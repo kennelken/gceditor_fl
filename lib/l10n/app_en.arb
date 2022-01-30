@@ -1,0 +1,717 @@
+{
+	"runGenerators": "Run all",
+	"@runGenerators": {
+		"description": ""
+	},
+	"delete": "Delete",
+	"@delete": {
+		"description": ""
+	},
+	"deselect": "Deselect",
+	"@deselect": {
+		"description": ""
+	},
+	"copy": "Copy",
+	"@copy": {
+		"description": ""
+	},
+	"fromClipboard": "Try to copy from clipboard",
+	"@fromClipboard": {
+		"description": ""
+	},
+	"cut": "Cut",
+	"@cut": {
+		"description": ""
+	},
+	"paste": "Paste",
+	"@paste": {
+		"description": ""
+	},
+	"after": "After",
+	"@after": {
+		"description": ""
+	},
+	"before": "Before",
+	"@before": {
+		"description": ""
+	},
+	"replace": "Replace",
+	"@replace": {
+		"description": ""
+	},
+	"fieldOwnerClass": "defined in:",
+	"@fieldOwnerClass": {
+		"description": ""
+	},
+	"historyDialogTitle": "#{name} history",
+	"@historyDialogTitle": {
+		"description": "",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"historySelectedItems": "Selected items: {selected}/{total}",
+	"@historySelectedItems": {
+		"description": "",
+		"placeholders": {
+			"selected": {
+				"type": "int"
+			},
+			"total": {
+				"type": "int"
+			}
+		}
+	},
+	"historyItemCurrent": "current",
+	"@historyItemCurrent": {
+		"description": ""
+	},
+	"gitItemGenerator": "gen{index}: {type}",
+	"@gitItemGenerator": {
+		"description": "",
+		"placeholders": {
+			"type": {
+				"type": "String"
+			},
+			"index": {
+				"type": "int"
+			}
+		}
+	},
+	"gitItemHistory": "his{index}: #{name}",
+	"@gitItemHistory": {
+		"description": "",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			},
+			"index": {
+				"type": "int"
+			}
+		}
+	},
+	"gitItemProject": "project",
+	"@gitItemProject": {
+		"description": ""
+	},
+	"gitItemAuthList": "auth list",
+	"@gitItemAuthList": {
+		"description": ""
+	},
+	"gitItemOutput": "output",
+	"@gitItemOutput": {
+		"description": ""
+	},
+	"pinnedPanelTitle": "Pinned items",
+	"@pinnedPanelTitle": {
+		"description": ""
+	},
+	"findTypeClassDeclaration": "class declaration",
+	"@findTypeClassDeclaration": {
+		"description": ""
+	},
+	"findTypeTableDeclaration": "table declaration",
+	"@findTypeTableDeclaration": {
+		"description": ""
+	},
+	"findTypeEnumDeclaration": "enum declaration",
+	"@findTypeEnumDeclaration": {
+		"description": ""
+	},
+	"findTypeFieldDeclaration": "column declaration",
+	"@findTypeFieldDeclaration": {
+		"description": ""
+	},
+	"classParentClassReference": "parent class",
+	"@classParentClassReference": {
+		"description": ""
+	},
+	"tableParentClassReference": "uses class",
+	"@tableParentClassReference": {
+		"description": ""
+	},
+	"referenceValue": "reference value",
+	"@referenceValue": {
+		"description": ""
+	},
+	"findTypeReference": "reference",
+	"@findTypeReference": {
+		"description": ""
+	},
+	"findTypeValue": "value",
+	"@findTypeValue": {
+		"description": ""
+	},
+	"findTypeDeclaration": "item declaration",
+	"@findTypeDeclaration": {
+		"description": ""
+	},
+	"labelFind": "Find",
+	"@labelFind": {
+		"description": ""
+	},
+	"hintFind": "Enter a search query",
+	"@hintFind": {
+		"description": ""
+	},
+	"prefixLabel": "prefix",
+	"@prefixLabel": {
+		"description": ""
+	},
+	"indentationLabel": "indent",
+	"@indentationLabel": {
+		"description": ""
+	},
+	"generatorFileNameLabel": "file name",
+	"@generatorFileNameLabel": {
+		"description": ""
+	},
+	"projectSettingsTimezoneTitle": "timezone",
+	"@projectSettingsTimezoneTitle": {
+		"description": ""
+	},
+	"projectSettingsSaveDelay": "save delay (seconds)",
+	"@projectSettingsSaveDelay": {
+		"description": ""
+	},
+	"projectSettingsgeneratorsTitle": "generators",
+	"@projectSettingsgeneratorsTitle": {
+		"description": ""
+	},
+	"projectSettingsTitle": "Project Settings",
+	"@projectSettingsTitle": {
+		"description": ""
+	},
+	"keyboardShortcutsTitle": "Keyboard shortcuts",
+	"@keyboardShortcutsTitle": {
+		"description": ""
+	},
+	"problemRepeatingDictionaryKey": "Repeating dictionary key",
+	"@problemRepeatingDictionaryKey": {
+		"description": ""
+	},
+	"problemRepeatingSetValue": "Repeating set value",
+	"@problemRepeatingSetValue": {
+		"description": ""
+	},
+	"problemValueIsNotUnique": "Non unique value",
+	"@problemValueIsNotUnique": {
+		"description": ""
+	},
+	"problemInvalidValue": "Invalid value",
+	"@problemInvalidValue": {
+		"description": ""
+	},
+	"problemInvalidRefence": "Invalid reference",
+	"@problemInvalidRefence": {
+		"description": ""
+	},
+	"problemsTitle": "Problems",
+	"@problemsTitle": {
+		"description": ""
+	},
+	"cellListSize": "size: {size}",
+	"@cellListSize": {
+		"description": "",
+		"placeholders": {
+			"size": {
+				"type": "int"
+			}
+		}
+	},
+	"findResultsCount": "{count, plural, =0{no matches} =1{1 match} other{{count} matches}}",
+	"@findResultsCount": {
+		"description": "",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"dataSelectionCount": "{count, plural, =0{No items selected} =1{Selected 1 item} other{Selected {count} items}}",
+	"@dataSelectionCount": {
+		"description": "",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"dataCopiedCount": "{count, plural, =0{No items copied} =1{Copied 1 item from {table}} other{Copied {count} items from '{table}'}}",
+	"@dataCopiedCount": {
+		"description": "",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			},
+			"table": {
+				"type": "String"
+			}
+		}
+	},
+	"dataCopiedExternalCount": "{count, plural, =0{No items copied} =1{Copied 1 item from Clipboard} other{Copied {count} items from Clipboard}}",
+	"@dataCopiedExternalCount": {
+		"description": "",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"dataCutCount": "{count, plural, =0{No items copied} =1{Cut 1 item from {table}} other{Cut {count} items from '{table}'}}",
+	"@dataCutCount": {
+		"description": "",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			},
+			"table": {
+				"type": "String"
+			}
+		}
+	},
+	"emptyDropDownList": "Nothing is found",
+	"@emptyDropDownList": {
+		"description": ""
+	},
+	"noClass": "no class",
+	"@noClass": {
+		"description": ""
+	},
+	"tableIsNotSelected": "No table is selected",
+	"@tableIsNotSelected": {
+		"description": ""
+	},
+	"tableHasNoClass": "Class is not specified",
+	"@tableHasNoClass": {
+		"description": ""
+	},
+	"selectedTableSize": "{columns} x {rows}",
+	"@selectedTableSize": {
+		"description": "",
+		"placeholders": {
+			"columns": {
+				"type": "int"
+			},
+			"rows": {
+				"type": "int"
+			}
+		}
+	},
+	"selectedTableTitle": "{name} : {className}",
+	"@selectedTableTitle": {
+		"description": "",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			},
+			"className": {
+				"type": "String"
+			}
+		}
+	},
+	"noTableSelected": "No table selected",
+	"@noTableSelected": {
+		"description": ""
+	},
+	"defaultFieldInfo": "format:\n    int, float, string, text - <String>\n    reference - <String> of entity id\n    list, set - [\"String\", ..., \"String\"]\n    dictionary - [[\"String\",\"String\"], ..., [\"String\",\"String\"]]\n    date - <yyyy.mm.dd hh:mm:ss>\n    duration - <nnnd nnnh nnnm nnns>",
+	"@defaultFieldInfo": {
+		"description": ""
+	},
+	"defaultValueTitle": "default value",
+	"@defaultValueTitle": {
+		"description": ""
+	},
+	"classReference": "class",
+	"@classReference": {
+		"description": ""
+	},
+	"fieldType": "type",
+	"@fieldType": {
+		"description": ""
+	},
+	"fieldKeyType": "key type",
+	"@fieldKeyType": {
+		"description": ""
+	},
+	"fieldValueType": "value type",
+	"@fieldValueType": {
+		"description": ""
+	},
+	"fieldReferenceClass": "class",
+	"@fieldReferenceClass": {
+		"description": ""
+	},
+	"fieldReferenceEnum": "enum",
+	"@fieldReferenceEnum": {
+		"description": ""
+	},
+	"exportFieldTitle": "export column",
+	"@exportFieldTitle": {
+		"description": ""
+	},
+	"exportElementsList": "export container class",
+	"@exportElementsList": {
+		"description": ""
+	},
+	"rowHeightMultiplier": "row height multiplier",
+	"@rowHeightMultiplier": {
+		"description": ""
+	},
+	"isUniqueValueTitle": "unique values",
+	"@isUniqueValueTitle": {
+		"description": ""
+	},
+	"dropDownSearchHint": "Search",
+	"@dropDownSearchHint": {
+		"description": ""
+	},
+	"nullValue": "<null>",
+	"@nullValue": {
+		"description": ""
+	},
+	"parentClass": "parent class",
+	"@parentClass": {
+		"description": ""
+	},
+	"classType": "class type",
+	"@classType": {
+		"description": ""
+	},
+	"addNewItem": "New Element",
+	"@addNewItem": {
+		"description": ""
+	},
+	"enumsListTitle": "values",
+	"@enumsListTitle": {
+		"description": ""
+	},
+	"classFieldsListTitle": "columns",
+	"@classFieldsListTitle": {
+		"description": ""
+	},
+	"requestModelFromServer": "Reinit Model",
+	"@requestModelFromServer": {
+		"description": ""
+	},
+	"longTapToDelete": "Please long tap the 'delete' button to delete the element",
+	"@longTapToDelete": {
+		"description": ""
+	},
+	"contextMenuFolder": "Folder",
+	"@contextMenuFolder": {
+		"description": ""
+	},
+	"contextMenuEnum": "Enum",
+	"@contextMenuEnum": {
+		"description": ""
+	},
+	"contextMenuClass": "Class",
+	"@contextMenuClass": {
+		"description": ""
+	},
+	"contextMenuTable": "Table",
+	"@contextMenuTable": {
+		"description": ""
+	},
+	"menubarFile": "File",
+	"@menubarFile": {
+		"description": ""
+	},
+	"menubarRunGenerators": "Run Generators",
+	"@menubarRunGenerators": {
+		"description": ""
+	},
+	"menubarProjectSettings": "Project Settings",
+	"@menubarProjectSettings": {
+		"description": ""
+	},
+	"menubarEdit": "Edit",
+	"@menubarEdit": {
+		"description": ""
+	},
+	"menubarUndo": "Undo",
+	"@menubarUndo": {
+		"description": ""
+	},
+	"menubarRedo": "Redo",
+	"@menubarRedo": {
+		"description": ""
+	},
+	"menubarSearch": "Search",
+	"@menubarSearch": {
+		"description": ""
+	},
+	"menubarFind": "Find",
+	"@menubarFind": {
+		"description": ""
+	},
+	"menubarView": "View",
+	"@menubarView": {
+		"description": ""
+	},
+	"expandedViewMenu": "Toggle Actions",
+	"@expandedViewMenu": {
+		"description": ""
+	},
+	"menubarConsole": "Console",
+	"@menubarConsole": {
+		"description": ""
+	},
+	"menubarZoomIn": "Zoom in",
+	"@menubarZoomIn": {
+		"description": ""
+	},
+	"menubarZoomOut": "Zoom out",
+	"@menubarZoomOut": {
+		"description": ""
+	},
+	"menubarShowShortcuts": "Shortcuts",
+	"@menubarShowShortcuts": {
+		"description": ""
+	},
+	"classMetaPropertyId": "id",
+	"@classMetaPropertyId": {
+		"description": ""
+	},
+	"classMetaPropertyDescription": "description",
+	"@classMetaPropertyDescription": {
+		"description": ""
+	},
+	"statusOnline": "online",
+	"@statusOnline": {
+		"description": ""
+	},
+	"statusOffline": "offline",
+	"@statusOffline": {
+		"description": ""
+	},
+	"connectedClientsCount": "{count, plural, =0{no clients} =1{1 client} other{{count} clients}",
+	"@connectedClientsCount": {
+		"description": "",
+		"placeholders": {
+			"count": {}
+		}
+	},
+	"clientStatus": "client: {status}",
+	"@clientStatus": {
+		"description": "",
+		"placeholders": {
+			"status": {}
+		}
+	},
+	"serverStatus": "server: {status}",
+	"@serverStatus": {
+		"description": "",
+		"placeholders": {
+			"status": {}
+		}
+	},
+	"typeClassField": "Column",
+	"@typeClassField": {
+		"description": ""
+	},
+	"typeTableGroup": "Group",
+	"@typeTableGroup": {
+		"description": ""
+	},
+	"typeTableEntry": "Table",
+	"@typeTableEntry": {
+		"description": ""
+	},
+	"typeClassGroup": "Group",
+	"@typeClassGroup": {
+		"description": ""
+	},
+	"typeClass": "Class",
+	"@typeClass": {
+		"description": ""
+	},
+	"typeEnum": "Enum",
+	"@typeEnum": {
+		"description": ""
+	},
+	"propertyNothingSelected": "Nothing is selected",
+	"@propertyNothingSelected": {
+		"description": "title in the file explorer"
+	},
+	"selectProjectFile": "Select project file",
+	"@selectProjectFile": {
+		"description": "title in the file explorer"
+	},
+	"selectProjectDirectory": "Select project directory",
+	"@selectProjectDirectory": {
+		"description": "title in the file explorer"
+	},
+	"clientModeButton": "Client",
+	"@clientModeButton": {
+		"description": ""
+	},
+	"standaloneModeButton": "Standalone",
+	"@standaloneModeButton": {
+		"description": ""
+	},
+	"serverModeButton": "Server",
+	"@serverModeButton": {
+		"description": ""
+	},
+	"ipAddressInputTitle": "ip address",
+	"@ipAddressInputTitle": {
+		"description": ""
+	},
+	"portInputTitle": "server port",
+	"@portInputTitle": {
+		"description": ""
+	},
+	"errorStartServer": "Could not start the server: '{error}'",
+	"@errorStartServer": {
+		"description": "",
+		"placeholders": {
+			"error": {}
+		}
+	},
+	"errorStartClient": "Could not connect to the server: '{error}'",
+	"@errorStartClient": {
+		"description": "",
+		"placeholders": {
+			"error": {}
+		}
+	},
+	"newLoginLabel": "new login",
+	"@newLoginLabel": {
+		"description": ""
+	},
+	"newSecretLabel": "new secret",
+	"@newSecretLabel": {
+		"description": ""
+	},
+	"buttonUnregisterLogin": "Remove",
+	"@buttonUnregisterLogin": {
+		"description": ""
+	},
+	"buttonRegisterNewLogin": "Register",
+	"@buttonRegisterNewLogin": {
+		"description": ""
+	},
+	"clientLoginHint": "your login",
+	"@clientLoginHint": {
+		"description": ""
+	},
+	"clientLoginLabel": "login",
+	"@clientLoginLabel": {
+		"description": ""
+	},
+	"clientSecretHint": "a secret received from an administrator",
+	"@clientSecretHint": {
+		"description": ""
+	},
+	"clientSecretLabel": "secret",
+	"@clientSecretLabel": {
+		"description": ""
+	},
+	"clientPasswordHint": "your password",
+	"@clientPasswordHint": {
+		"description": ""
+	},
+	"clientPasswordLabel": "password",
+	"@clientPasswordLabel": {
+		"description": ""
+	},
+	"rememberPassword": "remember password",
+	"@rememberPassword": {
+		"description": ""
+	},
+	"historyTagLabel": "tag",
+	"@historyTagLabel": {
+		"description": ""
+	},
+	"historyTagHint": "file to store commands history",
+	"@historyTagHint": {
+		"description": ""
+	},
+	"newLoginHint": "any login to register",
+	"@newLoginHint": {
+		"description": ""
+	},
+	"newSecretHint": "any secret to register",
+	"@newSecretHint": {
+		"description": ""
+	},
+	"projectPathTitle": "Project path:",
+	"@projectPathTitle": {
+		"description": ""
+	},
+	"authListPathTitle": "Auth list:",
+	"@authListPathTitle": {
+		"description": ""
+	},
+	"projectPath": "project path",
+	"@projectPath": {
+		"description": ""
+	},
+	"outputPath": "output path",
+	"@outputPath": {
+		"description": ""
+	},
+	"authListPath": "auth list path",
+	"@authListPath": {
+		"description": ""
+	},
+	"historyPath": "history folder path",
+	"@historyPath": {
+		"description": ""
+	},
+	"classesTitle": "Classes",
+	"@classesTitle": {
+		"description": ""
+	},
+	"gitTitle": "Git",
+	"@gitTitle": {
+		"description": ""
+	},
+	"historyTitle": "History",
+	"@historyTitle": {
+		"description": ""
+	},
+	"historyItemsCount": "{count, plural, =0{empty} =1{1 item} other{{count} items}",
+	"@historyItemsCount": {
+		"description": "",
+		"placeholders": {
+			"count": {}
+		}
+	},
+	"gitSelected": "{selected}/{total}",
+	"@gitSelected": {
+		"description": "",
+		"placeholders": {
+			"selected": {
+				"type": "int"
+			},
+			"total": {
+				"type": "int"
+			}
+		}
+	},
+	"settingsTitle": "Settings",
+	"@settingsTitle": {
+		"description": ""
+	},
+	"tablesTitle": "Tables",
+	"@tablesTitle": {
+		"description": ""
+	},
+	"buttonApply": "Apply",
+	"@buttonApply": {
+		"description": ""
+	},
+	"buttonCancel": "Cancel",
+	"@buttonCancel": {
+		"description": ""
+	},
+	"buttonExecute": "Execute",
+	"@buttonExecute": {
+		"description": ""
+	}
+}

@@ -1,0 +1,1 @@
+build\windows\runner\Release\gceditor.exe --help

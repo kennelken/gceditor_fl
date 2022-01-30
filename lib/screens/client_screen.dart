@@ -1,0 +1,20 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gceditor/components/table/table_properties_view.dart';
+import 'package:gceditor/components/table/table_view.dart';
+import 'package:gceditor/model/state/settings_state.dart';
+
+class ClientScreen extends ConsumerWidget {
+  const ClientScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(context, watch) {
+    watch(settingsStateProvider);
+    return Row(
+      children: const [
+        Expanded(child: TableView()),
+        TablePropertiesView(),
+      ],
+    );
+  }
+}

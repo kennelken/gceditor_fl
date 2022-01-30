@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://json-schema.org/draft-07/schema#
+targets:
+  $default:
+    builders:
+      reflectable:
+        generate_for:
+          - no/files
+      json_serializable:
+        options:
+          any_map: false
+          checked: false
+          constructor: ""
+          create_factory: true
+          create_to_json: true
+          disallow_unrecognized_keys: false
+          explicit_to_json: true
+          field_rename: none
+          generic_argument_factories: false
+          ignore_unannotated: false
+          include_if_null: false

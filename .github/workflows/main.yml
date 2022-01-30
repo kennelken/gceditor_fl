@@ -1,0 +1,201 @@
+name: main
+
+on:
+  push:
+    branches: [master]
+    tags: [v*]
+  pull_request:
+    branches: [master]
+
+  workflow_dispatch:
+
+jobs:
+  get-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      need-release: ${{steps.get-version.outputs.is-semver}}
+      version: ${{steps.get-version.outputs.version}}
+
+    steps:
+      - name: Check version tag
+        id: get-version
+        uses: battila7/get-version-action@v2
+
+      - name: Print version tag
+        run: |
+          echo is-semver=${{steps.get-version.outputs.is-semver}}
+          echo version=${{steps.get-version.outputs.version}}
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+
+      - name: Init flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Analyze code
+        run: flutter analyze --no-fatal-infos
+
+      - name: Build windows
+        run: |
+          flutter config --enable-windows-desktop
+          flutter build windows --release
+
+      - name: Upload windows build
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-build
+          path: build/windows/runner/Release
+
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+
+      - name: Init flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build web
+        run: flutter build web --release
+
+      - name: Upload web build
+        uses: actions/upload-artifact@v2
+        with:
+          name: web-build
+          path: build/web
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare linux
+        run: |
+          sudo apt install clang libgtk-3-dev ninja-build -y
+
+      - name: Git checkout
+        uses: actions/checkout@v2
+
+      - name: Init flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build linux
+        run: |
+          flutter config --enable-linux-desktop
+          flutter build linux --release
+
+      - name: Upload linux build
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-build
+          path: build/linux/x64/release/bundle
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+
+      - name: Init flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build macos
+        run: |
+          flutter config --enable-macos-desktop
+          flutter build macos --release
+
+      - name: Archive macos build
+        run: |
+          cd build/macos/Build/Products/Release
+          zip -9 -y -r -q gceditor.zip gceditor.app
+
+      - name: Upload macos build
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos-build
+          path: build/macos/Build/Products/Release/gceditor.zip
+
+  release:
+    needs: [get-tag, build-windows, build-web, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    if: needs.get-tag.outputs.need-release
+    steps:
+      - name: Download windows build
+        uses: actions/download-artifact@v2
+        with:
+          name: windows-build
+          path: windows-build
+
+      - name: Download web build
+        uses: actions/download-artifact@v2
+        with:
+          name: web-build
+          path: web-build
+
+      - name: Download linux build
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-build
+          path: linux-build
+      - name: Download macos build
+        uses: actions/download-artifact@v2
+        with:
+          name: macos-build
+          path: macos-build
+
+      - name: Archive windows build
+        uses: vimtor/action-zip@v1
+        with:
+          files: windows-build
+          dest: gceditor_windows_${{needs.get-tag.outputs.version}}.zip
+
+      - name: Archive web build
+        uses: vimtor/action-zip@v1
+        with:
+          files: web-build
+          dest: gceditor_web_${{needs.get-tag.outputs.version}}.zip
+
+      - name: Archive linux build
+        uses: vimtor/action-zip@v1
+        with:
+          files: linux-build
+          dest: gceditor_linux_${{needs.get-tag.outputs.version}}.zip
+
+      - name: Archive macos build
+        uses: vimtor/action-zip@v1
+        with:
+          files: macos-build
+          dest: gceditor_macos_${{needs.get-tag.outputs.version}}.zip
+
+      - name: Create a release
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: ${{needs.get-tag.outputs.version}}
+          prerelease: false
+          files: |
+            gceditor_windows_${{needs.get-tag.outputs.version}}.zip
+            gceditor_web_${{needs.get-tag.outputs.version}}.zip
+            gceditor_linux_${{needs.get-tag.outputs.version}}.zip
+            gceditor_macos_${{needs.get-tag.outputs.version}}.zip
