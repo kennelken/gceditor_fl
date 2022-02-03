@@ -968,7 +968,7 @@ namespace Fairfun.Gceditor.Model
 
   final String _assignValueRowTemplate = '''
 
-                    {${_paramClassName}}.{${_paramPropertyName}} = {${_paramParseFunction}};''';
+                        {${_paramClassName}}.{${_paramPropertyName}} = {${_paramParseFunction}};''';
 
   final String _listItemsListAssignmentRowTemplate = '''
 
