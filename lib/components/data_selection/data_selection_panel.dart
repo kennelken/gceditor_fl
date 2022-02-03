@@ -315,7 +315,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
       return;
     }
 
-    final rows = clipboardText!.text!.split(ClientDataSelectionStateNotifier.rowsDelimiter);
+    final rows = clipboardText!.text!.split(ClientDataSelectionStateNotifier.rowsDelimiterPattern);
     if (rows.length < 2) {
       providerContainer
           .read(logStateProvider)

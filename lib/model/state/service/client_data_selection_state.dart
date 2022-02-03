@@ -42,6 +42,7 @@ class ClientDataSelectionStateNotifier extends ChangeNotifier {
   static const idColumnName = '%id%';
   static const csvDelimiter = '\t';
   static const rowsDelimiter = '\n';
+  static final rowsDelimiterPattern = RegExp(r'[\n\r]+');
 
   ClientDataSelectionState state;
 
@@ -129,7 +130,7 @@ class ClientDataSelectionStateNotifier extends ChangeNotifier {
     final rows = state.copiedItems!.map(
       (e) => DbModelUtils.encodeDataRowCell(e).join(csvDelimiter),
     );
-    final clipboardCsv = [columnNames, ...rows].join('\n');
+    final clipboardCsv = [columnNames, ...rows].join(rowsDelimiter);
 
     Clipboard.setData(ClipboardData(text: clipboardCsv));
   }
