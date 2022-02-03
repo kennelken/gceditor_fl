@@ -94,7 +94,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                     icon: Icon(
                       FontAwesomeIcons.fileImport,
                       color: kColorAccentBlue.withAlpha(_isCopyFromClipboardAvailable ? kIconActiveAlpha : kIconInactiveAlpha),
-                      size: 17,
+                      size: 17 * kScale,
                     ),
                     onClick: _handleCopyFromClipboardClick,
                   ),
@@ -106,7 +106,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                     icon: Icon(
                       FontAwesomeIcons.copy,
                       color: kColorAccentBlue.withAlpha(_isCopyAvailable ? kIconActiveAlpha : kIconInactiveAlpha),
-                      size: 17,
+                      size: 17 * kScale,
                     ),
                     onClick: _handleCopyClick,
                   ),
@@ -117,7 +117,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                     icon: Icon(
                       FontAwesomeIcons.cut,
                       color: kColorAccentOrange.withAlpha(_isCopyAvailable ? kIconActiveAlpha : kIconInactiveAlpha),
-                      size: 17,
+                      size: 17 * kScale,
                     ),
                     onClick: _handleCutClick,
                   ),
@@ -135,7 +135,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                       icon: Icon(
                         FontAwesomeIcons.paste,
                         color: kColorAccentBlue.withAlpha(_isPasteAvailable ? kIconActiveAlpha : kIconInactiveAlpha),
-                        size: 17,
+                        size: 17 * kScale,
                       ),
                       buttons: [
                         ContextMenuChildButtonData(Loc.get.before, _handlePasteBefore),
@@ -158,10 +158,10 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                 TooltipWrapper(
                   message: Loc.get.deselect,
                   child: IconButtonTransparent(
-                    icon: const Icon(
+                    icon: Icon(
                       FontAwesomeIcons.times,
                       color: kColorPrimaryLight,
-                      size: 20,
+                      size: 20 * kScale,
                     ),
                     onClick: () => dataSelectionState.clear(true),
                   ),
@@ -174,7 +174,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
     );
   }
 
-  SizedBox _horizontalSpace() => const SizedBox(width: 13);
+  SizedBox _horizontalSpace() => SizedBox(width: 13 * kScale);
 
   void _handleCopyClick() {
     if (!_isCopyAvailable) //
