@@ -860,7 +860,8 @@ namespace Fairfun.Gceditor.Model
         /// </summary>
         public new {${_paramPrefix}}{${_paramClass}} Clone()
         {
-            {${_paramPrefix}}{${_paramClass}} result = new {${_paramPrefix}}{${_paramClass}} {{${_methodCloneBody}}
+            {${_paramPrefix}}{${_paramClass}} result = new {${_paramPrefix}}{${_paramClass}}
+            {{${_methodCloneBody}}
             };
             CloneCustom(result);
             return result;
