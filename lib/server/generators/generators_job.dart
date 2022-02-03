@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:darq/darq.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gceditor/consts/consts.dart';
@@ -124,8 +125,7 @@ class GeneratorAdditionalInformation {
 mixin OutputFolderSaver {
   Future<String?> saveToFile({required String outputFolder, required String fileName, required String fileExtension, required String data}) async {
     try {
-      final fullPath = path.join(outputFolder, '$fileName.$fileExtension');
-      final file = File(fullPath);
+      final file = _getFile(outputFolder: outputFolder, fileName: fileName, fileExtension: fileExtension);
 
       if (!await file.exists()) {
         file.create(recursive: true);
@@ -138,5 +138,37 @@ mixin OutputFolderSaver {
     }
 
     return null;
+  }
+
+  Future<String?> readFromFile({required String outputFolder, required String fileName, required String fileExtension}) async {
+    try {
+      final file = _getFile(outputFolder: outputFolder, fileName: fileName, fileExtension: fileExtension);
+      if (!await file.exists()) return null;
+
+      return await file.readAsString();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  File _getFile({required String outputFolder, required String fileName, required String fileExtension}) {
+    final fullPath = path.join(outputFolder, '$fileName.$fileExtension');
+    final file = File(fullPath);
+    return file;
+  }
+}
+
+mixin FilesComparer {
+  bool resultChanged(String newResult, String? oldResult, String payloadBeginning) {
+    if (oldResult == null) //
+      return true;
+
+    final payloadStartOldResult = oldResult.indexOf(payloadBeginning);
+    final payloadStartNewResult = newResult.indexOf(payloadBeginning);
+
+    final hashOld = md5.convert(utf8.encode(oldResult.substring(payloadStartOldResult))).toString();
+    final hashNew = md5.convert(utf8.encode(newResult.substring(payloadStartNewResult))).toString();
+
+    return hashOld != hashNew;
   }
 }

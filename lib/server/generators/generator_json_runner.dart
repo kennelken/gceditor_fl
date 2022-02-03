@@ -9,7 +9,7 @@ import 'package:gceditor/server/generators/json/generator_json_root.dart';
 import 'generators_job.dart';
 import 'json/generator_json_item.dart';
 
-class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with OutputFolderSaver {
+class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with OutputFolderSaver, FilesComparer {
   @override
   Future<GeneratorResult> execute(String outputFolder, DbModel model, GeneratorJson data, GeneratorAdditionalInformation additionalInfo) async {
     final result = GeneratorJsonRoot();
@@ -45,6 +45,15 @@ class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with Output
       }
 
       final resultJson = JsonEncoder.withIndent(data.indentation).convert(result.toJson());
+
+      final previousResult = await readFromFile(
+        outputFolder: outputFolder,
+        fileName: data.fileName,
+        fileExtension: data.fileExtension,
+      );
+
+      if (!resultChanged(resultJson, previousResult, '"classes": {')) //
+        return GeneratorResult.success();
 
       final saveError = await saveToFile(
         outputFolder: outputFolder,

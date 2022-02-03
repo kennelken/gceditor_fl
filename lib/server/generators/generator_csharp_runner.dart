@@ -16,7 +16,7 @@ import 'package:gceditor/utils/utils.dart';
 
 import 'generators_job.dart';
 
-class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with OutputFolderSaver {
+class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with OutputFolderSaver, FilesComparer {
   static final _newLineRegExp = RegExp(r'[\r\n]+');
   static const _indent = '    ';
   static const _defaultNewLine = '\n';
@@ -85,6 +85,15 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
           _paramListItemsListsDeclarations: _getListItemsListsDeclarations(model, data),
         },
       );
+
+      final previousResult = await readFromFile(
+        outputFolder: outputFolder,
+        fileName: data.fileName,
+        fileExtension: data.fileExtension,
+      );
+
+      if (!resultChanged(result, previousResult, '#pragma warning disable')) //
+        return GeneratorResult.success();
 
       final saveError = await saveToFile(
         outputFolder: outputFolder,
