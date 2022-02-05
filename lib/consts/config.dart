@@ -122,6 +122,9 @@ class Config {
   static final idFormatRegex = RegExp(r'^[a-zA-Z_][a-zA-Z_0-9]{1,}$');
   static final RegExp validCharactersForId = RegExp(r'[a-zA-Z_0-9]');
   static final List<FilteringTextInputFormatter> filterId = [FilteringTextInputFormatter.allow(validCharactersForId)];
+
+  static final RegExp newLinePattern = RegExp(r'[\n\r]+');
+  static const String newLineSymbol = '\n';
 }
 
 final random = Random();

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:darq/darq.dart';
 import 'package:flutter/foundation.dart';
+import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/main.dart';
 import 'package:gceditor/model/db/db_model.dart';
@@ -166,9 +167,13 @@ mixin FilesComparer {
     final payloadStartOldResult = oldResult.indexOf(payloadBeginning);
     final payloadStartNewResult = newResult.indexOf(payloadBeginning);
 
-    final hashOld = md5.convert(utf8.encode(oldResult.substring(payloadStartOldResult))).toString();
-    final hashNew = md5.convert(utf8.encode(newResult.substring(payloadStartNewResult))).toString();
+    final hashOld = _getHash(oldResult, payloadStartOldResult);
+    final hashNew = _getHash(newResult, payloadStartNewResult);
 
     return hashOld != hashNew;
+  }
+
+  String _getHash(String input, int startingFrom) {
+    return md5.convert(utf8.encode(input.substring(startingFrom).replaceAll(Config.newLinePattern, Config.newLineSymbol))).toString();
   }
 }

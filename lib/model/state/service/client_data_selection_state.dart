@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db/data_table_row.dart';
 import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/model_root.dart';
@@ -41,8 +42,8 @@ class ClientDataSelectionState {
 class ClientDataSelectionStateNotifier extends ChangeNotifier {
   static const idColumnName = '%id%';
   static const csvDelimiter = '\t';
-  static const rowsDelimiter = '\n';
-  static final rowsDelimiterPattern = RegExp(r'[\n\r]+');
+  static const rowsDelimiter = Config.newLineSymbol;
+  static final rowsDelimiterPattern = Config.newLinePattern;
 
   ClientDataSelectionState state;
 
