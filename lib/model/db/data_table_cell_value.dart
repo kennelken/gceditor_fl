@@ -5,11 +5,11 @@ part 'data_table_cell_value.g.dart';
 
 @JsonSerializable()
 class DataTableCellValue {
-  @JsonKey(includeIfNull: false, defaultValue: null)
+  @JsonKey(includeIfNull: false, defaultValue: null, name: 'v')
   dynamic simpleValue;
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeIfNull: false, name: 'lv')
   List<dynamic>? listCellValues;
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeIfNull: false, name: 'dv')
   List<DataTableCellDictionaryItem>? dictionaryCellValues;
 
   DataTableCellValue();

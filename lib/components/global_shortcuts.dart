@@ -44,46 +44,55 @@ class GlobalShortcuts {
       ToggleConsoleIntent: CallbackAction<ToggleConsoleIntent>(
         onInvoke: (ToggleConsoleIntent intent) {
           toggleConsole();
+          return null;
         },
       ),
       DeselectIntent: CallbackAction<DeselectIntent>(
         onInvoke: (DeselectIntent intent) {
           deselect();
+          return null;
         },
       ),
       UndoIntent: CallbackAction<UndoIntent>(
         onInvoke: (UndoIntent intent) {
           undo();
+          return null;
         },
       ),
       RedoIntent: CallbackAction<RedoIntent>(
         onInvoke: (RedoIntent intent) {
           redo();
+          return null;
         },
       ),
       FindIntent: CallbackAction<FindIntent>(
         onInvoke: (FindIntent intent) {
           openFind();
+          return null;
         },
       ),
       RunGeneratorsIntent: CallbackAction<RunGeneratorsIntent>(
         onInvoke: (RunGeneratorsIntent intent) {
           runGenerators();
+          return null;
         },
       ),
       ZoomInIntent: CallbackAction<ZoomInIntent>(
         onInvoke: (ZoomInIntent intent) {
           zoomIn();
+          return null;
         },
       ),
       ZoomOutIntent: CallbackAction<ZoomOutIntent>(
         onInvoke: (ZoomOutIntent intent) {
           zoomOut();
+          return null;
         },
       ),
       NextProblemIntent: CallbackAction<NextProblemIntent>(
         onInvoke: (NextProblemIntent intent) {
           providerContainer.read(clientProblemsStateProvider).focusOnNextProblem(null);
+          return null;
         },
       ),
     };

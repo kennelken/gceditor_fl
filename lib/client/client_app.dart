@@ -199,6 +199,8 @@ class ClientApp {
       providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.critical, 'ClientApp: error getting the model'));
       _closeSocket(true);
     }
+
+    return null;
   }
 
   void _sendCommand(Uint8List rawCommand) {

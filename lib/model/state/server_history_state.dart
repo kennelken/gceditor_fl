@@ -101,6 +101,7 @@ class ServerHistoryStateNotifier extends ChangeNotifier {
         state = newState;
 
         await _updateCurrentItemIfRequired(false);
+        return null;
       },
     );
   }
@@ -150,6 +151,7 @@ class ServerHistoryStateNotifier extends ChangeNotifier {
 
         final newEntry = HistoryItemDataEntry.values(id: cmd.id, command: cmd, time: DateTime.now().toUtc(), user: user);
         await state._currentHistoryFile!.writeAsString(Config.streamJsonOptions.convert(newEntry.toJson()) + '\n', mode: FileMode.append);
+        return null;
       },
     );
   }

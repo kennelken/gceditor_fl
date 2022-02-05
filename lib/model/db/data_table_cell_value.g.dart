@@ -8,9 +8,9 @@ part of 'data_table_cell_value.dart';
 
 DataTableCellValue _$DataTableCellValueFromJson(Map<String, dynamic> json) =>
     DataTableCellValue()
-      ..simpleValue = json['simpleValue']
-      ..listCellValues = json['listCellValues'] as List<dynamic>?
-      ..dictionaryCellValues = (json['dictionaryCellValues'] as List<dynamic>?)
+      ..simpleValue = json['v']
+      ..listCellValues = json['lv'] as List<dynamic>?
+      ..dictionaryCellValues = (json['dv'] as List<dynamic>?)
           ?.map((e) =>
               DataTableCellDictionaryItem.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -24,9 +24,9 @@ Map<String, dynamic> _$DataTableCellValueToJson(DataTableCellValue instance) {
     }
   }
 
-  writeNotNull('simpleValue', instance.simpleValue);
-  writeNotNull('listCellValues', instance.listCellValues);
-  writeNotNull('dictionaryCellValues',
-      instance.dictionaryCellValues?.map((e) => e.toJson()).toList());
+  writeNotNull('v', instance.simpleValue);
+  writeNotNull('lv', instance.listCellValues);
+  writeNotNull(
+      'dv', instance.dictionaryCellValues?.map((e) => e.toJson()).toList());
   return val;
 }

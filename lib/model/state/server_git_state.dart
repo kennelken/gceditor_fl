@@ -122,6 +122,7 @@ class ServerGitStateNotifier extends ChangeNotifier {
         }
 
         state = newState;
+        return null;
       },
     );
   }
@@ -148,6 +149,7 @@ class ServerGitStateNotifier extends ChangeNotifier {
           errors.add('');
           return errors.join('\n\n\n');
         }
+        return null;
       },
     );
   }
@@ -179,6 +181,7 @@ class ServerGitStateNotifier extends ChangeNotifier {
           errors.add('');
           return errors.join('\n\n\n');
         }
+        return null;
       },
     );
   }
@@ -210,6 +213,7 @@ class ServerGitStateNotifier extends ChangeNotifier {
           errors.add('');
           return errors.join('\n\n\n');
         }
+        return null;
       },
     );
   }

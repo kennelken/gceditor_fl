@@ -352,7 +352,7 @@
 	"@exportFieldTitle": {
 		"description": ""
 	},
-	"exportElementsList": "export container class",
+	"exportElementsList": "generate items references",
 	"@exportElementsList": {
 		"description": ""
 	},

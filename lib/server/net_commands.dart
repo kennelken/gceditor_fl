@@ -160,7 +160,9 @@ class CommandOkResponse extends BaseCommand implements IBaseCommand, BaseRespons
   CommandType get type => CommandType.ok;
 
   @override
-  String? parse(Uint8List data) {}
+  String? parse(Uint8List data) {
+    return null;
+  }
 
   @override
   List<int> getPayload() {
@@ -186,6 +188,7 @@ class CommandErrorResponse extends BaseCommand implements IBaseCommand, BaseResp
     final payload = CommandErrorResponsePayload.fromJson(jsonDecode(jsonText));
     message = payload.message;
     model = payload.model;
+    return null;
   }
 
   @override
@@ -213,6 +216,7 @@ class CommandRequestAuthenification extends BaseCommand implements IBaseCommand 
       providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Error: $error\nclasstack: $callstack'));
       return error.toString();
     }
+    return null;
   }
 
   @override
@@ -229,7 +233,9 @@ class CommandRequestDbModel extends BaseCommand implements IBaseCommand {
   CommandType get type => CommandType.requestDbModel;
 
   @override
-  String? parse(Uint8List data) {}
+  String? parse(Uint8List data) {
+    return null;
+  }
 
   @override
   List<int> getPayload() {
@@ -272,7 +278,9 @@ class CommandRequestRunGenerators extends BaseCommand implements IBaseCommand {
   CommandType get type => CommandType.requestRunGenerators;
 
   @override
-  String? parse(Uint8List data) {}
+  String? parse(Uint8List data) {
+    return null;
+  }
 
   @override
   List<int> getPayload() {
@@ -311,6 +319,7 @@ abstract class BaseCommandRequest<T> extends BaseCommand implements IBaseCommand
       providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Error: $error\nclasstack: $callstack'));
       return error.toString();
     }
+    return null;
   }
 
   @override
@@ -342,6 +351,7 @@ abstract class BaseCommandResponse<T> extends BaseCommand implements IBaseComman
       providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Error: $error\nclasstack: $callstack'));
       return error.toString();
     }
+    return null;
   }
 
   @override

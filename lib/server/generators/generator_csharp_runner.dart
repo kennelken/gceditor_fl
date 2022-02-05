@@ -500,16 +500,16 @@ ${_makeSummary('</summary>', indentDepth)}''';
       case ClassFieldType.date:
       case ClassFieldType.duration:
       case ClassFieldType.color:
-        return _getAssignSimpleValueFunction(model, data, field.typeInfo, '${value}.simpleValue');
+        return _getAssignSimpleValueFunction(model, data, field.typeInfo, '${value}.v');
 
       case ClassFieldType.list:
-        return 'ParseList(${value}.listCellValues, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
+        return 'ParseList(${value}.lv, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
       case ClassFieldType.set:
-        return 'ParseHashSet(${value}.listCellValues, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
+        return 'ParseHashSet(${value}.lv, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
       case ClassFieldType.dictionary:
-        return 'ParseDictionary(${value}.dictionaryCellValues, k => ${_getAssignSimpleValueFunction(model, data, field.keyTypeInfo!, 'k')}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
+        return 'ParseDictionary(${value}.dv, k => ${_getAssignSimpleValueFunction(model, data, field.keyTypeInfo!, 'k')}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
     }
   }
 
