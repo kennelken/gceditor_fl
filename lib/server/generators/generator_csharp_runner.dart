@@ -1061,9 +1061,9 @@ namespace Fairfun.Gceditor.Model
         }
 
         public class JsonCellValue {
-            public object simpleValue;
-            public List<object> listCellValues;
-            public List<JsonDictionaryItem> dictionaryCellValues;
+            public object v;
+            public List<object> lv;
+            public List<JsonDictionaryItem> dv;
         }
 
         public class JsonDictionaryItem {
