@@ -5,3 +5,10 @@
 28. EPIC: replace Parent class with a Components. Replace Class concept with Component concept (classes become interfaces, generate a class for every table like "Apple: ITaste, IShape, IEnergySource")
 
 29. Navigation history and navigate back and forth alt+🡺, alt+🢀
+
+30. column property "not null" and a new problem type for this property
+
+31. reset a column to defaults button (with ctrl/alt modifier)
+32. batch set column values (consider selected rows)
+
+33. wait for https://github.com/flutter/flutter/pull/98469 to be published in stable channel to fix an issue with spaces and enters in a multiline textfield
