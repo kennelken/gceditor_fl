@@ -204,8 +204,8 @@
 	"@problemInvalidValue": {
 		"description": ""
 	},
-	"problemInvalidRefence": "Invalid reference",
-	"@problemInvalidRefence": {
+	"problemInvalidReference": "Invalid reference",
+	"@problemInvalidReference": {
 		"description": ""
 	},
 	"problemsTitle": "Problems",
@@ -376,6 +376,10 @@
 	"@parentClass": {
 		"description": ""
 	},
+	"parentInterfaces": "parent interfaces",
+	"@parentInterfaces": {
+		"description": ""
+	},
 	"classType": "class type",
 	"@classType": {
 		"description": ""
@@ -390,6 +394,10 @@
 	},
 	"classFieldsListTitle": "columns",
 	"@classFieldsListTitle": {
+		"description": ""
+	},
+	"interfacesListTitle": "interfaces",
+	"@interfacesListTitle": {
 		"description": ""
 	},
 	"requestModelFromServer": "Reinit Model",

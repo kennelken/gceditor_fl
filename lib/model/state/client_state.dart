@@ -49,13 +49,16 @@ class ClientStateNotifier extends ServerStateNotifier {
       case DbCmdType.addNewClass:
       case DbCmdType.addEnumValue:
       case DbCmdType.addClassField:
+      case DbCmdType.addClassInterface:
       case DbCmdType.deleteClass:
       case DbCmdType.deleteEnumValue:
       case DbCmdType.deleteClassField:
+      case DbCmdType.deleteClassInterface:
       case DbCmdType.editMetaEntityId:
       case DbCmdType.editMetaEntityDescription:
       case DbCmdType.editEnumValue:
       case DbCmdType.editClassField:
+      case DbCmdType.editClassInterface:
       case DbCmdType.editClass:
       case DbCmdType.editTable:
       case DbCmdType.editTableRowId:

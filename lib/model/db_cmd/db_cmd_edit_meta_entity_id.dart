@@ -39,6 +39,11 @@ class DbCmdEditMetaEntityId extends BaseDbCmd {
       for (var classEntity in dbModel.cache.allClasses) {
         if (classEntity.parent == entityId) //
           classEntity.parent = newValue;
+        for (var i = 0; i < classEntity.interfaces.length; i++) //
+        {
+          if (classEntity.interfaces[i] == entityId) //
+            classEntity.interfaces[i] = newValue;
+        }
       }
 
       for (var tableEntity in dbModel.cache.allDataTables) {

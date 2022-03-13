@@ -30,7 +30,7 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
   static const _paramJsonParser = 'json';
 
   static const _paramClass = 'class';
-  static const _paramParenClass = 'parentClass';
+  static const _paramParentClass = 'parentClass';
   static const _paramClassDescription = 'classDescription';
   static const _paramPropertiesBody = 'propertiesBody';
   static const _paramEnumBody = '_enumBody';
@@ -137,7 +137,7 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
         {
           _paramPrefix: data.prefix,
           _paramClass: classEntity.id,
-          _paramParenClass: getParentClass(classEntity, data),
+          _paramParentClass: _getParentClass(classEntity, data),
           _paramClassDescription: _makeSummary(classEntity.description.isNotEmpty ? classEntity.description : 'No description', 1),
           _paramPropertiesBody: _getClassProperties(data, classEntity),
           _methodCloneBody: _getCloneProperties(model, classEntity),
@@ -192,26 +192,26 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
     }
 
     for (var i = 0; i < model.cache.allDataTables.length; i++) {
-      final teableEntity = model.cache.allDataTables[i];
-      if (teableEntity.exportList != true) //
+      final tableEntity = model.cache.allDataTables[i];
+      if (tableEntity.exportList != true) //
         continue;
 
       final classDefinition = _classItemsListTemplate.format(
         {
           _paramPrefix: data.prefix,
-          _paramClass: teableEntity.id,
+          _paramClass: tableEntity.id,
           _paramMetaEntityType: describeEnum(MetaEntityType.Table),
-          _paramItemsListPropertiesList: teableEntity.rows
+          _paramItemsListPropertiesList: tableEntity.rows
               .map((e) => _paramItemsListPropertyEntryTemplate.format({
                     _paramPrefix: data.prefix,
-                    _paramClassName: teableEntity.classId,
+                    _paramClassName: tableEntity.classId,
                     _paramEntryName: e.id,
                   }))
               .join(),
-          _paramItemsListConstructorList: teableEntity.rows
+          _paramItemsListConstructorList: tableEntity.rows
               .map((e) => _paramItemsListConstructorEntryTemplate.format({
                     _paramPrefix: data.prefix,
-                    _paramClassName: teableEntity.classId,
+                    _paramClassName: tableEntity.classId,
                     _paramEntryName: e.id,
                   }))
               .join(),
@@ -232,13 +232,17 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
 
       case ClassType.valueType:
         return _structTemplate;
+
+      case ClassType.interface:
+        return _interfaceTemplate;
     }
   }
 
-  String getParentClass(ClassMetaEntity classEntity, GeneratorCsharp data) {
+  String _getParentClass(ClassMetaEntity classEntity, GeneratorCsharp data) {
     switch (classEntity.classType) {
       case ClassType.undefined:
       case ClassType.referenceType:
+      case ClassType.interface:
         return ': ${classEntity.parent != null ? '${data.prefix}${classEntity.parent}' : 'Base${data.prefix}Item'},';
 
       case ClassType.valueType:
@@ -861,7 +865,40 @@ namespace Fairfun.Gceditor.Model
   final String _classTemplate = '''    /// <summary>
 {${_paramClassDescription}}
     /// </summary>
-    public partial class {${_paramPrefix}}{${_paramClass}} {${_paramParenClass}} ICloneable<{${_paramPrefix}}{${_paramClass}}>
+    public partial class {${_paramPrefix}}{${_paramClass}} {${_paramParentClass}} ICloneable<{${_paramPrefix}}{${_paramClass}}>
+    {{${_paramPropertiesBody}}
+
+        /// <summary>
+        /// Clone of the item. Warning: references to the model entities are not being copied!
+        /// </summary>
+        public new {${_paramPrefix}}{${_paramClass}} Clone()
+        {
+            {${_paramPrefix}}{${_paramClass}} result = new {${_paramPrefix}}{${_paramClass}}
+            {{${_methodCloneBody}}
+            };
+            CloneCustom(result);
+            return result;
+        }
+
+        public override string ToString()
+        {
+            return \$"{{{${_paramPrefix}}{${_paramClass}}}} {{Id: {Id}}}";
+        }
+
+        internal override void OnParsed(ConfigRoot root)
+        {
+            base.OnParsed(root);
+            OnParsedImplementation(root);
+        }
+
+        partial void CloneCustom({${_paramPrefix}}{${_paramClass}} to);
+        partial void OnParsedImplementation({${_paramPrefix}}Root root);
+    }''';
+  // TODO! implement
+  final String _interfaceTemplate = '''    /// <summary>
+{${_paramClassDescription}}
+    /// </summary>
+    public partial interface {${_paramPrefix}}{${_paramClass}} {${_paramParentClass}}
     {{${_paramPropertiesBody}}
 
         /// <summary>

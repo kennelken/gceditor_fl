@@ -10,6 +10,8 @@ class ClassMetaEntity extends ClassMeta {
   ClassType classType = ClassType.referenceType;
   bool? exportList;
   List<ClassMetaFieldDescription> fields = <ClassMetaFieldDescription>[];
+  @JsonKey(defaultValue: <String>[])
+  List<String?> interfaces = <String?>[];
 
   ClassMetaEntity() {
     $type = ClassMetaType.$class;

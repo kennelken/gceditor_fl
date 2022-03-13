@@ -17,7 +17,11 @@ ClassMetaEntity _$ClassMetaEntityFromJson(Map<String, dynamic> json) =>
       ..fields = (json['fields'] as List<dynamic>)
           .map((e) =>
               ClassMetaFieldDescription.fromJson(e as Map<String, dynamic>))
-          .toList();
+          .toList()
+      ..interfaces = (json['interfaces'] as List<dynamic>?)
+              ?.map((e) => e as String?)
+              .toList() ??
+          [];
 
 Map<String, dynamic> _$ClassMetaEntityToJson(ClassMetaEntity instance) {
   final val = <String, dynamic>{};
@@ -35,6 +39,7 @@ Map<String, dynamic> _$ClassMetaEntityToJson(ClassMetaEntity instance) {
   val['classType'] = _$ClassTypeEnumMap[instance.classType];
   writeNotNull('exportList', instance.exportList);
   val['fields'] = instance.fields.map((e) => e.toJson()).toList();
+  val['interfaces'] = instance.interfaces;
   return val;
 }
 
@@ -49,4 +54,5 @@ const _$ClassTypeEnumMap = {
   ClassType.undefined: 'undefined',
   ClassType.referenceType: 'referenceType',
   ClassType.valueType: 'valueType',
+  ClassType.interface: 'interface',
 };

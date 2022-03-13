@@ -1,18 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'db_cmd_delete_class.dart';
+part of 'db_cmd_add_class_interface.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-DbCmdDeleteClass _$DbCmdDeleteClassFromJson(Map<String, dynamic> json) =>
-    DbCmdDeleteClass()
+DbCmdAddClassInterface _$DbCmdAddClassInterfaceFromJson(
+        Map<String, dynamic> json) =>
+    DbCmdAddClassInterface()
       ..id = json['id'] as String
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
-      ..entityId = json['entityId'] as String;
+      ..entityId = json['entityId'] as String
+      ..index = json['index'] as int
+      ..interfaceId = json['interfaceId'] as String?
+      ..dataColumnsByTable =
+          (json['dataColumnsByTable'] as Map<String, dynamic>?)?.map(
+        (k, e) =>
+            MapEntry(k, DataTableColumn.fromJson(e as Map<String, dynamic>)),
+      );
 
-Map<String, dynamic> _$DbCmdDeleteClassToJson(DbCmdDeleteClass instance) {
+Map<String, dynamic> _$DbCmdAddClassInterfaceToJson(
+    DbCmdAddClassInterface instance) {
   final val = <String, dynamic>{
     'id': instance.id,
   };
@@ -25,6 +34,10 @@ Map<String, dynamic> _$DbCmdDeleteClassToJson(DbCmdDeleteClass instance) {
 
   writeNotNull(r'$type', _$DbCmdTypeEnumMap[instance.$type]);
   val['entityId'] = instance.entityId;
+  val['index'] = instance.index;
+  writeNotNull('interfaceId', instance.interfaceId);
+  writeNotNull('dataColumnsByTable',
+      instance.dataColumnsByTable?.map((k, e) => MapEntry(k, e.toJson())));
   return val;
 }
 

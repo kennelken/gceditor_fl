@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_add_class_field.dart';
+import 'package:gceditor/model/db_cmd/db_cmd_add_class_interface.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_add_data_row.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_add_enum_value.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_add_new_class.dart';
@@ -28,6 +29,8 @@ import 'package:gceditor/model/db_cmd/db_cmd_resize_dictionary_key_to_value.dart
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
+import 'db_cmd_delete_class_interface.dart';
+import 'db_cmd_edit_class_interface.dart';
 import 'db_cmd_edit_table_row_id.dart';
 import 'db_cmd_reorder_data_row.dart';
 import 'db_cmd_result.dart';
@@ -43,9 +46,9 @@ abstract class BaseDbCmd {
   }
 
   DbCmdResult execute(DbModel dbModel) {
-    final valudationResult = validate(dbModel);
-    if (!valudationResult.success) {
-      return valudationResult;
+    final validationResult = validate(dbModel);
+    if (!validationResult.success) {
+      return validationResult;
     }
 
     try {
@@ -73,9 +76,9 @@ abstract class BaseDbCmd {
 
   static BaseDbCmd decode(dynamic element) {
     final type = element['\$type'];
-    final enumedType = DbCmdType.values.firstWhereOrNull((e) => describeEnum(e) == type);
+    final enumType = DbCmdType.values.firstWhereOrNull((e) => describeEnum(e) == type);
 
-    switch (enumedType) {
+    switch (enumType) {
       case null:
       case DbCmdType.unknown:
         break;
@@ -89,6 +92,8 @@ abstract class BaseDbCmd {
         return DbCmdAddEnumValue.fromJson(element);
       case DbCmdType.addClassField:
         return DbCmdAddClassField.fromJson(element);
+      case DbCmdType.addClassInterface:
+        return DbCmdAddClassInterface.fromJson(element);
       case DbCmdType.deleteClass:
         return DbCmdDeleteClass.fromJson(element);
       case DbCmdType.deleteTable:
@@ -97,6 +102,8 @@ abstract class BaseDbCmd {
         return DbCmdDeleteEnumValue.fromJson(element);
       case DbCmdType.deleteClassField:
         return DbCmdDeleteClassField.fromJson(element);
+      case DbCmdType.deleteClassInterface:
+        return DbCmdDeleteClassInterface.fromJson(element);
       case DbCmdType.deleteDataRow:
         return DbCmdDeleteDataRow.fromJson(element);
       case DbCmdType.editMetaEntityId:
@@ -107,6 +114,8 @@ abstract class BaseDbCmd {
         return DbCmdEditEnumValue.fromJson(element);
       case DbCmdType.editClassField:
         return DbCmdEditClassField.fromJson(element);
+      case DbCmdType.editClassInterface:
+        return DbCmdEditClassInterface.fromJson(element);
       case DbCmdType.editClass:
         return DbCmdEditClass.fromJson(element);
       case DbCmdType.editTable:
@@ -133,7 +142,7 @@ abstract class BaseDbCmd {
         return DbCmdCopyPaste.fromJson(element);
     }
 
-    throw Exception('Can not decode caommand of type "$type"');
+    throw Exception('Can not decode command of type "$type"');
   }
 }
 
@@ -145,15 +154,18 @@ enum DbCmdType {
   addDataRow,
   addEnumValue,
   addClassField,
+  addClassInterface,
   deleteClass,
   deleteTable,
   deleteEnumValue,
   deleteClassField,
+  deleteClassInterface,
   deleteDataRow,
   editMetaEntityId,
   editMetaEntityDescription,
   editEnumValue,
   editClassField,
+  editClassInterface,
   editClass,
   editTable,
   editTableRowId,

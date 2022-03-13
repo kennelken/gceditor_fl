@@ -147,7 +147,7 @@ class DbModelProblem {
   String getDescription() {
     switch (type) {
       case ProblemType.invalidReference:
-        return Loc.get.problemInvalidRefence;
+        return Loc.get.problemInvalidReference;
       case ProblemType.invalidValue:
         return Loc.get.problemInvalidValue;
       case ProblemType.notUniqueValue:
@@ -201,7 +201,7 @@ List<DbModelProblem> _computeProblems(String modelJson) {
   _computeAndAppendInvalidReferences(model, result);
   _computeAndAppendInvalidValues(model, result);
   _computeAndAppendDuplicateUniqueValues(model, result);
-  _computeAndAppendRepreatingSetValues(model, result);
+  _computeAndAppendRepeatingSetValues(model, result);
   _computeAndAppendRepeatingDictionaryKeys(model, result);
 
   result = result.orderByDescending((p) => p.severity.index).toList();
@@ -528,7 +528,7 @@ void _computeAndAppendDuplicateUniqueValues(DbModel model, List<DbModelProblem> 
   }
 }
 
-void _computeAndAppendRepreatingSetValues(DbModel model, List<DbModelProblem> result) {
+void _computeAndAppendRepeatingSetValues(DbModel model, List<DbModelProblem> result) {
   for (var table in model.cache.allDataTables) {
     final allFields = model.cache.getAllFieldsById(table.classId);
     if (allFields == null) //

@@ -24,20 +24,22 @@ class DataTableRowView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(builder: (context, watch, child) {
-      final selectionState = watch(clientDataSelectionStateProvider).state;
-      final isSelected = selectionState.selectionTable == table && selectionState.selectedItems.contains(index);
+    return Consumer(
+      builder: (context, watch, child) {
+        final selectionState = watch(clientDataSelectionStateProvider).state;
+        final isSelected = selectionState.selectionTable == table && selectionState.selectedItems.contains(index);
 
-      return Material(
-        color: isSelected ? kColorSelectedDataTable : kColorTransparent,
-        child: InkWell(
-          onTap: _handleClick,
-          child: Row(
-            children: _getCells(),
+        return Material(
+          color: isSelected ? kColorSelectedDataTable : kColorTransparent,
+          child: InkWell(
+            onTap: _handleClick,
+            child: Row(
+              children: _getCells(),
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 
   List<Widget> _getCells() {

@@ -175,4 +175,5 @@ enum ClassType {
   undefined,
   referenceType,
   valueType,
+  interface,
 }

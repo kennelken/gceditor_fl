@@ -36,6 +36,8 @@ class DbModelCache {
   Map<ClassMetaEntity, List<ClassMetaFieldDescription>>? _allFields;
   Map<ClassMetaEntity, List<ClassMetaEntity>>? _parentClasses;
   Map<ClassMetaEntity, List<ClassMetaEntity>>? _subClasses;
+  Map<ClassMetaEntity, List<ClassMetaEntity>>? _parentInterfaces;
+  Map<ClassMetaEntity, List<ClassMetaEntity>>? _subInterfaces;
 
   Map<ClassMeta, List<IIdentifiable>>? _availableReferenceValues;
   Map<ClassMetaFieldDescription, DataTableCellValue>? _defaultValues;
@@ -61,19 +63,21 @@ class DbModelCache {
     _allFields = null;
     _parentClasses = null;
     _subClasses = null;
+    _parentInterfaces = null;
+    _subInterfaces = null;
     _availableReferenceValues = null;
     _defaultValues = null;
     _hasBigCells = null;
   }
 
   T? getEntity<T extends IIdentifiable>(String id) {
-    validateIfRequired();
+    _validateIfRequired();
     return (_classesById![id] ?? _tablesById![id]) as T?;
   }
 
   T? getClass<T extends ClassMeta>(String? id) {
     if (id == null) return null;
-    validateIfRequired();
+    _validateIfRequired();
     if (_classesById![id] is! T?) //
       return null;
     return _classesById![id] as T?;
@@ -81,7 +85,7 @@ class DbModelCache {
 
   T? getTable<T extends TableMeta>(String? id) {
     if (id == null) return null;
-    validateIfRequired();
+    _validateIfRequired();
     if (_tablesById![id] is! T?) //
       return null;
     return _tablesById![id] as T?;
@@ -89,27 +93,27 @@ class DbModelCache {
 
   DataTableRowData? getTableRow(String? id) {
     if (id == null) return null;
-    validateIfRequired();
+    _validateIfRequired();
     return _tableRowsById![id];
   }
 
   TableMetaEntity? getTableByRowId(String? id) {
     if (id == null) return null;
-    validateIfRequired();
+    _validateIfRequired();
     return _tableByRowId![id];
   }
 
   ClassMetaFieldDescription? getField(String id, ClassMetaEntity? entity) {
-    validateIfRequired();
+    _validateIfRequired();
     return _fieldById![id]?[entity];
   }
 
   ClassMetaEntity? getFieldOwner(ClassMetaFieldDescription field) {
-    validateIfRequired();
+    _validateIfRequired();
     return _classByField![field];
   }
 
-  void validateIfRequired() {
+  void _validateIfRequired() {
     if (_initialized) //
       return;
 
@@ -190,17 +194,17 @@ class DbModelCache {
   }
 
   ClassMetaGroup? getParentClass(ClassMeta classMeta) {
-    validateIfRequired();
+    _validateIfRequired();
     return _classParents![classMeta];
   }
 
   TableMetaGroup? getParentTable(TableMeta tableMeta) {
-    validateIfRequired();
+    _validateIfRequired();
     return _tableParents![tableMeta];
   }
 
   IMetaGroup<T1>? getParent<T1 extends IIdentifiable, T2 extends T1>(T2 entity) {
-    validateIfRequired();
+    _validateIfRequired();
     if (entity is ClassMeta) {
       return getParentClass(entity as ClassMeta) as IMetaGroup<T1>?;
     }
@@ -221,7 +225,7 @@ class DbModelCache {
   }
 
   int? getClassIndex(ClassMeta classMeta) {
-    validateIfRequired();
+    _validateIfRequired();
     final parent = _classParents![classMeta];
     if (parent == null)
       return model.classes.indexOf(classMeta);
@@ -230,7 +234,7 @@ class DbModelCache {
   }
 
   int? getTableIndex(TableMeta tableMeta) {
-    validateIfRequired();
+    _validateIfRequired();
     final parent = _tableParents![tableMeta];
     if (parent == null)
       return model.tables.indexOf(tableMeta);
@@ -239,7 +243,7 @@ class DbModelCache {
   }
 
   int? getIndex<T extends IIdentifiable>(T entity) {
-    validateIfRequired();
+    _validateIfRequired();
     if (entity is ClassMeta) {
       return getClassIndex(entity);
     }
@@ -250,27 +254,27 @@ class DbModelCache {
   }
 
   List<ClassMetaEntity> get allClasses {
-    validateIfRequired();
+    _validateIfRequired();
     return _allClasses!;
   }
 
   List<TableMetaEntity> get allDataTables {
-    validateIfRequired();
+    _validateIfRequired();
     return _allDataTables!;
   }
 
   List<TableMeta> get allTablesMetas {
-    validateIfRequired();
+    _validateIfRequired();
     return _allTablesMetas!;
   }
 
   List<ClassMeta> get allClassesMetas {
-    validateIfRequired();
+    _validateIfRequired();
     return _allClassesMetas!;
   }
 
   List<ClassMetaEntityEnum> get allEnums {
-    validateIfRequired();
+    _validateIfRequired();
     return _allEnums!;
   }
 
@@ -279,33 +283,78 @@ class DbModelCache {
     _allFields = {};
     _parentClasses = {};
     _subClasses = {};
+    _parentInterfaces = {};
+    _subInterfaces = {};
     _fieldById = {};
     _classByField = {};
     _hasBigCells = {};
 
-    final subclassesOneLevel = <ClassMetaEntity, Set<ClassMetaEntity>>{};
+    final subClassesOneLevel = <ClassMetaEntity, Set<ClassMetaEntity>>{};
+    final subInterfacesOneLevel = <ClassMetaEntity, Set<ClassMetaEntity>>{};
 
+    // first pass to find interfaces fields
     for (final entity in _allClasses!) {
-      final inheritedFields = <ClassMetaFieldDescription>[];
-      var allFields = <ClassMetaFieldDescription>[];
-
       final parentClasses = _getParentClasses(entity).toList();
       final parents = parentClasses.reversed.toList();
       _parentClasses![entity] = parents;
 
+      final parentInterfaces = _getParentInterfaces(entity);
+      _parentInterfaces![entity] = parentInterfaces;
+
+      if (entity.classType == ClassType.interface) {
+        final inheritedFields = <ClassMetaFieldDescription>[];
+        final allFields = <ClassMetaFieldDescription>[];
+
+        final reversedInterfaces = parentInterfaces.reversed.toList();
+
+        for (final parent in reversedInterfaces) {
+          inheritedFields.addAll(_allFields![parent]!); //add fields of inherited interfaces
+        }
+
+        allFields.addAll(inheritedFields);
+        allFields.addAll(entity.fields);
+
+        _allFields![entity] = allFields;
+        _inheritedFields![entity] = inheritedFields;
+      }
+    }
+
+    for (final entity in _allClasses!) {
+      final inheritedFields = <ClassMetaFieldDescription>[];
+      final allFields = <ClassMetaFieldDescription>[];
+
+      final parents = _parentClasses![entity]!.reversed.toList();
+      _parentClasses![entity] = parents;
+
       for (final parent in parents) {
+        for (final interfaceId in parent.interfaces) {
+          if (interfaceId == null) //
+            continue;
+          final parentInterface = getClass<ClassMetaEntity>(interfaceId)!;
+          inheritedFields.addAll(_allFields![parentInterface]!);
+        }
         inheritedFields.addAll(parent.fields);
       }
 
       if (parents.isNotEmpty) {
         final parent = parents[0];
 
-        if (subclassesOneLevel[parent] == null) //
-          subclassesOneLevel[parent] = {};
-        subclassesOneLevel[parent]!.add(entity);
+        if (subClassesOneLevel[parent] == null) //
+          subClassesOneLevel[parent] = {};
+        subClassesOneLevel[parent]!.add(entity);
       }
 
-      allFields = inheritedFields.toList();
+      for (var interfaceId in entity.interfaces) {
+        if (interfaceId != null) {
+          final parentInterface = getClass<ClassMetaEntity>(interfaceId)!;
+
+          if (subInterfacesOneLevel[parentInterface] == null) //
+            subInterfacesOneLevel[parentInterface] = {};
+          subInterfacesOneLevel[parentInterface]!.add(entity);
+        }
+      }
+
+      allFields.addAll(inheritedFields);
       allFields.addAll(entity.fields);
 
       for (final field in allFields) {
@@ -334,8 +383,18 @@ class DbModelCache {
         if (entity != currentElement) //
           _subClasses![entity]!.add(currentElement);
 
-        if (subclassesOneLevel[currentElement] != null) //
-          queue.addAll(subclassesOneLevel[currentElement]!);
+        if (subClassesOneLevel[currentElement] != null) //
+          queue.addAll(subClassesOneLevel[currentElement]!);
+      }
+
+      queue.add(entity);
+      while (queue.isNotEmpty) {
+        final currentElement = queue.removeFirst();
+        if (entity != currentElement) //
+          _subInterfaces![entity]!.add(currentElement);
+
+        if (subInterfacesOneLevel[currentElement] != null) //
+          queue.addAll(subInterfacesOneLevel[currentElement]!);
       }
     }
   }
@@ -378,37 +437,48 @@ class DbModelCache {
   }
 
   List<ClassMetaFieldDescription> getInheritedFields(ClassMetaEntity entity) {
-    validateIfRequired();
+    _validateIfRequired();
     return _inheritedFields![entity]!;
   }
 
   List<ClassMetaFieldDescription> getAllFields(ClassMetaEntity entity) {
-    validateIfRequired();
+    _validateIfRequired();
     return _allFields![entity]!;
   }
 
   List<ClassMetaFieldDescription>? getAllFieldsById(String id) {
     if (id.isEmpty) //
       return null;
-    validateIfRequired();
+    _validateIfRequired();
     final classEntity = getClass<ClassMetaEntity>(id)!;
     return _allFields![classEntity]!;
   }
 
   List<ClassMetaEntity> getParentClasses(IIdentifiable entity) {
-    validateIfRequired();
+    _validateIfRequired();
     return _parentClasses![entity]!;
   }
 
   List<ClassMetaEntity> getSubClasses(IIdentifiable entity) {
-    validateIfRequired();
+    _validateIfRequired();
     return _subClasses![entity]!;
+  }
+
+  List<ClassMetaEntity> getParentInterfaces(IIdentifiable entity) {
+    _validateIfRequired();
+    return _parentInterfaces![entity]!;
+  }
+
+  final List<ClassMetaEntity> _emptySubInterfaces = [];
+  List<ClassMetaEntity> getSubInterfaces(IIdentifiable entity) {
+    _validateIfRequired();
+    return _subInterfaces![entity] ?? _emptySubInterfaces;
   }
 
   List<IIdentifiable>? getAvailableValues(ClassMeta? classEntity) {
     if (classEntity == null) //
       return null;
-    validateIfRequired();
+    _validateIfRequired();
     return _availableReferenceValues![classEntity] ?? [];
   }
 
@@ -424,8 +494,35 @@ class DbModelCache {
     return result;
   }
 
+  List<ClassMetaEntity> _getParentInterfaces(ClassMetaEntity entity,
+      [List<ClassMetaEntity>? accumulatedResult, Set<ClassMetaEntity>? accumulatedResultHashMap]) {
+    accumulatedResult ??= <ClassMetaEntity>[];
+    accumulatedResultHashMap ??= <ClassMetaEntity>{};
+
+    for (var i = 0; i < entity.interfaces.length; i++) {
+      if (entity.interfaces[i] == null) //
+        continue;
+
+      final parent = _classesById![entity.interfaces[i]] as ClassMetaEntity;
+
+      if (accumulatedResultHashMap.contains(parent)) //
+        continue;
+
+      accumulatedResultHashMap.add(parent);
+      accumulatedResult.add(parent);
+
+      _getParentInterfaces(
+        parent,
+        accumulatedResult,
+        accumulatedResultHashMap,
+      );
+    }
+
+    return accumulatedResult;
+  }
+
   DataTableCellValue getDefaultValue(ClassMetaFieldDescription field) {
-    validateIfRequired();
+    _validateIfRequired();
     return _defaultValues![field]!.copy(); // JsonMapper can't serialize a single object multiple times
   }
 
@@ -433,7 +530,7 @@ class DbModelCache {
     if (classEntity == null) //
       return false;
 
-    validateIfRequired();
+    _validateIfRequired();
     return _hasBigCells![classEntity] ?? false;
   }
 }

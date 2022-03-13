@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/db_model.dart';
@@ -46,7 +47,7 @@ class DbCmdEditClass extends BaseDbCmd {
 
     final dataColumnsByTable = valuesByTable ?? <String, List<DataTableColumn>>{};
 
-    if (editParentClassId == true) {
+    if (editParentClassId == true || classType == ClassType.interface) {
       final allTablesUsingClass = DbModelUtils.getAllTablesUsingClass(dbModel, entity);
       for (final table in allTablesUsingClass) {
         if (dataColumnsByTable.containsKey(table.id)) //
@@ -56,6 +57,10 @@ class DbCmdEditClass extends BaseDbCmd {
       }
 
       entity.parent = parentClassId;
+      if (classType == ClassType.interface) {
+        entity.parent = null;
+      }
+
       dbModel.cache.invalidate();
 
       for (final table in allTablesUsingClass) {
@@ -69,13 +74,13 @@ class DbCmdEditClass extends BaseDbCmd {
       }
     }
 
+    if (classType != null) {
+      entity.classType = classType!;
+    }
+
     for (final kvp in dataColumnsByTable.entries) {
       final table = dbModel.cache.getTable(kvp.key) as TableMetaEntity;
       DbModelUtils.applyDataColumns(dbModel, table, kvp.value);
-    }
-
-    if (classType != null) {
-      entity.classType = classType!;
     }
 
     if (exportList != null) {
@@ -94,9 +99,41 @@ class DbCmdEditClass extends BaseDbCmd {
     if (entity is! ClassMetaEntity) //
       return DbCmdResult.fail('Entity with id "$entityId" is not a class');
 
+    if (classType != null) {
+      if (classType == ClassType.valueType) {
+        if (entity.parent != null) //
+          return DbCmdResult.fail('"${describeEnum(classType!)}" type can not have a parent class');
+
+        final allSubclasses = dbModel.cache.getSubClasses(entity);
+        if (allSubclasses.isNotEmpty) //
+          return DbCmdResult.fail('"${describeEnum(classType!)}" type can not have subclasses');
+      }
+
+      if (classType == ClassType.interface) {
+        final firstChildClass = dbModel.cache.allClasses.firstWhereOrNull((c) => c.parent == entity.id);
+        if (firstChildClass != null) //
+          return DbCmdResult.fail(
+              'Can\'t change the classType to "${describeEnum(classType!)}" because it is used as parent in "${firstChildClass.id}"');
+
+        final firstChildTable = dbModel.cache.allDataTables.firstWhereOrNull((c) => c.classId == entity.id);
+        if (firstChildTable != null) //
+          return DbCmdResult.fail(
+              'Can\'t change the classType to "${describeEnum(classType!)}" because it is used as parent in "${firstChildTable.id}"');
+      }
+
+      if (classType != ClassType.interface) {
+        final firstParentClass = dbModel.cache.allClasses.firstWhereOrNull((c) => c.interfaces.any((element) => element == entity.id));
+        if (firstParentClass != null) //
+          return DbCmdResult.fail(
+              'Can\'t change the classType to "${describeEnum(classType!)}" because it is used as an interface in "${firstParentClass.id}"');
+      }
+    }
     if (editParentClassId == true) {
       if (parentClassId != null) {
         final parentEntity = dbModel.cache.getClass(parentClassId);
+
+        if (entity.classType == ClassType.interface) //
+          return DbCmdResult.fail('Can\'t set a parent class of an interface');
 
         if (parentEntity == null) //
           return DbCmdResult.fail('Entity with id "$parentClassId" does not exist');
@@ -117,17 +154,6 @@ class DbCmdEditClass extends BaseDbCmd {
 
         if (parentEntity.classType != ClassType.referenceType) //
           return DbCmdResult.fail('Inheritance is not supported for class type "${describeEnum(parentEntity.classType)}"');
-      }
-    }
-
-    if (classType != null) {
-      if (classType == ClassType.valueType) {
-        if (entity.parent != null) //
-          return DbCmdResult.fail('"${describeEnum(classType!)}" type can not have a parent class');
-
-        final allSubclasses = dbModel.cache.getSubClasses(entity);
-        if (allSubclasses.isNotEmpty) //
-          return DbCmdResult.fail('"${describeEnum(classType!)}" type can not have subclasses');
       }
     }
 

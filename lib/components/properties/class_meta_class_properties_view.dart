@@ -16,6 +16,7 @@ import 'package:gceditor/model/db/class_meta_field_description.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/db_cmd/base_db_cmd.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_add_class_field.dart';
+import 'package:gceditor/model/db_cmd/db_cmd_add_class_interface.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_class.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_meta_entity_description.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_meta_entity_id.dart';
@@ -31,6 +32,8 @@ import 'package:gceditor/model/state/service/client_navigation_service.dart';
 import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/utils/utils.dart';
 
+import 'primitives/property_class_interface.dart';
+
 class ClassMetaClassPropertiesViewProperties extends StatefulWidget {
   final ClassMetaEntity data;
 
@@ -44,7 +47,8 @@ class ClassMetaClassPropertiesViewProperties extends StatefulWidget {
 }
 
 class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassPropertiesViewProperties> {
-  late List<ClassMetaFieldDescription> values;
+  late List<ClassMetaFieldDescription> _columns;
+  late List<ClassMetaEntity?> _interfaces;
 
   @override
   void initState() {
@@ -60,7 +64,9 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
   }
 
   void _handleClientStateChanges([bool toSetState = true]) {
-    values = widget.data.fields.toList();
+    _columns = widget.data.fields.toList();
+    _interfaces = widget.data.interfaces.map((i) => clientModel.cache.getClass<ClassMetaEntity>(i)).toList();
+
     if (toSetState) //
       setState(() {});
   }
@@ -106,19 +112,6 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
               multiline: true,
             ),
             kStyle.kPropertiesVerticalDivider,
-            DropDownSelector<ClassMetaEntity>(
-              label: Loc.get.parentClass,
-              items: model.cache.allClasses,
-              selectedItem: model.cache.getClass(widget.data.parent),
-              isEnabled: (e) =>
-                  e != widget.data &&
-                  !model.cache.getParentClasses(e).contains(widget.data) &&
-                  e.classType == ClassType.referenceType &&
-                  widget.data.classType == ClassType.referenceType,
-              onValueChanged: _handleParentClassChange,
-              inputDecoration: parentInputDecoration,
-            ),
-            kStyle.kPropertiesVerticalDivider,
             DropDownSelector<EnumWrapper<ClassType>>(
               label: Loc.get.classType,
               items: classTypes,
@@ -127,6 +120,21 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
               onValueChanged: _handleClassTypeChange,
               addNull: false,
             ),
+            if (widget.data.classType != ClassType.interface) ...[
+              kStyle.kPropertiesVerticalDivider,
+              DropDownSelector<ClassMetaEntity>(
+                label: Loc.get.parentClass,
+                items: model.cache.allClasses.where((element) => element.classType != ClassType.interface).toList(),
+                selectedItem: model.cache.getClass(widget.data.parent),
+                isEnabled: (e) =>
+                    e != widget.data &&
+                    !model.cache.getParentClasses(e).contains(widget.data) &&
+                    e.classType == ClassType.referenceType &&
+                    widget.data.classType == ClassType.referenceType,
+                onValueChanged: _handleParentClassChange,
+                inputDecoration: parentInputDecoration,
+              ),
+            ],
             kStyle.kPropertiesVerticalDivider,
             PropertyBoolView(
               title: Loc.get.exportElementsList,
@@ -150,8 +158,8 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
                         child: ReorderableListView.builder(
                           scrollController: ScrollController(),
                           shrinkWrap: true,
-                          itemCount: values.length,
-                          onReorder: _handleValuesReorder,
+                          itemCount: _columns.length,
+                          onReorder: _handleColumnsReorder,
                           header: Padding(
                             padding: EdgeInsets.only(left: 10 * kScale),
                             child: PropertyTitle(
@@ -160,28 +168,72 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
                           ),
                           itemBuilder: (context, index) {
                             return ClassFieldValueView(
-                              key: ObjectKey(values[index]),
+                              key: ObjectKey(_columns[index]),
                               entity: widget.data,
-                              data: values[index],
+                              data: _columns[index],
                             );
                           },
                         ),
                       ),
                     ),
                     AddNewEnumValueButton(
-                      onClick: _handleAddNewValue,
+                      onClick: _handleAddNewColumn,
                     ),
                   ],
                 ),
               ),
             ),
+            if (widget.data.classType != ClassType.valueType) ...[
+              kStyle.kPropertiesVerticalDivider,
+              Container(
+                color: kColorBlueMetaPropertiesGroup,
+                width: 9999,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 5 * kScale, top: 5 * kScale, bottom: 5 * kScale),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: Theme(
+                          data: kStyle.kReordableListTheme,
+                          child: ReorderableListView.builder(
+                            scrollController: ScrollController(),
+                            shrinkWrap: true,
+                            itemCount: _interfaces.length,
+                            onReorder: _handleInterfaceReorder,
+                            header: Padding(
+                              padding: EdgeInsets.only(left: 10 * kScale),
+                              child: PropertyTitle(
+                                title: Loc.get.interfacesListTitle,
+                              ),
+                            ),
+                            itemBuilder: (context, index) {
+                              return PropertyClassInterface(
+                                key: ValueKey(index),
+                                entity: widget.data,
+                                interface: _interfaces[index],
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      AddNewEnumValueButton(
+                        onClick: _handleAddNewInterface,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ],
         );
       },
     );
   }
 
-  void _handleValuesReorder(int oldIndex, int newIndex) {
+  void _handleColumnsReorder(int oldIndex, int newIndex) {
     if (oldIndex == newIndex) //
       return;
 
@@ -190,13 +242,13 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
         .addCommand(DbCmdReorderClassField.values(entityId: widget.data.id, indexFrom: oldIndex, indexTo: newIndex));
 
     setState(() {
-      values.insert(newIndex, values[oldIndex]);
+      _columns.insert(newIndex, _columns[oldIndex]);
       final indexesAfterInserting = Utils.getModifiedIndexesAfterReordering(oldIndex, newIndex);
-      values.removeAt(indexesAfterInserting.oldValue!);
+      _columns.removeAt(indexesAfterInserting.oldValue!);
     });
   }
 
-  void _handleAddNewValue() {
+  void _handleAddNewColumn() {
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(
           DbCmdAddClassField.values(
             entityId: widget.data.id,
@@ -236,5 +288,30 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
       entityId: widget.data.id,
       exportList: value,
     );
+  }
+
+  void _handleInterfaceReorder(int oldIndex, int newIndex) {
+    if (oldIndex == newIndex) //
+      return;
+
+/*     providerContainer
+        .read(clientOwnCommandsStateProvider)
+        .addCommand(DbCmdReorderClassField.values(entityId: widget.data.id, indexFrom: oldIndex, indexTo: newIndex));
+
+    setState(() {
+      _columns.insert(newIndex, _columns[oldIndex]);
+      final indexesAfterInserting = Utils.getModifiedIndexesAfterReordering(oldIndex, newIndex);
+      _columns.removeAt(indexesAfterInserting.oldValue!);
+    }); */
+  }
+
+  void _handleAddNewInterface() {
+    providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+          DbCmdAddClassInterface.values(
+            entityId: widget.data.id,
+            index: widget.data.interfaces.length,
+            interfaceId: null,
+          ),
+        );
   }
 }
