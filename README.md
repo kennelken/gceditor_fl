@@ -77,7 +77,7 @@ It does not require to setup any complex environment because it stores data in j
 
 # Usage
 ## Binaries from the Releases section
-Latest binaries are available in Releases section here https://github.com/kennelken/gceditor_fl
+Latest binaries are available in the Releases section here https://github.com/kennelken/gceditor_fl/releases
 ## From the source code
 To build the application from the source code you need:
 * Install flutter from https://docs.flutter.dev/get-started/install
