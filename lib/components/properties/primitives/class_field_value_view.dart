@@ -69,13 +69,14 @@ class ClassFieldValueView extends ConsumerWidget {
                   ),
                 ),
               ),
-              if (watch(clientViewModeStateProvider).state.actionsMode)
+              if (watch(clientViewModeStateProvider).state.actionsMode) ...[
                 DeleteButton(
                   onAction: _handleDelete,
                   size: 14 * kScale,
                   width: 25 * kScale,
                   color: kColorPrimaryLight,
                 ),
+              ],
               SizedBox(width: 28 * kScale),
             ],
           ),

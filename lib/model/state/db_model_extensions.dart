@@ -472,8 +472,8 @@ class DbModelUtils {
   }
 
   static List<DataTableColumn> getDataColumns(DbModel model, TableMetaEntity table,
-      {List<ClassMetaFieldDescription>? columns, List<String>? columnsds}) {
-    if (columns != null && columnsds != null) //
+      {List<ClassMetaFieldDescription>? columns, List<String>? columnsIds}) {
+    if (columns != null && columnsIds != null) //
       throw Exception('Only one of the following is allowed to be specified: fields, fieldIds');
 
     final result = <DataTableColumn>[];
@@ -485,8 +485,8 @@ class DbModelUtils {
 
     final allFields = model.cache.getAllFields(classEntity);
     var fieldsToSave = columns ?? allFields;
-    if (columnsds != null) //
-      fieldsToSave = allFields.where((e) => columnsds.contains(e.id)).toList();
+    if (columnsIds != null) //
+      fieldsToSave = allFields.where((e) => columnsIds.contains(e.id)).toList();
 
     for (var field in fieldsToSave) {
       final fieldIndex = allFields.indexOf(field);
@@ -508,13 +508,13 @@ class DbModelUtils {
     DbModel model,
     TableMetaEntity table, {
     List<ClassMetaFieldDescription>? columns,
-    List<String>? columnsds,
+    List<String>? columnsIds,
   }) {
     final list = getDataColumns(
       model,
       table,
       columns: columns,
-      columnsds: columnsds,
+      columnsIds: columnsIds,
     );
 
     return {for (var c in list) c.id: c};
@@ -1006,7 +1006,7 @@ class DbModelUtils {
     ClientFindState findState,
     ClientNavigationService navigationService, {
     InputDecoration? defaultInputDecoration,
-    FindResultFieldDefinistionValueType? fieldValueType,
+    FindResultFieldDefinitionValueType? fieldValueType,
   }) {
     final findResult = !findState.visible ? null : findState.getResults()?.firstWhereOrNull((e) => coordinates.fitsFindResult(e.metaItem));
     final isSelected = coordinates.fitsFindResult(navigationService.longLastingFindResult?.metaItem);
@@ -1114,7 +1114,7 @@ class MetaValueCoordinates {
   String? enumId;
   String? fieldId;
   String? parentClass;
-  FindResultFieldDefinistionValueType? fieldValueType;
+  FindResultFieldDefinitionValueType? fieldValueType;
 
   MetaValueCoordinates({
     this.classId,

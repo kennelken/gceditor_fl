@@ -309,15 +309,15 @@ class ClientFindStateNotifier extends ChangeNotifier {
             );
           }
 
-          FindResultFieldDefinistionValueType? fieldValueType;
+          FindResultFieldDefinitionValueType? fieldValueType;
           if (fieldValueType == null && field.typeInfo.classId != null && _checkMatch(field.typeInfo.classId!, isId: true)) {
-            fieldValueType = FindResultFieldDefinistionValueType.simple;
+            fieldValueType = FindResultFieldDefinitionValueType.simple;
           }
           if (fieldValueType == null && field.keyTypeInfo?.classId != null && _checkMatch(field.keyTypeInfo!.classId!, isId: true)) {
-            fieldValueType = FindResultFieldDefinistionValueType.simple;
+            fieldValueType = FindResultFieldDefinitionValueType.simple;
           }
           if (fieldValueType == null && field.valueTypeInfo?.classId != null && _checkMatch(field.valueTypeInfo!.classId!, isId: true)) {
-            fieldValueType = FindResultFieldDefinistionValueType.simple;
+            fieldValueType = FindResultFieldDefinitionValueType.simple;
           }
 
           if (fieldValueType != null) {
@@ -540,7 +540,7 @@ class FindResultItemMetaItem {
   String? fieldId;
   String? enumId;
   String? parentClass;
-  FindResultFieldDefinistionValueType? fieldValueType;
+  FindResultFieldDefinitionValueType? fieldValueType;
 
   FindResultItemMetaItem({
     this.tableId,
@@ -565,7 +565,7 @@ enum FindResultType {
   columnUsedAsReferenceType,
 }
 
-enum FindResultFieldDefinistionValueType {
+enum FindResultFieldDefinitionValueType {
   simple,
   key,
   value,

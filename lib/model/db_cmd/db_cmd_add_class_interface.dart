@@ -8,6 +8,7 @@ import '../db/class_meta_entity.dart';
 import '../db/table_meta_entity.dart';
 import '../state/db_model_extensions.dart';
 import 'base_db_cmd.dart';
+import 'db_cmd_delete_class_interface.dart';
 import 'db_cmd_result.dart';
 
 part 'db_cmd_add_class_interface.g.dart';
@@ -18,7 +19,7 @@ class DbCmdAddClassInterface extends BaseDbCmd {
   late int index;
   late String? interfaceId;
 
-  Map<String, DataTableColumn>? dataColumnsByTable;
+  Map<String, List<DataTableColumn>>? dataColumnsByTable;
 
   DbCmdAddClassInterface.values({
     String? id,
@@ -58,7 +59,7 @@ class DbCmdAddClassInterface extends BaseDbCmd {
 
             DbModelUtils.insertDefaultValues(dbModel, table, fieldIndex);
             if (dataColumnsByTable?[table.id] != null) {
-              DbModelUtils.applyDataColumns(dbModel, table, [dataColumnsByTable![table.id]!]);
+              DbModelUtils.applyDataColumns(dbModel, table, dataColumnsByTable![table.id]!);
             }
           }
         }
@@ -114,7 +115,7 @@ class DbCmdAddClassInterface extends BaseDbCmd {
         if (table is! TableMetaEntity) //
           return DbCmdResult.fail('Entity with id "$tableId" is not a table');
 
-        if (table.rows.length != dataColumnsByTable![tableId]!.values.length) //
+        if (dataColumnsByTable![tableId]!.any((e) => e.values.length != table.rows.length)) //
           return DbCmdResult.fail('invalid rows count for table "$tableId"');
       }
     }
@@ -124,12 +125,9 @@ class DbCmdAddClassInterface extends BaseDbCmd {
 
   @override
   BaseDbCmd createUndoCmd(DbModel dbModel) {
-    return DbCmdAddClassInterface.values(
-      // TODO! replace with delete interface command
+    return DbCmdDeleteClassInterface.values(
       entityId: entityId,
       index: index,
-      interfaceId: interfaceId,
-      dataColumnsByTable: dataColumnsByTable,
     );
   }
 }

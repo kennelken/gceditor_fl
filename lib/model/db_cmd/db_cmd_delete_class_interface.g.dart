@@ -12,13 +12,7 @@ DbCmdDeleteClassInterface _$DbCmdDeleteClassInterfaceFromJson(
       ..id = json['id'] as String
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..entityId = json['entityId'] as String
-      ..index = json['index'] as int
-      ..interfaceId = json['interfaceId'] as String?
-      ..dataColumnsByTable =
-          (json['dataColumnsByTable'] as Map<String, dynamic>?)?.map(
-        (k, e) =>
-            MapEntry(k, DataTableColumn.fromJson(e as Map<String, dynamic>)),
-      );
+      ..index = json['index'] as int;
 
 Map<String, dynamic> _$DbCmdDeleteClassInterfaceToJson(
     DbCmdDeleteClassInterface instance) {
@@ -35,9 +29,6 @@ Map<String, dynamic> _$DbCmdDeleteClassInterfaceToJson(
   writeNotNull(r'$type', _$DbCmdTypeEnumMap[instance.$type]);
   val['entityId'] = instance.entityId;
   val['index'] = instance.index;
-  writeNotNull('interfaceId', instance.interfaceId);
-  writeNotNull('dataColumnsByTable',
-      instance.dataColumnsByTable?.map((k, e) => MapEntry(k, e.toJson())));
   return val;
 }
 

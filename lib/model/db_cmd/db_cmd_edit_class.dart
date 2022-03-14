@@ -107,6 +107,9 @@ class DbCmdEditClass extends BaseDbCmd {
         final allSubclasses = dbModel.cache.getSubClasses(entity);
         if (allSubclasses.isNotEmpty) //
           return DbCmdResult.fail('"${describeEnum(classType!)}" type can not have subclasses');
+
+        if (entity.interfaces.isNotEmpty) //
+          return DbCmdResult.fail('"${describeEnum(classType!)}" type can\'t be set while the entity has interfaces');
       }
 
       if (classType == ClassType.interface) {

@@ -63,10 +63,13 @@ class DbCmdDeleteClass extends BaseDbCmd {
         if (table.classId == classMeta.id) //
           return DbCmdResult.fail('Class "${classMeta.id}" is used in table "${table.id}"');
       }
-      for (var table in dbModel.cache.allClasses) {
-        if (table.fields
+      for (var classEntity in dbModel.cache.allClasses) {
+        if (classEntity.fields
             .any((f) => f.typeInfo.classId == classMeta.id || f.valueTypeInfo?.classId == classMeta.id || f.keyTypeInfo?.classId == classMeta.id)) //
-          return DbCmdResult.fail('Class "${classMeta.id}" is used in table "${table.id}"');
+          return DbCmdResult.fail('Class "${classMeta.id}" is used in class "${classEntity.id}"');
+
+        if (classEntity.interfaces.any((element) => element == entityId))
+          return DbCmdResult.fail('Class "${classMeta.id}" is used in class "${classEntity.id}"');
       }
     }
 

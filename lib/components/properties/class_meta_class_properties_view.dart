@@ -214,6 +214,7 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
                                 key: ValueKey(index),
                                 entity: widget.data,
                                 interface: _interfaces[index],
+                                index: index,
                               );
                             },
                           ),

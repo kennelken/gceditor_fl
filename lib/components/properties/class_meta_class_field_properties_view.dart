@@ -161,7 +161,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                             MetaValueCoordinates(
                               classId: classEntity.id,
                               fieldId: widget.data.id,
-                              fieldValueType: FindResultFieldDefinistionValueType.simple,
+                              fieldValueType: FindResultFieldDefinitionValueType.simple,
                             ),
                             watch(clientFindStateProvider).state,
                             watch(clientNavigationServiceProvider).state,
@@ -196,7 +196,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                               MetaValueCoordinates(
                                 classId: classEntity.id,
                                 fieldId: widget.data.id,
-                                fieldValueType: FindResultFieldDefinistionValueType.simple,
+                                fieldValueType: FindResultFieldDefinitionValueType.simple,
                               ),
                               watch(clientFindStateProvider).state,
                               watch(clientNavigationServiceProvider).state,
@@ -232,7 +232,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                               MetaValueCoordinates(
                                 classId: classEntity.id,
                                 fieldId: widget.data.id,
-                                fieldValueType: FindResultFieldDefinistionValueType.simple,
+                                fieldValueType: FindResultFieldDefinitionValueType.simple,
                               ),
                               watch(clientFindStateProvider).state,
                               watch(clientNavigationServiceProvider).state,
