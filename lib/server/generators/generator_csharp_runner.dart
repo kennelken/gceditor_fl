@@ -669,6 +669,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Linq;
 #if UNITY_5_3_OR_NEWER
@@ -1182,32 +1183,32 @@ namespace Fairfun.Gceditor.Model
 
         private static bool ParseBool(object value)
         {
-            return Convert.ToInt32(value) == 1;
+            return Convert.ToInt32(value, CultureInfo.InvariantCulture) == 1;
         }
 
         private static int ParseInt(object value)
         {
-            return Convert.ToInt32(value);
+            return Convert.ToInt32(value, CultureInfo.InvariantCulture);
         }
 
         private static long ParseLong(object value)
         {
-            return Convert.ToInt64(value);
+            return Convert.ToInt64(value, CultureInfo.InvariantCulture);
         }
 
         private static float ParseFloat(object value)
         {
-            return Convert.ToSingle(value);
+            return Convert.ToSingle(value, CultureInfo.InvariantCulture);
         }
 
         private static double ParseDouble(object value)
         {
-            return Convert.ToDouble(value);
+            return Convert.ToDouble(value, CultureInfo.InvariantCulture);
         }
 
         private static string ParseString(object value)
         {
-            return Convert.ToString(value);
+            return Convert.ToString(value, CultureInfo.InvariantCulture);
         }
 
         private static T ParseReference<T>(object value, Dictionary<string, IIdentifiable> objectsByIds) where T : IIdentifiable
