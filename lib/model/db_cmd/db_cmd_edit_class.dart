@@ -133,21 +133,24 @@ class DbCmdEditClass extends BaseDbCmd {
     }
     if (editParentClassId == true) {
       if (parentClassId != null) {
-        final parentEntity = dbModel.cache.getClass(parentClassId);
+        final newParentEntity = dbModel.cache.getClass(parentClassId);
 
         if (entity.classType == ClassType.interface) //
           return DbCmdResult.fail('Can\'t set a parent class of an interface');
 
-        if (parentEntity == null) //
+        if (newParentEntity == null) //
           return DbCmdResult.fail('Entity with id "$parentClassId" does not exist');
 
-        if (parentEntity is! ClassMetaEntity) //
+        if (newParentEntity is! ClassMetaEntity) //
           return DbCmdResult.fail('Entity with id "$parentClassId" is not a class');
 
-        if (dbModel.cache.getSubClasses(entity).contains(parentEntity))
+        if (newParentEntity.classType == ClassType.interface) //
+          return DbCmdResult.fail('Can\'t set an interface "$parentClassId" as a parent class');
+
+        if (dbModel.cache.getSubClasses(entity).contains(newParentEntity))
           return DbCmdResult.fail('Specified parent "$parentClassId" is incorrect because it is a child of entity "$entityId"');
 
-        final parentFields = dbModel.cache.getAllFields(parentEntity);
+        final parentFields = dbModel.cache.getAllFields(newParentEntity);
         for (var subclass in [entity, ...dbModel.cache.getSubClasses(entity)]) {
           for (var field in subclass.fields) {
             if (parentFields.any((f) => f.id == field.id))
@@ -155,8 +158,8 @@ class DbCmdEditClass extends BaseDbCmd {
           }
         }
 
-        if (parentEntity.classType != ClassType.referenceType) //
-          return DbCmdResult.fail('Inheritance is not supported for class type "${describeEnum(parentEntity.classType)}"');
+        if (newParentEntity.classType != ClassType.referenceType) //
+          return DbCmdResult.fail('Inheritance is not supported for class type "${describeEnum(newParentEntity.classType)}"');
       }
     }
 

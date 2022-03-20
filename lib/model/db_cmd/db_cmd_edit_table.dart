@@ -8,6 +8,7 @@ import 'package:gceditor/model/db_network/data_table_column.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../db/db_model_shared.dart';
 import 'base_db_cmd.dart';
 import 'db_cmd_result.dart';
 
@@ -99,6 +100,9 @@ class DbCmdEditTable extends BaseDbCmd {
 
       if (classEntity is! ClassMetaEntity) //
         return DbCmdResult.fail('Entity with id "$classId" is not a class');
+
+      if (classEntity.classType == ClassType.interface) //
+        return DbCmdResult.fail('Can\'t set an interface "$classId" as a parent class');
 
       newClass = classEntity;
     }

@@ -7,6 +7,7 @@ import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/state/client_state.dart';
 
 import '../../../model/db_cmd/db_cmd_delete_class_interface.dart';
+import '../../../model/db_cmd/db_cmd_edit_class_interface.dart';
 import '../../../model/model_root.dart';
 import '../../../model/state/client_find_state.dart';
 import '../../../model/state/client_view_mode_state.dart';
@@ -81,11 +82,40 @@ class PropertyClassInterface extends ConsumerWidget {
     if (value == interface) //
       return;
 
-    // TODO! change type command
+    providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+          DbCmdEditClassInterface.values(
+            entityId: entity.id,
+            index: index,
+            interfaceId: value?.id,
+          ),
+        );
   }
 
-  bool _checkSelectionEnabled(ClassMetaEntity e, List<ClassMetaEntity>? subInterfaces) {
-    return e != entity && (subInterfaces == null || !subInterfaces.contains(e));
+  bool _checkSelectionEnabled(ClassMetaEntity e, List<ClassMetaEntity> subInterfaces) {
+    final model = clientModel;
+
+    final interfaceToReplaceId = entity.interfaces[index];
+
+    return e != entity &&
+        !subInterfaces.any((element) => element == e) &&
+        !entity.interfaces.any(
+          (otherInterfaceId) {
+            final otherInterface = model.cache.getClass<ClassMetaEntity>(otherInterfaceId);
+            if (otherInterface == null) //
+              return false;
+
+            if (otherInterfaceId == interfaceToReplaceId) //
+              return false;
+
+            if (otherInterface == e) //
+              return true;
+
+            if (model.cache.getParentInterfaces(otherInterface).contains(e)) //
+              return true;
+
+            return false;
+          },
+        );
   }
 
   void _handleDelete() {

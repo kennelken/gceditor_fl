@@ -1,17 +1,16 @@
 import 'package:gceditor/model/db/db_model.dart';
-import 'package:gceditor/model/db_network/data_table_column.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../db/class_meta_entity.dart';
-import '../state/db_model_extensions.dart';
 import 'base_db_cmd.dart';
+import 'common_class_interface_command.dart';
 import 'db_cmd_add_class_interface.dart';
 import 'db_cmd_result.dart';
 
 part 'db_cmd_delete_class_interface.g.dart';
 
 @JsonSerializable()
-class DbCmdDeleteClassInterface extends BaseDbCmd {
+class DbCmdDeleteClassInterface extends BaseDbCmd with CommonClassInterfaceCommand {
   late String entityId;
   late int index;
 
@@ -59,23 +58,11 @@ class DbCmdDeleteClassInterface extends BaseDbCmd {
     final interfaceId = entity.interfaces[index];
     final interfaceEntity = dbModel.cache.getClass<ClassMetaEntity>(interfaceId);
 
-    final dataColumnsByTable = <String, List<DataTableColumn>>{};
-    if (interfaceEntity != null) {
-      final interfaceFields = dbModel.cache.getAllFields(interfaceEntity).toSet();
-
-      for (final table in dbModel.cache.allDataTables) {
-        final allFields = dbModel.cache.getAllFieldsById(table.classId);
-        final interferingFields = allFields!.where((f) => interfaceFields.contains(f)).toList();
-
-        dataColumnsByTable[table.id] = DbModelUtils.getDataColumns(dbModel, table, columns: interferingFields);
-      }
-    }
-
     return DbCmdAddClassInterface.values(
       entityId: entityId,
       index: index,
       interfaceId: entity.interfaces[index],
-      dataColumnsByTable: dataColumnsByTable,
+      dataColumnsByTable: getDataColumnsByTable(dbModel: dbModel, interfaceEntity: interfaceEntity),
     );
   }
 }

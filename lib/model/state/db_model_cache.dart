@@ -292,49 +292,12 @@ class DbModelCache {
     final subClassesOneLevel = <ClassMetaEntity, Set<ClassMetaEntity>>{};
     final subInterfacesOneLevel = <ClassMetaEntity, Set<ClassMetaEntity>>{};
 
-    // first pass to find interfaces fields
     for (final entity in _allClasses!) {
-      final parentClasses = _getParentClasses(entity).toList();
-      final parents = parentClasses.reversed.toList();
-      _parentClasses![entity] = parents;
-
-      final parentInterfaces = _getParentInterfaces(entity);
-      _parentInterfaces![entity] = parentInterfaces;
-
-      if (entity.classType == ClassType.interface) {
-        final inheritedFields = <ClassMetaFieldDescription>[];
-        final allFields = <ClassMetaFieldDescription>[];
-
-        final reversedInterfaces = parentInterfaces.reversed.toList();
-
-        for (final parent in reversedInterfaces) {
-          inheritedFields.addAll(_allFields![parent]!); //add fields of inherited interfaces
-        }
-
-        allFields.addAll(inheritedFields);
-        allFields.addAll(entity.fields);
-
-        _allFields![entity] = allFields;
-        _inheritedFields![entity] = inheritedFields;
-      }
+      _getOrBuildAllFields(entity);
     }
 
     for (final entity in _allClasses!) {
-      final inheritedFields = <ClassMetaFieldDescription>[];
-      final allFields = <ClassMetaFieldDescription>[];
-
-      final parents = _parentClasses![entity]!.reversed.toList();
-      _parentClasses![entity] = parents;
-
-      for (final parent in parents) {
-        for (final interfaceId in parent.interfaces) {
-          if (interfaceId == null) //
-            continue;
-          final parentInterface = getClass<ClassMetaEntity>(interfaceId)!;
-          inheritedFields.addAll(_allFields![parentInterface]!);
-        }
-        inheritedFields.addAll(parent.fields);
-      }
+      final parents = _parentClasses![entity]!;
 
       if (parents.isNotEmpty) {
         final parent = parents[0];
@@ -345,36 +308,20 @@ class DbModelCache {
       }
 
       for (var interfaceId in entity.interfaces) {
-        if (interfaceId != null) {
-          final parentInterface = getClass<ClassMetaEntity>(interfaceId)!;
+        if (interfaceId == null) //
+          continue;
 
-          if (subInterfacesOneLevel[parentInterface] == null) //
-            subInterfacesOneLevel[parentInterface] = {};
-          subInterfacesOneLevel[parentInterface]!.add(entity);
-        }
+        final parentInterface = getClass<ClassMetaEntity>(interfaceId)!;
+
+        if (subInterfacesOneLevel[parentInterface] == null) //
+          subInterfacesOneLevel[parentInterface] = {};
+        subInterfacesOneLevel[parentInterface]!.add(entity);
       }
-
-      allFields.addAll(inheritedFields);
-      allFields.addAll(entity.fields);
-
-      for (final field in allFields) {
-        if (_fieldById![field.id] == null) //
-          _fieldById![field.id] = <ClassMetaEntity, ClassMetaFieldDescription>{};
-        _fieldById![field.id]![entity] = field;
-      }
-
-      _inheritedFields![entity] = inheritedFields;
-      _allFields![entity] = allFields;
-
-      _hasBigCells![entity] = allFields.any((e) => !e.typeInfo.type.isSimple());
     }
 
     for (final entity in _allClasses!) {
       _subClasses![entity] = [];
-
-      for (final field in entity.fields) {
-        _classByField![field] = entity;
-      }
+      _subInterfaces![entity] = [];
 
       final queue = Queue<ClassMetaEntity>();
       queue.add(entity);
@@ -532,6 +479,53 @@ class DbModelCache {
 
     _validateIfRequired();
     return _hasBigCells![classEntity] ?? false;
+  }
+
+  List<ClassMetaFieldDescription> _getOrBuildAllFields(ClassMetaEntity entity) {
+    if (!_parentInterfaces!.containsKey(entity)) {
+      _parentInterfaces![entity] = _getParentInterfaces(entity);
+    }
+
+    if (!_parentClasses!.containsKey(entity)) {
+      _parentClasses![entity] = _getParentClasses(entity).reversed.toList();
+    }
+
+    if (!_allFields!.containsKey(entity)) {
+      final parents = _parentClasses![entity]!;
+
+      final inheritedFields = <ClassMetaFieldDescription>[];
+      final allFields = <ClassMetaFieldDescription>[];
+
+      for (final parent in parents) {
+        inheritedFields.addAll(_getOrBuildAllFields(parent));
+      }
+
+      final parentInterfaces = _parentInterfaces![entity]!;
+      final reversedInterfaces = parentInterfaces.reversed.toList();
+
+      for (final parent in reversedInterfaces) {
+        inheritedFields.addAll(_getOrBuildAllFields(parent)); //add fields of inherited interfaces
+      }
+
+      allFields.addAll(inheritedFields);
+      allFields.addAll(entity.fields);
+
+      _allFields![entity] = allFields;
+      _inheritedFields![entity] = inheritedFields;
+
+      for (final field in allFields) {
+        if (_fieldById![field.id] == null) //
+          _fieldById![field.id] = <ClassMetaEntity, ClassMetaFieldDescription>{};
+        _fieldById![field.id]![entity] = field;
+      }
+
+      for (final field in entity.fields) {
+        _classByField![field] = entity;
+      }
+
+      _hasBigCells![entity] = allFields.any((e) => !e.typeInfo.type.isSimple());
+    }
+    return _allFields![entity]!;
   }
 }
 

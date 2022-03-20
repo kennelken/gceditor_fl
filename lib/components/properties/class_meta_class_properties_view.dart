@@ -90,6 +90,8 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
           watch(clientNavigationServiceProvider).state,
         );
 
+        final clientVersion = watch(clientStateProvider).state.version;
+
         return ClassMetaPropertiesContainer(
           children: [
             PropertyStringView(
@@ -211,7 +213,7 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
                             ),
                             itemBuilder: (context, index) {
                               return PropertyClassInterface(
-                                key: ValueKey(index),
+                                key: ValueKey('${clientVersion}_${index}_'),
                                 entity: widget.data,
                                 interface: _interfaces[index],
                                 index: index,

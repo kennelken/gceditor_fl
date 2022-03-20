@@ -16,8 +16,11 @@ DbCmdEditClassInterface _$DbCmdEditClassInterfaceFromJson(
       ..interfaceId = json['interfaceId'] as String?
       ..dataColumnsByTable =
           (json['dataColumnsByTable'] as Map<String, dynamic>?)?.map(
-        (k, e) =>
-            MapEntry(k, DataTableColumn.fromJson(e as Map<String, dynamic>)),
+        (k, e) => MapEntry(
+            k,
+            (e as List<dynamic>)
+                .map((e) => DataTableColumn.fromJson(e as Map<String, dynamic>))
+                .toList()),
       );
 
 Map<String, dynamic> _$DbCmdEditClassInterfaceToJson(
@@ -36,8 +39,10 @@ Map<String, dynamic> _$DbCmdEditClassInterfaceToJson(
   val['entityId'] = instance.entityId;
   val['index'] = instance.index;
   writeNotNull('interfaceId', instance.interfaceId);
-  writeNotNull('dataColumnsByTable',
-      instance.dataColumnsByTable?.map((k, e) => MapEntry(k, e.toJson())));
+  writeNotNull(
+      'dataColumnsByTable',
+      instance.dataColumnsByTable
+          ?.map((k, e) => MapEntry(k, e.map((e) => e.toJson()).toList())));
   return val;
 }
 

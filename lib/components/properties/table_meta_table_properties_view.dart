@@ -7,6 +7,7 @@ import 'package:gceditor/components/properties/primitives/property_string_view.d
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
+import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/db_cmd/base_db_cmd.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_meta_entity_description.dart';
@@ -65,7 +66,7 @@ class TableMetaTablePropertiesViewProperties extends ConsumerWidget {
         kStyle.kPropertiesVerticalDivider,
         DropDownSelector<ClassMetaEntity>(
           label: Loc.get.parentClass,
-          items: model.cache.allClasses,
+          items: model.cache.allClasses.where((e) => e.classType != ClassType.interface).toList(),
           selectedItem: model.cache.getClass(data.classId),
           isEnabled: (e) => e.id != data.classId,
           onValueChanged: _handleClassChange,
