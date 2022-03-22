@@ -206,6 +206,7 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
           SizedBox(
             width: 65 * kScale,
             child: TextField(
+              clipBehavior: Clip.none,
               controller: _indentationController,
               focusNode: _indentationFocusNode,
               inputFormatters: Config.filterIndentationForJson,
@@ -225,6 +226,7 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
           SizedBox(
             width: 65 * kScale,
             child: TextField(
+              clipBehavior: Clip.none,
               controller: _prefixController,
               focusNode: _prefixFocusNode,
               inputFormatters: Config.filterId,
