@@ -46,9 +46,8 @@ class DbCmdEditEnumValue extends BaseDbCmd {
       entity.values[index].description = newDescription!;
 
     if (newId != null) {
-      entity.values[index].id = newId!;
-
       final oldId = entity.values[index].id;
+      entity.values[index].id = newId!;
       DbModelUtils.updateEnumReferences(dbModel, oldId, newId!, entity);
     }
 
