@@ -176,8 +176,8 @@
 	"@projectSettingsSaveDelay": {
 		"description": ""
 	},
-	"projectSettingsgeneratorsTitle": "generators",
-	"@projectSettingsgeneratorsTitle": {
+	"projectSettingsGeneratorsTitle": "generators",
+	"@projectSettingsGeneratorsTitle": {
 		"description": ""
 	},
 	"projectSettingsTitle": "Project Settings",

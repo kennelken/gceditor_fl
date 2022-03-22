@@ -61,7 +61,7 @@ class _GeneratorsViewState extends State<GeneratorsView> {
               child: Row(
                 children: [
                   Text(
-                    Loc.get.projectSettingsgeneratorsTitle,
+                    Loc.get.projectSettingsGeneratorsTitle,
                     style: kStyle.kTextRegular.copyWith(color: kColorTextButton),
                   ),
                   TooltipWrapper(

@@ -42,7 +42,7 @@ class _DataTableCellTextViewState extends State<DataTableCellTextView> {
     super.initState();
     var currentValue = widget.value;
     if (widget.fieldType.type == ClassFieldType.date) {
-      currentValue = DbModelUtils.applyTimezone(currentValue.toString(), clientModel.settings.timeZone);
+      currentValue = DbModelUtils.applyTimezone(currentValue?.toString() ?? '', clientModel.settings.timeZone);
     }
 
     _textController = TextEditingController(text: DbModelUtils.simpleValueToText(currentValue));

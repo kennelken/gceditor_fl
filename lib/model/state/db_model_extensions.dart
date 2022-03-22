@@ -953,8 +953,11 @@ class DbModelUtils {
     }
   }
 
-  static String applyTimezone(String dateText, double timezone) {
-    final date = parseDate(dateText)!;
+  static String? applyTimezone(String dateText, double timezone) {
+    final date = parseDate(dateText);
+    if (date == null) //
+      return null;
+
     final newDate = simpleValueToText(date.add(Duration(minutes: (timezone * 60).toInt())))!;
     return newDate;
   }
