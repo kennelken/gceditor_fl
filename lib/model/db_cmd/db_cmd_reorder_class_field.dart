@@ -82,7 +82,7 @@ class DbCmdReorderClassField extends BaseDbCmd {
       return DbCmdResult.fail('Entity with id "$entityId" is not a class');
 
     if (indexFrom == indexTo) //
-      return DbCmdResult.fail('indexFrom "$indexFrom" is equial to indexTo "$indexTo"');
+      return DbCmdResult.fail('indexFrom "$indexFrom" is equal to indexTo "$indexTo"');
 
     if (indexFrom < 0 || indexFrom >= entity.fields.length) //
       return DbCmdResult.fail('Incorrect indexFrom "$indexFrom"');

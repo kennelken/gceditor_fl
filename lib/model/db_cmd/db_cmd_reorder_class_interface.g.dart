@@ -1,20 +1,22 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'db_cmd_reorder_enum.dart';
+part of 'db_cmd_reorder_class_interface.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-DbCmdReorderEnum _$DbCmdReorderEnumFromJson(Map<String, dynamic> json) =>
-    DbCmdReorderEnum()
+DbCmdReorderClassInterface _$DbCmdReorderClassInterfaceFromJson(
+        Map<String, dynamic> json) =>
+    DbCmdReorderClassInterface()
       ..id = json['id'] as String
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..entityId = json['entityId'] as String
       ..indexFrom = json['indexFrom'] as int
       ..indexTo = json['indexTo'] as int;
 
-Map<String, dynamic> _$DbCmdReorderEnumToJson(DbCmdReorderEnum instance) {
+Map<String, dynamic> _$DbCmdReorderClassInterfaceToJson(
+    DbCmdReorderClassInterface instance) {
   final val = <String, dynamic>{
     'id': instance.id,
   };

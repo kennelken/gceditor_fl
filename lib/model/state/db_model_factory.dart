@@ -199,7 +199,7 @@ class DbModelFactory {
         return GeneratorJson()
           ..fileName = Config.defaultGeneratorName
           ..fileExtension = Config.defaultGeneratorJsonFileExtension
-          ..indentation = Config.defaultGeneratorJsonIndentatation;
+          ..indentation = Config.defaultGeneratorJsonIndentation;
 
       case GeneratorType.csharp:
         return GeneratorCsharp()

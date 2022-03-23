@@ -32,6 +32,7 @@ import 'package:gceditor/model/state/service/client_navigation_service.dart';
 import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/utils/utils.dart';
 
+import '../../model/db_cmd/db_cmd_reorder_class_interface.dart';
 import 'primitives/property_class_interface.dart';
 
 class ClassMetaClassPropertiesViewProperties extends StatefulWidget {
@@ -297,15 +298,15 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
     if (oldIndex == newIndex) //
       return;
 
-/*     providerContainer
+    providerContainer
         .read(clientOwnCommandsStateProvider)
-        .addCommand(DbCmdReorderClassField.values(entityId: widget.data.id, indexFrom: oldIndex, indexTo: newIndex));
+        .addCommand(DbCmdReorderClassInterface.values(entityId: widget.data.id, indexFrom: oldIndex, indexTo: newIndex));
 
     setState(() {
-      _columns.insert(newIndex, _columns[oldIndex]);
+      _interfaces.insert(newIndex, _interfaces[oldIndex]);
       final indexesAfterInserting = Utils.getModifiedIndexesAfterReordering(oldIndex, newIndex);
-      _columns.removeAt(indexesAfterInserting.oldValue!);
-    }); */
+      _interfaces.removeAt(indexesAfterInserting.oldValue!);
+    });
   }
 
   void _handleAddNewInterface() {

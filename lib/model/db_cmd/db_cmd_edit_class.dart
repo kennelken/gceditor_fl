@@ -50,10 +50,7 @@ class DbCmdEditClass extends BaseDbCmd {
     if (editParentClassId == true || classType == ClassType.interface) {
       final allTablesUsingClass = DbModelUtils.getAllTablesUsingClass(dbModel, entity);
       for (final table in allTablesUsingClass) {
-        if (dataColumnsByTable.containsKey(table.id)) //
-          continue;
-
-        dataColumnsByTable[table.id] = DbModelUtils.getDataColumns(dbModel, table);
+        dataColumnsByTable[table.id] = DbModelUtils.getDataColumns(dbModel, table, prioritizedValues: dataColumnsByTable[table.id]);
       }
 
       entity.parent = parentClassId;

@@ -153,7 +153,7 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
                                     coordinates: widget.coordinates.copyWith(innerListRowIndex: index, innerListColumnIndex: 0),
                                     value: _cellValue.listCellValues![index],
                                     fieldInfo: widget.valueFieldType,
-                                    onVlaueChanged: (value) => _handleValueChanged(index, value),
+                                    onValueChanged: (value) => _handleValueChanged(index, value),
                                   ),
                                 ),
                               ),

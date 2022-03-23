@@ -26,7 +26,7 @@ typedef DataTableSimpleCellFactory = Widget Function({
   Key? key,
   required DataTableValueCoordinates coordinates,
   required ClassFieldDescriptionDataInfo fieldInfo,
-  required ValueChanged<dynamic> onVlaueChanged,
+  required ValueChanged<dynamic> onValueChanged,
   required dynamic value,
   dynamic defaultValue,
 });
@@ -93,7 +93,7 @@ class DataTableCellView extends StatelessWidget {
           fieldInfo: field.typeInfo,
           value: row.values[index].simpleValue,
           defaultValue: model.cache.getDefaultValue(field),
-          onVlaueChanged: (v) => _saveValue(DataTableCellValue.simple(v)),
+          onValueChanged: (v) => _saveValue(DataTableCellValue.simple(v)),
         );
 
       case ClassFieldType.list:
@@ -130,7 +130,7 @@ class DataTableCellView extends StatelessWidget {
     required ClassFieldDescriptionDataInfo fieldInfo,
     required dynamic value,
     dynamic defaultValue,
-    required ValueChanged<dynamic> onVlaueChanged,
+    required ValueChanged<dynamic> onValueChanged,
   }) {
     switch (fieldInfo.type) {
       case ClassFieldType.undefined:
@@ -144,7 +144,7 @@ class DataTableCellView extends StatelessWidget {
           coordinates: coordinates,
           value: value,
           fieldType: fieldInfo,
-          onValueChanged: onVlaueChanged,
+          onValueChanged: onValueChanged,
         );
 
       case ClassFieldType.int:
@@ -161,7 +161,7 @@ class DataTableCellView extends StatelessWidget {
           value: value,
           defaultValue: defaultValue,
           fieldType: fieldInfo,
-          onValueChanged: onVlaueChanged,
+          onValueChanged: onValueChanged,
         );
 
       case ClassFieldType.reference:
@@ -170,7 +170,7 @@ class DataTableCellView extends StatelessWidget {
           coordinates: coordinates,
           value: value,
           fieldType: fieldInfo,
-          onValueChanged: onVlaueChanged,
+          onValueChanged: onValueChanged,
         );
 
       case ClassFieldType.color:
@@ -178,7 +178,7 @@ class DataTableCellView extends StatelessWidget {
           key: key,
           coordinates: coordinates,
           value: value,
-          onValueChanged: onVlaueChanged,
+          onValueChanged: onValueChanged,
         );
 
       case ClassFieldType.list:

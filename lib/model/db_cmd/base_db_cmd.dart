@@ -32,6 +32,7 @@ import 'package:uuid/uuid.dart';
 import 'db_cmd_delete_class_interface.dart';
 import 'db_cmd_edit_class_interface.dart';
 import 'db_cmd_edit_table_row_id.dart';
+import 'db_cmd_reorder_class_interface.dart';
 import 'db_cmd_reorder_data_row.dart';
 import 'db_cmd_result.dart';
 
@@ -132,6 +133,8 @@ abstract class BaseDbCmd {
         return DbCmdReorderEnum.fromJson(element);
       case DbCmdType.reorderClassField:
         return DbCmdReorderClassField.fromJson(element);
+      case DbCmdType.reorderClassInterface:
+        return DbCmdReorderClassInterface.fromJson(element);
       case DbCmdType.reorderDataRow:
         return DbCmdReorderDataRow.fromJson(element);
       case DbCmdType.resizeColumn:
@@ -174,6 +177,7 @@ enum DbCmdType {
   reorderMetaEntity,
   reorderEnum,
   reorderClassField,
+  reorderClassInterface,
   reorderDataRow,
   resizeColumn,
   resizeDictionaryKeyToValue,

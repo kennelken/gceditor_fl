@@ -63,6 +63,7 @@ const _$DbCmdTypeEnumMap = {
   DbCmdType.reorderMetaEntity: 'reorderMetaEntity',
   DbCmdType.reorderEnum: 'reorderEnum',
   DbCmdType.reorderClassField: 'reorderClassField',
+  DbCmdType.reorderClassInterface: 'reorderClassInterface',
   DbCmdType.reorderDataRow: 'reorderDataRow',
   DbCmdType.resizeColumn: 'resizeColumn',
   DbCmdType.resizeDictionaryKeyToValue: 'resizeDictionaryKeyToValue',

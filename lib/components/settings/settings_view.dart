@@ -85,7 +85,7 @@ class SettingsView extends ConsumerWidget {
                         child: TextField(
                           controller: timezoneController,
                           decoration: kStyle.kInputTextStyleSettingsProperties,
-                          inputFormatters: Config.filterTimzefone,
+                          inputFormatters: Config.filterTimeZone,
                           focusNode: timezoneFocusNode,
                           textAlign: TextAlign.center,
                         ),

@@ -38,14 +38,14 @@ class DbCmdAddClassInterface extends BaseDbCmd with CommonClassInterfaceCommand 
   DbCmdResult doExecute(DbModel dbModel) {
     final entity = dbModel.cache.getClass<ClassMetaEntity>(entityId)!;
 
-    entity.interfaces.insert(index, interfaceId);
-    dbModel.cache.invalidate();
-
     executeEdit(
       dbModel: dbModel,
       entity: entity,
       interfaceId: interfaceId,
-      dataColumnsByTable: dataColumnsByTable,
+      valuesByTable: dataColumnsByTable,
+      interfaceIndex: index,
+      insert: true,
+      delete: false,
     );
 
     return DbCmdResult.success();

@@ -31,7 +31,16 @@ class DbCmdDeleteClassInterface extends BaseDbCmd with CommonClassInterfaceComma
   @override
   DbCmdResult doExecute(DbModel dbModel) {
     final entity = dbModel.cache.getClass<ClassMetaEntity>(entityId)!;
-    entity.interfaces.removeAt(index);
+
+    executeEdit(
+      dbModel: dbModel,
+      entity: entity,
+      interfaceId: null,
+      valuesByTable: null,
+      interfaceIndex: index,
+      insert: false,
+      delete: true,
+    );
 
     return DbCmdResult.success();
   }

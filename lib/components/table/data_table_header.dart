@@ -119,6 +119,15 @@ class DataTableHeader extends ConsumerWidget {
     final selfAndParents = [...parentClasses, classEntity];
 
     for (var i = 0; i < selfAndParents.length; i++) {
+      final parentClass = selfAndParents[i];
+      final interfaces = clientModel.cache.getParentInterfaces(parentClass);
+      if (interfaces.isNotEmpty) {
+        selfAndParents.insertAll(i, interfaces);
+        i += interfaces.length;
+      }
+    }
+
+    for (var i = 0; i < selfAndParents.length; i++) {
       final currentClass = selfAndParents[i];
       result.add(
         Text(

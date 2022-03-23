@@ -491,20 +491,21 @@ class DbModelCache {
     }
 
     if (!_allFields!.containsKey(entity)) {
-      final parents = _parentClasses![entity]!;
-
       final inheritedFields = <ClassMetaFieldDescription>[];
       final allFields = <ClassMetaFieldDescription>[];
 
-      for (final parent in parents) {
+      final parent = getClass<ClassMetaEntity>(entity.parent);
+      if (parent != null) {
         inheritedFields.addAll(_getOrBuildAllFields(parent));
       }
 
-      final parentInterfaces = _parentInterfaces![entity]!;
-      final reversedInterfaces = parentInterfaces.reversed.toList();
+      final interfaces = entity.interfaces //
+          .where((e) => e != null)
+          .map((e) => getClass<ClassMetaEntity>(e)!)
+          .toList();
 
-      for (final parent in reversedInterfaces) {
-        inheritedFields.addAll(_getOrBuildAllFields(parent)); //add fields of inherited interfaces
+      for (final interface in interfaces) {
+        inheritedFields.addAll(_getOrBuildAllFields(interface));
       }
 
       allFields.addAll(inheritedFields);

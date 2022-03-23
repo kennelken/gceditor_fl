@@ -67,6 +67,7 @@ class ClientStateNotifier extends ServerStateNotifier {
       case DbCmdType.reorderMetaEntity:
       case DbCmdType.reorderEnum:
       case DbCmdType.reorderClassField:
+      case DbCmdType.reorderClassInterface:
       case DbCmdType.resizeColumn:
       case DbCmdType.resizeDictionaryKeyToValue:
         break;

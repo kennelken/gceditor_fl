@@ -25,7 +25,7 @@ class Config {
   static const String defaultGeneratorName = 'Model';
   static const String defaultGeneratorJsonFileExtension = 'json';
   static const String defaultGeneratorCsharpFileExtension = 'cs';
-  static const String defaultGeneratorJsonIndentatation = '\t';
+  static const String defaultGeneratorJsonIndentation = '\t';
   static const String defaultGeneratorCsharpPrefix = 'Model';
   static const int generatorMinFileNameLength = 2;
   static const int generatorMinFileExtensionLength = 1;
@@ -113,7 +113,7 @@ class Config {
 
   static final validTimezoneFormat = RegExp(r'^[-+]?[0-9]{0,2}(?:\.[05]?)?$');
   static final RegExp validCharactersForTimezone = RegExp(r'[\-+0-9\.]');
-  static final List<FilteringTextInputFormatter> filterTimzefone = [FilteringTextInputFormatter.allow(validCharactersForTimezone)];
+  static final List<FilteringTextInputFormatter> filterTimeZone = [FilteringTextInputFormatter.allow(validCharactersForTimezone)];
 
   static final RegExp validIndentationForJson = RegExp(r'[ \t\r\n]');
   static final List<FilteringTextInputFormatter> filterIndentationForJson = [FilteringTextInputFormatter.allow(validIndentationForJson)];

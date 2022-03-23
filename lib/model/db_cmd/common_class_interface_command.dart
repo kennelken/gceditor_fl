@@ -105,7 +105,9 @@ mixin CommonClassInterfaceCommand {
         final allFields = dbModel.cache.getAllFieldsById(table.classId);
         final interferingFields = allFields!.where((f) => interfaceFields.contains(f)).toList();
 
-        dataColumnsByTable[table.id] = DbModelUtils.getDataColumns(dbModel, table, columns: interferingFields);
+        final dataColumns = DbModelUtils.getDataColumns(dbModel, table, columns: interferingFields);
+        if (dataColumns.isNotEmpty) //
+          dataColumnsByTable[table.id] = dataColumns;
       }
     }
     return dataColumnsByTable;
@@ -116,30 +118,40 @@ mixin CommonClassInterfaceCommand {
     required DbModel dbModel,
     required ClassMetaEntity entity,
     required String? interfaceId,
-    required Map<String, List<DataTableColumn>>? dataColumnsByTable,
+    required int interfaceIndex,
+    required bool insert,
+    required Map<String, List<DataTableColumn>>? valuesByTable,
+    required bool delete,
   }) {
-    // TODO! offset existing items in data rows to free space for added fields (and remove the offsets for removed fields)
+    final dataColumnsByTable = valuesByTable ?? <String, List<DataTableColumn>>{};
 
-    final allClasses = [entity, ...dbModel.cache.getSubClasses(entity)];
-    final interface = dbModel.cache.getClass<ClassMetaEntity>(interfaceId);
-    if (interface != null) {
-      final allInterfaceFields = dbModel.cache.getAllFields(interface);
+    final allTablesUsingClass = DbModelUtils.getAllTablesUsingClass(dbModel, entity);
+    for (final table in allTablesUsingClass) {
+      dataColumnsByTable[table.id] = DbModelUtils.getDataColumns(dbModel, table, prioritizedValues: dataColumnsByTable[table.id]);
+    }
 
-      for (final classEntity in allClasses) {
-        final allTables = dbModel.cache.allDataTables.where((e) => e.classId == classEntity.id);
-        for (final table in allTables) {
-          final allFields = dbModel.cache.getAllFields(classEntity);
+    if (delete) {
+      entity.interfaces.removeAt(interfaceIndex);
+    } else if (insert) {
+      entity.interfaces.insert(interfaceIndex, interfaceId);
+    } else {
+      entity.interfaces[interfaceIndex] = interfaceId;
+    }
+    dbModel.cache.invalidate();
 
-          for (final interfaceField in allInterfaceFields) {
-            final fieldIndex = allFields.indexOf(interfaceField);
+    for (final table in allTablesUsingClass) {
+      final allFields = dbModel.cache.getAllFields(entity);
+      final defaultValues = allFields.map((e) => DbModelUtils.parseDefaultValueByFieldOrDefault(e, e.defaultValue)).toList();
 
-            DbModelUtils.insertDefaultValues(dbModel, table, fieldIndex);
-            if (dataColumnsByTable?[table.id] != null) {
-              DbModelUtils.applyDataColumns(dbModel, table, dataColumnsByTable![table.id]!);
-            }
-          }
-        }
+      for (var i = 0; i < table.rows.length; i++) {
+        table.rows[i].values.clear();
+        table.rows[i].values.addAll(defaultValues);
       }
+    }
+
+    for (final kvp in dataColumnsByTable.entries) {
+      final table = dbModel.cache.getTable<TableMetaEntity>(kvp.key)!;
+      DbModelUtils.applyDataColumns(dbModel, table, kvp.value);
     }
   }
 }

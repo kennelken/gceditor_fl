@@ -7,7 +7,7 @@ part 'generator_json.g.dart';
 
 @JsonSerializable()
 class GeneratorJson extends BaseGenerator {
-  String indentation = Config.defaultGeneratorJsonIndentatation;
+  String indentation = Config.defaultGeneratorJsonIndentation;
 
   GeneratorJson() {
     $type = GeneratorType.json;

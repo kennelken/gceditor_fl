@@ -471,8 +471,13 @@ class DbModelUtils {
     return result;
   }
 
-  static List<DataTableColumn> getDataColumns(DbModel model, TableMetaEntity table,
-      {List<ClassMetaFieldDescription>? columns, List<String>? columnsIds}) {
+  static List<DataTableColumn> getDataColumns(
+    DbModel model,
+    TableMetaEntity table, {
+    List<ClassMetaFieldDescription>? columns,
+    List<String>? columnsIds,
+    List<DataTableColumn>? prioritizedValues,
+  }) {
     if (columns != null && columnsIds != null) //
       throw Exception('Only one of the following is allowed to be specified: fields, fieldIds');
 
@@ -498,6 +503,13 @@ class DbModelUtils {
 
       for (var i = 0; i < table.rows.length; i++) {
         values.add(table.rows[i].values[fieldIndex].copy());
+      }
+    }
+
+    if (prioritizedValues != null) {
+      for (var prioritizedColumn in prioritizedValues) {
+        result.removeWhere((element) => element.id == prioritizedColumn.id);
+        result.add(prioritizedColumn);
       }
     }
 
