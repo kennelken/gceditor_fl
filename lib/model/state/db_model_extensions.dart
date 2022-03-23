@@ -872,7 +872,7 @@ class DbModelUtils {
 
   static List<TableMetaEntity> getAllTablesUsingClass(DbModel model, ClassMetaEntity classEntity) {
     final result = <TableMetaEntity>[];
-    final currentClassAndSubclasses = [classEntity, ...model.cache.getSubClasses(classEntity)].map((e) => e.id).toSet();
+    final currentClassAndSubclasses = [classEntity, ...model.cache.getImplementingClasses(classEntity)].map((e) => e.id).toSet();
     for (final table in model.cache.allDataTables) {
       if (currentClassAndSubclasses.contains(table.classId)) {
         result.add(table);

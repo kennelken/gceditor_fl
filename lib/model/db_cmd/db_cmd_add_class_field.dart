@@ -44,7 +44,7 @@ class DbCmdAddClassField extends BaseDbCmd {
     entity.fields.insert(index, field);
     dbModel.cache.invalidate();
 
-    final allClasses = [entity, ...dbModel.cache.getSubClasses(entity)];
+    final allClasses = [entity, ...dbModel.cache.getImplementingClasses(entity)];
     for (final classEntity in allClasses) {
       final allTables = dbModel.cache.allDataTables.where((e) => e.classId == classEntity.id);
       for (final table in allTables) {
@@ -76,7 +76,7 @@ class DbCmdAddClassField extends BaseDbCmd {
     if (index < 0 || index > entity.fields.length) //
       return DbCmdResult.fail('invalid index "$index"');
 
-    for (final subclass in [entity, ...dbModel.cache.getSubClasses(entity)]) {
+    for (final subclass in [entity, ...dbModel.cache.getImplementingClasses(entity)]) {
       final allFields = dbModel.cache.getAllFields(subclass);
       if (allFields.any((e) => e.id == field.id)) //
         return DbCmdResult.fail('Field with id "${field.id}" already exists in class "${subclass.id}"');

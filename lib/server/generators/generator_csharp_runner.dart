@@ -161,7 +161,7 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
       if (classEntity.exportList != true) //
         continue;
 
-      final thisAndParentClasses = model.cache.getSubClasses(classEntity).concat([classEntity]).map((e) => e.id).toSet();
+      final thisAndParentClasses = model.cache.getImplementingClasses(classEntity).concat([classEntity]).map((e) => e.id).toSet();
 
       final allItems =
           model.cache.allDataTables.where((element) => thisAndParentClasses.contains(element.classId)).toMap((e) => MapEntry(e.classId, e.rows));

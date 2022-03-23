@@ -101,7 +101,7 @@ class DbCmdEditClass extends BaseDbCmd {
         if (entity.parent != null) //
           return DbCmdResult.fail('"${describeEnum(classType!)}" type can not have a parent class');
 
-        final allSubclasses = dbModel.cache.getSubClasses(entity);
+        final allSubclasses = dbModel.cache.getImplementingClasses(entity);
         if (allSubclasses.isNotEmpty) //
           return DbCmdResult.fail('"${describeEnum(classType!)}" type can not have subclasses');
 
@@ -144,11 +144,11 @@ class DbCmdEditClass extends BaseDbCmd {
         if (newParentEntity.classType == ClassType.interface) //
           return DbCmdResult.fail('Can\'t set an interface "$parentClassId" as a parent class');
 
-        if (dbModel.cache.getSubClasses(entity).contains(newParentEntity))
+        if (dbModel.cache.getImplementingClasses(entity).contains(newParentEntity))
           return DbCmdResult.fail('Specified parent "$parentClassId" is incorrect because it is a child of entity "$entityId"');
 
         final parentFields = dbModel.cache.getAllFields(newParentEntity);
-        for (var subclass in [entity, ...dbModel.cache.getSubClasses(entity)]) {
+        for (var subclass in [entity, ...dbModel.cache.getImplementingClasses(entity)]) {
           for (var field in subclass.fields) {
             if (parentFields.any((f) => f.id == field.id))
               return DbCmdResult.fail('Specified parent "$parentClassId" already contains field "${field.id}" of "${subclass.id}"');

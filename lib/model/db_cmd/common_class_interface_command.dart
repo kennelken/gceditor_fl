@@ -39,7 +39,7 @@ mixin CommonClassInterfaceCommand {
       if (interface == entity) //
         return DbCmdResult.fail('Can\'t specify self as a parent interface "$interfaceId"');
 
-      final subclasses = [entity, ...dbModel.cache.getSubClasses(entity)];
+      final subclasses = [entity, ...dbModel.cache.getImplementingClasses(entity)];
 
       ClassMetaEntity? interfaceToReplace;
       if (index >= 0 && index <= entity.interfaces.length - 1) {

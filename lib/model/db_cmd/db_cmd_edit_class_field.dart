@@ -122,7 +122,7 @@ class DbCmdEditClassField extends BaseDbCmd {
       if (!DbModelUtils.validateId(newId!)) //
         return DbCmdResult.fail('Id "$newId" is invalid. Valid format: "${Config.idFormatRegex.pattern}"');
 
-      final subclasses = dbModel.cache.getSubClasses(fieldOwner);
+      final subclasses = dbModel.cache.getImplementingClasses(fieldOwner);
       for (var subClass in [fieldOwner, ...subclasses]) {
         if (dbModel.cache.getAllFields(subClass).any((e) => e.id == newId)) //
           return DbCmdResult.fail('Field with id "$newId" already exists in class "${subClass.id}"');

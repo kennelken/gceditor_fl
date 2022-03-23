@@ -36,6 +36,7 @@ class DbModelCache {
   Map<ClassMetaEntity, List<ClassMetaFieldDescription>>? _allFields;
   Map<ClassMetaEntity, List<ClassMetaEntity>>? _parentClasses;
   Map<ClassMetaEntity, List<ClassMetaEntity>>? _subClasses;
+  Map<ClassMetaEntity, List<ClassMetaEntity>>? _implementingClasses;
   Map<ClassMetaEntity, List<ClassMetaEntity>>? _parentInterfaces;
   Map<ClassMetaEntity, List<ClassMetaEntity>>? _subInterfaces;
 
@@ -63,6 +64,7 @@ class DbModelCache {
     _allFields = null;
     _parentClasses = null;
     _subClasses = null;
+    _implementingClasses = null;
     _parentInterfaces = null;
     _subInterfaces = null;
     _availableReferenceValues = null;
@@ -283,6 +285,7 @@ class DbModelCache {
     _allFields = {};
     _parentClasses = {};
     _subClasses = {};
+    _implementingClasses = {};
     _parentInterfaces = {};
     _subInterfaces = {};
     _fieldById = {};
@@ -343,6 +346,25 @@ class DbModelCache {
         if (subInterfacesOneLevel[currentElement] != null) //
           queue.addAll(subInterfacesOneLevel[currentElement]!);
       }
+    }
+
+    for (final entity in _allClasses!) {
+      final implementingClasses = <ClassMetaEntity>{};
+
+      final interfaces = [entity, ..._subInterfaces![entity]!];
+      for (var interface in interfaces) {
+        for (final entityI in _allClasses!) {
+          for (final interfaceI in entityI.interfaces) {
+            if (interfaceI == interface.id) {
+              implementingClasses.add(entityI);
+            }
+          }
+        }
+      }
+
+      implementingClasses.addAll(_subInterfaces![entity]!);
+      implementingClasses.addAll(_subClasses![entity]!);
+      _implementingClasses![entity] = implementingClasses.toList();
     }
   }
 
@@ -409,6 +431,11 @@ class DbModelCache {
   List<ClassMetaEntity> getSubClasses(IIdentifiable entity) {
     _validateIfRequired();
     return _subClasses![entity]!;
+  }
+
+  List<ClassMetaEntity> getImplementingClasses(IIdentifiable entity) {
+    _validateIfRequired();
+    return _implementingClasses![entity]!;
   }
 
   List<ClassMetaEntity> getParentInterfaces(IIdentifiable entity) {
