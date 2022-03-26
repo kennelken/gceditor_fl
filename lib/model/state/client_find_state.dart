@@ -136,6 +136,7 @@ class ClientFindStateNotifier extends ChangeNotifier {
       case FindResultType.classDeclaration:
       case FindResultType.enumDeclaration:
       case FindResultType.classParentClass:
+      case FindResultType.classParentInterface:
         providerContainer.read(clientNavigationServiceProvider).focusOn(
               NavigationData.toClassProperties(
                 classId: item.metaItem!.classId!,
@@ -289,6 +290,25 @@ class ClientFindStateNotifier extends ChangeNotifier {
               value: classEntity.parent!,
             ),
           );
+        }
+
+        if (classEntity is ClassMetaEntity && classEntity.interfaces.isNotEmpty) {
+          final interfaces = classEntity.interfaces.where((e) => e != null).map((e) => model.cache.getClass<ClassMetaEntity>(e)).toList();
+          for (var interface in interfaces) {
+            if (interface != null && _checkMatch(interface.id, isId: true)) {
+              state._results!.add(
+                FindResultItem.metaItem(
+                  metaItem: FindResultItemMetaItem(
+                    classId: classEntity.id,
+                    parentClass: interface.id,
+                  ),
+                  priority: priorityCommon,
+                  type: FindResultType.classParentInterface,
+                  value: interface.id,
+                ),
+              );
+            }
+          }
         }
       }
 
@@ -464,6 +484,9 @@ class FindResultItem {
       case FindResultType.classParentClass:
         return Loc.get.classParentClassReference;
 
+      case FindResultType.classParentInterface:
+        return Loc.get.classParentInterfaceClassReference;
+
       case FindResultType.tableParentClass:
         return Loc.get.tableParentClassReference;
 
@@ -496,6 +519,9 @@ class FindResultItem {
         return kColorAccentGreen;
 
       case FindResultType.classParentClass:
+        return kColorAccentPink;
+
+      case FindResultType.classParentInterface:
         return kColorAccentPink;
 
       case FindResultType.tableParentClass:
@@ -561,6 +587,7 @@ enum FindResultType {
   enumDeclaration,
   fieldDeclaration,
   classParentClass,
+  classParentInterface,
   tableParentClass,
   columnUsedAsReferenceType,
 }

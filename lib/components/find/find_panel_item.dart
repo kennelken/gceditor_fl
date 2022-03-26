@@ -85,6 +85,12 @@ class FindPanelItem extends StatelessWidget {
           style: kStyle.kTextExtraSmall,
         );
 
+      case FindResultType.classParentInterface:
+        return Text(
+          '${item.metaItem!.classId}',
+          style: kStyle.kTextExtraSmall,
+        );
+
       case FindResultType.tableParentClass:
         return Text(
           '${item.metaItem!.tableId}',

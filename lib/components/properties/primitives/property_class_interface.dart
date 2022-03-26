@@ -29,14 +29,13 @@ class PropertyClassInterface extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, watch) {
-    final idInputColor = DbModelUtils.getMetaFieldColor(
-      MetaValueCoordinates(classId: entity.id),
+    final subInterfaces = clientModel.cache.getSubInterfaces(entity);
+
+    final parentInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
+      MetaValueCoordinates(classId: entity.id, parentClass: interface?.id ?? ''),
       watch(clientFindStateProvider).state,
       watch(clientNavigationServiceProvider).state,
-      kColorAccentBlue1_5,
     );
-
-    final subInterfaces = clientModel.cache.getSubInterfaces(entity);
 
     final items = clientModel.cache.allClasses //
         .where((c) => c.classType == ClassType.interface)
@@ -49,16 +48,14 @@ class PropertyClassInterface extends ConsumerWidget {
         child: Row(
           children: [
             Expanded(
-              child: Material(
-                color: idInputColor,
-                child: DropDownSelector<ClassMetaEntity>(
-                  onValueChanged: _handleValueChanged,
-                  isEnabled: (e) => _checkSelectionEnabled(e, subInterfaces),
-                  items: items,
-                  selectedItem: interface,
-                  label: '',
-                  addNull: true,
-                ),
+              child: DropDownSelector<ClassMetaEntity>(
+                onValueChanged: _handleValueChanged,
+                isEnabled: (e) => _checkSelectionEnabled(e, subInterfaces),
+                items: items,
+                selectedItem: interface,
+                label: '',
+                addNull: true,
+                inputDecoration: parentInputDecoration,
               ),
             ),
             if (watch(clientViewModeStateProvider).state.actionsMode) ...[

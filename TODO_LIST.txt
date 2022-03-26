@@ -2,8 +2,6 @@
 
 24. set colors for classes, tables, columns, rows (use as row color in color column)
 
-28. EPIC: replace Parent class with a Components. Replace Class concept with Component concept (classes become interfaces, generate a class for every table like "Apple: ITaste, IShape, IEnergySource")
-
 29. Navigation history and navigate back and forth alt+🡺, alt+🢀
 
 30. column property "not null" and a new problem type for this property
