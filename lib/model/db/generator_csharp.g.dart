@@ -11,9 +11,9 @@ GeneratorCsharp _$GeneratorCsharpFromJson(Map<String, dynamic> json) =>
       ..$type = $enumDecodeNullable(_$GeneratorTypeEnumMap, json[r'$type'])
       ..fileName = json['fileName'] as String
       ..fileExtension = json['fileExtension'] as String
-      ..prefix = json['prefix'] as String
-      ..prefixInterface = json['prefixInterface'] as String
-      ..postfix = json['postfix'] as String;
+      ..prefix = json['prefix'] as String? ?? 'Model'
+      ..prefixInterface = json['prefixInterface'] as String? ?? 'IModel'
+      ..postfix = json['postfix'] as String? ?? '';
 
 Map<String, dynamic> _$GeneratorCsharpToJson(GeneratorCsharp instance) {
   final val = <String, dynamic>{};
