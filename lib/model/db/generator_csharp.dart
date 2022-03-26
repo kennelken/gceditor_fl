@@ -8,6 +8,8 @@ part 'generator_csharp.g.dart';
 @JsonSerializable()
 class GeneratorCsharp extends BaseGenerator {
   String prefix = Config.defaultGeneratorCsharpPrefix;
+  String prefixInterface = Config.defaultGeneratorCsharpPrefixInterface;
+  String postfix = Config.defaultGeneratorCsharpPostfix;
 
   GeneratorCsharp() {
     $type = GeneratorType.csharp;

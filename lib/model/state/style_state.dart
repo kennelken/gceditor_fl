@@ -23,6 +23,7 @@ class StyleState {
   var kTextBig = const TextStyle();
   var kTextRegular = const TextStyle();
   var kTextSmall = const TextStyle();
+  var kTextUltraSmall = const TextStyle();
   var kTextExtraSmall = const TextStyle();
   var kTextExtraSmallInactive = const TextStyle();
   var kTextExtraSmallLightest = const TextStyle();
@@ -103,6 +104,7 @@ class StyleStateNotifier extends ChangeNotifier {
     state.kTextBigger = state.kTextRegular.copyWith(fontSize: 28 * state.globalScale);
     state.kTextBig = state.kTextRegular.copyWith(fontSize: 24 * state.globalScale);
     state.kTextSmall = state.kTextRegular.copyWith(fontSize: 16 * state.globalScale);
+    state.kTextUltraSmall = state.kTextRegular.copyWith(fontSize: 11 * state.globalScale);
     state.kTextExtraSmall = state.kTextRegular.copyWith(fontSize: 14 * state.globalScale);
     state.kTextExtraSmallInactive = state.kTextRegular.copyWith(fontSize: 14 * state.globalScale, color: kTextColorLightHalfTransparent);
     state.kTextExtraSmallLightest = state.kTextRegular.copyWith(fontSize: 14 * state.globalScale, color: kTextColorLightest);

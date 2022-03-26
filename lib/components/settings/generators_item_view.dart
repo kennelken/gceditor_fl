@@ -42,6 +42,10 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
   late FocusNode _indentationFocusNode;
   late TextEditingController _prefixController;
   late FocusNode _prefixFocusNode;
+  late TextEditingController _prefixInterfaceController;
+  late FocusNode _prefixInterfaceFocusNode;
+  late TextEditingController _postfixController;
+  late FocusNode _postfixFocusNode;
 
   @override
   void initState() {
@@ -59,6 +63,14 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
     _prefixFocusNode = FocusNode();
     _prefixFocusNode.addListener(_handlePrefixFocusChanged);
 
+    _prefixInterfaceController = TextEditingController();
+    _prefixInterfaceFocusNode = FocusNode();
+    _prefixInterfaceFocusNode.addListener(_handlePrefixInterfaceFocusChanged);
+
+    _postfixController = TextEditingController();
+    _postfixFocusNode = FocusNode();
+    _postfixFocusNode.addListener(_handlePostfixFocusChanged);
+
     providerContainer.read(clientStateProvider).addListener(_handleClientStateChange);
 
     _handleClientStateChange();
@@ -71,6 +83,8 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
     _fileNameFocusNode.removeListener(_handleFileNameFocusChanged);
     _indentationFocusNode.removeListener(_handleIndentationFocusChanged);
     _prefixFocusNode.removeListener(_handlePrefixFocusChanged);
+    _prefixInterfaceFocusNode.removeListener(_handlePrefixInterfaceFocusChanged);
+    _postfixFocusNode.removeListener(_handlePostfixFocusChanged);
     providerContainer.read(clientStateProvider).removeListener(_handleClientStateChange);
   }
 
@@ -96,6 +110,8 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
 
       case GeneratorType.csharp:
         _prefixController.text = (_generatorCopy as GeneratorCsharp).prefix;
+        _prefixInterfaceController.text = (_generatorCopy as GeneratorCsharp).prefixInterface;
+        _postfixController.text = (_generatorCopy as GeneratorCsharp).postfix;
         break;
     }
   }
@@ -196,6 +212,28 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
     widget.onChange(_generatorCopy);
   }
 
+  void _handlePrefixInterfaceFocusChanged() {
+    if (_prefixInterfaceFocusNode.hasFocus) //
+      return;
+
+    if ((_generatorCopy as GeneratorCsharp).prefixInterface == _prefixInterfaceController.text) //
+      return;
+
+    (_generatorCopy as GeneratorCsharp).prefixInterface = _prefixInterfaceController.text;
+    widget.onChange(_generatorCopy);
+  }
+
+  void _handlePostfixFocusChanged() {
+    if (_postfixFocusNode.hasFocus) //
+      return;
+
+    if ((_generatorCopy as GeneratorCsharp).postfix == _postfixController.text) //
+      return;
+
+    (_generatorCopy as GeneratorCsharp).postfix = _postfixController.text;
+    widget.onChange(_generatorCopy);
+  }
+
   List<Widget> _getOptions() {
     switch (_generatorCopy.$type!) {
       case GeneratorType.undefined:
@@ -204,7 +242,7 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
       case GeneratorType.json:
         return [
           SizedBox(
-            width: 65 * kScale,
+            width: 80 * kScale,
             child: TextField(
               clipBehavior: Clip.none,
               controller: _indentationController,
@@ -212,7 +250,7 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
               inputFormatters: Config.filterIndentationForJson,
               decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
                 hintText: Loc.get.indentationLabel,
-                hintStyle: kStyle.kTextExtraSmall.copyWith(
+                hintStyle: kStyle.kTextUltraSmall.copyWith(
                   color: kColorPrimaryLight,
                 ),
               ),
@@ -224,7 +262,7 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
       case GeneratorType.csharp:
         return [
           SizedBox(
-            width: 65 * kScale,
+            width: 80 * kScale,
             child: TextField(
               clipBehavior: Clip.none,
               controller: _prefixController,
@@ -232,7 +270,39 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
               inputFormatters: Config.filterId,
               decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
                 hintText: Loc.get.prefixLabel,
-                hintStyle: kStyle.kTextExtraSmall.copyWith(
+                hintStyle: kStyle.kTextUltraSmall.copyWith(
+                  color: kColorPrimaryLight,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 5 * kScale),
+          SizedBox(
+            width: 80 * kScale,
+            child: TextField(
+              clipBehavior: Clip.none,
+              controller: _prefixInterfaceController,
+              focusNode: _prefixInterfaceFocusNode,
+              inputFormatters: Config.filterId,
+              decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                hintText: Loc.get.prefixInterfaceLabel,
+                hintStyle: kStyle.kTextUltraSmall.copyWith(
+                  color: kColorPrimaryLight,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 5 * kScale),
+          SizedBox(
+            width: 80 * kScale,
+            child: TextField(
+              clipBehavior: Clip.none,
+              controller: _postfixController,
+              focusNode: _postfixFocusNode,
+              inputFormatters: Config.filterId,
+              decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                hintText: Loc.get.postfixLabel,
+                hintStyle: kStyle.kTextUltraSmall.copyWith(
                   color: kColorPrimaryLight,
                 ),
               ),

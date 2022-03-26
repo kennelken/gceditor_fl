@@ -205,7 +205,9 @@ class DbModelFactory {
         return GeneratorCsharp()
           ..fileName = Config.defaultGeneratorName
           ..fileExtension = Config.defaultGeneratorCsharpFileExtension
-          ..prefix = Config.defaultGeneratorCsharpPrefix;
+          ..prefix = Config.defaultGeneratorCsharpPrefix
+          ..prefixInterface = Config.defaultGeneratorCsharpPrefixInterface
+          ..postfix = Config.defaultGeneratorCsharpPostfix;
     }
   }
 }

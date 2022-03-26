@@ -160,6 +160,14 @@
 	"@prefixLabel": {
 		"description": ""
 	},
+	"prefixInterfaceLabel": "interface",
+	"@prefixInterfaceLabel": {
+		"description": ""
+	},
+	"postfixLabel": "postfix",
+	"@postfixLabel": {
+		"description": ""
+	},
 	"indentationLabel": "indent",
 	"@indentationLabel": {
 		"description": ""

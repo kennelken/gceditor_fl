@@ -23,6 +23,8 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
   static const _itemsListSuffix = 'ItemsList';
 
   static const _paramPrefix = 'prefix';
+  static const _paramPrefixInterface = 'prefixInterface';
+  static const _paramPostfix = 'postfix';
   static const _paramClasses = 'classes';
   static const _paramItemsLists = 'paramItemsLists';
   static const _paramDate = 'date';
@@ -31,6 +33,7 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
 
   static const _paramClass = 'class';
   static const _paramParentClass = 'parentClass';
+  static const _paramParentInterfaces = 'parentInterfaces';
   static const _paramClassDescription = 'classDescription';
   static const _paramPropertiesBody = 'propertiesBody';
   static const _paramEnumBody = '_enumBody';
@@ -40,6 +43,7 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
   static const _paramListStructGetHashCode = 'listStructGetHashCode';
   static const _paramListStructEqEq = 'listStructEqEq';
 
+  static const _paramPropertyAccessLevel = 'propertyAccessLevel';
   static const _paramPropertyType = 'propertyType';
   static const _paramPropertyName = 'propertyName';
   static const _paramPropertySummary = 'propertySummary';
@@ -69,12 +73,16 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
           _paramDate: additionalInfo.date,
           _paramUser: additionalInfo.user,
           _paramPrefix: data.prefix,
+          _paramPrefixInterface: data.prefixInterface,
+          _paramPostfix: data.postfix,
           _paramClasses: _getClasses(model, data),
           _paramItemsLists: _getItemsLists(model, data),
           _paramJsonParser: _parserTemplate.format(
             {
               _paramPrefix: data.prefix,
-              _paramListInstantiate: _getListInstantate(model, data),
+              _paramPrefixInterface: data.prefixInterface,
+              _paramPostfix: data.postfix,
+              _paramListInstantiate: _getListInstantiate(model, data),
               _paramRegexDate: Config.dateFormatRegex.pattern,
               _paramRegexDuration: Config.durationFormatRegex.pattern,
               _paramAssignValueCases: _getAssignValuesCases(model, data),
@@ -121,6 +129,8 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
       final enumDefinition = _enumTemplate.format(
         {
           _paramPrefix: data.prefix,
+          _paramPrefixInterface: data.prefixInterface,
+          _paramPostfix: data.postfix,
           _paramClass: enumEntity.id,
           _paramEnumBody: _getEnumValues(enumEntity),
           _paramClassDescription: _makeSummary(enumEntity.description.isNotEmpty ? enumEntity.description : 'No description', 1),
@@ -136,10 +146,13 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
       final classDefinition = _getClassTemplateByClassType(classEntity.classType).format(
         {
           _paramPrefix: data.prefix,
+          _paramPrefixInterface: data.prefixInterface,
+          _paramPostfix: data.postfix,
           _paramClass: classEntity.id,
           _paramParentClass: _getParentClass(classEntity, data),
+          _paramParentInterfaces: _getParentInterfaces(classEntity, data),
           _paramClassDescription: _makeSummary(classEntity.description.isNotEmpty ? classEntity.description : 'No description', 1),
-          _paramPropertiesBody: _getClassProperties(data, classEntity),
+          _paramPropertiesBody: _getClassProperties(model, data, classEntity),
           _methodCloneBody: _getCloneProperties(model, classEntity),
           _paramListStructGetHashCode: _getListStructGetHashCode(model, classEntity),
           _paramListStructEquals: _getListStructEquals(model, classEntity),
@@ -169,11 +182,15 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
       final classDefinition = _classItemsListTemplate.format(
         {
           _paramPrefix: data.prefix,
+          _paramPrefixInterface: data.prefixInterface,
+          _paramPostfix: data.postfix,
           _paramClass: classEntity.id,
           _paramMetaEntityType: describeEnum(MetaEntityType.Class),
           _paramItemsListPropertiesList: allItems.entries
               .selectMany((kvp, _) => kvp.value.map((e) => _paramItemsListPropertyEntryTemplate.format({
                     _paramPrefix: data.prefix,
+                    _paramPrefixInterface: data.prefixInterface,
+                    _paramPostfix: data.postfix,
                     _paramClassName: kvp.key,
                     _paramEntryName: e.id,
                   })))
@@ -181,6 +198,8 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
           _paramItemsListConstructorList: allItems.entries
               .selectMany((kvp, _) => kvp.value.map((e) => _paramItemsListConstructorEntryTemplate.format({
                     _paramPrefix: data.prefix,
+                    _paramPrefixInterface: data.prefixInterface,
+                    _paramPostfix: data.postfix,
                     _paramClassName: kvp.key,
                     _paramEntryName: e.id,
                   })))
@@ -199,11 +218,15 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
       final classDefinition = _classItemsListTemplate.format(
         {
           _paramPrefix: data.prefix,
+          _paramPrefixInterface: data.prefixInterface,
+          _paramPostfix: data.postfix,
           _paramClass: tableEntity.id,
           _paramMetaEntityType: describeEnum(MetaEntityType.Table),
           _paramItemsListPropertiesList: tableEntity.rows
               .map((e) => _paramItemsListPropertyEntryTemplate.format({
                     _paramPrefix: data.prefix,
+                    _paramPrefixInterface: data.prefixInterface,
+                    _paramPostfix: data.postfix,
                     _paramClassName: tableEntity.classId,
                     _paramEntryName: e.id,
                   }))
@@ -211,6 +234,8 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
           _paramItemsListConstructorList: tableEntity.rows
               .map((e) => _paramItemsListConstructorEntryTemplate.format({
                     _paramPrefix: data.prefix,
+                    _paramPrefixInterface: data.prefixInterface,
+                    _paramPostfix: data.postfix,
                     _paramClassName: tableEntity.classId,
                     _paramEntryName: e.id,
                   }))
@@ -240,22 +265,62 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
 
   String _getParentClass(ClassMetaEntity classEntity, GeneratorCsharp data) {
     switch (classEntity.classType) {
-      case ClassType.undefined:
       case ClassType.referenceType:
-      case ClassType.interface:
-        return ': ${classEntity.parent != null ? '${data.prefix}${classEntity.parent}' : 'Base${data.prefix}Item'},';
+        return ': ${classEntity.parent != null ? '${data.prefix}${classEntity.parent}${data.postfix}' : 'Base${data.prefix}Item${data.postfix}'},';
 
+      case ClassType.undefined:
       case ClassType.valueType:
-        return ':';
+      case ClassType.interface:
+        return '';
     }
   }
 
-  String _getClassProperties(GeneratorCsharp data, ClassMetaEntity classEntity) {
+  String _getParentInterfaces(ClassMetaEntity classEntity, GeneratorCsharp data) {
+    final interfaces = classEntity.interfaces //
+        .where((e) => e != null)
+        .map((e) => '${data.prefixInterface}$e${data.postfix}')
+        .join(', ');
+
+    if (interfaces.isEmpty) //
+      return '';
+
+    switch (classEntity.classType) {
+      case ClassType.referenceType:
+      case ClassType.valueType:
+        return ', $interfaces';
+
+      case ClassType.undefined:
+      case ClassType.interface:
+        return ' : $interfaces';
+    }
+  }
+
+  String _getClassProperties(DbModel model, GeneratorCsharp data, ClassMetaEntity classEntity) {
     final items = <String>[];
-    for (final field in classEntity.fields) {
+
+    final inheritedInterfaceFields = <ClassMetaFieldDescription>[];
+    switch (classEntity.classType) {
+      case ClassType.undefined:
+      case ClassType.interface:
+        break;
+
+      case ClassType.referenceType:
+      case ClassType.valueType:
+        inheritedInterfaceFields.addAll(
+          classEntity.interfaces //
+              .where((e) => e != null)
+              .selectMany((e, index) => model.cache.getAllFieldsById(e!)!),
+        );
+        break;
+    }
+
+    final allFields = [...classEntity.fields, ...inheritedInterfaceFields];
+
+    for (final field in allFields) {
       items.add(
         _classPropertyTemplate.format(
           {
+            _paramPropertyAccessLevel: _getPropertyAccessLevel(classEntity, data),
             _paramPropertyType: _getPropertyType(field, data),
             _paramPropertyName: field.id,
             _paramPropertySummary: _makeWholeSummary(field.description, 2),
@@ -354,7 +419,19 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
     return items.join();
   }
 
-  _getPropertyType(ClassMetaFieldDescription field, GeneratorCsharp data) {
+  String _getPropertyAccessLevel(ClassMetaEntity classEntity, GeneratorCsharp data) {
+    switch (classEntity.classType) {
+      case ClassType.undefined:
+      case ClassType.interface:
+        return '';
+
+      case ClassType.referenceType:
+      case ClassType.valueType:
+        return 'public ';
+    }
+  }
+
+  String _getPropertyType(ClassMetaFieldDescription field, GeneratorCsharp data) {
     switch (field.typeInfo.type) {
       case ClassFieldType.bool:
       case ClassFieldType.int:
@@ -404,7 +481,7 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
         return 'string';
 
       case ClassFieldType.reference:
-        return '${data.prefix}${type.classId!}';
+        return '${data.prefix}${type.classId!}${data.postfix}';
 
       case ClassFieldType.list:
       case ClassFieldType.set:
@@ -437,17 +514,28 @@ ${_makeSummary(summary, indentDepth)}
 ${_makeSummary('</summary>', indentDepth)}''';
   }
 
-  String _getListInstantate(DbModel model, GeneratorCsharp data) {
+  String _getListInstantiate(DbModel model, GeneratorCsharp data) {
     final items = <String>[];
     for (final classEntity in model.cache.allClasses) {
-      items.add(
-        _getNewInstanceRowTemplate.format(
-          {
-            _paramClassName: classEntity.id,
-            _paramPrefix: data.prefix,
-          },
-        ),
-      );
+      switch (classEntity.classType) {
+        case ClassType.undefined:
+        case ClassType.interface:
+          break;
+
+        case ClassType.referenceType:
+        case ClassType.valueType:
+          items.add(
+            _getNewInstanceRowTemplate.format(
+              {
+                _paramClassName: classEntity.id,
+                _paramPrefix: data.prefix,
+                _paramPrefixInterface: data.prefixInterface,
+                _paramPostfix: data.postfix,
+              },
+            ),
+          );
+          break;
+      }
     }
 
     return items.join();
@@ -458,14 +546,23 @@ ${_makeSummary('</summary>', indentDepth)}''';
 
     final allClassesSortedByDepth = model.cache.allClasses.orderByDescending((e) => model.cache.getParentClasses(e).length).toList();
     for (final classEntity in allClassesSortedByDepth) {
-      items.add(
-        _assignValueCaseTemplate.format(
-          {
-            _paramClassName: '${data.prefix}${classEntity.id}',
-            _paramAssignValueListProperties: _getAssignValueListProperties(model, data, classEntity),
-          },
-        ),
-      );
+      switch (classEntity.classType) {
+        case ClassType.undefined:
+        case ClassType.interface:
+          break;
+
+        case ClassType.referenceType:
+        case ClassType.valueType:
+          items.add(
+            _assignValueCaseTemplate.format(
+              {
+                _paramClassName: '${data.prefix}${classEntity.id}${data.postfix}',
+                _paramAssignValueListProperties: _getAssignValueListProperties(model, data, classEntity),
+              },
+            ),
+          );
+          break;
+      }
     }
 
     return items.join();
@@ -477,7 +574,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
       items.add(
         _assignValueRowTemplate.format(
           {
-            _paramClassName: '${data.prefix}${classEntity.id}',
+            _paramClassName: '${data.prefix}${classEntity.id}${data.postfix}',
             _paramPropertyName: field.id,
             _paramParseFunction: _getAssignValueFunction(model, data, classEntity, field),
           },
@@ -546,7 +643,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
 
       case ClassFieldType.reference:
         final classEntity = model.cache.getEntity(type.classId!);
-        final genericType = '${data.prefix}${type.classId}';
+        final genericType = '${data.prefix}${type.classId}${data.postfix}';
         if (classEntity is ClassMetaEntityEnum) //
           return 'ParseEnum<${genericType}>(${value})';
         return 'ParseReference<${genericType}>(${value}, objectsByIds)';
@@ -594,12 +691,16 @@ ${_makeSummary('</summary>', indentDepth)}''';
     final classes = model.cache.allClasses.where((e) => e.exportList == true).map((e) => _listItemsListAssignmentRowTemplate.format({
           _paramClassName: e.id,
           _paramPrefix: data.prefix,
+          _paramPrefixInterface: data.prefixInterface,
+          _paramPostfix: data.postfix,
           _paramMetaEntityType: describeEnum(MetaEntityType.Class),
         }));
 
     final tables = model.cache.allDataTables.where((e) => e.exportList == true).map((e) => _listItemsListAssignmentRowTemplate.format({
           _paramClassName: e.id,
           _paramPrefix: data.prefix,
+          _paramPrefixInterface: data.prefixInterface,
+          _paramPostfix: data.postfix,
           _paramMetaEntityType: describeEnum(MetaEntityType.Table),
         }));
 
@@ -610,12 +711,16 @@ ${_makeSummary('</summary>', indentDepth)}''';
     final classes = model.cache.allClasses.where((e) => e.exportList == true).map((e) => _listItemsListDeclarationRowTemplate.format({
           _paramClassName: e.id,
           _paramPrefix: data.prefix,
+          _paramPrefixInterface: data.prefixInterface,
+          _paramPostfix: data.postfix,
           _paramMetaEntityType: describeEnum(MetaEntityType.Class),
         }));
 
     final tables = model.cache.allDataTables.where((e) => e.exportList == true).map((e) => _listItemsListDeclarationRowTemplate.format({
           _paramClassName: e.id,
           _paramPrefix: data.prefix,
+          _paramPrefixInterface: data.prefixInterface,
+          _paramPostfix: data.postfix,
           _paramMetaEntityType: describeEnum(MetaEntityType.Table),
         }));
 
@@ -714,7 +819,7 @@ namespace Fairfun.Gceditor.Model
     /// <summary>
     /// Autogenerated via gceditor
     /// </summary>
-    public partial class {${_paramPrefix}}Root
+    public partial class {${_paramPrefix}}Root{${_paramPostfix}}
     {
         public string CreatedBy;
         public string CreationTime;
@@ -795,11 +900,11 @@ namespace Fairfun.Gceditor.Model
 #endregion
 
 #region Classes definitions
-    public partial class Base{${_paramPrefix}}Item : IIdentifiable
+    public partial class Base{${_paramPrefix}}Item{${_paramPostfix}} : IIdentifiable
     {
         public string Id { get; set; }
 
-        internal virtual void OnParsed(ConfigRoot root) {}
+        internal virtual void OnParsed({${_paramPrefix}}Root{${_paramPostfix}} root) {}
     }
 
 {${_paramClasses}}
@@ -859,22 +964,22 @@ namespace Fairfun.Gceditor.Model
   final String _enumTemplate = '''    /// <summary>
 {${_paramClassDescription}}
     /// </summary>
-    public enum {${_paramPrefix}}{${_paramClass}}
+    public enum {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}
     {{${_paramEnumBody}}
     }''';
 
   final String _classTemplate = '''    /// <summary>
 {${_paramClassDescription}}
     /// </summary>
-    public partial class {${_paramPrefix}}{${_paramClass}} {${_paramParentClass}} ICloneable<{${_paramPrefix}}{${_paramClass}}>
+    public partial class {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} {${_paramParentClass}} ICloneable<{${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}>{${_paramParentInterfaces}}
     {{${_paramPropertiesBody}}
 
         /// <summary>
         /// Clone of the item. Warning: references to the model entities are not being copied!
         /// </summary>
-        public new {${_paramPrefix}}{${_paramClass}} Clone()
+        public new {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} Clone()
         {
-            {${_paramPrefix}}{${_paramClass}} result = new {${_paramPrefix}}{${_paramClass}}
+            {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} result = new {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}
             {{${_methodCloneBody}}
             };
             CloneCustom(result);
@@ -883,85 +988,60 @@ namespace Fairfun.Gceditor.Model
 
         public override string ToString()
         {
-            return \$"{{{${_paramPrefix}}{${_paramClass}}}} {{Id: {Id}}}";
+            return \$"{{{${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}}} {{Id: {Id}}}";
         }
 
-        internal override void OnParsed(ConfigRoot root)
+        internal override void OnParsed({${_paramPrefix}}Root{${_paramPostfix}} root)
         {
             base.OnParsed(root);
             OnParsedImplementation(root);
         }
 
-        partial void CloneCustom({${_paramPrefix}}{${_paramClass}} to);
-        partial void OnParsedImplementation({${_paramPrefix}}Root root);
+        partial void CloneCustom({${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} to);
+        partial void OnParsedImplementation({${_paramPrefix}}Root{${_paramPostfix}} root);
     }''';
-  // TODO! implement
+
   final String _interfaceTemplate = '''    /// <summary>
 {${_paramClassDescription}}
     /// </summary>
-    public partial interface {${_paramPrefix}}{${_paramClass}} {${_paramParentClass}}
+    public partial interface {${_paramPrefixInterface}}{${_paramClass}}{${_paramPostfix}}{${_paramParentInterfaces}}
     {{${_paramPropertiesBody}}
-
-        /// <summary>
-        /// Clone of the item. Warning: references to the model entities are not being copied!
-        /// </summary>
-        public new {${_paramPrefix}}{${_paramClass}} Clone()
-        {
-            {${_paramPrefix}}{${_paramClass}} result = new {${_paramPrefix}}{${_paramClass}}
-            {{${_methodCloneBody}}
-            };
-            CloneCustom(result);
-            return result;
-        }
-
-        public override string ToString()
-        {
-            return \$"{{{${_paramPrefix}}{${_paramClass}}}} {{Id: {Id}}}";
-        }
-
-        internal override void OnParsed(ConfigRoot root)
-        {
-            base.OnParsed(root);
-            OnParsedImplementation(root);
-        }
-
-        partial void CloneCustom({${_paramPrefix}}{${_paramClass}} to);
-        partial void OnParsedImplementation({${_paramPrefix}}Root root);
     }''';
 
-  final String _classItemsListTemplate = '''    public partial class {${_paramPrefix}}{${_paramClass}}{${_paramMetaEntityType}}${_itemsListSuffix}
+  final String _classItemsListTemplate =
+      '''    public partial class {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}{${_paramMetaEntityType}}${_itemsListSuffix}
     {{${_paramItemsListPropertiesList}}
 
-        public {${_paramPrefix}}{${_paramClass}}{${_paramMetaEntityType}}${_itemsListSuffix}(Dictionary<string, IIdentifiable> allItems)
+        public {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}{${_paramMetaEntityType}}${_itemsListSuffix}(Dictionary<string, IIdentifiable> allItems)
         {{${_paramItemsListConstructorList}}
         }
     }''';
 
   final String _paramItemsListPropertyEntryTemplate = '''
 
-        public {${_paramPrefix}}{${_paramClassName}} {${_paramEntryName}} { get; }''';
+        public {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}} {${_paramEntryName}} { get; }''';
   final String _paramItemsListConstructorEntryTemplate = '''
 
-            if (allItems.TryGetValue("{${_paramEntryName}}", out var {${_paramEntryName}}Value)) {${_paramEntryName}} = {${_paramEntryName}}Value as {${_paramPrefix}}{${_paramClassName}};''';
+            if (allItems.TryGetValue("{${_paramEntryName}}", out var {${_paramEntryName}}Value)) {${_paramEntryName}} = ({${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}){${_paramEntryName}}Value;''';
 
   final String _structTemplate = '''    /// <summary>
 {${_paramClassDescription}}
     /// </summary>
-    public partial struct {${_paramPrefix}}{${_paramClass}} : IIdentifiable, ICloneable<{${_paramPrefix}}{${_paramClass}}>
+    public partial struct {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} : IIdentifiable, ICloneable<{${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}>{${_paramParentInterfaces}}
     {
         public string Id { get; set; }{${_paramPropertiesBody}}
 
         /// <summary>
         /// Deep clone of the item
         /// </summary>
-        public {${_paramPrefix}}{${_paramClass}} Clone()
+        public {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} Clone()
         {
             return this;
         }
 
         public override bool Equals(object obj)
         {
-            return obj is {${_paramPrefix}}{${_paramClass}} other{${_paramListStructEquals}};
+            return obj is {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} other{${_paramListStructEquals}};
         }
 
         public override int GetHashCode()
@@ -969,19 +1049,19 @@ namespace Fairfun.Gceditor.Model
             return 0{${_paramListStructGetHashCode}};
         }
 
-        public static bool operator ==({${_paramPrefix}}{${_paramClass}} a, {${_paramPrefix}}{${_paramClass}} b)
+        public static bool operator ==({${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} a, {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} b)
         {
             return true{${_paramListStructEqEq}};
         }
 
-        public static bool operator !=({${_paramPrefix}}{${_paramClass}} a, {${_paramPrefix}}{${_paramClass}} b)
+        public static bool operator !=({${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} a, {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} b)
         {
             return !(a == b);
         }
 
         public override string ToString()
         {
-            return \$"{{{${_paramPrefix}}{${_paramClass}}}} {{Id: {Id}}}";
+            return \$"{{{${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}}} {{Id: {Id}}}";
         }
     }''';
 
@@ -996,7 +1076,7 @@ namespace Fairfun.Gceditor.Model
                    && a.{${_paramPropertyName}} == b.{${_paramPropertyName}}''';
 
   final String _classPropertyTemplate = '''{${_paramPropertySummary}}
-        public {${_paramPropertyType}} {${_paramPropertyName}} { get; set; }''';
+        {${_paramPropertyAccessLevel}}{${_paramPropertyType}} {${_paramPropertyName}} { get; set; }''';
 
   final String _copyRowTemplate = '''${_defaultNewLine}                {${_paramPropertyName}} = {${_paramPropertyName}}{${_paramCloneProperty}},''';
   final String _enumRowTemplate = '''{${_paramPropertySummary}}
@@ -1005,7 +1085,7 @@ namespace Fairfun.Gceditor.Model
   final _getNewInstanceRowTemplate = '''
 
                 case "{${_paramClassName}}":
-                    return new {${_paramPrefix}}{${_paramClassName}} { Id = item.id };
+                    return new {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}} { Id = item.id };
   ''';
 
   final String _assignValueCaseTemplate = '''
@@ -1020,17 +1100,17 @@ namespace Fairfun.Gceditor.Model
 
   final String _listItemsListAssignmentRowTemplate = '''
 
-            {${_paramClassName}} = new {${_paramPrefix}}{${_paramClassName}}{${_paramMetaEntityType}}${_itemsListSuffix}(allItems);''';
+            {${_paramClassName}} = new {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}{${_paramMetaEntityType}}${_itemsListSuffix}(allItems);''';
 
   final String _listItemsListDeclarationRowTemplate = '''
 
-        public {${_paramPrefix}}{${_paramClassName}}{${_paramMetaEntityType}}${_itemsListSuffix} {${_paramClassName}} { get; private set; }''';
+        public {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}{${_paramMetaEntityType}}${_itemsListSuffix} {${_paramClassName}} { get; private set; }''';
 
   final String _parserTemplate = //
       '''#region JSON
     public static class GceditorJsonParser
     {
-        public static {${_paramPrefix}}Root Parse(string jsonText, Func<string, JsonRoot> parseFunction, {${_paramPrefix}}Root root = null, Action<ErrorData> onError = null)
+        public static {${_paramPrefix}}Root{${_paramPostfix}} Parse(string jsonText, Func<string, JsonRoot> parseFunction, {${_paramPrefix}}Root{${_paramPostfix}} root = null, Action<ErrorData> onError = null)
         {
             EmptyCollectionFactory emptyCollectionFactory = new EmptyCollectionFactory();
 
@@ -1069,13 +1149,13 @@ namespace Fairfun.Gceditor.Model
             foreach (var objectId in allClasses)
                 objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId], emptyCollectionFactory, onError);
 
-            root ??= new {${_paramPrefix}}Root();
+            root ??= new {${_paramPrefix}}Root{${_paramPostfix}}();
             root.CreatedBy = jsonRoot.user;
             root.CreationTime = jsonRoot.date;
             root.Init(new List<IIdentifiable>(objectsByIds.Values));
 
             foreach (var objectId in allClasses)
-                (objectsByIds[objectId] as BaseConfigItem).OnParsed(root);
+                (objectsByIds[objectId] as Base{${_paramPrefix}}Item{${_paramPostfix}}).OnParsed(root);
 
             return root;
         }
@@ -1114,7 +1194,7 @@ namespace Fairfun.Gceditor.Model
             switch (className)
             {{${_paramListInstantiate}}
                 default:
-                    return new Base{${_paramPrefix}}Item { Id = item.id };
+                    return new Base{${_paramPrefix}}Item{${_paramPostfix}} { Id = item.id };
             }
         }
 

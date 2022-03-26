@@ -123,7 +123,7 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
               onValueChanged: _handleClassTypeChange,
               addNull: false,
             ),
-            if (widget.data.classType != ClassType.interface) ...[
+            if (widget.data.classType == ClassType.referenceType) ...[
               kStyle.kPropertiesVerticalDivider,
               DropDownSelector<ClassMetaEntity>(
                 label: Loc.get.parentClass,
@@ -138,12 +138,14 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
                 inputDecoration: parentInputDecoration,
               ),
             ],
-            kStyle.kPropertiesVerticalDivider,
-            PropertyBoolView(
-              title: Loc.get.exportElementsList,
-              value: widget.data.exportList ?? false,
-              saveCallback: _handleExportListChanged,
-            ),
+            if (widget.data.classType != ClassType.interface) ...[
+              kStyle.kPropertiesVerticalDivider,
+              PropertyBoolView(
+                title: Loc.get.exportElementsList,
+                value: widget.data.exportList ?? false,
+                saveCallback: _handleExportListChanged,
+              ),
+            ],
             kStyle.kPropertiesVerticalDivider,
             Container(
               color: kColorBlueMetaPropertiesGroup,
@@ -186,51 +188,49 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
                 ),
               ),
             ),
-            if (widget.data.classType != ClassType.valueType) ...[
-              kStyle.kPropertiesVerticalDivider,
-              Container(
-                color: kColorBlueMetaPropertiesGroup,
-                width: 9999,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 5 * kScale, top: 5 * kScale, bottom: 5 * kScale),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Flexible(
-                        fit: FlexFit.loose,
-                        child: Theme(
-                          data: kStyle.kReordableListTheme,
-                          child: ReorderableListView.builder(
-                            scrollController: ScrollController(),
-                            shrinkWrap: true,
-                            itemCount: _interfaces.length,
-                            onReorder: _handleInterfaceReorder,
-                            header: Padding(
-                              padding: EdgeInsets.only(left: 10 * kScale),
-                              child: PropertyTitle(
-                                title: Loc.get.interfacesListTitle,
-                              ),
+            kStyle.kPropertiesVerticalDivider,
+            Container(
+              color: kColorBlueMetaPropertiesGroup,
+              width: 9999,
+              child: Padding(
+                padding: EdgeInsets.only(left: 5 * kScale, top: 5 * kScale, bottom: 5 * kScale),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: Theme(
+                        data: kStyle.kReordableListTheme,
+                        child: ReorderableListView.builder(
+                          scrollController: ScrollController(),
+                          shrinkWrap: true,
+                          itemCount: _interfaces.length,
+                          onReorder: _handleInterfaceReorder,
+                          header: Padding(
+                            padding: EdgeInsets.only(left: 10 * kScale),
+                            child: PropertyTitle(
+                              title: Loc.get.interfacesListTitle,
                             ),
-                            itemBuilder: (context, index) {
-                              return PropertyClassInterface(
-                                key: ValueKey('${clientVersion}_${index}_'),
-                                entity: widget.data,
-                                interface: _interfaces[index],
-                                index: index,
-                              );
-                            },
                           ),
+                          itemBuilder: (context, index) {
+                            return PropertyClassInterface(
+                              key: ValueKey('${clientVersion}_${index}_'),
+                              entity: widget.data,
+                              interface: _interfaces[index],
+                              index: index,
+                            );
+                          },
                         ),
                       ),
-                      AddNewEnumValueButton(
-                        onClick: _handleAddNewInterface,
-                      ),
-                    ],
-                  ),
+                    ),
+                    AddNewEnumValueButton(
+                      onClick: _handleAddNewInterface,
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ],
         );
       },

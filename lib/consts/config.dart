@@ -27,6 +27,8 @@ class Config {
   static const String defaultGeneratorCsharpFileExtension = 'cs';
   static const String defaultGeneratorJsonIndentation = '\t';
   static const String defaultGeneratorCsharpPrefix = 'Model';
+  static const String defaultGeneratorCsharpPrefixInterface = 'IModel';
+  static const String defaultGeneratorCsharpPostfix = '';
   static const int generatorMinFileNameLength = 2;
   static const int generatorMinFileExtensionLength = 1;
   static const bool defaultRememberPassword = true;
