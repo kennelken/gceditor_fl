@@ -519,7 +519,7 @@ packages:
       path: "plugins/menubar"
       ref: a8ca32b01bafa91624a1fc8e2cdd0c2312d40a84
       resolved-ref: a8ca32b01bafa91624a1fc8e2cdd0c2312d40a84
-      url: "git://github.com/google/flutter-desktop-embedding.git"
+      url: "https://github.com/google/flutter-desktop-embedding.git"
     source: git
     version: "0.1.0"
   meta:
@@ -946,7 +946,7 @@ packages:
       path: "plugins/window_size"
       ref: a8ca32b01bafa91624a1fc8e2cdd0c2312d40a84
       resolved-ref: a8ca32b01bafa91624a1fc8e2cdd0c2312d40a84
-      url: "git://github.com/google/flutter-desktop-embedding.git"
+      url: "https://github.com/google/flutter-desktop-embedding.git"
     source: git
     version: "0.1.0"
   xdg_directories:
