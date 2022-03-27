@@ -84,7 +84,8 @@ jobs:
     steps:
       - name: Prepare linux
         run: |
-          sudo apt install clang libgtk-3-dev ninja-build -y
+          sudo apt-get update
+          sudo apt install clang libgtk-3-dev ninja-build -y --fix-missing
 
       - name: Git checkout
         uses: actions/checkout@v3
