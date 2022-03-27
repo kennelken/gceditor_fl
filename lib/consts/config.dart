@@ -26,6 +26,7 @@ class Config {
   static const String defaultGeneratorJsonFileExtension = 'json';
   static const String defaultGeneratorCsharpFileExtension = 'cs';
   static const String defaultGeneratorJsonIndentation = '\t';
+  static const String defaultGeneratorCsharpNamespace = 'Fairfun.Gceditor.Model';
   static const String defaultGeneratorCsharpPrefix = 'Model';
   static const String defaultGeneratorCsharpPrefixInterface = 'IModel';
   static const String defaultGeneratorCsharpPostfix = '';
@@ -124,6 +125,9 @@ class Config {
   static final idFormatRegex = RegExp(r'^[a-zA-Z_][a-zA-Z_0-9]{1,}$');
   static final RegExp validCharactersForId = RegExp(r'[a-zA-Z_0-9]');
   static final List<FilteringTextInputFormatter> filterId = [FilteringTextInputFormatter.allow(validCharactersForId)];
+
+  static final RegExp validCharactersForNamespace = RegExp(r'[a-zA-Z_0-9\.]');
+  static final List<FilteringTextInputFormatter> filterNamespace = [FilteringTextInputFormatter.allow(validCharactersForNamespace)];
 
   static final RegExp newLinePattern = RegExp(r'[\n\r]+');
   static const String newLineSymbol = '\n';

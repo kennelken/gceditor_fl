@@ -22,6 +22,9 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
   static const _defaultNewLine = '\n';
   static const _itemsListSuffix = 'ItemsList';
 
+  static const _paramNamespaceStart = 'namespaceStart';
+  static const _paramNamespaceEnd = 'namespaceEnd';
+
   static const _paramPrefix = 'prefix';
   static const _paramPrefixInterface = 'prefixInterface';
   static const _paramPostfix = 'postfix';
@@ -70,6 +73,8 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
     try {
       final result = _rootTemplate.format(
         {
+          _paramNamespaceStart: _getNamespaceStart(data),
+          _paramNamespaceEnd: _getNamespaceEnd(data),
           _paramDate: additionalInfo.date,
           _paramUser: additionalInfo.user,
           _paramPrefix: data.prefix,
@@ -118,6 +123,21 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
     }
 
     return GeneratorResult.success();
+  }
+
+  String _getNamespaceStart(GeneratorCsharp data) {
+    if (data.namespace.isEmpty) //
+      return '';
+    return '''
+
+namespace ${data.namespace}
+{''';
+  }
+
+  String _getNamespaceEnd(GeneratorCsharp data) {
+    if (data.namespace.isEmpty) //
+      return '';
+    return '\n}';
   }
 
   String _getClasses(DbModel model, GeneratorCsharp data) {
@@ -782,9 +802,7 @@ using UnityEngine;
 #else
 using System.Drawing;
 #endif
-
-namespace Fairfun.Gceditor.Model
-{
+{${_paramNamespaceStart}}
 #region Interfaces
     public interface ICloneable<T>
     {
@@ -959,7 +977,7 @@ namespace Fairfun.Gceditor.Model
 #endregion
 
 {${_paramJsonParser}}
-}''';
+#pragma warning restore 0414, 0168, 0219, 1998, 0109{${_paramNamespaceEnd}}''';
 
   final String _enumTemplate = '''    /// <summary>
 {${_paramClassDescription}}
@@ -1420,8 +1438,7 @@ namespace Fairfun.Gceditor.Model
             Message = message;
         }
     }
-#endregion
-#pragma warning restore 0414, 0168, 0219, 1998, 0109''';
+#endregion''';
 }
 
 enum MetaEntityType {

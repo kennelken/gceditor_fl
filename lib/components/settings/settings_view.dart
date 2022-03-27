@@ -30,7 +30,7 @@ class SettingsView extends ConsumerWidget {
     watch(styleStateProvider);
 
     return Container(
-      width: 900 * kScale,
+      width: 1100 * kScale,
       height: 352 * kScale,
       color: kTextColorLightest,
       child: Column(

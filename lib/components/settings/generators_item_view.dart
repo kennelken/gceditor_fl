@@ -41,6 +41,8 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
   late FocusNode _fileNameFocusNode;
   late TextEditingController _indentationController;
   late FocusNode _indentationFocusNode;
+  late TextEditingController _namespaceController;
+  late FocusNode _namespaceFocusNode;
   late TextEditingController _prefixController;
   late FocusNode _prefixFocusNode;
   late TextEditingController _prefixInterfaceController;
@@ -59,6 +61,10 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
     _indentationController = TextEditingController();
     _indentationFocusNode = FocusNode();
     _indentationFocusNode.addListener(_handleIndentationFocusChanged);
+
+    _namespaceController = TextEditingController();
+    _namespaceFocusNode = FocusNode();
+    _namespaceFocusNode.addListener(_handleNamespaceFocusChanged);
 
     _prefixController = TextEditingController();
     _prefixFocusNode = FocusNode();
@@ -83,6 +89,7 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
 
     _fileNameFocusNode.removeListener(_handleFileNameFocusChanged);
     _indentationFocusNode.removeListener(_handleIndentationFocusChanged);
+    _namespaceFocusNode.removeListener(_handleNamespaceFocusChanged);
     _prefixFocusNode.removeListener(_handlePrefixFocusChanged);
     _prefixInterfaceFocusNode.removeListener(_handlePrefixInterfaceFocusChanged);
     _postfixFocusNode.removeListener(_handlePostfixFocusChanged);
@@ -94,7 +101,10 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
     super.dispose();
     _fileNameController.dispose();
     _indentationController.dispose();
+    _namespaceController.dispose();
     _prefixController.dispose();
+    _prefixInterfaceController.dispose();
+    _postfixController.dispose();
   }
 
   void _handleClientStateChange() {
@@ -110,6 +120,7 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
         break;
 
       case GeneratorType.csharp:
+        _namespaceController.text = (_generatorCopy as GeneratorCsharp).namespace;
         _prefixController.text = (_generatorCopy as GeneratorCsharp).prefix;
         _prefixInterfaceController.text = (_generatorCopy as GeneratorCsharp).prefixInterface;
         _postfixController.text = (_generatorCopy as GeneratorCsharp).postfix;
@@ -129,6 +140,7 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
           child: Row(
             children: [
               Expanded(
+                flex: 10,
                 child: Row(
                   children: [
                     Text(
@@ -147,6 +159,7 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
                 ),
               ),
               Expanded(
+                flex: 8,
                 child: TooltipWrapper(
                   message: Loc.get.generatorFileNameLabel,
                   child: TextField(
@@ -206,6 +219,17 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
     widget.onChange(_generatorCopy);
   }
 
+  void _handleNamespaceFocusChanged() {
+    if (_namespaceFocusNode.hasFocus) //
+      return;
+
+    if ((_generatorCopy as GeneratorCsharp).namespace == _namespaceController.text) //
+      return;
+
+    (_generatorCopy as GeneratorCsharp).namespace = _namespaceController.text;
+    widget.onChange(_generatorCopy);
+  }
+
   void _handlePrefixFocusChanged() {
     if (_prefixFocusNode.hasFocus) //
       return;
@@ -249,7 +273,7 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
           TooltipWrapper(
             message: Loc.get.indentationLabel,
             child: SizedBox(
-              width: 80 * kScale,
+              width: 100 * kScale,
               child: TextField(
                 clipBehavior: Clip.none,
                 controller: _indentationController,
@@ -270,9 +294,28 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
       case GeneratorType.csharp:
         return [
           TooltipWrapper(
+            message: Loc.get.namespaceLabel,
+            child: SizedBox(
+              width: 100 * kScale,
+              child: TextField(
+                clipBehavior: Clip.none,
+                controller: _namespaceController,
+                focusNode: _namespaceFocusNode,
+                inputFormatters: Config.filterNamespace,
+                decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                  hintText: Loc.get.namespaceLabel,
+                  hintStyle: kStyle.kTextUltraSmall.copyWith(
+                    color: kColorPrimaryLight,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 5 * kScale),
+          TooltipWrapper(
             message: Loc.get.prefixLabel,
             child: SizedBox(
-              width: 80 * kScale,
+              width: 100 * kScale,
               child: TextField(
                 clipBehavior: Clip.none,
                 controller: _prefixController,
@@ -291,7 +334,7 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
           TooltipWrapper(
             message: Loc.get.prefixInterfaceLabel,
             child: SizedBox(
-              width: 80 * kScale,
+              width: 100 * kScale,
               child: TextField(
                 clipBehavior: Clip.none,
                 controller: _prefixInterfaceController,
@@ -310,7 +353,7 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
           TooltipWrapper(
             message: Loc.get.postfixLabel,
             child: SizedBox(
-              width: 80 * kScale,
+              width: 100 * kScale,
               child: TextField(
                 clipBehavior: Clip.none,
                 controller: _postfixController,

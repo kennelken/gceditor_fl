@@ -7,6 +7,9 @@ part 'generator_csharp.g.dart';
 
 @JsonSerializable()
 class GeneratorCsharp extends BaseGenerator {
+  @JsonKey(defaultValue: Config.defaultGeneratorCsharpNamespace)
+  String namespace = Config.defaultGeneratorCsharpNamespace;
+
   @JsonKey(defaultValue: Config.defaultGeneratorCsharpPrefix)
   String prefix = Config.defaultGeneratorCsharpPrefix;
 

@@ -160,6 +160,10 @@
 	"@hintFind": {
 		"description": ""
 	},
+	"namespaceLabel": "namespace",
+	"@namespaceLabel": {
+		"description": ""
+	},
 	"prefixLabel": "prefix",
 	"@prefixLabel": {
 		"description": ""
