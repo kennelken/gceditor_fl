@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/properties/primitives/delete_button.dart';
 import 'package:gceditor/components/properties/primitives/icon_button_transparent.dart';
 import 'package:gceditor/components/table/primitives/data_table_cell_view.dart';
+import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/model/db/data_table_row.dart';
@@ -20,6 +21,8 @@ import 'package:gceditor/model/state/pinned_items_state.dart';
 import 'package:gceditor/model/state/service/client_data_selection_state.dart';
 import 'package:gceditor/model/state/service/client_navigation_service.dart';
 import 'package:gceditor/model/state/style_state.dart';
+
+import '../../../consts/loc.dart';
 
 double? _initialWidth;
 
@@ -113,36 +116,46 @@ class DataTableRowIdView extends ConsumerWidget {
                     onAction: _handleDelete,
                     size: 14 * kScale,
                     color: kColorPrimaryLight,
+                    tooltipText: Loc.get.deleteTableItemTooltip,
                   ),
                 ),
-              IconButtonTransparent(
-                size: 22 * kScale,
-                icon: Icon(
-                  FontAwesomeIcons.search,
-                  color: kColorPrimaryLight,
-                  size: 12 * kScale,
+              TooltipWrapper(
+                message: Loc.get.findReferencesTooltip,
+                child: IconButtonTransparent(
+                  size: 22 * kScale,
+                  icon: Icon(
+                    FontAwesomeIcons.search,
+                    color: kColorPrimaryLight,
+                    size: 12 * kScale,
+                  ),
+                  onClick: _handleFindClick,
                 ),
-                onClick: _handleFindClick,
               ),
               if (!isPinnedItem)
-                IconButtonTransparent(
-                  size: 22 * kScale,
-                  icon: Icon(
-                    FontAwesomeIcons.mapPin,
-                    color: kColorPrimaryLight,
-                    size: 12 * kScale,
+                TooltipWrapper(
+                  message: Loc.get.pinItemTooltip,
+                  child: IconButtonTransparent(
+                    size: 22 * kScale,
+                    icon: Icon(
+                      FontAwesomeIcons.mapPin,
+                      color: kColorPrimaryLight,
+                      size: 12 * kScale,
+                    ),
+                    onClick: () => _handlePinClick(row!),
                   ),
-                  onClick: () => _handlePinClick(row!),
                 ),
               if (isPinnedItem)
-                IconButtonTransparent(
-                  size: 22 * kScale,
-                  icon: Icon(
-                    FontAwesomeIcons.times,
-                    color: kColorPrimaryLight,
-                    size: 12 * kScale,
+                TooltipWrapper(
+                  message: Loc.get.unpinItemTooltip,
+                  child: IconButtonTransparent(
+                    size: 22 * kScale,
+                    icon: Icon(
+                      FontAwesomeIcons.times,
+                      color: kColorPrimaryLight,
+                      size: 12 * kScale,
+                    ),
+                    onClick: () => _handleUnpinClick(row!),
                   ),
-                  onClick: () => _handleUnpinClick(row!),
                 ),
             ],
             if (!isPinnedItem) //

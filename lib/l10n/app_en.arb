@@ -164,7 +164,7 @@
 	"@prefixLabel": {
 		"description": ""
 	},
-	"prefixInterfaceLabel": "interface",
+	"prefixInterfaceLabel": "prefix interface",
 	"@prefixInterfaceLabel": {
 		"description": ""
 	},
@@ -736,6 +736,126 @@
 	},
 	"buttonFillColumnTooltip": "Fill the column with a value",
 	"@buttonFillColumnTooltip": {
+		"description": ""
+	},
+	"keyboardShortcutTooltip": "Keyboard shortcuts",
+	"@keyboardShortcutTooltip": {
+		"description": ""
+	},
+	"createNewTableTooltip": "Create a new table",
+	"@createNewTableTooltip": {
+		"description": ""
+	},
+	"createNewClassTooltip": "Create a new class",
+	"@createNewClassTooltip": {
+		"description": ""
+	},
+	"nextProblemTooltip": "Show the next problem",
+	"@nextProblemTooltip": {
+		"description": ""
+	},
+	"gitRefreshTooltip": "Refresh git items",
+	"@gitRefreshTooltip": {
+		"description": ""
+	},
+	"gitCommitTooltip": "git: Commit selected items",
+	"@gitCommitTooltip": {
+		"description": ""
+	},
+	"gitPushTooltip": "git: Push changes",
+	"@gitPushTooltip": {
+		"description": ""
+	},
+	"gitPullTooltip": "git: Pull",
+	"@gitPullTooltip": {
+		"description": ""
+	},
+	"historyRefreshTooltip": "Refresh the history",
+	"@historyRefreshTooltip": {
+		"description": ""
+	},
+	"crateNewTableItem": "Create a new table item",
+	"@crateNewTableItem": {
+		"description": ""
+	},
+	"deleteTableItemTooltip": "Remove the table item",
+	"@deleteTableItemTooltip": {
+		"description": ""
+	},
+	"findReferencesTooltip": "Find references",
+	"@findReferencesTooltip": {
+		"description": ""
+	},
+	"pinItemTooltip": "Pin the item",
+	"@pinItemTooltip": {
+		"description": ""
+	},
+	"unpinItemTooltip": "Unpin the item",
+	"@unpinItemTooltip": {
+		"description": ""
+	},
+	"createNewGeneratorTooltip": "Create a new generator",
+	"@createNewGeneratorTooltip": {
+		"description": ""
+	},
+	"findTooltip": "Search",
+	"@findTooltip": {
+		"description": ""
+	},
+	"findIdTooltip": "Toggle setting: id only",
+	"@findIdTooltip": {
+		"description": ""
+	},
+	"findCaseSensitiveTooltip": "Toggle setting: case-sensitive",
+	"@findCaseSensitiveTooltip": {
+		"description": ""
+	},
+	"findFullWordsTooltip": "Toggle setting: full word only",
+	"@findFullWordsTooltip": {
+		"description": ""
+	},
+	"findRegexTooltip": "Toggle setting: regex mode",
+	"@findRegexTooltip": {
+		"description": ""
+	},
+	"findCloseTooltip": "Close",
+	"@findCloseTooltip": {
+		"description": ""
+	},
+	"closePinnedItemsTooltip": "Close",
+	"@closePinnedItemsTooltip": {
+		"description": ""
+	},
+	"deleteTableTooltip": "Delete the table",
+	"@deleteTableTooltip": {
+		"description": ""
+	},
+	"deleteClassTooltip": "Delete the class",
+	"@deleteClassTooltip": {
+		"description": ""
+	},
+	"deleteGroupTooltip": "Delete the folder",
+	"@deleteGroupTooltip": {
+		"description": ""
+	},
+	"deleteEnumTooltip": "Delete the enum",
+	"@deleteEnumTooltip": {
+		"description": ""
+	},
+	"deleteFieldTooltip": "Delete the column",
+	"@deleteFieldTooltip": {
+		"description": ""
+	},
+	"closeTooltip": "Close",
+	"@closeTooltip": {
+		"description": ""
+	},
+	"generateTableItemsTooltip": "Whether the code generators should generate a class containg all items of the table",
+	"@generateTableItemsTooltip": {
+		"description": ""
+	},
+	"generateClassItemsTooltip": "Whether the code generators should generate a class containg all items of the tables utilizing this class",
+	"@generateClassItemsTooltip": {
 		"description": ""
 	},
 	"fillColumnLabel": "Fill column '{column}' with",

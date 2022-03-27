@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/pinned/pinned_panel_item.dart';
 import 'package:gceditor/components/properties/primitives/icon_button_transparent.dart';
+import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/state/client_state.dart';
@@ -72,13 +73,16 @@ class _PinnedPanelState extends State<PinnedPanel> {
                         style: kStyle.kTextExtraSmall,
                       ),
                     ),
-                    IconButtonTransparent(
-                      icon: Icon(
-                        FontAwesomeIcons.times,
-                        color: kColorPrimaryLight,
-                        size: 20 * kScale,
+                    TooltipWrapper(
+                      message: Loc.get.closePinnedItemsTooltip,
+                      child: IconButtonTransparent(
+                        icon: Icon(
+                          FontAwesomeIcons.times,
+                          color: kColorPrimaryLight,
+                          size: 20 * kScale,
+                        ),
+                        onClick: () => notifier.clear(),
                       ),
-                      onClick: () => notifier.clear(),
                     ),
                   ],
                 ),

@@ -15,6 +15,7 @@ import 'package:gceditor/components/properties/primitives/icon_button_transparen
 import 'package:gceditor/components/table/context_menu_button.dart';
 import 'package:gceditor/components/table/data_table/data_table_view.dart';
 import 'package:gceditor/components/table/data_table_header.dart';
+import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/components/tree/table_classes_view.dart';
 import 'package:gceditor/components/tree/table_tables_view.dart';
 import 'package:gceditor/consts/config.dart';
@@ -72,14 +73,17 @@ class TableView extends ConsumerWidget {
                         style: kStyle.kTextSmall,
                       ),
                     ),
-                    IconButtonTransparent(
-                      icon: const Icon(
-                        FontAwesomeIcons.keyboard,
-                        color: kColorAccentBlue,
-                        size: 13,
+                    TooltipWrapper(
+                      message: Loc.get.keyboardShortcutTooltip,
+                      child: IconButtonTransparent(
+                        icon: const Icon(
+                          FontAwesomeIcons.keyboard,
+                          color: kColorAccentBlue,
+                          size: 13,
+                        ),
+                        onClick: _handleShowShortcutsClick,
+                        size: 28,
                       ),
-                      onClick: _handleShowShortcutsClick,
-                      size: 28,
                     ),
                   ],
                 ),
@@ -95,12 +99,15 @@ class TableView extends ConsumerWidget {
                         style: kStyle.kTextSmall,
                       ),
                     ),
-                    ContextMenuButton(
-                      controller: _addTableController,
-                      buttons: [
-                        ContextMenuChildButtonData(Loc.get.contextMenuFolder, () => _addNewTable(TableMetaType.$group)),
-                        ContextMenuChildButtonData(Loc.get.contextMenuTable, () => _addNewTable(TableMetaType.$table)),
-                      ],
+                    TooltipWrapper(
+                      message: Loc.get.crateNewTableItem,
+                      child: ContextMenuButton(
+                        controller: _addTableController,
+                        buttons: [
+                          ContextMenuChildButtonData(Loc.get.contextMenuFolder, () => _addNewTable(TableMetaType.$group)),
+                          ContextMenuChildButtonData(Loc.get.contextMenuTable, () => _addNewTable(TableMetaType.$table)),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -134,13 +141,16 @@ class TableView extends ConsumerWidget {
                         style: kStyle.kTextSmall,
                       ),
                     ),
-                    ContextMenuButton(
-                      controller: _addClassController,
-                      buttons: [
-                        ContextMenuChildButtonData(Loc.get.contextMenuFolder, () => _addNewClass(ClassMetaType.$group)),
-                        ContextMenuChildButtonData(Loc.get.contextMenuEnum, () => _addNewClass(ClassMetaType.$enum)),
-                        ContextMenuChildButtonData(Loc.get.contextMenuClass, () => _addNewClass(ClassMetaType.$class)),
-                      ],
+                    TooltipWrapper(
+                      message: Loc.get.createNewClassTooltip,
+                      child: ContextMenuButton(
+                        controller: _addClassController,
+                        buttons: [
+                          ContextMenuChildButtonData(Loc.get.contextMenuFolder, () => _addNewClass(ClassMetaType.$group)),
+                          ContextMenuChildButtonData(Loc.get.contextMenuEnum, () => _addNewClass(ClassMetaType.$enum)),
+                          ContextMenuChildButtonData(Loc.get.contextMenuClass, () => _addNewClass(ClassMetaType.$class)),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -175,38 +185,41 @@ class TableView extends ConsumerWidget {
                     const Expanded(child: SizedBox()),
                     Material(
                       color: kColorPrimaryDarker,
-                      child: InkWell(
-                        enableFeedback: true,
-                        splashColor: kColorPrimaryDarker,
-                        highlightColor: kColorPrimaryDarker2,
-                        hoverColor: kColorPrimary,
-                        onTap: _handleProblemsClick,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              FontAwesomeIcons.exclamationTriangle,
-                              size: 13 * kScale,
-                              color: kColorAccentRed2,
-                            ),
-                            SizedBox(width: 5 * kScale),
-                            Text(
-                              problemsState.getProblems(ProblemSeverity.error).length.toString(),
-                              style: kStyle.kTextSmall,
-                            ),
-                            SizedBox(width: 15 * kScale),
-                            Icon(
-                              FontAwesomeIcons.exclamationTriangle,
-                              size: 13 * kScale,
-                              color: kColorAccentYellow,
-                            ),
-                            SizedBox(width: 5 * kScale),
-                            Text(
-                              problemsState.getProblems(ProblemSeverity.warning).length.toString(),
-                              style: kStyle.kTextSmall,
-                            ),
-                          ],
+                      child: TooltipWrapper(
+                        message: Loc.get.nextProblemTooltip,
+                        child: InkWell(
+                          enableFeedback: true,
+                          splashColor: kColorPrimaryDarker,
+                          highlightColor: kColorPrimaryDarker2,
+                          hoverColor: kColorPrimary,
+                          onTap: _handleProblemsClick,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                FontAwesomeIcons.exclamationTriangle,
+                                size: 13 * kScale,
+                                color: kColorAccentRed2,
+                              ),
+                              SizedBox(width: 5 * kScale),
+                              Text(
+                                problemsState.getProblems(ProblemSeverity.error).length.toString(),
+                                style: kStyle.kTextSmall,
+                              ),
+                              SizedBox(width: 15 * kScale),
+                              Icon(
+                                FontAwesomeIcons.exclamationTriangle,
+                                size: 13 * kScale,
+                                color: kColorAccentYellow,
+                              ),
+                              SizedBox(width: 5 * kScale),
+                              Text(
+                                problemsState.getProblems(ProblemSeverity.warning).length.toString(),
+                                style: kStyle.kTextSmall,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -248,45 +261,57 @@ class TableView extends ConsumerWidget {
                           maxLines: 1,
                         ),
                       ),
-                      IconButtonTransparent(
-                        size: 32 * kScale,
-                        icon: Icon(
-                          FontAwesomeIcons.syncAlt,
-                          color: gitState.isProcessing ? kColorAccentBlueInactive : kColorAccentBlue,
-                          size: 15 * kScale,
+                      TooltipWrapper(
+                        message: Loc.get.gitRefreshTooltip,
+                        child: IconButtonTransparent(
+                          size: 32 * kScale,
+                          icon: Icon(
+                            FontAwesomeIcons.syncAlt,
+                            color: gitState.isProcessing ? kColorAccentBlueInactive : kColorAccentBlue,
+                            size: 15 * kScale,
+                          ),
+                          onClick: () => providerContainer.read(clientGitStateProvider).refresh(),
+                          enabled: !gitState.isProcessing,
                         ),
-                        onClick: () => providerContainer.read(clientGitStateProvider).refresh(),
-                        enabled: !gitState.isProcessing,
                       ),
-                      IconButtonTransparent(
-                        size: 32 * kScale,
-                        icon: Icon(
-                          FontAwesomeIcons.save,
-                          color: gitState.isProcessing || gitState.selectedItems.isEmpty ? kColorAccentBlueInactive : kColorAccentBlue,
-                          size: 15 * kScale,
+                      TooltipWrapper(
+                        message: Loc.get.gitCommitTooltip,
+                        child: IconButtonTransparent(
+                          size: 32 * kScale,
+                          icon: Icon(
+                            FontAwesomeIcons.save,
+                            color: gitState.isProcessing || gitState.selectedItems.isEmpty ? kColorAccentBlueInactive : kColorAccentBlue,
+                            size: 15 * kScale,
+                          ),
+                          onClick: () => providerContainer.read(clientGitStateProvider).doCommit(),
+                          enabled: !gitState.isProcessing && gitState.selectedItems.isNotEmpty,
                         ),
-                        onClick: () => providerContainer.read(clientGitStateProvider).doCommit(),
-                        enabled: !gitState.isProcessing && gitState.selectedItems.isNotEmpty,
                       ),
-                      IconButtonTransparent(
-                        size: 32 * kScale,
-                        icon: Icon(
-                          FontAwesomeIcons.arrowCircleUp,
-                          color: gitState.isProcessing || gitState.selectedItems.isEmpty ? kColorAccentBlueInactive : kColorAccentBlue,
-                          size: 15 * kScale,
+                      TooltipWrapper(
+                        message: Loc.get.gitPushTooltip,
+                        child: IconButtonTransparent(
+                          size: 32 * kScale,
+                          icon: Icon(
+                            FontAwesomeIcons.arrowCircleUp,
+                            color: gitState.isProcessing || gitState.selectedItems.isEmpty ? kColorAccentBlueInactive : kColorAccentBlue,
+                            size: 15 * kScale,
+                          ),
+                          onClick: () => providerContainer.read(clientGitStateProvider).doPush(),
+                          enabled: !gitState.isProcessing && gitState.selectedItems.isNotEmpty,
                         ),
-                        onClick: () => providerContainer.read(clientGitStateProvider).doPush(),
-                        enabled: !gitState.isProcessing && gitState.selectedItems.isNotEmpty,
                       ),
-                      IconButtonTransparent(
-                        size: 32 * kScale,
-                        icon: Icon(
-                          FontAwesomeIcons.arrowCircleDown,
-                          color: gitState.isProcessing || gitState.selectedItems.isEmpty ? kColorAccentBlueInactive : kColorAccentBlue,
-                          size: 15 * kScale,
+                      TooltipWrapper(
+                        message: Loc.get.gitPullTooltip,
+                        child: IconButtonTransparent(
+                          size: 32 * kScale,
+                          icon: Icon(
+                            FontAwesomeIcons.arrowCircleDown,
+                            color: gitState.isProcessing || gitState.selectedItems.isEmpty ? kColorAccentBlueInactive : kColorAccentBlue,
+                            size: 15 * kScale,
+                          ),
+                          onClick: () => providerContainer.read(clientGitStateProvider).doPull(),
+                          enabled: !gitState.isProcessing && gitState.selectedItems.isNotEmpty,
                         ),
-                        onClick: () => providerContainer.read(clientGitStateProvider).doPull(),
-                        enabled: !gitState.isProcessing && gitState.selectedItems.isNotEmpty,
                       ),
                     ],
                   ),
@@ -334,15 +359,18 @@ class TableView extends ConsumerWidget {
                           maxLines: 1,
                         ),
                       ),
-                      IconButtonTransparent(
-                        size: 32 * kScale,
-                        icon: Icon(
-                          FontAwesomeIcons.syncAlt,
-                          color: historyState.isProcessing ? kColorAccentBlueInactive : kColorAccentBlue,
-                          size: 15 * kScale,
+                      TooltipWrapper(
+                        message: Loc.get.historyRefreshTooltip,
+                        child: IconButtonTransparent(
+                          size: 32 * kScale,
+                          icon: Icon(
+                            FontAwesomeIcons.syncAlt,
+                            color: historyState.isProcessing ? kColorAccentBlueInactive : kColorAccentBlue,
+                            size: 15 * kScale,
+                          ),
+                          onClick: () => providerContainer.read(clientHistoryStateProvider).refresh(),
+                          enabled: !historyState.isProcessing,
                         ),
-                        onClick: () => providerContainer.read(clientHistoryStateProvider).refresh(),
-                        enabled: !historyState.isProcessing,
                       ),
                     ],
                   ),

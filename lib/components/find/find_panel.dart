@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/find/find_panel_item.dart';
 import 'package:gceditor/components/properties/primitives/icon_button_transparent.dart';
+import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/model_root.dart';
@@ -85,72 +86,90 @@ class _FindPanelState extends State<FindPanel> {
                     ],
                   ),
                 ),
-                IconButtonTransparent(
-                  icon: Icon(
-                    FontAwesomeIcons.search,
-                    color: kColorAccentBlue,
-                    size: 20 * kScale,
+                TooltipWrapper(
+                  message: Loc.get.findTooltip,
+                  child: IconButtonTransparent(
+                    icon: Icon(
+                      FontAwesomeIcons.search,
+                      color: kColorAccentBlue,
+                      size: 20 * kScale,
+                    ),
+                    onClick: _handleFindClick,
                   ),
-                  onClick: _handleFindClick,
                 ),
                 SizedBox(width: 3 * kScale),
-                IconButtonTransparent(
-                  size: 37 * kStyle.globalScale,
-                  onClick: _handleOnlyIdClick,
-                  icon: FittedBox(
-                    child: Text(
-                      'id',
-                      style: kStyle.kTextExtraSmall.copyWith(color: settings.onlyId == true ? kTextColorLightBlue : kTextColorLightHalfTransparent),
-                      maxLines: 1,
-                      overflow: TextOverflow.clip,
+                TooltipWrapper(
+                  message: Loc.get.findIdTooltip,
+                  child: IconButtonTransparent(
+                    size: 37 * kStyle.globalScale,
+                    onClick: _handleOnlyIdClick,
+                    icon: FittedBox(
+                      child: Text(
+                        'id',
+                        style: kStyle.kTextExtraSmall.copyWith(color: settings.onlyId == true ? kTextColorLightBlue : kTextColorLightHalfTransparent),
+                        maxLines: 1,
+                        overflow: TextOverflow.clip,
+                      ),
                     ),
                   ),
                 ),
-                IconButtonTransparent(
-                  size: 37 * kStyle.globalScale,
-                  onClick: _handleCaseSensitiveClick,
-                  icon: FittedBox(
-                    child: Text(
-                      'Aa',
-                      style: kStyle.kTextExtraSmall
-                          .copyWith(color: settings.caseSensitive == true ? kTextColorLightBlue : kTextColorLightHalfTransparent),
-                      maxLines: 1,
-                      overflow: TextOverflow.clip,
+                TooltipWrapper(
+                  message: Loc.get.findCaseSensitiveTooltip,
+                  child: IconButtonTransparent(
+                    size: 37 * kStyle.globalScale,
+                    onClick: _handleCaseSensitiveClick,
+                    icon: FittedBox(
+                      child: Text(
+                        'Aa',
+                        style: kStyle.kTextExtraSmall
+                            .copyWith(color: settings.caseSensitive == true ? kTextColorLightBlue : kTextColorLightHalfTransparent),
+                        maxLines: 1,
+                        overflow: TextOverflow.clip,
+                      ),
                     ),
                   ),
                 ),
-                IconButtonTransparent(
-                  size: 37 * kStyle.globalScale,
-                  onClick: _handleWordClick,
-                  icon: FittedBox(
-                    child: Text(
-                      'W',
-                      style: kStyle.kTextExtraSmall.copyWith(color: settings.word == true ? kTextColorLightBlue : kTextColorLightHalfTransparent),
-                      maxLines: 1,
-                      overflow: TextOverflow.clip,
+                TooltipWrapper(
+                  message: Loc.get.findFullWordsTooltip,
+                  child: IconButtonTransparent(
+                    size: 37 * kStyle.globalScale,
+                    onClick: _handleWordClick,
+                    icon: FittedBox(
+                      child: Text(
+                        'W',
+                        style: kStyle.kTextExtraSmall.copyWith(color: settings.word == true ? kTextColorLightBlue : kTextColorLightHalfTransparent),
+                        maxLines: 1,
+                        overflow: TextOverflow.clip,
+                      ),
                     ),
                   ),
                 ),
-                IconButtonTransparent(
-                  size: 37 * kStyle.globalScale,
-                  onClick: _handleRegexClick,
-                  icon: FittedBox(
-                    child: Text(
-                      '.*',
-                      style: kStyle.kTextExtraSmall.copyWith(color: settings.regEx == true ? kTextColorLightBlue : kTextColorLightHalfTransparent),
-                      maxLines: 1,
-                      overflow: TextOverflow.clip,
+                TooltipWrapper(
+                  message: Loc.get.findRegexTooltip,
+                  child: IconButtonTransparent(
+                    size: 37 * kStyle.globalScale,
+                    onClick: _handleRegexClick,
+                    icon: FittedBox(
+                      child: Text(
+                        '.*',
+                        style: kStyle.kTextExtraSmall.copyWith(color: settings.regEx == true ? kTextColorLightBlue : kTextColorLightHalfTransparent),
+                        maxLines: 1,
+                        overflow: TextOverflow.clip,
+                      ),
                     ),
                   ),
                 ),
                 SizedBox(width: 20 * kScale),
-                IconButtonTransparent(
-                  icon: Icon(
-                    FontAwesomeIcons.times,
-                    color: kColorPrimaryLight,
-                    size: 20 * kScale,
+                TooltipWrapper(
+                  message: Loc.get.findCloseTooltip,
+                  child: IconButtonTransparent(
+                    icon: Icon(
+                      FontAwesomeIcons.times,
+                      color: kColorPrimaryLight,
+                      size: 20 * kScale,
+                    ),
+                    onClick: () => providerContainer.read(clientFindStateProvider).toggleVisibility(false),
                   ),
-                  onClick: () => providerContainer.read(clientFindStateProvider).toggleVisibility(false),
                 )
               ],
             ),

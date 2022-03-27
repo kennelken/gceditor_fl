@@ -146,13 +146,11 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                     ),
                   ),
                 ),
-                TooltipWrapper(
-                  message: Loc.get.delete,
-                  child: DeleteButton(
-                    color: kColorAccentRed.withAlpha(_isDeleteAvailable ? kIconActiveAlpha : kIconInactiveAlpha),
-                    size: 18,
-                    onAction: _handleDeleteClick,
-                  ),
+                DeleteButton(
+                  color: kColorAccentRed.withAlpha(_isDeleteAvailable ? kIconActiveAlpha : kIconInactiveAlpha),
+                  size: 18,
+                  onAction: _handleDeleteClick,
+                  tooltipText: Loc.get.delete,
                 ),
                 _horizontalSpace(),
                 TooltipWrapper(

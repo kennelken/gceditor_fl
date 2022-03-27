@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/properties/primitives/delete_button.dart';
 import 'package:gceditor/components/properties/primitives/icon_button_transparent.dart';
+import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
@@ -106,20 +107,24 @@ class _EnumValueViewState extends State<EnumValueView> {
               ),
             ),
             if (watch(clientViewModeStateProvider).state.actionsMode) ...[
-              IconButtonTransparent(
-                size: 22 * kScale,
-                icon: Icon(
-                  FontAwesomeIcons.search,
-                  color: kColorPrimaryLight,
-                  size: 12 * kScale,
+              TooltipWrapper(
+                message: Loc.get.findReferencesTooltip,
+                child: IconButtonTransparent(
+                  size: 22 * kScale,
+                  icon: Icon(
+                    FontAwesomeIcons.search,
+                    color: kColorPrimaryLight,
+                    size: 12 * kScale,
+                  ),
+                  onClick: _handleFindClick,
                 ),
-                onClick: _handleFindClick,
               ),
               DeleteButton(
                 onAction: _handleDelete,
                 size: 14 * kScale,
                 width: 25 * kScale,
                 color: kColorPrimaryLight,
+                tooltipText: Loc.get.delete,
               ),
             ],
             SizedBox(width: 28 * kScale),

@@ -10,6 +10,7 @@ import 'package:gceditor/components/properties/class_meta_group_properties_view.
 import 'package:gceditor/components/properties/primitives/delete_button.dart';
 import 'package:gceditor/components/properties/table_meta_group_properties_view.dart';
 import 'package:gceditor/components/properties/table_meta_table_properties_view.dart';
+import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
@@ -90,15 +91,21 @@ class TablePropertiesView extends ConsumerWidget {
                           ),
                         ),
                         if (_isDeleteButtonVisible(selectedEntity) && watch(clientViewModeStateProvider).state.actionsMode) //
-                          DeleteButton(onAction: () => _deleteEntity(selectedEntity!.id)),
+                          DeleteButton(
+                            onAction: () => _deleteEntity(selectedEntity!.id),
+                            tooltipText: _getDeleteTooltip(selectedEntity),
+                          ),
                         SizedBox(
                           width: 30 * kScale,
-                          child: MaterialButton(
-                            onPressed: () => _handleBackButton(selectedEntity),
-                            child: Icon(
-                              FontAwesomeIcons.times,
-                              color: kColorPrimaryLight,
-                              size: 20 * kScale,
+                          child: TooltipWrapper(
+                            message: Loc.get.closeTooltip,
+                            child: MaterialButton(
+                              onPressed: () => _handleBackButton(selectedEntity),
+                              child: Icon(
+                                FontAwesomeIcons.times,
+                                color: kColorPrimaryLight,
+                                size: 20 * kScale,
+                              ),
                             ),
                           ),
                         ),
@@ -152,17 +159,38 @@ class TablePropertiesView extends ConsumerWidget {
     if (selectedObject is ClassMetaGroup) {
       result = Loc.get.typeClassGroup;
     } else if (selectedObject is ClassMetaEntity) {
-      result += Loc.get.typeClass;
+      result = Loc.get.typeClass;
     } else if (selectedObject is ClassMetaEntityEnum) {
-      result += Loc.get.typeEnum;
+      result = Loc.get.typeEnum;
     } else if (selectedObject is TableMetaGroup) {
-      result += Loc.get.typeTableGroup;
+      result = Loc.get.typeTableGroup;
     } else if (selectedObject is TableMetaEntity) {
-      result += Loc.get.typeTableEntry;
+      result = Loc.get.typeTableEntry;
     } else if (selectedObject is ClassMetaFieldDescription) {
-      result += Loc.get.typeClassField;
+      result = Loc.get.typeClassField;
     }
     result += ': ' + selectedObject.id;
+
+    return result;
+  }
+
+  String _getDeleteTooltip(IIdentifiable? selectedObject) {
+    if (selectedObject == null) return '';
+
+    var result = '';
+    if (selectedObject is ClassMetaGroup) {
+      result = Loc.get.deleteGroupTooltip;
+    } else if (selectedObject is ClassMetaEntity) {
+      result = Loc.get.deleteClassTooltip;
+    } else if (selectedObject is ClassMetaEntityEnum) {
+      result = Loc.get.deleteEnumTooltip;
+    } else if (selectedObject is TableMetaGroup) {
+      result = Loc.get.deleteGroupTooltip;
+    } else if (selectedObject is TableMetaEntity) {
+      result = Loc.get.deleteTableTooltip;
+    } else if (selectedObject is ClassMetaFieldDescription) {
+      result = Loc.get.deleteFieldTooltip;
+    }
 
     return result;
   }

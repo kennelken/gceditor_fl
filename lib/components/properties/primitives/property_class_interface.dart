@@ -6,6 +6,7 @@ import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/state/client_state.dart';
 
+import '../../../consts/loc.dart';
 import '../../../model/db_cmd/db_cmd_delete_class_interface.dart';
 import '../../../model/db_cmd/db_cmd_edit_class_interface.dart';
 import '../../../model/model_root.dart';
@@ -64,6 +65,7 @@ class PropertyClassInterface extends ConsumerWidget {
                 size: 14 * kScale,
                 width: 25 * kScale,
                 color: kColorPrimaryLight,
+                tooltipText: Loc.get.delete,
               ),
             ],
             SizedBox(

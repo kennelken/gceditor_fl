@@ -76,12 +76,15 @@ class _GeneratorsViewState extends State<GeneratorsView> {
                     ),
                   ),
                   const Expanded(child: SizedBox()),
-                  ContextMenuButton(
-                    buttons: GeneratorType.values
-                        .where((e) => e != GeneratorType.undefined)
-                        .map((e) => ContextMenuChildButtonData(describeEnum(e), () => _handleAddNewGenerator(e)))
-                        .toList(),
-                    controller: _addNewGeneratorPopupController,
+                  TooltipWrapper(
+                    message: Loc.get.createNewGeneratorTooltip,
+                    child: ContextMenuButton(
+                      buttons: GeneratorType.values
+                          .where((e) => e != GeneratorType.undefined)
+                          .map((e) => ContextMenuChildButtonData(describeEnum(e), () => _handleAddNewGenerator(e)))
+                          .toList(),
+                      controller: _addNewGeneratorPopupController,
+                    ),
                   ),
                 ],
               ),

@@ -4,6 +4,7 @@ import 'package:gceditor/components/properties/primitives/class_meta_properties_
 import 'package:gceditor/components/properties/primitives/drop_down_selector.dart';
 import 'package:gceditor/components/properties/primitives/property_bool_view.dart';
 import 'package:gceditor/components/properties/primitives/property_string_view.dart';
+import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
@@ -81,10 +82,13 @@ class TableMetaTablePropertiesViewProperties extends ConsumerWidget {
           saveCallback: _handleRowHeightChanged,
         ),
         kStyle.kPropertiesVerticalDivider,
-        PropertyBoolView(
-          title: Loc.get.exportElementsList,
-          value: data.exportList ?? false,
-          saveCallback: _handleExportListChanged,
+        TooltipWrapper(
+          message: Loc.get.generateTableItemsTooltip,
+          child: PropertyBoolView(
+            title: Loc.get.exportElementsList,
+            value: data.exportList ?? false,
+            saveCallback: _handleExportListChanged,
+          ),
         ),
       ],
     );

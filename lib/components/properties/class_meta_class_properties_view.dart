@@ -8,6 +8,7 @@ import 'package:gceditor/components/properties/primitives/drop_down_selector.dar
 import 'package:gceditor/components/properties/primitives/property_bool_view.dart';
 import 'package:gceditor/components/properties/primitives/property_string_view.dart';
 import 'package:gceditor/components/properties/primitives/property_title.dart';
+import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
@@ -140,10 +141,13 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
             ],
             if (widget.data.classType != ClassType.interface) ...[
               kStyle.kPropertiesVerticalDivider,
-              PropertyBoolView(
-                title: Loc.get.exportElementsList,
-                value: widget.data.exportList ?? false,
-                saveCallback: _handleExportListChanged,
+              TooltipWrapper(
+                message: Loc.get.generateClassItemsTooltip,
+                child: PropertyBoolView(
+                  title: Loc.get.exportElementsList,
+                  value: widget.data.exportList ?? false,
+                  saveCallback: _handleExportListChanged,
+                ),
               ),
             ],
             kStyle.kPropertiesVerticalDivider,

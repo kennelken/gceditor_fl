@@ -14,6 +14,7 @@ import 'package:gceditor/model/state/service/client_navigation_service.dart';
 import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/model/state/table_selection_state.dart';
 
+import '../../../consts/loc.dart';
 import 'delete_button.dart';
 
 class ClassFieldValueView extends ConsumerWidget {
@@ -75,6 +76,7 @@ class ClassFieldValueView extends ConsumerWidget {
                   size: 14 * kScale,
                   width: 25 * kScale,
                   color: kColorPrimaryLight,
+                  tooltipText: Loc.get.deleteFieldTooltip,
                 ),
               ],
               SizedBox(width: 28 * kScale),

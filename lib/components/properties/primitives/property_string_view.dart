@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/properties/primitives/icon_button_transparent.dart';
+import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/model/db_cmd/base_db_cmd.dart';
@@ -10,6 +11,8 @@ import 'package:gceditor/model/state/client_find_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/model/state/style_state.dart';
+
+import '../../../consts/loc.dart';
 
 typedef GetSaveCommand = BaseDbCmd Function(String newValue);
 
@@ -77,14 +80,17 @@ class _PropertyStringViewState extends State<PropertyStringView> {
           ),
         ),
         if (widget.showFindIcon == true)
-          IconButtonTransparent(
-            size: 22 * kScale,
-            icon: Icon(
-              FontAwesomeIcons.search,
-              color: kColorPrimaryLight,
-              size: 12 * kScale,
+          TooltipWrapper(
+            message: Loc.get.findReferencesTooltip,
+            child: IconButtonTransparent(
+              size: 22 * kScale,
+              icon: Icon(
+                FontAwesomeIcons.search,
+                color: kColorPrimaryLight,
+                size: 12 * kScale,
+              ),
+              onClick: _handleFindClick,
             ),
-            onClick: _handleFindClick,
           ),
       ],
     );

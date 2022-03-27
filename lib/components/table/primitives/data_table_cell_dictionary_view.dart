@@ -206,6 +206,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
                                   size: 14 * kScale,
                                   width: 25 * kScale,
                                   color: kColorPrimaryLight,
+                                  tooltipText: Loc.get.delete,
                                 ),
                               ],
                             ],

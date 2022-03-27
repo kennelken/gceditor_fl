@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gceditor/components/properties/primitives/delete_button.dart';
+import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
@@ -146,14 +147,17 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
                 ),
               ),
               Expanded(
-                child: TextField(
-                  textAlign: TextAlign.end,
-                  controller: _fileNameController,
-                  focusNode: _fileNameFocusNode,
-                  decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
-                    hintText: Loc.get.generatorFileNameLabel,
-                    hintStyle: kStyle.kTextExtraSmall.copyWith(
-                      color: kColorPrimaryLight,
+                child: TooltipWrapper(
+                  message: Loc.get.generatorFileNameLabel,
+                  child: TextField(
+                    textAlign: TextAlign.end,
+                    controller: _fileNameController,
+                    focusNode: _fileNameFocusNode,
+                    decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                      hintText: Loc.get.generatorFileNameLabel,
+                      hintStyle: kStyle.kTextExtraSmall.copyWith(
+                        color: kColorPrimaryLight,
+                      ),
                     ),
                   ),
                 ),
@@ -170,6 +174,7 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
                 child: DeleteButton(
                   size: 17 * kScale,
                   onAction: _handleDeleteClick,
+                  tooltipText: Loc.get.delete,
                 ),
               ),
             ],
@@ -241,17 +246,20 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
 
       case GeneratorType.json:
         return [
-          SizedBox(
-            width: 80 * kScale,
-            child: TextField(
-              clipBehavior: Clip.none,
-              controller: _indentationController,
-              focusNode: _indentationFocusNode,
-              inputFormatters: Config.filterIndentationForJson,
-              decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
-                hintText: Loc.get.indentationLabel,
-                hintStyle: kStyle.kTextUltraSmall.copyWith(
-                  color: kColorPrimaryLight,
+          TooltipWrapper(
+            message: Loc.get.indentationLabel,
+            child: SizedBox(
+              width: 80 * kScale,
+              child: TextField(
+                clipBehavior: Clip.none,
+                controller: _indentationController,
+                focusNode: _indentationFocusNode,
+                inputFormatters: Config.filterIndentationForJson,
+                decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                  hintText: Loc.get.indentationLabel,
+                  hintStyle: kStyle.kTextUltraSmall.copyWith(
+                    color: kColorPrimaryLight,
+                  ),
                 ),
               ),
             ),
@@ -261,49 +269,58 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
 
       case GeneratorType.csharp:
         return [
-          SizedBox(
-            width: 80 * kScale,
-            child: TextField(
-              clipBehavior: Clip.none,
-              controller: _prefixController,
-              focusNode: _prefixFocusNode,
-              inputFormatters: Config.filterId,
-              decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
-                hintText: Loc.get.prefixLabel,
-                hintStyle: kStyle.kTextUltraSmall.copyWith(
-                  color: kColorPrimaryLight,
+          TooltipWrapper(
+            message: Loc.get.prefixLabel,
+            child: SizedBox(
+              width: 80 * kScale,
+              child: TextField(
+                clipBehavior: Clip.none,
+                controller: _prefixController,
+                focusNode: _prefixFocusNode,
+                inputFormatters: Config.filterId,
+                decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                  hintText: Loc.get.prefixLabel,
+                  hintStyle: kStyle.kTextUltraSmall.copyWith(
+                    color: kColorPrimaryLight,
+                  ),
                 ),
               ),
             ),
           ),
           SizedBox(width: 5 * kScale),
-          SizedBox(
-            width: 80 * kScale,
-            child: TextField(
-              clipBehavior: Clip.none,
-              controller: _prefixInterfaceController,
-              focusNode: _prefixInterfaceFocusNode,
-              inputFormatters: Config.filterId,
-              decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
-                hintText: Loc.get.prefixInterfaceLabel,
-                hintStyle: kStyle.kTextUltraSmall.copyWith(
-                  color: kColorPrimaryLight,
+          TooltipWrapper(
+            message: Loc.get.prefixInterfaceLabel,
+            child: SizedBox(
+              width: 80 * kScale,
+              child: TextField(
+                clipBehavior: Clip.none,
+                controller: _prefixInterfaceController,
+                focusNode: _prefixInterfaceFocusNode,
+                inputFormatters: Config.filterId,
+                decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                  hintText: Loc.get.prefixInterfaceLabel,
+                  hintStyle: kStyle.kTextUltraSmall.copyWith(
+                    color: kColorPrimaryLight,
+                  ),
                 ),
               ),
             ),
           ),
           SizedBox(width: 5 * kScale),
-          SizedBox(
-            width: 80 * kScale,
-            child: TextField(
-              clipBehavior: Clip.none,
-              controller: _postfixController,
-              focusNode: _postfixFocusNode,
-              inputFormatters: Config.filterId,
-              decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
-                hintText: Loc.get.postfixLabel,
-                hintStyle: kStyle.kTextUltraSmall.copyWith(
-                  color: kColorPrimaryLight,
+          TooltipWrapper(
+            message: Loc.get.postfixLabel,
+            child: SizedBox(
+              width: 80 * kScale,
+              child: TextField(
+                clipBehavior: Clip.none,
+                controller: _postfixController,
+                focusNode: _postfixFocusNode,
+                inputFormatters: Config.filterId,
+                decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                  hintText: Loc.get.postfixLabel,
+                  hintStyle: kStyle.kTextUltraSmall.copyWith(
+                    color: kColorPrimaryLight,
+                  ),
                 ),
               ),
             ),
