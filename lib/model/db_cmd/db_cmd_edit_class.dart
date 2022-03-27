@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
-import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/db_network/data_table_column.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -75,10 +74,7 @@ class DbCmdEditClass extends BaseDbCmd {
       entity.classType = classType!;
     }
 
-    for (final kvp in dataColumnsByTable.entries) {
-      final table = dbModel.cache.getTable(kvp.key) as TableMetaEntity;
-      DbModelUtils.applyDataColumns(dbModel, table, kvp.value);
-    }
+    DbModelUtils.applyManyDataColumns(dbModel, dataColumnsByTable);
 
     if (exportList != null) {
       entity.exportList = exportList!;

@@ -59,12 +59,12 @@ class _ServerAuthAdminPanelState extends State<ServerAuthAdminPanel> {
     return Consumer(
       builder: (context, watch, child) {
         watch(startupProvider);
-        final defaulFolder = watch(appStateProvider).state.defaultProjectFolder;
-        final defaulFolderPath = defaulFolder?.path ?? '';
+        final defaultFolder = watch(appStateProvider).state.defaultProjectFolder;
+        final defaultFolderPath = defaultFolder?.path ?? '';
         final authListState = providerContainer.read(authListStateProvider).state;
 
         final authListPath =
-            authListState.filePath ?? AppLocalStorage.instance.authListPath ?? path.join(defaulFolderPath, Config.newAuthListDefaultName);
+            authListState.filePath ?? AppLocalStorage.instance.authListPath ?? path.join(defaultFolderPath, Config.newAuthListDefaultName);
 
         final newLogin = AppLocalStorage.instance.newLogin ?? Config.defaultNewLogin;
         final newSecret = AppLocalStorage.instance.newSecret ?? Config.defaultNewSecret;
@@ -80,7 +80,7 @@ class _ServerAuthAdminPanelState extends State<ServerAuthAdminPanel> {
           children: [
             SizedBox(
               child: ProjectPathView(
-                defaulFolder: defaulFolder,
+                defaultFolder: defaultFolder,
                 projectPath: authListPath,
                 projectPathTextController: _authListPathTextController,
                 labelText: Loc.get.authListPath,

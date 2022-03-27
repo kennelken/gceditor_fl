@@ -16,7 +16,7 @@ class ClientAuthPanel extends StatefulWidget {
     required bool rememberPassword,
   }) onCredentialsChanged;
 
-  final PartialAuthentificationData authData;
+  final PartialAuthenticationData authData;
 
   const ClientAuthPanel({
     Key? key,

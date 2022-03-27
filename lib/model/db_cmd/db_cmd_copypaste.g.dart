@@ -102,4 +102,5 @@ const _$DbCmdTypeEnumMap = {
   DbCmdType.resizeColumn: 'resizeColumn',
   DbCmdType.resizeDictionaryKeyToValue: 'resizeDictionaryKeyToValue',
   DbCmdType.copypaste: 'copypaste',
+  DbCmdType.fillColumn: 'fillColumn',
 };

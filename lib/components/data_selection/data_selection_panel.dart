@@ -193,11 +193,11 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
       return;
 
     final toTable = dataSelectionState.state.selectionTable ?? providerContainer.read(tableSelectionStateProvider).state.selectedTable;
-    final firstSelectedindex = dataSelectionState.state.selectedItems.orderBy((e) => e).firstOrNull ?? 0;
+    final firstSelectedIndex = dataSelectionState.state.selectedItems.orderBy((e) => e).firstOrNull ?? 0;
 
     final toIndices = IntRange(
-      firstSelectedindex,
-      firstSelectedindex + (dataSelectionState.state.copiedItems ?? dataSelectionState.state.externalCopiedItems)!.length - 1,
+      firstSelectedIndex,
+      firstSelectedIndex + (dataSelectionState.state.copiedItems ?? dataSelectionState.state.externalCopiedItems)!.length - 1,
     ).toList();
 
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(
@@ -224,11 +224,11 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
       return;
 
     final toTable = dataSelectionState.state.selectionTable ?? providerContainer.read(tableSelectionStateProvider).state.selectedTable;
-    final lastSelectedindex = dataSelectionState.state.selectedItems.orderBy((e) => e).lastOrNull ?? toTable!.rows.length - 1;
+    final lastSelectedIndex = dataSelectionState.state.selectedItems.orderBy((e) => e).lastOrNull ?? toTable!.rows.length - 1;
 
     final toIndices = IntRange(
-      lastSelectedindex + 1,
-      lastSelectedindex + 1 + (dataSelectionState.state.copiedItems ?? dataSelectionState.state.externalCopiedItems)!.length - 1,
+      lastSelectedIndex + 1,
+      lastSelectedIndex + 1 + (dataSelectionState.state.copiedItems ?? dataSelectionState.state.externalCopiedItems)!.length - 1,
     ).toList();
 
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(

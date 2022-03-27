@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/properties/primitives/text_button_transparent.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/model/db/class_meta_field_description.dart';
@@ -13,7 +14,12 @@ import 'package:gceditor/model/state/service/client_navigation_service.dart';
 import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/model/state/table_selection_state.dart';
 
+import '../../../consts/loc.dart';
+import '../../../main.dart';
+import '../../../model/state/client_view_mode_state.dart';
+import '../../properties/primitives/icon_button_transparent.dart';
 import '../../tooltip_wrapper.dart';
+import '../fill_value_view.dart';
 
 double? _initialWidth;
 
@@ -34,6 +40,7 @@ class DataTableColumnHeadView extends ConsumerWidget {
   @override
   Widget build(context, watch) {
     final width = DbModelUtils.getTableColumnWidth(table, field);
+    final actionsMode = watch(clientViewModeStateProvider).state.actionsMode;
 
     final decoration = kStyle.kDataTableHeadBoxDecorationNoRight.copyWith(
       color: DbModelUtils.getMetaFieldColor(
@@ -74,6 +81,21 @@ class DataTableColumnHeadView extends ConsumerWidget {
                         maxLines: 1,
                       ),
                     ),
+                    if (actionsMode) ...[
+                      const SizedBox(width: 10),
+                      TooltipWrapper(
+                        message: Loc.get.buttonFillColumnTooltip,
+                        child: IconButtonTransparent(
+                          onClick: () => _openFillColumnDialog(index),
+                          icon: Icon(
+                            FontAwesomeIcons.fillDrip,
+                            size: 12.0 * kScale,
+                            color: kColorAccentBlue,
+                          ),
+                          size: 25 * kScale,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -127,5 +149,20 @@ class DataTableColumnHeadView extends ConsumerWidget {
     }
 
     _initialWidth = null;
+  }
+
+  void _openFillColumnDialog(int index) {
+    showDialog(
+      context: popupContext!,
+      barrierColor: kColorTransparent,
+      builder: (context) {
+        return Dialog(
+          child: FillValueView(
+            field: field,
+            table: table,
+          ),
+        );
+      },
+    );
   }
 }

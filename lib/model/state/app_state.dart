@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/client/client_app.dart';
-import 'package:gceditor/model/db_network/authentification_data.dart';
+import 'package:gceditor/model/db_network/authentication_data.dart';
 import 'package:gceditor/server/server_app.dart';
 
 final appStateProvider = ChangeNotifierProvider((_) => AppStateNotifier(AppState()));
@@ -13,7 +13,7 @@ class AppState {
   AppMode? appMode;
   String? ipAddress;
   int? port;
-  AuthentificationData? authData;
+  AuthenticationData? authData;
   File? projectFile;
   Directory? output;
   File? authListFile;
@@ -40,7 +40,7 @@ class AppStateNotifier extends ChangeNotifier {
   void setClientAppParams(
     String ipAddress,
     int port,
-    AuthentificationData authData,
+    AuthenticationData authData,
   ) {
     state.ipAddress = ipAddress;
     state.port = port;
@@ -52,7 +52,7 @@ class AppStateNotifier extends ChangeNotifier {
     int port,
     File file,
     Directory output,
-    AuthentificationData authData,
+    AuthenticationData authData,
   ) {
     state.ipAddress = 'localhost';
     state.port = port;
@@ -73,7 +73,7 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void launchgApp(AppMode mode) {
+  void launchApp(AppMode mode) {
     state.appMode = mode;
     notifyListeners();
   }

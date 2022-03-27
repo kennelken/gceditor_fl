@@ -159,7 +159,7 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
                     Flexible(
                       fit: FlexFit.loose,
                       child: Theme(
-                        data: kStyle.kReordableListTheme,
+                        data: kStyle.kReorderableListTheme,
                         child: ReorderableListView.builder(
                           scrollController: ScrollController(),
                           shrinkWrap: true,
@@ -201,7 +201,7 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
                     Flexible(
                       fit: FlexFit.loose,
                       child: Theme(
-                        data: kStyle.kReordableListTheme,
+                        data: kStyle.kReorderableListTheme,
                         child: ReorderableListView.builder(
                           scrollController: ScrollController(),
                           shrinkWrap: true,

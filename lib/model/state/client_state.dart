@@ -70,6 +70,7 @@ class ClientStateNotifier extends ServerStateNotifier {
       case DbCmdType.reorderClassInterface:
       case DbCmdType.resizeColumn:
       case DbCmdType.resizeDictionaryKeyToValue:
+      case DbCmdType.fillColumn:
         break;
 
       case DbCmdType.addDataRow:

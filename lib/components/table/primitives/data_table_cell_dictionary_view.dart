@@ -135,7 +135,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
         ),
         Expanded(
           child: Theme(
-            data: kStyle.kReordableListThemeInvisibleScrollbars,
+            data: kStyle.kReorderableListThemeInvisibleScrollbars,
             child: ScrollConfiguration(
               behavior: kScrollDraggable,
               child: Consumer(

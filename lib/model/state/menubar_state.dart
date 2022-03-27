@@ -130,6 +130,6 @@ class MenubarStateNotifier extends ChangeNotifier {
   }
 
   void _requestModelFromServer() {
-    providerContainer.read(appStateProvider).state.clientApp!.reinitModel();
+    providerContainer.read(appStateProvider).state.clientApp!.reInitModel();
   }
 }

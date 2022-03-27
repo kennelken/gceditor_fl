@@ -16,8 +16,11 @@ DbCmdAddClassField _$DbCmdAddClassFieldFromJson(Map<String, dynamic> json) =>
           json['field'] as Map<String, dynamic>)
       ..dataColumnsByTable =
           (json['dataColumnsByTable'] as Map<String, dynamic>?)?.map(
-        (k, e) =>
-            MapEntry(k, DataTableColumn.fromJson(e as Map<String, dynamic>)),
+        (k, e) => MapEntry(
+            k,
+            (e as List<dynamic>)
+                .map((e) => DataTableColumn.fromJson(e as Map<String, dynamic>))
+                .toList()),
       );
 
 Map<String, dynamic> _$DbCmdAddClassFieldToJson(DbCmdAddClassField instance) {
@@ -35,8 +38,10 @@ Map<String, dynamic> _$DbCmdAddClassFieldToJson(DbCmdAddClassField instance) {
   val['entityId'] = instance.entityId;
   val['index'] = instance.index;
   val['field'] = instance.field.toJson();
-  writeNotNull('dataColumnsByTable',
-      instance.dataColumnsByTable?.map((k, e) => MapEntry(k, e.toJson())));
+  writeNotNull(
+      'dataColumnsByTable',
+      instance.dataColumnsByTable
+          ?.map((k, e) => MapEntry(k, e.map((e) => e.toJson()).toList())));
   return val;
 }
 
@@ -72,4 +77,5 @@ const _$DbCmdTypeEnumMap = {
   DbCmdType.resizeColumn: 'resizeColumn',
   DbCmdType.resizeDictionaryKeyToValue: 'resizeDictionaryKeyToValue',
   DbCmdType.copypaste: 'copypaste',
+  DbCmdType.fillColumn: 'fillColumn',
 };

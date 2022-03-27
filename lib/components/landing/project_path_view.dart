@@ -12,7 +12,7 @@ import 'package:path/path.dart' as path;
 class ProjectPathView extends StatelessWidget {
   final TextEditingController projectPathTextController;
   final String projectPath;
-  final Directory? defaulFolder;
+  final Directory? defaultFolder;
   final String? labelText;
   final String defaultName;
   final bool isFile;
@@ -21,7 +21,7 @@ class ProjectPathView extends StatelessWidget {
     Key? key,
     required this.projectPathTextController,
     required this.projectPath,
-    required this.defaulFolder,
+    required this.defaultFolder,
     required this.labelText,
     required this.defaultName,
     required this.isFile,
@@ -60,7 +60,7 @@ class ProjectPathView extends StatelessWidget {
           width: 30 * kScale,
           height: 30 * kScale,
           child: ElevatedButton(
-            onPressed: () => _handleBrowseProjectDirectory(defaulFolder!),
+            onPressed: () => _handleBrowseProjectDirectory(defaultFolder!),
             child: Icon(
               FontAwesomeIcons.folder,
               size: 20 * kScale,

@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db_network/auth_list_entry.dart';
-import 'package:gceditor/model/db_network/authentification_data.dart';
+import 'package:gceditor/model/db_network/authentication_data.dart';
 import 'package:gceditor/model/db_network/login_state_data.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
@@ -63,7 +63,7 @@ class AuthListStateNotifier extends ChangeNotifier {
     await file.writeAsString(Config.fileJsonOptions.convert(state.loginListData!.toJson()));
   }
 
-  Future<bool> isValidAuth(AuthentificationData? data) async {
+  Future<bool> isValidAuth(AuthenticationData? data) async {
     if (data == null) {
       providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Null auth data'));
       return false;

@@ -1,23 +1,25 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'db_cmd_resize_dictionary_key_to_value.dart';
+part of 'db_cmd_fill_column.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-DbCmdResizeDictionaryKeyToValue _$DbCmdResizeDictionaryKeyToValueFromJson(
-        Map<String, dynamic> json) =>
-    DbCmdResizeDictionaryKeyToValue()
+DbCmdFillColumn _$DbCmdFillColumnFromJson(Map<String, dynamic> json) =>
+    DbCmdFillColumn()
       ..id = json['id'] as String
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
-      ..tableId = json['tableId'] as String
-      ..fieldId = json['fieldId'] as String
-      ..ratio = (json['ratio'] as num).toDouble()
-      ..oldRatio = (json['oldRatio'] as num).toDouble();
+      ..dataColumnsByTable =
+          (json['dataColumnsByTable'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(
+            k,
+            (e as List<dynamic>)
+                .map((e) => DataTableColumn.fromJson(e as Map<String, dynamic>))
+                .toList()),
+      );
 
-Map<String, dynamic> _$DbCmdResizeDictionaryKeyToValueToJson(
-    DbCmdResizeDictionaryKeyToValue instance) {
+Map<String, dynamic> _$DbCmdFillColumnToJson(DbCmdFillColumn instance) {
   final val = <String, dynamic>{
     'id': instance.id,
   };
@@ -29,10 +31,10 @@ Map<String, dynamic> _$DbCmdResizeDictionaryKeyToValueToJson(
   }
 
   writeNotNull(r'$type', _$DbCmdTypeEnumMap[instance.$type]);
-  val['tableId'] = instance.tableId;
-  val['fieldId'] = instance.fieldId;
-  val['ratio'] = instance.ratio;
-  val['oldRatio'] = instance.oldRatio;
+  writeNotNull(
+      'dataColumnsByTable',
+      instance.dataColumnsByTable
+          ?.map((k, e) => MapEntry(k, e.map((e) => e.toJson()).toList())));
   return val;
 }
 

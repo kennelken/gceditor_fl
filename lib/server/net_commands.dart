@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db_cmd/base_db_cmd.dart';
-import 'package:gceditor/model/db_network/authentification_data.dart';
+import 'package:gceditor/model/db_network/authentication_data.dart';
 import 'package:gceditor/model/db_network/command_error_response_payload.dart';
 import 'package:gceditor/model/db_network/command_request_git_payload.dart';
 import 'package:gceditor/model/db_network/command_request_git_response_payload.dart';
@@ -21,7 +21,7 @@ enum CommandType {
   unknown,
   ok,
   error,
-  requestAuthentification,
+  requestAuthentication,
   requestDbModel,
   requestDbModelResponse,
   requestDbModelModification,
@@ -56,8 +56,8 @@ class CommandFactory {
         command = CommandErrorResponse();
         break;
 
-      case CommandType.requestAuthentification:
-        command = CommandRequestAuthenification();
+      case CommandType.requestAuthentication:
+        command = CommandRequestAuthentication();
         break;
 
       case CommandType.requestDbModel:
@@ -199,19 +199,19 @@ class CommandErrorResponse extends BaseCommand implements IBaseCommand, BaseResp
   }
 }
 
-class CommandRequestAuthenification extends BaseCommand implements IBaseCommand {
-  late AuthentificationData? authData;
+class CommandRequestAuthentication extends BaseCommand implements IBaseCommand {
+  late AuthenticationData? authData;
 
-  CommandRequestAuthenification();
+  CommandRequestAuthentication();
 
   @override
-  CommandType get type => CommandType.requestAuthentification;
+  CommandType get type => CommandType.requestAuthentication;
 
   @override
   String? parse(Uint8List data) {
     try {
       final jsonText = utf8.decode(data);
-      authData = AuthentificationData.fromJson(jsonDecode(jsonText));
+      authData = AuthenticationData.fromJson(jsonDecode(jsonText));
     } catch (error, callstack) {
       providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Error: $error\nclasstack: $callstack'));
       return error.toString();
@@ -461,12 +461,12 @@ class ParseCommandResult<T extends BaseCommand?> {
   ParseCommandResult(this.command, this.error);
 }
 
-class PartialAuthentificationData {
+class PartialAuthenticationData {
   String? login;
   String? secret;
   String? password;
 
-  PartialAuthentificationData.values({
+  PartialAuthenticationData.values({
     this.login,
     this.secret,
     this.password,

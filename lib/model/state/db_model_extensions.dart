@@ -18,6 +18,7 @@ import 'package:gceditor/model/db/data_table_row.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/db/table_meta_entity.dart';
+import 'package:gceditor/model/db_cmd/db_cmd_result.dart';
 import 'package:gceditor/model/db_network/data_table_column.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/client_find_state.dart';
@@ -131,16 +132,23 @@ class DbModelUtils {
     return parseDefaultValueByField(field, value) ?? getDefaultValue(field.typeInfo.type);
   }
 
-  static DataTableCellValue? parseDefaultValueByField(ClassMetaFieldDescription field, String value) {
-    return parseDefaultValue(field.typeInfo, field.keyTypeInfo, field.valueTypeInfo, value);
+  static DataTableCellValue? parseDefaultValueByField(ClassMetaFieldDescription field, String value, {bool silent = false}) {
+    return parseDefaultValue(
+      field.typeInfo,
+      field.keyTypeInfo,
+      field.valueTypeInfo,
+      value,
+      silent: silent,
+    );
   }
 
   static DataTableCellValue? parseDefaultValue(
     ClassFieldDescriptionDataInfo type,
     ClassFieldDescriptionDataInfo? keyType,
     ClassFieldDescriptionDataInfo? valueType,
-    String value,
-  ) {
+    String value, {
+    bool silent = false,
+  }) {
     if (value.isEmpty) //
       return getDefaultValue(type.type);
 
@@ -199,7 +207,8 @@ class DbModelUtils {
           final resultList = DataTableCellValue.list(valuesList);
           return resultList;
         } catch (e, callstack) {
-          providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
+          if (!silent) //
+            providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
           return null;
         }
 
@@ -221,7 +230,8 @@ class DbModelUtils {
           final resultList = DataTableCellValue.dictionary(valuesList);
           return resultList;
         } catch (e, callstack) {
-          providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
+          if (!silent) //
+            providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
           return null;
         }
     }
@@ -553,6 +563,13 @@ class DbModelUtils {
           table.rows[j].values[i] = columnData.values[j];
         }
       }
+    }
+  }
+
+  static void applyManyDataColumns(DbModel model, Map<String, List<DataTableColumn>> columnsByTable) {
+    for (final tableId in columnsByTable.keys) {
+      final table = model.cache.getTable<TableMetaEntity>(tableId)!;
+      applyDataColumns(model, table, columnsByTable[tableId]!);
     }
   }
 
@@ -1120,6 +1137,24 @@ class DbModelUtils {
         return DbModelUtils.parseDefaultValueByFieldOrDefault(columnData, e?.toString() ?? '');
       }).toList();
     return result;
+  }
+
+  static DbCmdResult validateDataByColumns(DbModel dbModel, Map<String, List<DataTableColumn>>? dataColumnsByTable) {
+    if (dataColumnsByTable == null) //
+      return DbCmdResult.success();
+
+    for (var tableId in dataColumnsByTable.keys) {
+      final table = dbModel.cache.getTable(tableId);
+      if (table == null) //
+        return DbCmdResult.fail('Entity with id "$tableId" does not exist');
+
+      if (table is! TableMetaEntity) //
+        return DbCmdResult.fail('Entity with id "$tableId" is not a table');
+
+      if (dataColumnsByTable[tableId]!.any((e) => e.values.length != table.rows.length)) //
+        return DbCmdResult.fail('invalid rows count for table "$tableId"');
+    }
+    return DbCmdResult.success();
   }
 }
 

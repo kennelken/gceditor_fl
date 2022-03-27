@@ -45,8 +45,8 @@ class StyleState {
   var kPropertiesVerticalDivider = const SizedBox();
   double kTableTopRowHeight = 0;
   var kInputTextStylePropertiesTableRowId = const InputDecoration();
-  var kReordableListTheme = ThemeData();
-  var kReordableListThemeInvisibleScrollbars = ThemeData();
+  var kReorderableListTheme = ThemeData();
+  var kReorderableListThemeInvisibleScrollbars = ThemeData();
 
   double kDataTableRowHeight = 0;
   double kDataTableInlineRowHeight = 0;
@@ -264,7 +264,7 @@ class StyleStateNotifier extends ChangeNotifier {
       hoverColor: kColorTransparent,
     );
 
-    state.kReordableListTheme = state.kAppTheme.copyWith(
+    state.kReorderableListTheme = state.kAppTheme.copyWith(
       backgroundColor: kColorTransparent,
       canvasColor: kColorTransparent,
       shadowColor: kColorTransparent,
@@ -274,7 +274,7 @@ class StyleStateNotifier extends ChangeNotifier {
       ),
     );
 
-    state.kReordableListThemeInvisibleScrollbars = state.kReordableListTheme.copyWith(
+    state.kReorderableListThemeInvisibleScrollbars = state.kReorderableListTheme.copyWith(
       scrollbarTheme: state.kAppTheme.scrollbarTheme.copyWith(
         isAlwaysShown: false,
       ),

@@ -106,7 +106,7 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                     Flexible(
                       fit: FlexFit.loose,
                       child: Theme(
-                        data: kStyle.kReordableListTheme,
+                        data: kStyle.kReorderableListTheme,
                         child: ScrollConfiguration(
                           behavior: kScrollNoScroll,
                           child: ReorderableListView.builder(

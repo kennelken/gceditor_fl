@@ -2,7 +2,6 @@ import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/class_meta_field_description.dart';
 import 'package:gceditor/model/db/db_model.dart';
-import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/db_network/data_table_column.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -19,7 +18,7 @@ class DbCmdAddClassField extends BaseDbCmd {
   late int index;
   late ClassMetaFieldDescription field;
 
-  Map<String, DataTableColumn>? dataColumnsByTable;
+  Map<String, List<DataTableColumn>>? dataColumnsByTable;
 
   DbCmdAddClassField.values({
     String? id,
@@ -53,7 +52,7 @@ class DbCmdAddClassField extends BaseDbCmd {
 
         DbModelUtils.insertDefaultValues(dbModel, table, fieldIndex);
         if (dataColumnsByTable?[table.id] != null) {
-          DbModelUtils.applyDataColumns(dbModel, table, [dataColumnsByTable![table.id]!]);
+          DbModelUtils.applyDataColumns(dbModel, table, dataColumnsByTable![table.id]!);
         }
       }
     }
@@ -82,19 +81,9 @@ class DbCmdAddClassField extends BaseDbCmd {
         return DbCmdResult.fail('Field with id "${field.id}" already exists in class "${subclass.id}"');
     }
 
-    if (dataColumnsByTable != null) {
-      for (var tableId in dataColumnsByTable!.keys) {
-        final table = dbModel.cache.getTable(tableId);
-        if (table == null) //
-          return DbCmdResult.fail('Entity with id "$tableId" does not exist');
-
-        if (table is! TableMetaEntity) //
-          return DbCmdResult.fail('Entity with id "$tableId" is not a table');
-
-        if (table.rows.length != dataColumnsByTable![tableId]!.values.length) //
-          return DbCmdResult.fail('invalid rows count for table "$tableId"');
-      }
-    }
+    final validateDataColumnsResult = DbModelUtils.validateDataByColumns(dbModel, dataColumnsByTable);
+    if (!validateDataColumnsResult.success) //
+      return validateDataColumnsResult;
 
     return DbCmdResult.success();
   }

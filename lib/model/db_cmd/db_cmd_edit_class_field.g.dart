@@ -30,8 +30,11 @@ DbCmdEditClassField _$DbCmdEditClassFieldFromJson(Map<String, dynamic> json) =>
               json['newValueType'] as Map<String, dynamic>)
       ..newDefaultValue = json['newDefaultValue'] as String?
       ..valuesByTable = (json['valuesByTable'] as Map<String, dynamic>?)?.map(
-        (k, e) =>
-            MapEntry(k, DataTableColumn.fromJson(e as Map<String, dynamic>)),
+        (k, e) => MapEntry(
+            k,
+            (e as List<dynamic>)
+                .map((e) => DataTableColumn.fromJson(e as Map<String, dynamic>))
+                .toList()),
       );
 
 Map<String, dynamic> _$DbCmdEditClassFieldToJson(DbCmdEditClassField instance) {
@@ -56,8 +59,10 @@ Map<String, dynamic> _$DbCmdEditClassFieldToJson(DbCmdEditClassField instance) {
   writeNotNull('newKeyType', instance.newKeyType?.toJson());
   writeNotNull('newValueType', instance.newValueType?.toJson());
   writeNotNull('newDefaultValue', instance.newDefaultValue);
-  writeNotNull('valuesByTable',
-      instance.valuesByTable?.map((k, e) => MapEntry(k, e.toJson())));
+  writeNotNull(
+      'valuesByTable',
+      instance.valuesByTable
+          ?.map((k, e) => MapEntry(k, e.map((e) => e.toJson()).toList())));
   return val;
 }
 
@@ -93,4 +98,5 @@ const _$DbCmdTypeEnumMap = {
   DbCmdType.resizeColumn: 'resizeColumn',
   DbCmdType.resizeDictionaryKeyToValue: 'resizeDictionaryKeyToValue',
   DbCmdType.copypaste: 'copypaste',
+  DbCmdType.fillColumn: 'fillColumn',
 };

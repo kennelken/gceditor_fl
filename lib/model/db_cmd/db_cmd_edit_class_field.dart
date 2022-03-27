@@ -3,7 +3,6 @@ import 'package:gceditor/model/db/class_field_description_data_info.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
-import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/db_network/data_table_column.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/utils/utils.dart';
@@ -28,7 +27,7 @@ class DbCmdEditClassField extends BaseDbCmd {
   ClassFieldDescriptionDataInfo? newValueType;
   String? newDefaultValue;
 
-  Map<String, DataTableColumn>? valuesByTable;
+  Map<String, List<DataTableColumn>>? valuesByTable;
 
   DbCmdEditClassField.values({
     String? id,
@@ -93,9 +92,7 @@ class DbCmdEditClassField extends BaseDbCmd {
     }
 
     if (valuesByTable != null) {
-      for (var tableId in valuesByTable!.keys) {
-        DbModelUtils.applyDataColumns(dbModel, dbModel.cache.getTable<TableMetaEntity>(tableId)!, [valuesByTable![tableId]!]);
-      }
+      DbModelUtils.applyManyDataColumns(dbModel, valuesByTable!);
     }
 
     return DbCmdResult.success();
@@ -172,27 +169,9 @@ class DbCmdEditClassField extends BaseDbCmd {
         return DbCmdResult.fail('Incorrect default value');
     }
 
-    if (valuesByTable != null) {
-      for (var tableId in valuesByTable!.keys) {
-        final currentTable = dbModel.cache.getTable(tableId);
-        if (currentTable == null) //
-          return DbCmdResult.fail('Specified table "$tableId" does not exist');
-
-        if (currentTable is! TableMetaEntity) //
-          return DbCmdResult.fail('Specified entity "$tableId" is not a table');
-
-        final allFields = dbModel.cache.getAllFieldsById(currentTable.classId);
-        final columnData = valuesByTable![tableId]!;
-
-        if (!(allFields?.any((f) => f.id == columnData.id) ?? false)) //
-          return DbCmdResult.fail('Specified column "${columnData.id}" is not exist');
-
-        if (currentTable.rows.length != columnData.values.length) //
-          return DbCmdResult.fail('Specified length "${columnData.values.length}" is not equals to "${currentTable.rows.length}"');
-
-        DbModelUtils.applyDataColumns(dbModel, dbModel.cache.getTable<TableMetaEntity>(tableId)!, [valuesByTable![tableId]!]);
-      }
-    }
+    final validateDataColumnsResult = DbModelUtils.validateDataByColumns(dbModel, valuesByTable);
+    if (!validateDataColumnsResult.success) //
+      return validateDataColumnsResult;
 
     return DbCmdResult.success();
   }
@@ -202,13 +181,13 @@ class DbCmdEditClassField extends BaseDbCmd {
     final entity = dbModel.cache.getClass(entityId) as ClassMetaEntity;
     final field = dbModel.cache.getField(fieldId, entity)!;
 
-    Map<String, DataTableColumn>? valuesByTable;
+    Map<String, List<DataTableColumn>>? valuesByTable;
     if (newType != null || newKeyType != null || newValueType != null || newDefaultValue != null) {
       valuesByTable = {};
       for (var table in dbModel.cache.allDataTables) {
         final dataColumns = DbModelUtils.getDataColumns(dbModel, table, columns: [field]);
         if (dataColumns.isNotEmpty) {
-          valuesByTable[table.id] = dataColumns[0];
+          valuesByTable[table.id] = dataColumns;
         }
       }
     }

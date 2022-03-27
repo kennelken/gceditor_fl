@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:gceditor/model/db_network/authentification_data.dart';
+import 'package:gceditor/model/db_network/authentication_data.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/model/state/auth_list_state.dart';
@@ -42,7 +42,7 @@ class ArgsManager {
       var runClient = false;
       var runServer = false;
 
-      if (argResults.wasParsed(_aServer) && checkRequredParameters(argResults, [_aPort, _aProjectPath, _aOutputPath, _aAuthPath, _aHistoryPath])) {
+      if (argResults.wasParsed(_aServer) && checkRequiredParameters(argResults, [_aPort, _aProjectPath, _aOutputPath, _aAuthPath, _aHistoryPath])) {
         final port = int.parse(argResults[_aPort]);
         final projectPath = argResults[_aProjectPath];
         final outputPath = argResults[_aOutputPath];
@@ -60,7 +60,7 @@ class ArgsManager {
         runServer = true;
       }
 
-      if (argResults.wasParsed(_aClient) && checkRequredParameters(argResults, [_aPort, _aHost, _aLogin, _aSecret, _aPassword])) {
+      if (argResults.wasParsed(_aClient) && checkRequiredParameters(argResults, [_aPort, _aHost, _aLogin, _aSecret, _aPassword])) {
         final port = int.parse(argResults[_aPort]);
         final host = argResults[_aHost];
         final login = argResults[_aLogin];
@@ -69,13 +69,13 @@ class ArgsManager {
 
         providerContainer
             .read(appStateProvider)
-            .setClientAppParams(host, port, AuthentificationData.values(login: login, secret: secret, password: password));
+            .setClientAppParams(host, port, AuthenticationData.values(login: login, secret: secret, password: password));
 
         runClient = true;
       }
 
       if ((argResults.wasParsed(_aRegisterLogin) || argResults.wasParsed(_aRegisterSecret)) && //
-          checkRequredParameters(argResults, [_aRegisterLogin, _aRegisterSecret, _aAuthPath])) {
+          checkRequiredParameters(argResults, [_aRegisterLogin, _aRegisterSecret, _aAuthPath])) {
         final login = argResults[_aRegisterLogin];
         final secret = argResults[_aRegisterSecret];
         final authPath = argResults[_aAuthPath];
@@ -85,7 +85,7 @@ class ArgsManager {
       }
 
       if ((argResults.wasParsed(_aUnregisterLogin)) && //
-          checkRequredParameters(argResults, [_aUnregisterLogin, _aAuthPath])) {
+          checkRequiredParameters(argResults, [_aUnregisterLogin, _aAuthPath])) {
         final login = argResults[_aUnregisterLogin];
         final authPath = argResults[_aAuthPath];
 
@@ -101,18 +101,18 @@ class ArgsManager {
               providerContainer.read(appStateProvider).state.authData!.login,
               providerContainer.read(appStateProvider).state.authData!.secret,
             );
-        providerContainer.read(appStateProvider).launchgApp(AppMode.standalone);
+        providerContainer.read(appStateProvider).launchApp(AppMode.standalone);
       } else if (runClient) {
-        providerContainer.read(appStateProvider).launchgApp(AppMode.client);
+        providerContainer.read(appStateProvider).launchApp(AppMode.client);
       } else if (runServer) {
-        providerContainer.read(appStateProvider).launchgApp(AppMode.server);
+        providerContainer.read(appStateProvider).launchApp(AppMode.server);
       }
     } catch (e, callStack) {
       providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Invalid arguments: $e\n$callStack'));
     }
   }
 
-  bool checkRequredParameters(ArgResults argResults, List<String> arguments) {
+  bool checkRequiredParameters(ArgResults argResults, List<String> arguments) {
     final missingArgs = <String>[];
     for (var arg in arguments) {
       if (!argResults.wasParsed(arg)) //
@@ -120,8 +120,8 @@ class ArgsManager {
     }
 
     if (missingArgs.isNotEmpty) {
-      final meessage = 'Missing required arguments: ${missingArgs.join(', ')}. Use --help for a list of supported command.';
-      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, meessage));
+      final message = 'Missing required arguments: ${missingArgs.join(', ')}. Use --help for a list of supported command.';
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, message));
       closeApp();
     }
 

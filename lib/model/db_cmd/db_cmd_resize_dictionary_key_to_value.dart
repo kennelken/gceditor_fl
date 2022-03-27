@@ -40,6 +40,8 @@ class DbCmdResizeDictionaryKeyToValue extends BaseDbCmd {
     final field = dbModel.cache.getField(fieldId, dbModel.cache.getClass<ClassMetaEntity>(table.classId))!;
     DbModelUtils.setDictionaryColumnRatio(table, field, ratio: ratio);
 
+    DbModelUtils.removeInvalidColumnWidth(dbModel, table);
+
     return DbCmdResult.success();
   }
 
@@ -61,8 +63,6 @@ class DbCmdResizeDictionaryKeyToValue extends BaseDbCmd {
 
     if (ratio < Config.minMainColumnHeightRatio || ratio > (1 - Config.minMainColumnHeightRatio))
       return DbCmdResult.fail('Specified invalid ratio $ratio');
-
-    DbModelUtils.removeInvalidColumnWidth(dbModel, table);
 
     return DbCmdResult.success();
   }

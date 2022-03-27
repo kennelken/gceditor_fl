@@ -149,7 +149,7 @@ class ServerApp {
     }
 
     if (!_authorizedClients.containsKey(client)) {
-      if (command is CommandRequestAuthenification) {
+      if (command is CommandRequestAuthentication) {
         if (command.authData == null) {
           _commandProcessorByClient[client]!.sendCommand(CommandErrorResponse(message: 'Invalid auth credentials'), command);
           providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'ServerApp: Invalid auth credentials'));

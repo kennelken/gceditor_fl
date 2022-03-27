@@ -75,7 +75,7 @@ class _DataTableIdsViewState extends State<DataTableIdsView> {
         child: ScrollConfiguration(
             behavior: kScrollDraggable, // TODO! get rid of a phantom horizontal scroll
             child: Theme(
-              data: kStyle.kReordableListTheme,
+              data: kStyle.kReorderableListTheme,
               child: ReorderableListView.builder(
                 buildDefaultDragHandles: widget.pinnedItems == null,
                 scrollDirection: Axis.vertical,

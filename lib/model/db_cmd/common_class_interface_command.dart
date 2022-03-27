@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import '../db/class_meta_entity.dart';
 import '../db/db_model.dart';
 import '../db/db_model_shared.dart';
-import '../db/table_meta_entity.dart';
 import '../db_network/data_table_column.dart';
 import '../state/db_model_extensions.dart';
 import 'db_cmd_result.dart';
@@ -78,19 +77,9 @@ mixin CommonClassInterfaceCommand {
       }
     }
 
-    if (dataColumnsByTable != null) {
-      for (var tableId in dataColumnsByTable.keys) {
-        final table = dbModel.cache.getTable(tableId);
-        if (table == null) //
-          return DbCmdResult.fail('Entity with id "$tableId" does not exist');
-
-        if (table is! TableMetaEntity) //
-          return DbCmdResult.fail('Entity with id "$tableId" is not a table');
-
-        if (dataColumnsByTable[tableId]!.any((e) => e.values.length != table.rows.length)) //
-          return DbCmdResult.fail('invalid rows count for table "$tableId"');
-      }
-    }
+    final validateDataColumnsResult = DbModelUtils.validateDataByColumns(dbModel, dataColumnsByTable);
+    if (!validateDataColumnsResult.success) //
+      return validateDataColumnsResult;
 
     return DbCmdResult.success();
   }
@@ -149,9 +138,6 @@ mixin CommonClassInterfaceCommand {
       }
     }
 
-    for (final kvp in dataColumnsByTable.entries) {
-      final table = dbModel.cache.getTable<TableMetaEntity>(kvp.key)!;
-      DbModelUtils.applyDataColumns(dbModel, table, kvp.value);
-    }
+    DbModelUtils.applyManyDataColumns(dbModel, dataColumnsByTable);
   }
 }

@@ -114,12 +114,12 @@ ScrollBehavior? _kScrollDraggable;
 ScrollBehavior get kScrollDraggable {
   // ignore: prefer_conditional_assignment
   if (_kScrollDraggable == null) {
-    _kScrollDraggable = getkScrollDraggable(popupContext!);
+    _kScrollDraggable = getScrollDraggable(popupContext!);
   }
   return _kScrollDraggable!;
 }
 
-ScrollBehavior getkScrollDraggable(BuildContext context) {
+ScrollBehavior getScrollDraggable(BuildContext context) {
   return ScrollConfiguration.of(context).copyWith(
     dragDevices: {
       PointerDeviceKind.touch,

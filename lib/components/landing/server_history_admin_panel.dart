@@ -68,14 +68,14 @@ class _ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
       builder: (context, watch, child) {
         watch(startupProvider);
 
-        final defaulFolder = watch(appStateProvider).state.defaultProjectFolder;
-        final defaulFolderPath = defaulFolder?.path ?? '';
+        final defaultFolder = watch(appStateProvider).state.defaultProjectFolder;
+        final defaultFolderPath = defaultFolder?.path ?? '';
 
         if (!_initialValuesSet) {
           final historyState = providerContainer.read(serverHistoryStateProvider).state;
 
           _historyPath =
-              historyState.folderPath ?? AppLocalStorage.instance.historyPath ?? path.join(defaulFolderPath, Config.newHistoryDefaultFolder);
+              historyState.folderPath ?? AppLocalStorage.instance.historyPath ?? path.join(defaultFolderPath, Config.newHistoryDefaultFolder);
 
           final historyTag = AppLocalStorage.instance.historyTag ?? Config.newHistoryDefaultTag;
 
@@ -93,7 +93,7 @@ class _ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
           children: [
             SizedBox(
               child: ProjectPathView(
-                defaulFolder: defaulFolder,
+                defaultFolder: defaultFolder,
                 projectPath: _historyPath,
                 projectPathTextController: _historyPathTextController,
                 labelText: Loc.get.historyPath,

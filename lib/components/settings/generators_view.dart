@@ -88,7 +88,7 @@ class _GeneratorsViewState extends State<GeneratorsView> {
             ),
             Expanded(
               child: Theme(
-                data: kStyle.kReordableListThemeInvisibleScrollbars,
+                data: kStyle.kReorderableListThemeInvisibleScrollbars,
                 child: ScrollConfiguration(
                   behavior: kScrollDraggable,
                   child: ReorderableListView.builder(

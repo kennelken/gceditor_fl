@@ -69,11 +69,11 @@ class DbCmdDeleteClassField extends BaseDbCmd {
     final entity = dbModel.cache.getClass(entityId) as ClassMetaEntity;
     final field = entity.fields.firstWhere((e) => e.id == fieldId);
 
-    final dataColumnsByTable = <String, DataTableColumn>{};
+    final dataColumnsByTable = <String, List<DataTableColumn>>{};
     for (final table in dbModel.cache.allDataTables) {
       final allFields = dbModel.cache.getAllFieldsById(table.classId);
       if (allFields != null && allFields.contains(field)) {
-        dataColumnsByTable[table.id] = DbModelUtils.getDataColumns(dbModel, table, columns: [field])[0];
+        dataColumnsByTable[table.id] = DbModelUtils.getDataColumns(dbModel, table, columns: [field]);
       }
     }
 

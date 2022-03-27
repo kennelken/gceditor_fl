@@ -3,7 +3,6 @@ import 'package:json_annotation/json_annotation.dart';
 
 import '../../utils/utils.dart';
 import '../db/class_meta_entity.dart';
-import '../db/table_meta_entity.dart';
 import '../db_network/data_table_column.dart';
 import '../state/db_model_extensions.dart';
 import 'base_db_cmd.dart';
@@ -58,10 +57,7 @@ class DbCmdReorderClassInterface extends BaseDbCmd {
       }
     }
 
-    for (final kvp in dataColumnsByTable.entries) {
-      final table = dbModel.cache.getTable<TableMetaEntity>(kvp.key)!;
-      DbModelUtils.applyDataColumns(dbModel, table, kvp.value);
-    }
+    DbModelUtils.applyManyDataColumns(dbModel, dataColumnsByTable);
 
     return DbCmdResult.success();
   }

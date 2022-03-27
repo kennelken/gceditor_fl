@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db_cmd/base_db_cmd.dart';
-import 'package:gceditor/model/db_network/authentification_data.dart';
+import 'package:gceditor/model/db_network/authentication_data.dart';
 import 'package:gceditor/model/db_network/command_request_git_payload.dart';
 import 'package:gceditor/model/db_network/command_request_git_response_payload.dart';
 import 'package:gceditor/model/db_network/command_request_history_execute_payload.dart';
@@ -25,7 +25,7 @@ import 'package:socket_io_client/socket_io_client.dart';
 class ClientApp {
   late final String ipAddress;
   late final int port;
-  late final AuthentificationData authData;
+  late final AuthenticationData authData;
 
   io.Socket? _socket;
   CommandsProcessor? _commandsProcessor;
@@ -164,7 +164,7 @@ class ClientApp {
 
         providerContainer
             .read(logStateProvider)
-            .addMessage(LogEntry(LogLevel.debug, 'ClientApp: succesfully executed db model modification command "${cmd.$type}:${cmd.id}"'));
+            .addMessage(LogEntry(LogLevel.debug, 'ClientApp: successfully executed db model modification command "${cmd.$type}:${cmd.id}"'));
         _commandsProcessor!.sendCommand(CommandOkResponse(), command);
       } else {
         providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.debug,
@@ -183,7 +183,7 @@ class ClientApp {
 
   Future<String?> _requestDbModel(bool warning) async {
     if (!_isAuthorized) {
-      final authResponse = await _commandsProcessor!.sendCommand<CommandOkResponse>(CommandRequestAuthenification()..authData = authData);
+      final authResponse = await _commandsProcessor!.sendCommand<CommandOkResponse>(CommandRequestAuthentication()..authData = authData);
       if (authResponse != null) {
         _isAuthorized = true;
       } else {
@@ -218,7 +218,7 @@ class ClientApp {
     } else if (error.sourceCommand is CommandRequestGit) {
       providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Please refresh the git state to continue working with git'));
     } else {
-      _closeSocket(error.sourceCommand is! CommandRequestAuthenification || providerContainer.read(appStateProvider).state.appMode != AppMode.client);
+      _closeSocket(error.sourceCommand is! CommandRequestAuthentication || providerContainer.read(appStateProvider).state.appMode != AppMode.client);
     }
   }
 
@@ -271,7 +271,7 @@ class ClientApp {
     providerContainer.read(clientStateProvider).setModel(model);
   }
 
-  void reinitModel() {
+  void reInitModel() {
     _requestDbModel(true);
   }
 }

@@ -5,10 +5,12 @@ import 'package:gceditor/consts/consts.dart';
 
 class InfoButton extends StatelessWidget {
   final String text;
+  final Color? color;
   //final _defaultValueInfoController = CustomPopupMenuController();
 
   const InfoButton({
     required this.text,
+    this.color,
     Key? key,
   }) : super(key: key);
 
@@ -25,7 +27,7 @@ class InfoButton extends StatelessWidget {
           color: kColorTransparent,
           child: Icon(
             FontAwesomeIcons.infoCircle,
-            color: kTextColorLight,
+            color: color ?? kTextColorLight,
             size: 20 * kScale,
           ),
         ),

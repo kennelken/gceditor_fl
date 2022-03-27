@@ -21,6 +21,7 @@ import 'package:gceditor/model/db_cmd/db_cmd_edit_meta_entity_id.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_project_settings.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_table.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_table_cell_value.dart';
+import 'package:gceditor/model/db_cmd/db_cmd_fill_column.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_reorder_class_field.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_reorder_enum.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_reorder_meta_entity.dart';
@@ -143,6 +144,8 @@ abstract class BaseDbCmd {
         return DbCmdResizeDictionaryKeyToValue.fromJson(element);
       case DbCmdType.copypaste:
         return DbCmdCopyPaste.fromJson(element);
+      case DbCmdType.fillColumn:
+        return DbCmdFillColumn.fromJson(element);
     }
 
     throw Exception('Can not decode command of type "$type"');
@@ -182,4 +185,5 @@ enum DbCmdType {
   resizeColumn,
   resizeDictionaryKeyToValue,
   copypaste,
+  fillColumn,
 }

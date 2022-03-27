@@ -733,5 +733,18 @@
 	"buttonExecute": "Execute",
 	"@buttonExecute": {
 		"description": ""
+	},
+	"buttonFillColumnTooltip": "Fill the column with a value",
+	"@buttonFillColumnTooltip": {
+		"description": ""
+	},
+	"fillColumnLabel": "Fill column '{column}' with",
+	"@fillColumnLabel": {
+		"description": "",
+		"placeholders": {
+			"column": {
+				"type": "String"
+			}
+		}
 	}
 }

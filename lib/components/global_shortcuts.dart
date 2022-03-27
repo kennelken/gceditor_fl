@@ -107,11 +107,11 @@ class GlobalShortcuts {
   }
 
   static void deselect() {
-    final stateNotofoer = providerContainer.read(tableSelectionStateProvider);
-    if (stateNotofoer.state.selectedField != null) {
-      stateNotofoer.setSelectedField();
-    } else if (stateNotofoer.state.selectedEntity != null) {
-      stateNotofoer.setSelectedEntity();
+    final stateSelection = providerContainer.read(tableSelectionStateProvider);
+    if (stateSelection.state.selectedField != null) {
+      stateSelection.setSelectedField();
+    } else if (stateSelection.state.selectedEntity != null) {
+      stateSelection.setSelectedEntity();
     }
 
     providerContainer.read(clientFindStateProvider).toggleVisibility(false);

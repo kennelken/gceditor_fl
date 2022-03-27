@@ -12,7 +12,7 @@ import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/app_local_storage.dart';
-import 'package:gceditor/model/db_network/authentification_data.dart';
+import 'package:gceditor/model/db_network/authentication_data.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/model/state/auth_list_state.dart';
@@ -55,8 +55,8 @@ class _LandingScreenState extends State<LandingScreen> {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, watch, child) {
-        final defaulFolder = watch(appStateProvider).state.defaultProjectFolder;
-        final defaulFolderPath = defaulFolder?.path ?? '';
+        final defaultFolder = watch(appStateProvider).state.defaultProjectFolder;
+        final defaultFolderPath = defaultFolder?.path ?? '';
         final openPort = watch(networkStateProvider.notifier).state.openPort?.toString() ?? Config.portMin.toString();
 
         if (!_initialValuesSet) {
@@ -66,8 +66,8 @@ class _LandingScreenState extends State<LandingScreen> {
           final preferredIpAddress = appState.ipAddress ?? (AppLocalStorage.instance.ipAddress ?? Config.defaultIp).toString();
 
           _projectPath =
-              appState.projectFile?.path ?? AppLocalStorage.instance.projectPath ?? path.join(defaulFolderPath, Config.newProjectDefaultName);
-          _outputPath = appState.output?.path ?? AppLocalStorage.instance.outputPath ?? path.join(defaulFolderPath);
+              appState.projectFile?.path ?? AppLocalStorage.instance.projectPath ?? path.join(defaultFolderPath, Config.newProjectDefaultName);
+          _outputPath = appState.output?.path ?? AppLocalStorage.instance.outputPath ?? path.join(defaultFolderPath);
 
           _clientIpTextController.text = preferredIpAddress;
           _portTextController.text = preferredPort;
@@ -157,7 +157,7 @@ class _LandingScreenState extends State<LandingScreen> {
                               ),
                               SizedBox(height: 60 * kScale),
                               ClientAuthPanel(
-                                authData: PartialAuthentificationData.values(login: _clientLogin, secret: _clientSecret, password: _clientPassword),
+                                authData: PartialAuthenticationData.values(login: _clientLogin, secret: _clientSecret, password: _clientPassword),
                                 onCredentialsChanged: _handleClientCredentialsChanged,
                               ),
                             ],
@@ -181,7 +181,7 @@ class _LandingScreenState extends State<LandingScreen> {
                       children: [
                         Expanded(
                           child: ScrollConfiguration(
-                            behavior: getkScrollDraggable(context),
+                            behavior: getScrollDraggable(context),
                             child: SingleChildScrollView(
                               scrollDirection: Axis.vertical,
                               controller: ScrollController(),
@@ -197,7 +197,7 @@ class _LandingScreenState extends State<LandingScreen> {
                                   ),
                                   SizedBox(height: 10 * kScale),
                                   ProjectPathView(
-                                    defaulFolder: defaulFolder,
+                                    defaultFolder: defaultFolder,
                                     projectPath: _projectPath,
                                     projectPathTextController: _projectPathTextController,
                                     labelText: Loc.get.projectPath,
@@ -206,7 +206,7 @@ class _LandingScreenState extends State<LandingScreen> {
                                   ),
                                   SizedBox(height: 10 * kScale),
                                   ProjectPathView(
-                                    defaulFolder: defaulFolder,
+                                    defaultFolder: defaultFolder,
                                     projectPath: _outputPath,
                                     projectPathTextController: _outputPathTextController,
                                     labelText: Loc.get.outputPath,
@@ -271,7 +271,7 @@ class _LandingScreenState extends State<LandingScreen> {
     appStateNotifier.setClientAppParams(
       ipAddress,
       port,
-      AuthentificationData.values(
+      AuthenticationData.values(
         login: _clientLogin!,
         secret: _clientSecret!,
         password: _clientPassword!,
@@ -280,7 +280,7 @@ class _LandingScreenState extends State<LandingScreen> {
 
     _saveLocalsStorageData();
 
-    appStateNotifier.launchgApp(AppMode.client);
+    appStateNotifier.launchApp(AppMode.client);
   }
 
   void _onStandalonePressed() {
@@ -294,7 +294,7 @@ class _LandingScreenState extends State<LandingScreen> {
       port,
       File(_projectPathTextController.text),
       Directory(_outputPathTextController.text),
-      AuthentificationData.values(
+      AuthenticationData.values(
         login: _clientLogin!,
         secret: _clientSecret!,
         password: _clientPassword!,
@@ -303,7 +303,7 @@ class _LandingScreenState extends State<LandingScreen> {
 
     _saveLocalsStorageData();
 
-    appStateNotifier.launchgApp(AppMode.standalone);
+    appStateNotifier.launchApp(AppMode.standalone);
   }
 
   void _onServerPressed() {
@@ -318,7 +318,7 @@ class _LandingScreenState extends State<LandingScreen> {
 
     _saveLocalsStorageData();
 
-    appStateNotifier.launchgApp(AppMode.server);
+    appStateNotifier.launchApp(AppMode.server);
   }
 
   void _saveLocalsStorageData() {
