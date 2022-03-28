@@ -9,3 +9,8 @@
 	Move Is Unique property there.
 
 33. wait for https://github.com/flutter/flutter/pull/98469 to be published in stable channel to fix an issue with spaces and enters in a multiline textfield
+
+34. new column type: formula. Allows to define a formula, that uses variables from a dictionary-like cell content.
+	Example:
+		Formula: {x} + {y}
+		Cell: {"x": "10", "y":"SomeTableRowId.SomeColumnName"}
