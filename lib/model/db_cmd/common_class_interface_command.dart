@@ -129,7 +129,7 @@ mixin CommonClassInterfaceCommand {
     dbModel.cache.invalidate();
 
     for (final table in allTablesUsingClass) {
-      final allFields = dbModel.cache.getAllFields(entity);
+      final allFields = dbModel.cache.getAllFieldsById(table.classId)!;
       final defaultValues = allFields.map((e) => DbModelUtils.parseDefaultValueByFieldOrDefault(e, e.defaultValue)).toList();
 
       for (var i = 0; i < table.rows.length; i++) {
