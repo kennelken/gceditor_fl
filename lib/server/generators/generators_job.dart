@@ -129,7 +129,7 @@ mixin OutputFolderSaver {
       final file = _getFile(outputFolder: outputFolder, fileName: fileName, fileExtension: fileExtension);
 
       if (!await file.exists()) {
-        file.create(recursive: true);
+        await file.create(recursive: true);
       }
 
       await file.writeAsString(data);
@@ -144,7 +144,8 @@ mixin OutputFolderSaver {
   Future<String?> readFromFile({required String outputFolder, required String fileName, required String fileExtension}) async {
     try {
       final file = _getFile(outputFolder: outputFolder, fileName: fileName, fileExtension: fileExtension);
-      if (!await file.exists()) return null;
+      if (!await file.exists()) //
+        return null;
 
       return await file.readAsString();
     } catch (e) {
@@ -161,11 +162,14 @@ mixin OutputFolderSaver {
 
 mixin FilesComparer {
   bool resultChanged(String newResult, String? oldResult, String payloadBeginning) {
-    if (oldResult == null) //
+    if (oldResult == null || oldResult.isEmpty) //
       return true;
 
     final payloadStartOldResult = oldResult.indexOf(payloadBeginning);
     final payloadStartNewResult = newResult.indexOf(payloadBeginning);
+
+    if (payloadStartOldResult <= -1) //
+      return true;
 
     final hashOld = _getHash(oldResult, payloadStartOldResult);
     final hashNew = _getHash(newResult, payloadStartNewResult);

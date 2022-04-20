@@ -89,7 +89,7 @@ class ServerHistoryStateNotifier extends ChangeNotifier {
             }
           }
         } else {
-          directory.create(recursive: true);
+          await directory.create(recursive: true);
         }
 
         if (newState.currentItem == null && (newState.currentTag?.isNotEmpty ?? false)) {

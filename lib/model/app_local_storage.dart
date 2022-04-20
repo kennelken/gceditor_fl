@@ -37,7 +37,7 @@ class AppLocalStorage {
 
       documentsPath = directory.path;
       documentsPath = path.join(documentsPath, Config.appName);
-      Directory(documentsPath).create(recursive: true);
+      await Directory(documentsPath).create(recursive: true);
     }
 
     _storage = LocalStorage(
