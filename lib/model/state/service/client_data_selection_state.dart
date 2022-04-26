@@ -21,6 +21,9 @@ final clientDataSelectionStateProvider = ChangeNotifierProvider((ref) {
     notifier.clear(false);
     notifier.updateVisibility(false);
   });
+  ref.read(clientViewModeStateProvider).addListener(() {
+    notifier.updateVisibility(false);
+  });
   return notifier;
 });
 
@@ -97,7 +100,8 @@ class ClientDataSelectionStateNotifier extends ChangeNotifier {
             state.selectionTable?.id == providerContainer.read(tableSelectionStateProvider).state.selectedTable?.id &&
             state.selectedItems.isNotEmpty ||
         (state.copiedItems?.length ?? 0) > 0 ||
-        (state.externalCopiedItems?.length ?? 0) > 0;
+        (state.externalCopiedItems?.length ?? 0) > 0 ||
+        providerContainer.read(clientViewModeStateProvider).state.actionsMode;
 
     if (!silent) //
       notifyListeners();
