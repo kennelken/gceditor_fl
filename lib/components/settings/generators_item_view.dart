@@ -120,6 +120,7 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
         break;
 
       case GeneratorType.csharp:
+      case GeneratorType.java:
         _namespaceController.text = (_generatorCopy as GeneratorCsharp).namespace;
         _prefixController.text = (_generatorCopy as GeneratorCsharp).prefix;
         _prefixInterfaceController.text = (_generatorCopy as GeneratorCsharp).prefixInterface;
@@ -292,6 +293,7 @@ class _GeneratorsItemViewState extends State<GeneratorsItemView> {
         ];
 
       case GeneratorType.csharp:
+      case GeneratorType.java:
         return [
           TooltipWrapper(
             message: Loc.get.namespaceLabel,

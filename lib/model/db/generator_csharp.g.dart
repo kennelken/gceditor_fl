@@ -39,4 +39,5 @@ const _$GeneratorTypeEnumMap = {
   GeneratorType.undefined: 'undefined',
   GeneratorType.json: 'json',
   GeneratorType.csharp: 'csharp',
+  GeneratorType.java: 'java',
 };

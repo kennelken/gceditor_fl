@@ -10,6 +10,7 @@ import 'package:gceditor/main.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/db/generator_csharp.dart';
+import 'package:gceditor/model/db/generator_java.dart';
 import 'package:gceditor/model/db/generator_json.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
@@ -17,6 +18,8 @@ import 'package:gceditor/model/state/log_state.dart';
 import 'package:gceditor/server/generators/generator_csharp_runner.dart';
 import 'package:gceditor/server/generators/generator_json_runner.dart';
 import 'package:path/path.dart' as path;
+
+import 'generator_java_runner.dart';
 
 class GeneratorsJob {
   Future<List<GeneratorResult>> start(DbModel model, String user) async {
@@ -93,6 +96,9 @@ Future<GeneratorResult> _executeGenerator(Tuple4<String, int, String, String> pa
 
     case GeneratorType.csharp:
       return await GeneratorCsharpRunner().execute(outputFolder, model, generatorData as GeneratorCsharp, additionalInfo);
+
+    case GeneratorType.java:
+      return await GeneratorJavaRunner().execute(outputFolder, model, generatorData as GeneratorJava, additionalInfo);
   }
 }
 

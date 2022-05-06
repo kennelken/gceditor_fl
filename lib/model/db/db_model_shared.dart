@@ -8,6 +8,8 @@ import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/db/table_meta_group.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import 'generator_java.dart';
+
 abstract class IIdentifiable {
   String id = '';
 }
@@ -43,6 +45,8 @@ abstract class BaseGenerator {
       return GeneratorJson.fromJson(element);
     } else if (type == describeEnum(GeneratorType.csharp)) {
       return GeneratorCsharp.fromJson(element);
+    } else if (type == describeEnum(GeneratorType.java)) {
+      return GeneratorJava.fromJson(element);
     } else {
       throw Exception('Unsupported generator type $type');
     }
@@ -168,6 +172,7 @@ enum GeneratorType {
   undefined,
   json,
   csharp,
+  java,
 }
 
 @JsonEnum()

@@ -18,6 +18,8 @@ import 'package:gceditor/model/db/generator_json.dart';
 import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/db/table_meta_group.dart';
 
+import '../db/generator_java.dart';
+
 class DbModelFactory {
   DbModel createDefaultDbModel() {
     final result = DbModel();
@@ -209,6 +211,15 @@ class DbModelFactory {
           ..prefix = Config.defaultGeneratorCsharpPrefix
           ..prefixInterface = Config.defaultGeneratorCsharpPrefixInterface
           ..postfix = Config.defaultGeneratorCsharpPostfix;
+
+      case GeneratorType.java:
+        return GeneratorJava()
+          ..fileName = Config.defaultGeneratorName
+          ..fileExtension = Config.defaultGeneratorJavaFileExtension
+          ..namespace = Config.defaultGeneratorJavaNamespace
+          ..prefix = Config.defaultGeneratorJavaPrefix
+          ..prefixInterface = Config.defaultGeneratorJavaPrefixInterface
+          ..postfix = Config.defaultGeneratorJavaPostfix;
     }
   }
 }

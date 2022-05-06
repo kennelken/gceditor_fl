@@ -861,6 +861,30 @@ using System.Drawing;
             throw new Exception(\$"Could not find item with id '{id}'");
         }
 
+        public List<T> Get<T>(IEnumerable<string> ids) where T : IIdentifiable
+        {
+            var result = new List<T>();
+            foreach (var id in ids)
+            {
+                if (AllItems.TryGetValue(id, out var item))
+                {
+                    if (item is T value)
+                    {
+                        result.Add(value);
+                    }
+                    else
+                    {
+                        throw new Exception(\$"Item with id='{id}' is not {typeof(T)}");
+                    }
+                }
+                else
+                {
+                    throw new Exception(\$"Could not find item with id '{id}'");
+                }
+            }
+            return result;
+        }
+
         public T GetOrDefault<T>(string id, T defaultValue = default) where T : IIdentifiable
         {
             if (AllItems.TryGetValue(id, out var item))
@@ -873,7 +897,27 @@ using System.Drawing;
             return defaultValue;
         }
 
-        public List<T> GetAll<T>() where T : IIdentifiable
+        public List<T> GetOrDefault<T>(IEnumerable<string> ids) where T : IIdentifiable
+        {
+            var result = new List<T>();
+            foreach (var id in ids)
+            {
+                if (AllItems.TryGetValue(id, out var item))
+                {
+                    if (item is T value)
+                    {
+                        result.Add(value);
+                    }
+                    else
+                    {
+                        throw new Exception(\$"Item with id='{id}' is not {typeof(T)}");
+                    }
+                }
+            }
+            return result;
+        }
+
+        public IReadOnlyList<T> GetAll<T>() where T : IIdentifiable
         {
             if (!AllItemsByType.TryGetValue(typeof(T), out var items))
             {
@@ -893,19 +937,45 @@ using System.Drawing;
             AllItems = new Dictionary<string, IIdentifiable>();
             AllItemsByType = new Dictionary<Type, object>();
 
+            var typesCache = new Dictionary<Type, List<Type>>();
             foreach (var item in items)
             {
                 AllItems[item.Id] = item;
 
-                if (!AllItemsByType.TryGetValue(item.GetType(), out var listItemsByType))
+                var types = GetParentTypesIncludingCurrent(item.GetType(), typesCache);
+                foreach (var type in types)
                 {
-                    listItemsByType = Activator.CreateInstance(typeof(List<>).MakeGenericType(item.GetType()));
-                    AllItemsByType.Add(item.GetType(), listItemsByType);
+                    if (type == typeof(object))
+                        continue;
+
+                    if (!AllItemsByType.TryGetValue(type, out var listItemsByType))
+                    {
+                        listItemsByType = Activator.CreateInstance(typeof(List<>).MakeGenericType(type));
+                        AllItemsByType.Add(type, listItemsByType);
+                    }
+                    (listItemsByType as IList).Add(item);
                 }
-                (listItemsByType as IList).Add(item);
             }
 
             Lists = new ItemsLists(AllItems);
+        }
+
+        private List<Type> GetParentTypesIncludingCurrent(Type type, Dictionary<Type, List<Type>> cache)
+        {
+            if (!cache.TryGetValue(type, out var result))
+            {
+                result = type.GetInterfaces().ToList();
+
+                var parent = type;
+                while (parent != null)
+                {
+                    result.Add(parent);
+                    parent = parent.BaseType;
+                }
+
+                cache[type] = result;
+            }
+            return result;
         }
     }
 
@@ -1236,9 +1306,9 @@ using System.Drawing;
 
 #region Parse
         private static Dictionary<TKey, TValue> ParseDictionary<TKey, TValue>(
-            List<JsonDictionaryItem> values, Func<object,
-                TKey> getKey, Func<object,
-                TValue> getValue,
+            List<JsonDictionaryItem> values,
+            Func<object, TKey> getKey,
+            Func<object, TValue> getValue,
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
