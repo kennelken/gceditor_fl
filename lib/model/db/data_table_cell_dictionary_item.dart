@@ -4,7 +4,9 @@ part 'data_table_cell_dictionary_item.g.dart';
 
 @JsonSerializable()
 class DataTableCellDictionaryItem {
+  @JsonKey(name: 'k')
   dynamic key;
+  @JsonKey(name: 'v')
   dynamic value;
 
   DataTableCellDictionaryItem();

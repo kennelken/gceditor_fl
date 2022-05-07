@@ -59,7 +59,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
   @override
   void initState() {
     super.initState();
-    _cellValue = _cloneValues(widget.value);
+    _cellValue = widget.value.copy();
     _scrollController = ScrollController();
 
     providerContainer.read(clientRestoredProvider).addListener(_handleClientRestored);
@@ -84,7 +84,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
   void _handleClientRestored() {
     if (!DbModelUtils.valuesAreEqual(_cellValue, widget.value)) {
       setState(() {
-        _cellValue = _cloneValues(widget.value);
+        _cellValue = widget.value.copy();
       });
     }
   }
@@ -97,7 +97,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
     if ((lastCommand?.$type ?? DbCmdType.unknown) == DbCmdType.editClassField || //
         !DbModelUtils.valuesAreEqual(_cellValue, value)) {
       setState(() {
-        _cellValue = _cloneValues(value);
+        _cellValue = value.copy();
       });
     }
   }
@@ -227,7 +227,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
   void _handleReorder(int oldIndex, int newIndex) {
     setState(
       () {
-        _cellValue = DataTableCellValue.dictionary(Utils.copyAndReorder(_cloneValues(_cellValue).dictionaryCellValues!, oldIndex, newIndex));
+        _cellValue = DataTableCellValue.dictionary(Utils.copyAndReorder(_cellValue.copy().dictionaryCellValues!, oldIndex, newIndex));
 
         widget.onValueChanged(_cellValue);
       },
@@ -237,7 +237,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
   _handleDeleteItem(int index) {
     setState(
       () {
-        final valuesListCopy = _cloneValues(_cellValue);
+        final valuesListCopy = _cellValue.copy();
         valuesListCopy.dictionaryCellValues!.removeAt(index);
         _cellValue = valuesListCopy;
 
@@ -249,7 +249,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
   void _handleAddRow() {
     setState(
       () {
-        final valuesListCopy = _cloneValues(_cellValue);
+        final valuesListCopy = _cellValue.copy();
         valuesListCopy.dictionaryCellValues!.add(
           DataTableCellDictionaryItem.values(
             key: DbModelUtils.getDefaultValue(widget.keyFieldType.type).simpleValue,
@@ -269,7 +269,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
   void _handleKeyChanged(int index, dynamic value) {
     setState(
       () {
-        final valuesListCopy = _cloneValues(_cellValue);
+        final valuesListCopy = _cellValue.copy();
         valuesListCopy.dictionaryCellValues![index].key = value;
         _cellValue = valuesListCopy;
 
@@ -281,17 +281,13 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
   void _handleValueChanged(int index, dynamic value) {
     setState(
       () {
-        final valuesListCopy = _cloneValues(_cellValue);
+        final valuesListCopy = _cellValue.copy();
         valuesListCopy.dictionaryCellValues![index].value = value;
         _cellValue = valuesListCopy;
 
         widget.onValueChanged(_cellValue);
       },
     );
-  }
-
-  DataTableCellValue _cloneValues(DataTableCellValue source) {
-    return DataTableCellValue.fromJson(source.toJson().clone());
   }
 
   void _handleHorizontalDragUpdate(BuildContext context, DragUpdateDetails details) {

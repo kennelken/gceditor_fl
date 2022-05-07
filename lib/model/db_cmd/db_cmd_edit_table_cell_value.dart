@@ -3,7 +3,6 @@ import 'package:gceditor/model/db/data_table_cell_value.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
-import 'package:gceditor/utils/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'base_db_cmd.dart';
@@ -86,7 +85,7 @@ class DbCmdEditTableCellValue extends BaseDbCmd {
       tableId: tableId,
       fieldId: fieldId,
       rowId: rowId,
-      value: DataTableCellValue.fromJson(table.rows[rowIndex].values[columnIndex].toJson().clone()),
+      value: table.rows[rowIndex].values[columnIndex].copy(),
     );
   }
 }

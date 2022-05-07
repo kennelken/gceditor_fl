@@ -418,6 +418,7 @@ class DbModelCache {
   List<ClassMetaFieldDescription>? getAllFieldsById(String id) {
     if (id.isEmpty) //
       return null;
+
     _validateIfRequired();
     final classEntity = getClass<ClassMetaEntity>(id)!;
     return _allFields![classEntity]!;

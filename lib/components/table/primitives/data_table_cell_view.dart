@@ -17,7 +17,6 @@ import 'package:gceditor/model/state/client_problems_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/model/state/style_state.dart';
-import 'package:gceditor/utils/utils.dart';
 
 import 'data_table_cell_list_view.dart';
 import 'data_table_cell_text_view.dart';
@@ -196,7 +195,7 @@ class DataTableCellView extends StatelessWidget {
             tableId: table.id,
             fieldId: allFields[index].id,
             rowId: row.id,
-            value: DataTableCellValue.fromJson(value.toJson().clone()),
+            value: value.copy(),
           ),
         );
   }

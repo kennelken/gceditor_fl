@@ -10,8 +10,7 @@ GeneratorJsonItem _$GeneratorJsonItemFromJson(Map<String, dynamic> json) =>
     GeneratorJsonItem()
       ..id = json['id'] as String
       ..values = (json['values'] as Map<String, dynamic>).map(
-        (k, e) =>
-            MapEntry(k, DataTableCellValue.fromJson(e as Map<String, dynamic>)),
+        (k, e) => MapEntry(k, DataTableCellValue.fromJson(e)),
       );
 
 Map<String, dynamic> _$GeneratorJsonItemToJson(GeneratorJsonItem instance) =>

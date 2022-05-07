@@ -9,8 +9,8 @@ part of 'data_table_cell_dictionary_item.dart';
 DataTableCellDictionaryItem _$DataTableCellDictionaryItemFromJson(
         Map<String, dynamic> json) =>
     DataTableCellDictionaryItem()
-      ..key = json['key']
-      ..value = json['value'];
+      ..key = json['k']
+      ..value = json['v'];
 
 Map<String, dynamic> _$DataTableCellDictionaryItemToJson(
     DataTableCellDictionaryItem instance) {
@@ -22,7 +22,7 @@ Map<String, dynamic> _$DataTableCellDictionaryItemToJson(
     }
   }
 
-  writeNotNull('key', instance.key);
-  writeNotNull('value', instance.value);
+  writeNotNull('k', instance.key);
+  writeNotNull('v', instance.value);
   return val;
 }

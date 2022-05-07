@@ -46,7 +46,7 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
   @override
   void initState() {
     super.initState();
-    _cellValue = _cloneValues(widget.value);
+    _cellValue = widget.value.copy();
     _scrollController = ScrollController();
 
     providerContainer.read(clientRestoredProvider).addListener(_handleClientRestored);
@@ -71,7 +71,7 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
   void _handleClientRestored() {
     if (!DbModelUtils.valuesAreEqual(_cellValue, widget.value)) {
       setState(() {
-        _cellValue = _cloneValues(widget.value);
+        _cellValue = widget.value.copy();
       });
     }
   }
@@ -84,7 +84,7 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
     if ((lastCommand?.$type ?? DbCmdType.unknown) == DbCmdType.editClassField || //
         !DbModelUtils.valuesAreEqual(_cellValue, value)) {
       setState(() {
-        _cellValue = _cloneValues(value);
+        _cellValue = value.copy();
       });
     }
   }
@@ -191,7 +191,7 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
 
   _handleDeleteItem(int index) {
     setState(() {
-      final valuesListCopy = _cloneValues(_cellValue);
+      final valuesListCopy = _cellValue.copy();
       valuesListCopy.listCellValues!.removeAt(index);
       _cellValue = valuesListCopy;
 
@@ -201,7 +201,7 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
 
   void _handleAddRow() {
     setState(() {
-      final valuesListCopy = _cloneValues(_cellValue);
+      final valuesListCopy = _cellValue.copy();
       valuesListCopy.listCellValues!.add(DbModelUtils.getDefaultValue(widget.valueFieldType.type).simpleValue);
       _cellValue = valuesListCopy;
 
@@ -214,15 +214,11 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
 
   void _handleValueChanged(int index, dynamic value) {
     setState(() {
-      final valuesListCopy = _cloneValues(_cellValue);
+      final valuesListCopy = _cellValue.copy();
       valuesListCopy.listCellValues![index] = value;
       _cellValue = valuesListCopy;
 
       widget.onValueChanged(_cellValue);
     });
-  }
-
-  DataTableCellValue _cloneValues(DataTableCellValue source) {
-    return DataTableCellValue.fromJson(source.toJson().clone());
   }
 }

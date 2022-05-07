@@ -14,8 +14,7 @@ DbCmdEditTableCellValue _$DbCmdEditTableCellValueFromJson(
       ..tableId = json['tableId'] as String
       ..fieldId = json['fieldId'] as String
       ..rowId = json['rowId'] as String
-      ..value =
-          DataTableCellValue.fromJson(json['value'] as Map<String, dynamic>);
+      ..value = DataTableCellValue.fromJson(json['value']);
 
 Map<String, dynamic> _$DbCmdEditTableCellValueToJson(
     DbCmdEditTableCellValue instance) {

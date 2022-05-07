@@ -1,6 +1,7 @@
 import 'package:gceditor/model/db/db_model_settings.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/state/db_model_cache.dart';
+import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'db_model.g.dart';
@@ -20,6 +21,10 @@ class DbModel {
 
   DbModel();
 
-  factory DbModel.fromJson(Map<String, dynamic> json) => _$DbModelFromJson(json);
+  factory DbModel.fromJson(Map<String, dynamic> json) {
+    final result = _$DbModelFromJson(json);
+    DbModelUtils.specifyDataCellValues(result);
+    return result;
+  }
   Map<String, dynamic> toJson() => _$DbModelToJson(this);
 }

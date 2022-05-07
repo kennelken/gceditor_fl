@@ -1,15 +1,11 @@
+import 'package:gceditor/model/db/class_meta_field_description.dart';
 import 'package:gceditor/model/db/data_table_cell_dictionary_item.dart';
-import 'package:json_annotation/json_annotation.dart';
 
-part 'data_table_cell_value.g.dart';
+import 'db_model_shared.dart';
 
-@JsonSerializable()
 class DataTableCellValue {
-  @JsonKey(includeIfNull: false, defaultValue: null, name: 'v')
   dynamic simpleValue;
-  @JsonKey(includeIfNull: false, name: 'lv')
   List<dynamic>? listCellValues;
-  @JsonKey(includeIfNull: false, name: 'dv')
   List<DataTableCellDictionaryItem>? dictionaryCellValues;
 
   DataTableCellValue();
@@ -33,6 +29,67 @@ class DataTableCellValue {
       ..dictionaryCellValues = dictionaryCellValues?.map((e) => e.copy()).toList();
   }
 
-  factory DataTableCellValue.fromJson(Map<String, dynamic> json) => _$DataTableCellValueFromJson(json);
-  Map<String, dynamic> toJson() => _$DataTableCellValueToJson(this);
+  factory DataTableCellValue.fromJson(dynamic json) {
+    final result = DataTableCellValue();
+
+    result.simpleValue = json;
+    if (json is List<dynamic>) {
+      result.listCellValues = json;
+      if (json.isEmpty || json[0] is Map<String, dynamic>) {
+        result.dictionaryCellValues = json.map((e) => DataTableCellDictionaryItem.fromJson(e)).toList();
+      }
+    }
+    return result;
+  }
+
+  dynamic toJson() {
+    if (dictionaryCellValues != null) {
+      return dictionaryCellValues!.map((e) => e.toJson()).toList();
+    } else if (listCellValues != null) {
+      return listCellValues!.toList();
+    }
+    return simpleValue;
+  }
+
+  void specifyType(ClassMetaFieldDescription? field) {
+    if (field == null) //
+      return;
+
+    switch (field.typeInfo.type) {
+      case ClassFieldType.undefined:
+      case ClassFieldType.bool:
+      case ClassFieldType.int:
+      case ClassFieldType.long:
+      case ClassFieldType.float:
+      case ClassFieldType.double:
+      case ClassFieldType.string:
+      case ClassFieldType.text:
+      case ClassFieldType.reference:
+      case ClassFieldType.date:
+      case ClassFieldType.duration:
+      case ClassFieldType.color:
+        listCellValues = null;
+        dictionaryCellValues = null;
+        break;
+
+      case ClassFieldType.list:
+      case ClassFieldType.set:
+        dictionaryCellValues = null;
+        simpleValue = null;
+        break;
+
+      case ClassFieldType.dictionary:
+        listCellValues = null;
+        simpleValue = null;
+        break;
+    }
+  }
+
+  static dynamic toJsonSt(DataTableCellValue obj) {
+    return obj.toJson();
+  }
+
+  static DataTableCellValue fromJsonSt(dynamic obj) {
+    return DataTableCellValue.fromJson(obj);
+  }
 }

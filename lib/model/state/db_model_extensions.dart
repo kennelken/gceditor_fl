@@ -1156,6 +1156,24 @@ class DbModelUtils {
     }
     return DbCmdResult.success();
   }
+
+  static void specifyDataCellValues(DbModel dbModel) {
+    for (final table in dbModel.cache.allDataTables) {
+      if (table.classId.isEmpty) //
+        return;
+
+      final fields = dbModel.cache.getAllFieldsById(table.classId);
+      if (fields == null) {
+        throw Exception("Could not find columns for class '${table.classId}'");
+      }
+
+      for (final row in table.rows) {
+        for (var i = 0; i < row.values.length; i++) {
+          row.values[i].specifyType(fields[i]);
+        }
+      }
+    }
+  }
 }
 
 class MetaValueCoordinates {

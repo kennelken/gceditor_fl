@@ -557,16 +557,16 @@ ${_makeSummary(' */', indentDepth, false)}''';
       case ClassFieldType.date:
       case ClassFieldType.duration:
       case ClassFieldType.color:
-        return _getAssignSimpleValueFunction(model, data, field.typeInfo, '${value}.v');
+        return _getAssignSimpleValueFunction(model, data, field.typeInfo, value);
 
       case ClassFieldType.list:
-        return 'ParseList(${value}.lv, ${_getSimplePropertyType(field.valueTypeInfo!, data)}.class, v -> ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
+        return 'ParseList(${value}, ${_getSimplePropertyType(field.valueTypeInfo!, data)}.class, v -> ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
       case ClassFieldType.set:
-        return 'ParseHashSet(${value}.lv, ${_getSimplePropertyType(field.valueTypeInfo!, data)}.class, v -> ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
+        return 'ParseHashSet(${value}, ${_getSimplePropertyType(field.valueTypeInfo!, data)}.class, v -> ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
       case ClassFieldType.dictionary:
-        return 'ParseDictionary(${value}.dv, ${_getSimplePropertyType(field.keyTypeInfo!, data)}.class, ${_getSimplePropertyType(field.valueTypeInfo!, data)}.class, k -> ${_getAssignSimpleValueFunction(model, data, field.keyTypeInfo!, 'k')}, v -> ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
+        return 'ParseDictionary(${value}, ${_getSimplePropertyType(field.keyTypeInfo!, data)}.class, ${_getSimplePropertyType(field.valueTypeInfo!, data)}.class, k -> ${_getAssignSimpleValueFunction(model, data, field.keyTypeInfo!, 'k')}, v -> ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
     }
   }
 
@@ -720,28 +720,24 @@ ${_makeSummary(' */', indentDepth, false)}''';
 // {${_paramDate}}
 // by {${_paramUser}}
 
-/** Usage:
- *	ObjectMapper objectMapper = new ObjectMapper();
- *	var modelRoot = new ModelRoot();
- *	ModelRoot.GceditorJsonParser.Parse(str, (s) -> {
- *		try {
- *			return objectMapper.readValue(s, ModelRoot.GceditorJsonParser.JsonRoot.class);
- *		} catch (IOException e) {
- *			throw new RuntimeException(e);
- *		}
- *	}, modelRoot, errorData -> HandleError(errorData));
+/** Dependencies:
+ *  https://github.com/FasterXML/jackson (fasterxml.jackson.core.databind) is required for this parser to work
+ *
+ *  Usage:
+ *  var modelRoot = new ModelRoot();
+ *  ModelRoot.GceditorJsonParser.Parse(str, modelRoot, errorData -> HandleError(errorData));
  */
 
 {${_paramNamespaceStart}}
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -1067,14 +1063,15 @@ class EmptyCollectionFactory
       '''
     public static class GceditorJsonParser
     {
-        public static {${_paramPrefix}}Root{${_paramPostfix}} Parse(String jsonText, Function<String, JsonRoot> parseFunction, {${_paramPrefix}}Root{${_paramPostfix}} root, Consumer<ErrorData> onError)  throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException
+        public static {${_paramPrefix}}Root{${_paramPostfix}} Parse(String jsonText, {${_paramPrefix}}Root{${_paramPostfix}} root, Consumer<ErrorData> onError) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException
         {
             EmptyCollectionFactory emptyCollectionFactory = new EmptyCollectionFactory();
 
             var objectsByIds = new HashMap<String, IIdentifiable>();
             var valuesByIds = new HashMap<String, JsonItem>();
 
-            var jsonRoot = parseFunction.apply(jsonText);
+            ObjectMapper objectMapper = new ObjectMapper();
+            var jsonRoot = objectMapper.readValue(jsonText, {${_paramPrefix}}Root{${_paramPostfix}}.GceditorJsonParser.JsonRoot.class);
             for (var className : jsonRoot.classes.keySet())
             {
                 var listItems = jsonRoot.classes.get(className);
@@ -1116,18 +1113,7 @@ class EmptyCollectionFactory
         public static class JsonItem
         {
             public String id;
-            public HashMap<String, JsonCellValue> values;
-        }
-
-        public static class JsonCellValue {
-            public Object v;
-            public ArrayList<Object> lv;
-            public ArrayList<JsonDictionaryItem> dv;
-        }
-
-        public static class JsonDictionaryItem {
-            public Object key;
-            public Object value;
+            public HashMap<String, Object> values;
         }
 
         private static IIdentifiable GetNewInstance(String className, JsonItem item)
@@ -1158,7 +1144,7 @@ class EmptyCollectionFactory
         }
 
         private static <TKey, TValue> HashMap<TKey, TValue> ParseDictionary(
-            ArrayList<JsonDictionaryItem> values,
+            Object values,
             Class<TKey> keyClass,
             Class<TValue> valueClass,
             Function<Object, TKey> getKey,
@@ -1166,40 +1152,45 @@ class EmptyCollectionFactory
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
-            if (values.size() <= 0)
+            var array = (ArrayList<LinkedHashMap>)values;
+            if (values == null || values == "" || array.size() <= 0)
                 return emptyCollectionFactory.<TKey, TValue>HashMap(keyClass, valueClass);
 
             var result = new HashMap<TKey, TValue>();
-            for (var value : values)
-                result.put(getKey.apply(value.key), getValue.apply(value.value));
+            for (var jsonValue : array)
+            {
+                result.put(getKey.apply(jsonValue.get("k")), getValue.apply(jsonValue.get("v")));
+            }
 
             return result;
         }
 
         private static <T> ArrayList<T> ParseList(
-            ArrayList<Object> values,
+            Object values,
             Class<T> valueClass,
             Function<Object, T> getValue,
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
-            if (values.size() <= 0)
+            var array = (ArrayList)values;
+            if (values == null || values == "" || array.size() <= 0)
                 return emptyCollectionFactory.<T>List(valueClass);
 
             var result = new ArrayList<T>();
-            for (var value : values)
+            for (var value : array)
                 result.add(getValue.apply(value));
             return result;
         }
 
         private static <T> HashSet<T> ParseHashSet(
-            ArrayList<Object> values,
+            Object values,
             Class<T> valueClass,
             Function<Object, T> getValue,
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
-            if (values.size() <= 0)
+            var array = (ArrayList)values;
+            if (values == null || values == "" || array.size() <= 0)
                 return emptyCollectionFactory.<T>HashSet(valueClass);
 
             return new HashSet<T>(GceditorJsonParser.<T>ParseList(values, valueClass, getValue, emptyCollectionFactory));

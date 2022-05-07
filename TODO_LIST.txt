@@ -6,7 +6,7 @@
 
 30. new column property: value checkers - a list of checkers (IChecker.validate(field, value)). Every checker should define its own unique properties.
 	Example of such checkers IntChecker, AllowedValuesChecker, BannedValuesChecker, DateChecker, ReferenceChecker, NotNullChecker.
-	Move Is Unique property there.
+	Move "Is Unique" property there.
 
 33. wait for https://github.com/flutter/flutter/pull/98469 to be published in stable channel to fix an issue with spaces and enters in a multiline textfield
 

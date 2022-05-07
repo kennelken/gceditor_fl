@@ -31,7 +31,7 @@ class Config {
   static const String defaultGeneratorCsharpPrefixInterface = 'IModel';
   static const String defaultGeneratorCsharpPostfix = '';
   static const String defaultGeneratorJavaFileExtension = 'java';
-  static const String defaultGeneratorJavaNamespace = 'Fairfun.Gceditor.Model';
+  static const String defaultGeneratorJavaNamespace = 'fairfun.gceditor.model';
   static const String defaultGeneratorJavaPrefix = 'Model';
   static const String defaultGeneratorJavaPrefixInterface = 'IModel';
   static const String defaultGeneratorJavaPostfix = '';
