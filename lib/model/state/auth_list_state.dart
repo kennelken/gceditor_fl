@@ -44,7 +44,7 @@ class AuthListStateNotifier extends ChangeNotifier {
     }
 
     final fileContent = await file.readAsString();
-    state.loginListData = fileContent.isEmpty ? null : LoginListData.fromJson(jsonDecode(fileContent));
+    state.loginListData = fileContent.isEmpty ? LoginListData() : LoginListData.fromJson(jsonDecode(fileContent));
     notifyListeners();
   }
 
