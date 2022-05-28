@@ -14,3 +14,6 @@
 		Cell: {"x": "10", "y":"SomeTableRowId.SomeColumnName"}
 
 35. replace MenuBar with PlatformMenuBar when there are implementations for windows and linux
+
+36. BUG: when you delete a row highlighted by a search, the next row becomes highlighted
+36.1. Maybe it should simply do search again every time any command is executed (performance expenses are possible)
