@@ -51,13 +51,13 @@ class _ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
   }
 
   void _handleHistoryPathChanged() {
-    WidgetsBinding.instance!.addPostFrameCallback(
+    WidgetsBinding.instance.addPostFrameCallback(
       (_) => providerContainer.read(serverHistoryStateProvider).setPath(_historyPathTextController.text),
     );
   }
 
   void _handleHistoryTagChanged() {
-    WidgetsBinding.instance!.addPostFrameCallback(
+    WidgetsBinding.instance.addPostFrameCallback(
       (_) => providerContainer.read(serverHistoryStateProvider).setTag(_tagNameTextController.text),
     );
   }

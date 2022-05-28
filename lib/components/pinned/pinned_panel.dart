@@ -41,7 +41,7 @@ class _PinnedPanelState extends State<PinnedPanel> {
         watch(clientStateProvider);
         watch(columnSizeChangedProvider);
 
-        WidgetsBinding.instance!.addPostFrameCallback(
+        WidgetsBinding.instance.addPostFrameCallback(
           (_) {
             if (_scrollController.hasClients) //
               _scrollController.animateTo(0, duration: kScrollListDuration, curve: Curves.easeInOut);

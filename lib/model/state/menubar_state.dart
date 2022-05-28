@@ -7,7 +7,7 @@ import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
-import 'package:menubar/menubar.dart';
+import 'package:menubar/menubar.dart' as menu_bar;
 
 final menubarStateProvider = ChangeNotifierProvider((ref) {
   final notifier = MenubarStateNotifier(MenubarState());
@@ -20,7 +20,7 @@ final menubarStateProvider = ChangeNotifierProvider((ref) {
 });
 
 class MenubarState {
-  List<Submenu>? _items;
+  List<menu_bar.Submenu>? _items;
 }
 
 class MenubarStateNotifier extends ChangeNotifier {
@@ -43,70 +43,70 @@ class MenubarStateNotifier extends ChangeNotifier {
     final nextRedoCommand = providerContainer.read(clientOwnCommandsStateProvider).state.nextRedoCommand;
 
     state._items = [
-      Submenu(
+      menu_bar.Submenu(
         label: Loc.get.menubarFile,
         children: [
-          MenuItem(
+          menu_bar.MenuItem(
             label: Loc.get.menubarProjectSettings,
             shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyZ),
             onClicked: GlobalShortcuts.openProjectSettings,
           ),
-          MenuItem(
+          menu_bar.MenuItem(
             label: Loc.get.menubarRunGenerators,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyZ),
             onClicked: GlobalShortcuts.runGenerators,
           ),
         ],
       ),
-      Submenu(
+      menu_bar.Submenu(
         label: Loc.get.menubarEdit,
         children: [
-          MenuItem(
+          menu_bar.MenuItem(
             label: Loc.get.menubarUndo + (nextUndoCommand != null ? ': ${describeEnum(nextUndoCommand.$type!)}' : ''),
             //shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyZ),
             enabled: nextUndoCommand != null,
             onClicked: GlobalShortcuts.undo,
           ),
-          MenuItem(
+          menu_bar.MenuItem(
             label: Loc.get.menubarRedo + (nextRedoCommand != null ? ': ${describeEnum(nextRedoCommand.$type!)}' : ''),
             //shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyY),
             enabled: nextRedoCommand != null,
             onClicked: GlobalShortcuts.redo,
           ),
-          MenuItem(
+          menu_bar.MenuItem(
             label: Loc.get.menubarFind,
             onClicked: GlobalShortcuts.openFind,
           ),
-          MenuItem(
+          menu_bar.MenuItem(
             label: Loc.get.requestModelFromServer,
             onClicked: _requestModelFromServer,
           ),
         ],
       ),
-      Submenu(
+      menu_bar.Submenu(
         label: Loc.get.menubarView,
         children: [
-          MenuItem(
+          menu_bar.MenuItem(
             label: Loc.get.expandedViewMenu,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
             onClicked: GlobalShortcuts.toggleActions, // is registered in GlobalShortcuts
           ),
-          MenuItem(
+          menu_bar.MenuItem(
             label: Loc.get.menubarConsole,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
             onClicked: GlobalShortcuts.toggleConsole, // is registered in GlobalShortcuts
           ),
-          MenuItem(
+          menu_bar.MenuItem(
             label: Loc.get.menubarZoomIn,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
             onClicked: GlobalShortcuts.zoomIn, // is registered in GlobalShortcuts
           ),
-          MenuItem(
+          menu_bar.MenuItem(
             label: Loc.get.menubarZoomOut,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
             onClicked: GlobalShortcuts.zoomOut, // is registered in GlobalShortcuts
           ),
-          MenuItem(
+          menu_bar.MenuItem(
             label: Loc.get.menubarShowShortcuts,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
             onClicked: GlobalShortcuts.openShortcutsList, // is registered in GlobalShortcuts
@@ -116,7 +116,7 @@ class MenubarStateNotifier extends ChangeNotifier {
     ];
 
     if (!kIsWeb) //
-      setApplicationMenu(state._items!);
+      menu_bar.setApplicationMenu(state._items!);
   }
 
   void _removeMenubar() {
@@ -126,7 +126,7 @@ class MenubarStateNotifier extends ChangeNotifier {
     state._items = null;
 
     if (!kIsWeb) //
-      setApplicationMenu([]);
+      menu_bar.setApplicationMenu([]);
   }
 
   void _requestModelFromServer() {

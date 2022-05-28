@@ -49,7 +49,7 @@ class _ServerAuthAdminPanelState extends State<ServerAuthAdminPanel> {
   }
 
   void _handleAuthPathChanged() {
-    WidgetsBinding.instance!.addPostFrameCallback(
+    WidgetsBinding.instance.addPostFrameCallback(
       (_) => providerContainer.read(authListStateProvider).setPath(_authListPathTextController.text),
     );
   }
