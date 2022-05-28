@@ -14,3 +14,5 @@
 	Example:
 		Formula: {x} + {y}
 		Cell: {"x": "10", "y":"SomeTableRowId.SomeColumnName"}
+
+35. remove " where T : IIdentifiable" constraint from get method in generated code, or add a new common interface to all classes and interfaces generated
