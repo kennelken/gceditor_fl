@@ -191,7 +191,8 @@ class StyleStateNotifier extends ChangeNotifier {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.all(4 * state.globalScale),
-          primary: kColorAccentBlue,
+          backgroundColor: kColorAccentBlue,
+          foregroundColor: kColorAccentBlue,
           textStyle: state.kTextBig,
           shape: const RoundedRectangleBorder(borderRadius: kCardBorder),
         ),
@@ -199,7 +200,7 @@ class StyleStateNotifier extends ChangeNotifier {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           padding: EdgeInsets.all(4 * state.globalScale),
-          primary: kColorTextButton,
+          foregroundColor: kColorTextButton,
           textStyle: state.kTextBig,
           shape: const RoundedRectangleBorder(borderRadius: kCardBorder),
           backgroundColor: kColorButtonActive,
@@ -208,7 +209,7 @@ class StyleStateNotifier extends ChangeNotifier {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           padding: EdgeInsets.all(4 * state.globalScale),
-          primary: kColorTextButton,
+          foregroundColor: kColorTextButton,
           textStyle: state.kTextBig,
           shape: const RoundedRectangleBorder(borderRadius: kCardBorder),
           backgroundColor: kColorButtonActive,
@@ -219,9 +220,9 @@ class StyleStateNotifier extends ChangeNotifier {
         thickness: MaterialStateProperty.all(8.0 * state.globalScale),
         //thumbColor: MaterialStateProperty.all(kTextColorLightHalfTransparent),
         //trackColor: MaterialStateProperty.all(kTextColorLightHalfTransparent),
-        isAlwaysShown: true,
+        thumbVisibility: MaterialStateProperty.all(true),
         interactive: true,
-        showTrackOnHover: true,
+        trackVisibility: MaterialStateProperty.all(true),
       ),
       checkboxTheme: const CheckboxThemeData(
         side: BorderSide(color: kColorAccentBlue),
@@ -276,7 +277,7 @@ class StyleStateNotifier extends ChangeNotifier {
 
     state.kReorderableListThemeInvisibleScrollbars = state.kReorderableListTheme.copyWith(
       scrollbarTheme: state.kAppTheme.scrollbarTheme.copyWith(
-        isAlwaysShown: false,
+        thumbVisibility: MaterialStateProperty.all(false),
       ),
     );
 
