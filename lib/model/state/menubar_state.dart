@@ -20,7 +20,7 @@ final menubarStateProvider = ChangeNotifierProvider((ref) {
 });
 
 class MenubarState {
-  List<menu_bar.Submenu>? _items;
+  List<menu_bar.NativeSubmenu>? _items;
 }
 
 class MenubarStateNotifier extends ChangeNotifier {
@@ -43,73 +43,71 @@ class MenubarStateNotifier extends ChangeNotifier {
     final nextRedoCommand = providerContainer.read(clientOwnCommandsStateProvider).state.nextRedoCommand;
 
     state._items = [
-      menu_bar.Submenu(
+      menu_bar.NativeSubmenu(
         label: Loc.get.menubarFile,
         children: [
-          menu_bar.MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarProjectSettings,
             shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyZ),
-            onClicked: GlobalShortcuts.openProjectSettings,
+            onSelected: GlobalShortcuts.openProjectSettings,
           ),
-          menu_bar.MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarRunGenerators,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyZ),
-            onClicked: GlobalShortcuts.runGenerators,
+            onSelected: GlobalShortcuts.runGenerators,
           ),
         ],
       ),
-      menu_bar.Submenu(
+      menu_bar.NativeSubmenu(
         label: Loc.get.menubarEdit,
         children: [
-          menu_bar.MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarUndo + (nextUndoCommand != null ? ': ${describeEnum(nextUndoCommand.$type!)}' : ''),
             //shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyZ),
-            enabled: nextUndoCommand != null,
-            onClicked: GlobalShortcuts.undo,
+            onSelected: nextUndoCommand != null ? GlobalShortcuts.undo : null,
           ),
-          menu_bar.MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarRedo + (nextRedoCommand != null ? ': ${describeEnum(nextRedoCommand.$type!)}' : ''),
             //shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyY),
-            enabled: nextRedoCommand != null,
-            onClicked: GlobalShortcuts.redo,
+            onSelected: nextRedoCommand != null ? GlobalShortcuts.redo : null,
           ),
-          menu_bar.MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarFind,
-            onClicked: GlobalShortcuts.openFind,
+            onSelected: GlobalShortcuts.openFind,
           ),
-          menu_bar.MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.requestModelFromServer,
-            onClicked: _requestModelFromServer,
+            onSelected: _requestModelFromServer,
           ),
         ],
       ),
-      menu_bar.Submenu(
+      menu_bar.NativeSubmenu(
         label: Loc.get.menubarView,
         children: [
-          menu_bar.MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.expandedViewMenu,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
-            onClicked: GlobalShortcuts.toggleActions, // is registered in GlobalShortcuts
+            onSelected: GlobalShortcuts.toggleActions, // is registered in GlobalShortcuts
           ),
-          menu_bar.MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarConsole,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
-            onClicked: GlobalShortcuts.toggleConsole, // is registered in GlobalShortcuts
+            onSelected: GlobalShortcuts.toggleConsole, // is registered in GlobalShortcuts
           ),
-          menu_bar.MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarZoomIn,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
-            onClicked: GlobalShortcuts.zoomIn, // is registered in GlobalShortcuts
+            onSelected: GlobalShortcuts.zoomIn, // is registered in GlobalShortcuts
           ),
-          menu_bar.MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarZoomOut,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
-            onClicked: GlobalShortcuts.zoomOut, // is registered in GlobalShortcuts
+            onSelected: GlobalShortcuts.zoomOut, // is registered in GlobalShortcuts
           ),
-          menu_bar.MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarShowShortcuts,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
-            onClicked: GlobalShortcuts.openShortcutsList, // is registered in GlobalShortcuts
+            onSelected: GlobalShortcuts.openShortcutsList, // is registered in GlobalShortcuts
           ),
         ],
       ),

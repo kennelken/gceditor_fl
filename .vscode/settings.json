@@ -65,5 +65,13 @@
 		"typeof",
 		"vimtor",
 		"Zenject"
-	]
+	],
+	"java.autobuild.enabled": false,
+	"java.completion.enabled": false,
+	"java.import.gradle.wrapper.enabled": false,
+	"java.import.maven.enabled": false,
+	"java.import.gradle.enabled": false,
+	"java.jdt.ls.androidSupport.enabled": "off",
+	"java.server.launchMode": "LightWeight",
+	"dart.previewSdkDaps": true
 }
