@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/components/global_shortcuts.dart';
 import 'package:gceditor/consts/loc.dart';
@@ -48,7 +47,7 @@ class MenubarStateNotifier extends ChangeNotifier {
         children: [
           menu_bar.NativeMenuItem(
             label: Loc.get.menubarProjectSettings,
-            shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyZ),
+            //shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyZ),
             onSelected: GlobalShortcuts.openProjectSettings,
           ),
           menu_bar.NativeMenuItem(

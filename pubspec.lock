@@ -252,7 +252,7 @@ packages:
       name: dropdown_search
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.4"
+    version: "5.0.2"
   ffi:
     dependency: transitive
     description:

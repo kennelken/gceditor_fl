@@ -61,7 +61,7 @@ dependencies:
   tcp_scanner: ^2.0.5
   uuid: ^3.0.4
   custom_pop_up_menu: ^1.2.2
-  dropdown_search: ^1.0.0
+  dropdown_search: ^5.0.0
   linked_scroll_controller: ^0.2.0
   catcher: ^0.6.8
   crypto: ^3.0.1
