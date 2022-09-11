@@ -1,6 +1,6 @@
 {
-    "name": "gceditor_fl",
-    "short_name": "gceditor_fl",
+    "name": "gceditor",
+    "short_name": "gceditor",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

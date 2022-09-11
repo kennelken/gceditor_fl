@@ -1,5 +1,8 @@
 name: main
 
+env:
+  flutterVersion: "3.3.1"
+
 on:
   push:
     branches: [master]
@@ -36,7 +39,7 @@ jobs:
         uses: subosito/flutter-action@v2.3.0
         with:
           channel: "stable"
-          flutter-version: "3.3.0"
+          flutter-version: ${{env.flutterVersion}}
 
       - name: Get dependencies
         run: flutter pub get
@@ -65,7 +68,7 @@ jobs:
         uses: subosito/flutter-action@v2.3.0
         with:
           channel: "stable"
-          flutter-version: "3.3.0"
+          flutter-version: ${{env.flutterVersion}}
 
       - name: Get dependencies
         run: flutter pub get
@@ -94,7 +97,7 @@ jobs:
         uses: subosito/flutter-action@v2.3.0
         with:
           channel: "stable"
-          flutter-version: "3.3.0"
+          flutter-version: ${{env.flutterVersion}}
 
       - name: Get dependencies
         run: flutter pub get
@@ -120,7 +123,7 @@ jobs:
         uses: subosito/flutter-action@v2.3.0
         with:
           channel: "stable"
-          flutter-version: "3.3.0"
+          flutter-version: ${{env.flutterVersion}}
 
       - name: Get dependencies
         run: flutter pub get

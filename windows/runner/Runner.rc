@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "xyz.fairfun" "\0"
-            VALUE "FileDescription", "gceditor_fl" "\0"
+            VALUE "FileDescription", "gceditor" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "gceditor_fl" "\0"
+            VALUE "InternalName", "gceditor" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2022 xyz.fairfun. All rights reserved." "\0"
-            VALUE "OriginalFilename", "gceditor_fl.exe" "\0"
-            VALUE "ProductName", "gceditor_fl" "\0"
+            VALUE "OriginalFilename", "gceditor.exe" "\0"
+            VALUE "ProductName", "gceditor" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
