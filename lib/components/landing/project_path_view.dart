@@ -51,6 +51,7 @@ class ProjectPathView extends StatelessWidget {
               child: Icon(
                 FontAwesomeIcons.file,
                 size: 20 * kScale,
+                color: kTextColorLightest,
               ),
             ),
           ),
@@ -64,6 +65,7 @@ class ProjectPathView extends StatelessWidget {
             child: Icon(
               FontAwesomeIcons.folder,
               size: 20 * kScale,
+              color: kTextColorLightest,
             ),
           ),
         ),
