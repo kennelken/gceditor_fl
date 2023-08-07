@@ -8,8 +8,8 @@ class TableProblemsView extends ConsumerWidget {
   const TableProblemsView({Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    final problems = watch(clientProblemsStateProvider).state.problems;
+  Widget build(context, ref) {
+    final problems = ref.watch(clientProblemsStateProvider).state.problems;
 
     return ScrollConfiguration(
       behavior: kScrollDraggable,

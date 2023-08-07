@@ -15,8 +15,8 @@ class SettingsView extends ConsumerWidget {
   const SettingsView({Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    final model = watch(clientStateProvider).state.model;
+  Widget build(context, ref) {
+    final model = ref.watch(clientStateProvider).state.model;
 
     final tz = model.settings.timeZone;
     final timezoneController = TextEditingController(text: Utils.floatWithSign(tz));
@@ -27,7 +27,7 @@ class SettingsView extends ConsumerWidget {
     final saveDelayFocusNode = FocusNode();
     saveDelayFocusNode.addListener(() => _handleSaveDelayFocus(saveDelayFocusNode, saveDelayController));
 
-    watch(styleStateProvider);
+    ref.watch(styleStateProvider);
 
     return Container(
       width: 1100 * kScale,
@@ -94,7 +94,7 @@ class SettingsView extends ConsumerWidget {
                   ),
                   SizedBox(height: 10 * kScale),
                   GeneratorsView(
-                    key: ValueKey(watch(clientStateProvider).state.version),
+                    key: ValueKey(ref.watch(clientStateProvider).state.version),
                   ),
                 ],
               ),

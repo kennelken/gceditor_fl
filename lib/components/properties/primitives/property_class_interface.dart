@@ -29,13 +29,13 @@ class PropertyClassInterface extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, watch) {
+  Widget build(BuildContext context, ref) {
     final subInterfaces = clientModel.cache.getSubInterfaces(entity);
 
     final parentInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
       MetaValueCoordinates(classId: entity.id, parentClass: interface?.id ?? ''),
-      watch(clientFindStateProvider).state,
-      watch(clientNavigationServiceProvider).state,
+      ref.watch(clientFindStateProvider).state,
+      ref.watch(clientNavigationServiceProvider).state,
     );
 
     final items = clientModel.cache.allClasses //
@@ -59,7 +59,7 @@ class PropertyClassInterface extends ConsumerWidget {
                 inputDecoration: parentInputDecoration,
               ),
             ),
-            if (watch(clientViewModeStateProvider).state.actionsMode) ...[
+            if (ref.watch(clientViewModeStateProvider).state.actionsMode) ...[
               DeleteButton(
                 onAction: _handleDelete,
                 size: 14 * kScale,

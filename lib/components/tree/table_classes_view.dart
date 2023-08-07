@@ -18,13 +18,13 @@ class TableClassesView extends ConsumerWidget {
   const TableClassesView({Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    if (!watch(clientStateProvider).state.isInited) //
+  Widget build(context, ref) {
+    if (!ref.watch(clientStateProvider).state.isInited) //
       return const SizedBox();
 
     final hadChildrenBefore = _rootNode.hasChildren;
 
-    final dbModel = watch(clientStateProvider).state.model;
+    final dbModel = ref.watch(clientStateProvider).state.model;
     final elements = dbModel.classes;
     _buildNodes(elements);
     _treeViewController.refreshNode(_rootNode, keepExpandedNodes: true);

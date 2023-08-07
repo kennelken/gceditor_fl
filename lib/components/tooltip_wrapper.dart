@@ -20,8 +20,8 @@ class TooltipWrapper extends StatelessWidget {
             padding: EdgeInsets.all(7 * kStyle.globalScale),
             message: message!,
             textStyle: kStyle.kTextExtraSmall,
-            child: child,
             waitDuration: kTooltipDelay,
+            child: child,
           )
         : child;
   }

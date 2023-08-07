@@ -21,7 +21,7 @@ class DataTableCellBoolView extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(context, watch) {
+  Widget build(context, ref) {
     return Align(
       alignment: Alignment.topCenter,
       child: Container(

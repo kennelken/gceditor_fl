@@ -13,8 +13,8 @@ class LoggerScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(context, watch) {
-    final messages = watch(logStateProvider).state.messages.reversed.toList();
+  Widget build(context, ref) {
+    final messages = ref.watch(logStateProvider).state.messages.reversed.toList();
 
     return Container(
       height: 99999,

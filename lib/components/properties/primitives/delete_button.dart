@@ -33,7 +33,7 @@ class DeleteButton extends StatelessWidget {
           onLongPress: onAction,
           child: FittedBox(
             child: Icon(
-              FontAwesomeIcons.trashAlt,
+              FontAwesomeIcons.trashCan,
               color: color ?? kColorPrimaryLightTransparent,
               size: (size ?? 20) * kScale,
             ),

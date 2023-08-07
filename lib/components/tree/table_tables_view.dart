@@ -18,10 +18,10 @@ class TableTablesView extends ConsumerWidget {
   const TableTablesView({Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) {
+  Widget build(context, ref) {
     final hadChildrenBefore = _rootNode.hasChildren;
 
-    final dbModel = watch(clientStateProvider).state.model;
+    final dbModel = ref.watch(clientStateProvider).state.model;
     final elements = dbModel.tables;
     _buildNodes(elements);
     _treeViewController.refreshNode(_rootNode, keepExpandedNodes: true);

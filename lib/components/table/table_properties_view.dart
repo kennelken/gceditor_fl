@@ -38,18 +38,18 @@ class TablePropertiesView extends ConsumerWidget {
   const TablePropertiesView({Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    watch(clientStateProvider);
-    watch(styleStateProvider);
+  Widget build(context, ref) {
+    ref.watch(clientStateProvider);
+    ref.watch(styleStateProvider);
 
-    IIdentifiable? selectedEntity = watch(tableSelectionStateProvider).state.selectedField;
-    selectedEntity ??= watch(tableSelectionStateProvider).state.selectedEntity;
+    IIdentifiable? selectedEntity = ref.watch(tableSelectionStateProvider).state.selectedField;
+    selectedEntity ??= ref.watch(tableSelectionStateProvider).state.selectedEntity;
 
     if (selectedEntity == null) //
       return const SizedBox();
 
     final selectedClassName = _getSelectedEntityLabel(selectedEntity);
-    final width = watch(settingsStateProvider).state.propertiesWidth;
+    final width = ref.watch(settingsStateProvider).state.propertiesWidth;
 
     final colors = _colorsByType.get(selectedEntity.runtimeType)!;
 
@@ -90,7 +90,7 @@ class TablePropertiesView extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        if (_isDeleteButtonVisible(selectedEntity) && watch(clientViewModeStateProvider).state.actionsMode) //
+                        if (_isDeleteButtonVisible(selectedEntity) && ref.watch(clientViewModeStateProvider).state.actionsMode) //
                           DeleteButton(
                             onAction: () => _deleteEntity(selectedEntity!.id),
                             tooltipText: _getDeleteTooltip(selectedEntity),
@@ -102,7 +102,7 @@ class TablePropertiesView extends ConsumerWidget {
                             child: MaterialButton(
                               onPressed: () => _handleBackButton(selectedEntity),
                               child: Icon(
-                                FontAwesomeIcons.times,
+                                FontAwesomeIcons.xmark,
                                 color: kColorPrimaryLight,
                                 size: 20 * kScale,
                               ),
@@ -169,7 +169,7 @@ class TablePropertiesView extends ConsumerWidget {
     } else if (selectedObject is ClassMetaFieldDescription) {
       result = Loc.get.typeClassField;
     }
-    result += ': ' + selectedObject.id;
+    result += ': ${selectedObject.id}';
 
     return result;
   }

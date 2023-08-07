@@ -38,15 +38,15 @@ class DataTableColumnHeadView extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(context, watch) {
+  Widget build(context, ref) {
     final width = DbModelUtils.getTableColumnWidth(table, field);
-    final actionsMode = watch(clientViewModeStateProvider).state.actionsMode;
+    final actionsMode = ref.watch(clientViewModeStateProvider).state.actionsMode;
 
     final decoration = kStyle.kDataTableHeadBoxDecorationNoRight.copyWith(
       color: DbModelUtils.getMetaFieldColor(
         coordinates,
-        watch(clientFindStateProvider).state,
-        watch(clientNavigationServiceProvider).state,
+        ref.watch(clientFindStateProvider).state,
+        ref.watch(clientNavigationServiceProvider).state,
         kStyle.kDataTableHeadBoxDecorationNoRight.color!,
       ),
     );
@@ -76,8 +76,9 @@ class DataTableColumnHeadView extends ConsumerWidget {
                     Flexible(
                       child: Text(
                         field.id,
-                        style:
-                            watch(tableSelectionStateProvider).state.selectedField == field ? kStyle.kTextExtraSmallSelected : kStyle.kTextExtraSmall,
+                        style: ref.watch(tableSelectionStateProvider).state.selectedField == field
+                            ? kStyle.kTextExtraSmallSelected
+                            : kStyle.kTextExtraSmall,
                         maxLines: 1,
                       ),
                     ),

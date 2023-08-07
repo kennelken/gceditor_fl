@@ -25,12 +25,12 @@ class DataTableHeader extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    watch(clientStateProvider);
-    final selectedTable = watch(tableSelectionStateProvider).state.selectedTable;
+  Widget build(context, ref) {
+    ref.watch(clientStateProvider);
+    final selectedTable = ref.watch(tableSelectionStateProvider).state.selectedTable;
     final selectedTableClass = selectedTable == null ? null : clientModel.cache.getClass<ClassMetaEntity>(selectedTable.classId);
     final hasSelection = selectedTable != null;
-    watch(styleStateProvider);
+    ref.watch(styleStateProvider);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -50,7 +50,7 @@ class DataTableHeader extends ConsumerWidget {
               onClick: () => _handleTableClick(selectedTable),
               child: Text(
                 selectedTable.id,
-                style: selectedTable == watch(tableSelectionStateProvider).state.selectedEntity
+                style: selectedTable == ref.watch(tableSelectionStateProvider).state.selectedEntity
                     ? kStyle.kTextExtraSmallSelected
                     : kStyle.kTextExtraSmall,
                 maxLines: 1,
@@ -61,7 +61,7 @@ class DataTableHeader extends ConsumerWidget {
           ..._getClasses(
             selectedTable,
             selectedTableClass,
-            watch(tableSelectionStateProvider).state.selectedEntity,
+            ref.watch(tableSelectionStateProvider).state.selectedEntity,
           ),
           SizedBox(width: 15 * kScale),
           Expanded(

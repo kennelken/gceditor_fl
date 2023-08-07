@@ -242,7 +242,7 @@ class DbModelUtils {
   }
 
   static String getRandomId() {
-    return '_' + const Uuid().v4().replaceAll('-', '_').substring(0, 23);
+    return '_${const Uuid().v4().replaceAll('-', '_').substring(0, 23)}';
   }
 
   static bool isDefaultId(String value) {

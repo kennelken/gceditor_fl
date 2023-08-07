@@ -68,12 +68,12 @@ class HistoryDialogItem extends StatelessWidget {
               SizedBox(width: 15 * kScale),
               if (executionResult == true) //
                 ...[
-                Icon(FontAwesomeIcons.checkCircle, size: 20 * kScale, color: kColorAccentTeal),
+                Icon(FontAwesomeIcons.circleCheck, size: 20 * kScale, color: kColorAccentTeal),
                 SizedBox(width: 15 * kScale),
               ],
               if (executionResult == false) //
                 ...[
-                Icon(FontAwesomeIcons.timesCircle, size: 20 * kScale, color: kColorAccentRed),
+                Icon(FontAwesomeIcons.circleXmark, size: 20 * kScale, color: kColorAccentRed),
                 SizedBox(width: 15 * kScale),
               ],
             ],

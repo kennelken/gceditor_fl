@@ -41,10 +41,10 @@ class _DataTableViewState extends State<DataTableView> {
   @override
   Widget build(BuildContext context) {
     return Consumer(
-      builder: (context, watch, child) {
-        final table = watch(tableSelectionStateProvider).state.selectedTable;
-        watch(clientStateProvider);
-        watch(columnSizeChangedProvider);
+      builder: (context, ref, child) {
+        final table = ref.watch(tableSelectionStateProvider).state.selectedTable;
+        ref.watch(clientStateProvider);
+        ref.watch(columnSizeChangedProvider);
 
         if (table == null || table.classId.isEmpty) {
           return Expanded(

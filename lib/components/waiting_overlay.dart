@@ -11,10 +11,10 @@ class WaitingOverlay extends ConsumerWidget {
   const WaitingOverlay({required this.child, Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    final isLoading = (watch(startupProvider).startupFlow?.isLoading() ?? true) ||
-        (watch(appStateProvider).state.needRestart) ||
-        watch(waitingStateProvider).state.isWaiting;
+  Widget build(context, ref) {
+    final isLoading = (ref.watch(startupProvider).startupFlow?.isLoading() ?? true) ||
+        (ref.watch(appStateProvider).state.needRestart) ||
+        ref.watch(waitingStateProvider).state.isWaiting;
     return LoadingOverlay(
       isLoading: isLoading,
       color: Colors.black.withAlpha(100),

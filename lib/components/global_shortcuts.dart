@@ -266,8 +266,8 @@ class _RawKeyboardEventsState extends State<RawKeyboardEvents> {
     return RawKeyboardListener(
       focusNode: focusNode,
       onKey: _handleKeyEvent,
-      child: widget.child,
       autofocus: true,
+      child: widget.child,
     );
   }
 

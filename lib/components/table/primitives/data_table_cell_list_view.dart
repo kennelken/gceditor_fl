@@ -131,7 +131,7 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
                 itemBuilder: (context, index) {
                   return Consumer(
                     key: ValueKey(index),
-                    builder: (context, watch, child) {
+                    builder: (context, ref, child) {
                       return SizedBox(
                         height: kStyle.kDataTableInlineRowHeight,
                         child: Padding(
@@ -157,7 +157,7 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
                                   ),
                                 ),
                               ),
-                              if (watch(clientViewModeStateProvider).state.actionsMode) ...[
+                              if (ref.watch(clientViewModeStateProvider).state.actionsMode) ...[
                                 DeleteButton(
                                   onAction: () => _handleDeleteItem(index),
                                   size: 14 * kScale,

@@ -52,8 +52,8 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
   @override
   Widget build(context) {
     return Consumer(
-      builder: (context, watch, child) {
-        final dataSelection = watch(clientDataSelectionStateProvider);
+      builder: (context, ref, child) {
+        final dataSelection = ref.watch(clientDataSelectionStateProvider);
 
         return Container(
           height: 40 * kScale,
@@ -115,7 +115,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                   message: Loc.get.cut,
                   child: IconButtonTransparent(
                     icon: Icon(
-                      FontAwesomeIcons.cut,
+                      FontAwesomeIcons.scissors,
                       color: kColorAccentOrange.withAlpha(_isCopyAvailable ? kIconActiveAlpha : kIconInactiveAlpha),
                       size: 17 * kScale,
                     ),
@@ -157,7 +157,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                   message: Loc.get.deselect,
                   child: IconButtonTransparent(
                     icon: Icon(
-                      FontAwesomeIcons.times,
+                      FontAwesomeIcons.xmark,
                       color: kColorPrimaryLight,
                       size: 20 * kScale,
                     ),

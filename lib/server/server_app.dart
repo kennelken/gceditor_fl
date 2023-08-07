@@ -186,7 +186,7 @@ class ServerApp {
         errorsMessage += '\t${element.error!}\n';
       });
       if (errorsMessage.isNotEmpty) {
-        errorsMessage = '$numErrors errors occured:\n' + errorsMessage;
+        errorsMessage = '$numErrors errors occured:\n$errorsMessage';
         _commandProcessorByClient[client]!.sendCommand(
           CommandErrorResponse(sourceCommand: command, message: errorsMessage, model: providerContainer.read(serverStateProvider).state.model),
           command,

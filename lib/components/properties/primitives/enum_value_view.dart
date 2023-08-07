@@ -64,14 +64,14 @@ class _EnumValueViewState extends State<EnumValueView> {
 
   @override
   Widget build(context) {
-    return Consumer(builder: (context, watch, child) {
-      watch(enumValueWidthRatioProvider);
-      watch(clientStateProvider);
+    return Consumer(builder: (context, ref, child) {
+      ref.watch(enumValueWidthRatioProvider);
+      ref.watch(clientStateProvider);
 
       final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
         MetaValueCoordinates(classId: widget.entity.id, enumId: widget.data.id),
-        watch(clientFindStateProvider).state,
-        watch(clientNavigationServiceProvider).state,
+        ref.watch(clientFindStateProvider).state,
+        ref.watch(clientNavigationServiceProvider).state,
         defaultInputDecoration: kStyle.kInputTextStyleProperties,
       );
 
@@ -106,13 +106,13 @@ class _EnumValueViewState extends State<EnumValueView> {
                 decoration: kStyle.kInputTextStyleProperties.copyWith(labelText: Loc.get.classMetaPropertyDescription),
               ),
             ),
-            if (watch(clientViewModeStateProvider).state.actionsMode) ...[
+            if (ref.watch(clientViewModeStateProvider).state.actionsMode) ...[
               TooltipWrapper(
                 message: Loc.get.findReferencesTooltip,
                 child: IconButtonTransparent(
                   size: 22 * kScale,
                   icon: Icon(
-                    FontAwesomeIcons.search,
+                    FontAwesomeIcons.magnifyingGlass,
                     color: kColorPrimaryLight,
                     size: 12 * kScale,
                   ),

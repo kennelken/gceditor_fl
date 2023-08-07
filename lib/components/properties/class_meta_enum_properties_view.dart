@@ -64,12 +64,12 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
   @override
   Widget build(context) {
     return Consumer(
-      builder: (context, watch, child) {
+      builder: (context, ref, child) {
         final clientState = providerContainer.read(clientStateProvider).state.version;
         final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
           MetaValueCoordinates(classId: widget.data.id),
-          watch(clientFindStateProvider).state,
-          watch(clientNavigationServiceProvider).state,
+          ref.watch(clientFindStateProvider).state,
+          ref.watch(clientNavigationServiceProvider).state,
         );
 
         return ClassMetaPropertiesContainer(
@@ -82,7 +82,7 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
               saveCallback: (v) => DbCmdEditMetaEntityId.values(entityId: widget.data.id, newValue: v),
               inputFormatters: Config.filterId,
               inputDecoration: idInputDecoration,
-              showFindIcon: watch(clientViewModeStateProvider).state.actionsMode,
+              showFindIcon: ref.watch(clientViewModeStateProvider).state.actionsMode,
             ),
             kStyle.kPropertiesVerticalDivider,
             PropertyStringView(

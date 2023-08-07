@@ -57,9 +57,9 @@ class _ServerAuthAdminPanelState extends State<ServerAuthAdminPanel> {
   @override
   Widget build(BuildContext context) {
     return Consumer(
-      builder: (context, watch, child) {
-        watch(startupProvider);
-        final defaultFolder = watch(appStateProvider).state.defaultProjectFolder;
+      builder: (context, ref, child) {
+        ref.watch(startupProvider);
+        final defaultFolder = ref.watch(appStateProvider).state.defaultProjectFolder;
         final defaultFolderPath = defaultFolder?.path ?? '';
         final authListState = providerContainer.read(authListStateProvider).state;
 

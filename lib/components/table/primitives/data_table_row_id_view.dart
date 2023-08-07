@@ -49,26 +49,26 @@ class DataTableRowIdView extends ConsumerWidget {
   }
 
   @override
-  Widget build(context, watch) {
+  Widget build(context, ref) {
     final model = clientModel;
     final height = DbModelUtils.getTableRowsHeight(model, table: table);
 
-    watch(columnSizeChangedProvider);
+    ref.watch(columnSizeChangedProvider);
     final width = DbModelUtils.getTableIdsColumnWidth(table);
 
     return Container(
       decoration: DbModelUtils.getDataTableIdBoxDecoration(
         coordinates,
-        watch(clientFindStateProvider).state,
-        watch(clientNavigationServiceProvider).state,
+        ref.watch(clientFindStateProvider).state,
+        ref.watch(clientNavigationServiceProvider).state,
       ),
       width: width,
       height: height,
-      child: _getBody(watch),
+      child: _getBody(ref),
     );
   }
 
-  Widget _getBody(ScopedReader watch) {
+  Widget _getBody(WidgetRef ref) {
     if (row == null) {
       return Row(
         children: [
@@ -78,7 +78,7 @@ class DataTableRowIdView extends ConsumerWidget {
       );
     }
 
-    final selectionState = watch(clientDataSelectionStateProvider).state;
+    final selectionState = ref.watch(clientDataSelectionStateProvider).state;
     final isSelected = selectionState.selectionTable == table && selectionState.selectedItems.contains(index);
 
     return Material(
@@ -108,7 +108,7 @@ class DataTableRowIdView extends ConsumerWidget {
                 ),
               ),
             ),
-            if (watch(clientViewModeStateProvider).state.actionsMode) ...[
+            if (ref.watch(clientViewModeStateProvider).state.actionsMode) ...[
               if (!isPinnedItem)
                 SizedBox(
                   width: 16 * kScale,
@@ -124,7 +124,7 @@ class DataTableRowIdView extends ConsumerWidget {
                 child: IconButtonTransparent(
                   size: 22 * kScale,
                   icon: Icon(
-                    FontAwesomeIcons.search,
+                    FontAwesomeIcons.magnifyingGlass,
                     color: kColorPrimaryLight,
                     size: 12 * kScale,
                   ),
@@ -150,7 +150,7 @@ class DataTableRowIdView extends ConsumerWidget {
                   child: IconButtonTransparent(
                     size: 22 * kScale,
                     icon: Icon(
-                      FontAwesomeIcons.times,
+                      FontAwesomeIcons.xmark,
                       color: kColorPrimaryLight,
                       size: 12 * kScale,
                     ),

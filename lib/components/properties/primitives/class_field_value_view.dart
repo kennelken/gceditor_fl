@@ -28,15 +28,15 @@ class ClassFieldValueView extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(context, watch) {
+  Widget build(context, ref) {
     final idInputColor = DbModelUtils.getMetaFieldColor(
       MetaValueCoordinates(classId: entity.id, fieldId: data.id),
-      watch(clientFindStateProvider).state,
-      watch(clientNavigationServiceProvider).state,
+      ref.watch(clientFindStateProvider).state,
+      ref.watch(clientNavigationServiceProvider).state,
       kColorAccentBlue1_5,
     );
 
-    watch(clientStateProvider);
+    ref.watch(clientStateProvider);
     return Padding(
       padding: EdgeInsets.only(top: 2 * kScale, bottom: 4 * kScale),
       child: TooltipWrapper(
@@ -70,7 +70,7 @@ class ClassFieldValueView extends ConsumerWidget {
                   ),
                 ),
               ),
-              if (watch(clientViewModeStateProvider).state.actionsMode) ...[
+              if (ref.watch(clientViewModeStateProvider).state.actionsMode) ...[
                 DeleteButton(
                   onAction: _handleDelete,
                   size: 14 * kScale,

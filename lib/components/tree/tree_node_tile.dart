@@ -22,10 +22,10 @@ class TreeNodeTile extends ConsumerWidget {
   const TreeNodeTile({Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) {
+  Widget build(context, ref) {
     final nodeScope = TreeNodeScope.of(context);
     final entity = nodeScope.node.data as IIdentifiable;
-    final isSelected = watch(tableSelectionStateProvider).state.selectedId == nodeScope.node.id;
+    final isSelected = ref.watch(tableSelectionStateProvider).state.selectedId == nodeScope.node.id;
     final isExpandable = nodeScope.node.data is ClassMetaGroup || nodeScope.node.data is TableMetaGroup;
 
     return Draggable<IIdentifiable>(

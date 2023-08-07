@@ -1,4 +1,5 @@
-import 'package:catcher/catcher.dart';
+import 'dart:async';
+
 import 'package:computer/computer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -17,39 +18,30 @@ import 'managers/startup/startup_manager.dart';
 import 'model/model_root.dart';
 import 'model/state/log_state.dart';
 
-final computer = Computer();
+final computer = Computer.create();
 List<String>? mainArgs;
 
 Future<void> main([List<String>? args]) async {
   mainArgs = args;
-  final debugOptions = CatcherOptions(
-    SilentReportMode(),
-    [
-      LogStateReportHandler(),
-    ],
-  );
-
-  final releaseOptions = CatcherOptions(
-    SilentReportMode(),
-    [
-      LogStateReportHandler(),
-    ],
-  );
-
   StartupManager.instance.createNewLoginFlowIfRequired(
-    () => Catcher(
-      debugConfig: debugOptions,
-      releaseConfig: releaseOptions,
-      runAppFunction: () {
-        runApp(
-          UncontrolledProviderScope(
-            container: providerContainer,
-            child: const MyApp(),
-          ),
-        );
-      },
-    ),
+    () => () {},
   );
+
+  final logHandler = LogStateReportHandler();
+  runZonedGuarded(() {
+    //<= the key is here
+    FlutterError.onError = (FlutterErrorDetails errorDetails) {
+      logHandler.handleError(errorDetails);
+    };
+    runApp(
+      UncontrolledProviderScope(
+        container: providerContainer,
+        child: const MyApp(),
+      ),
+    );
+  }, (error, stackTrace) {
+    logHandler.handle(error.toString());
+  });
 }
 
 BuildContext? get popupContext => navigatorKey.currentState?.overlay?.context;
@@ -63,8 +55,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     precacheImage(AssetImage(Assets.images.icon1024PNG), context);
 
-    return Consumer(builder: (context, watch, child) {
-      watch(styleStateProvider);
+    return Consumer(builder: (context, ref, child) {
+      ref.watch(styleStateProvider);
       Utils.rebuildAllChildren(context);
 
       return RawKeyboardEvents(
@@ -108,8 +100,8 @@ class MyApp extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Consumer(
-                                builder: (context, watch, child) {
-                                  final visible = watch(logStateProvider).state.visible;
+                                builder: (context, ref, child) {
+                                  final visible = ref.watch(logStateProvider).state.visible;
                                   return visible ? LoggerScreen(key: const ValueKey('LoggerScreen')) : WaitingOverlay(child: page);
                                 },
                               ),

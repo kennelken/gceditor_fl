@@ -150,7 +150,7 @@ class ServerHistoryStateNotifier extends ChangeNotifier {
           return;
 
         final newEntry = HistoryItemDataEntry.values(id: cmd.id, command: cmd, time: DateTime.now().toUtc(), user: user);
-        await state._currentHistoryFile!.writeAsString(Config.streamJsonOptions.convert(newEntry.toJson()) + '\n', mode: FileMode.append);
+        await state._currentHistoryFile!.writeAsString('${Config.streamJsonOptions.convert(newEntry.toJson())}\n', mode: FileMode.append);
         return null;
       },
     );

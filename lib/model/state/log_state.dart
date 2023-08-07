@@ -1,8 +1,5 @@
 import 'dart:async';
 
-import 'package:catcher/model/platform_type.dart';
-import 'package:catcher/model/report.dart';
-import 'package:catcher/model/report_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/consts/config.dart';
@@ -89,28 +86,17 @@ Color getColorByLogLevel(LogLevel logLevel) {
   }
 }
 
-class LogStateReportHandler extends ReportHandler {
-  final _supportedPlatforms = [
-    PlatformType.android,
-    PlatformType.iOS,
-    PlatformType.linux,
-    PlatformType.macOS,
-    PlatformType.unknown,
-    PlatformType.web,
-    PlatformType.windows
-  ];
-
+class LogStateReportHandler {
   @override
-  List<PlatformType> getSupportedPlatforms() {
-    return _supportedPlatforms;
+  Future<bool> handleError(FlutterErrorDetails error) {
+    return handle(error.exceptionAsString());
   }
 
-  @override
-  Future<bool> handle(Report error, BuildContext? context) {
+  Future<bool> handle(String error) {
     providerContainer.read(logStateProvider).addMessage(
           LogEntry(
             LogLevel.error,
-            'error: ${error.error}\nstacktrace: ${error.stackTrace}'.trimRight(),
+            'error: ${error.trimRight()}',
           ),
         );
     return Future.value(true);

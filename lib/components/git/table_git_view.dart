@@ -9,9 +9,9 @@ class TableGitView extends ConsumerWidget {
   const TableGitView({Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    final items = watch(clientGitStateProvider).state.items;
-    watch(styleStateProvider);
+  Widget build(context, ref) {
+    final items = ref.watch(clientGitStateProvider).state.items;
+    ref.watch(styleStateProvider);
 
     return ScrollConfiguration(
       behavior: kScrollDraggable,

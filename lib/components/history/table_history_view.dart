@@ -9,9 +9,9 @@ class TableHistoryView extends ConsumerWidget {
   const TableHistoryView({Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    final items = watch(clientHistoryStateProvider).state.items;
-    watch(styleStateProvider);
+  Widget build(context, ref) {
+    final items = ref.watch(clientHistoryStateProvider).state.items;
+    ref.watch(styleStateProvider);
 
     return ScrollConfiguration(
       behavior: kScrollDraggable,

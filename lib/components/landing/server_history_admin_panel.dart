@@ -65,10 +65,10 @@ class _ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
   @override
   Widget build(BuildContext context) {
     return Consumer(
-      builder: (context, watch, child) {
-        watch(startupProvider);
+      builder: (context, ref, child) {
+        ref.watch(startupProvider);
 
-        final defaultFolder = watch(appStateProvider).state.defaultProjectFolder;
+        final defaultFolder = ref.watch(appStateProvider).state.defaultProjectFolder;
         final defaultFolderPath = defaultFolder?.path ?? '';
 
         if (!_initialValuesSet) {

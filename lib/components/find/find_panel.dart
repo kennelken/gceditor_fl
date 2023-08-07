@@ -49,9 +49,9 @@ class _FindPanelState extends State<FindPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(builder: (context, watch, child) {
-      final settings = watch(clientFindStateProvider).state.settings;
-      final results = watch(clientFindStateProvider).state.getResults();
+    return Consumer(builder: (context, ref, child) {
+      final settings = ref.watch(clientFindStateProvider).state.settings;
+      final results = ref.watch(clientFindStateProvider).state.getResults();
       _findTextController.text = settings.text ?? '';
       _preselectFindText();
 
@@ -90,7 +90,7 @@ class _FindPanelState extends State<FindPanel> {
                   message: Loc.get.findTooltip,
                   child: IconButtonTransparent(
                     icon: Icon(
-                      FontAwesomeIcons.search,
+                      FontAwesomeIcons.magnifyingGlass,
                       color: kColorAccentBlue,
                       size: 20 * kScale,
                     ),
@@ -164,7 +164,7 @@ class _FindPanelState extends State<FindPanel> {
                   message: Loc.get.findCloseTooltip,
                   child: IconButtonTransparent(
                     icon: Icon(
-                      FontAwesomeIcons.times,
+                      FontAwesomeIcons.xmark,
                       color: kColorPrimaryLight,
                       size: 20 * kScale,
                     ),

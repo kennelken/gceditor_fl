@@ -139,8 +139,8 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
             child: ScrollConfiguration(
               behavior: kScrollDraggable,
               child: Consumer(
-                builder: (context, watch, child) {
-                  watch(columnSizeChangedProvider);
+                builder: (context, ref, child) {
+                  ref.watch(columnSizeChangedProvider);
                   return ReorderableListView.builder(
                     scrollController: _scrollController,
                     itemCount: _cellValue.dictionaryCellValues!.length,
@@ -200,7 +200,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
                                   ),
                                 ),
                               ),
-                              if (watch(clientViewModeStateProvider).state.actionsMode) ...[
+                              if (ref.watch(clientViewModeStateProvider).state.actionsMode) ...[
                                 DeleteButton(
                                   onAction: () => _handleDeleteItem(index),
                                   size: 14 * kScale,

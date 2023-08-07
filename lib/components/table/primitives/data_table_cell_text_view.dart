@@ -94,7 +94,7 @@ class _DataTableCellTextViewState extends State<DataTableCellTextView> {
         break;
     }
 
-    return Consumer(builder: (context, watch, child) {
+    return Consumer(builder: (context, ref, child) {
       return Align(
         alignment: Alignment.topCenter,
         child: TextField(
@@ -102,9 +102,9 @@ class _DataTableCellTextViewState extends State<DataTableCellTextView> {
           focusNode: _focusNode,
           decoration: DbModelUtils.getDataCellInputDecoration(
             widget.coordinates,
-            watch(clientProblemsStateProvider).state,
-            watch(clientFindStateProvider).state,
-            watch(clientNavigationServiceProvider).state,
+            ref.watch(clientProblemsStateProvider).state,
+            ref.watch(clientFindStateProvider).state,
+            ref.watch(clientNavigationServiceProvider).state,
           ),
           maxLines: widget.fieldType.type.isSimple() ? 1 : Config.dataTableTextMaxLines,
           inputFormatters: formatter,

@@ -57,7 +57,7 @@ class StartupFlow {
     initializeSystemServices = machine.newState('initializeSystemServices')
       ..onEntry(
         () async {
-          providerContainer.read(errorNotifierProvider).state.start();
+          providerContainer.read(errorNotifierProvider).start();
 
           await Future(
             () async {

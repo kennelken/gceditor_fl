@@ -26,15 +26,15 @@ class DataTableCellColorView extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(context, watch) {
+  Widget build(context, ref) {
     final initialColor = Color(value);
 
     return Container(
       color: DbModelUtils.getDataCellColor(
         coordinates,
-        watch(clientProblemsStateProvider).state,
-        watch(clientFindStateProvider).state,
-        watch(clientNavigationServiceProvider).state,
+        ref.watch(clientProblemsStateProvider).state,
+        ref.watch(clientFindStateProvider).state,
+        ref.watch(clientNavigationServiceProvider).state,
       ),
       child: Padding(
         padding: EdgeInsets.all(8 * kScale),
@@ -123,6 +123,10 @@ class DataTableCellColorView extends ConsumerWidget {
           ),
           actions: <Widget>[
             TextButton(
+              style: kButtonTransparent,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
@@ -130,12 +134,13 @@ class DataTableCellColorView extends ConsumerWidget {
                   style: kStyle.kTextSmall.copyWith(color: kColorPrimary, fontWeight: FontWeight.bold),
                 ),
               ),
-              style: kButtonTransparent,
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
             ),
             TextButton(
+              style: kButtonTransparent,
+              onPressed: () {
+                _handleColorChanged(pickerColor);
+                Navigator.of(context).pop();
+              },
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
@@ -143,11 +148,6 @@ class DataTableCellColorView extends ConsumerWidget {
                   style: kStyle.kTextSmall.copyWith(color: kColorPrimary, fontWeight: FontWeight.bold),
                 ),
               ),
-              style: kButtonTransparent,
-              onPressed: () {
-                _handleColorChanged(pickerColor);
-                Navigator.of(context).pop();
-              },
             ),
           ],
         );

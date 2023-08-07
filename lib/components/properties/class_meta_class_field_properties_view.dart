@@ -73,13 +73,13 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
   @override
   Widget build(context) {
     return Consumer(
-      builder: (context, watch, child) {
+      builder: (context, ref, child) {
         final classEntity = clientModel.cache.getFieldOwner(widget.data);
 
         final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
           MetaValueCoordinates(classId: classEntity!.id, fieldId: widget.data.id),
-          watch(clientFindStateProvider).state,
-          watch(clientNavigationServiceProvider).state,
+          ref.watch(clientFindStateProvider).state,
+          ref.watch(clientNavigationServiceProvider).state,
         );
 
         final model = clientModel;
@@ -101,7 +101,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
             saveCallback: (v) => DbCmdEditClassField.values(entityId: entity.id, fieldId: widget.data.id, newId: v),
             inputFormatters: Config.filterId,
             inputDecoration: idInputDecoration,
-            showFindIcon: watch(clientViewModeStateProvider).state.actionsMode,
+            showFindIcon: ref.watch(clientViewModeStateProvider).state.actionsMode,
           ),
           kStyle.kPropertiesVerticalDivider,
           PropertyStringView(
@@ -163,8 +163,8 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                               fieldId: widget.data.id,
                               fieldValueType: FindResultFieldDefinitionValueType.simple,
                             ),
-                            watch(clientFindStateProvider).state,
-                            watch(clientNavigationServiceProvider).state,
+                            ref.watch(clientFindStateProvider).state,
+                            ref.watch(clientNavigationServiceProvider).state,
                           );
 
                           return _getReferenceClassSelector(
@@ -198,8 +198,8 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                                 fieldId: widget.data.id,
                                 fieldValueType: FindResultFieldDefinitionValueType.simple,
                               ),
-                              watch(clientFindStateProvider).state,
-                              watch(clientNavigationServiceProvider).state,
+                              ref.watch(clientFindStateProvider).state,
+                              ref.watch(clientNavigationServiceProvider).state,
                             );
 
                             return _getReferenceClassSelector(
@@ -234,8 +234,8 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                                 fieldId: widget.data.id,
                                 fieldValueType: FindResultFieldDefinitionValueType.simple,
                               ),
-                              watch(clientFindStateProvider).state,
-                              watch(clientNavigationServiceProvider).state,
+                              ref.watch(clientFindStateProvider).state,
+                              ref.watch(clientNavigationServiceProvider).state,
                             );
 
                             return _getReferenceClassSelector(
@@ -283,7 +283,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                       IconButtonTransparent(
                         onClick: _revertTypes,
                         icon: Icon(
-                          FontAwesomeIcons.times,
+                          FontAwesomeIcons.xmark,
                           color: kColorAccentRed,
                           size: 27 * kScale,
                         ),

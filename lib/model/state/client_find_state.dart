@@ -330,6 +330,7 @@ class ClientFindStateNotifier extends ChangeNotifier {
           }
 
           FindResultFieldDefinitionValueType? fieldValueType;
+          // ignore: unnecessary_null_comparison
           if (fieldValueType == null && field.typeInfo.classId != null && _checkMatch(field.typeInfo.classId!, isId: true)) {
             fieldValueType = FindResultFieldDefinitionValueType.simple;
           }

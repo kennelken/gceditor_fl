@@ -75,8 +75,8 @@ class _ClientAuthPanelState extends State<ClientAuthPanel> {
   @override
   Widget build(BuildContext context) {
     return Consumer(
-      builder: (context, watch, child) {
-        watch(startupProvider);
+      builder: (context, ref, child) {
+        ref.watch(startupProvider);
 
         if (!_initialValuesSet) {
           final login = widget.authData.login ?? AppLocalStorage.instance.clientLogin ?? Config.defaultNewLogin;
