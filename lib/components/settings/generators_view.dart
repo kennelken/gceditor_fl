@@ -23,10 +23,10 @@ class GeneratorsView extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _GeneratorsViewState createState() => _GeneratorsViewState();
+  GeneratorsViewState createState() => GeneratorsViewState();
 }
 
-class _GeneratorsViewState extends State<GeneratorsView> {
+class GeneratorsViewState extends State<GeneratorsView> {
   late List<BaseGenerator> generators;
   late final CustomPopupMenuController _addNewGeneratorPopupController;
   late final ScrollController _listScrollController;

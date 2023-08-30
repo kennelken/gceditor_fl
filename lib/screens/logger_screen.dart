@@ -21,19 +21,25 @@ class LoggerScreen extends ConsumerWidget {
       width: 99999,
       padding: EdgeInsets.all(8 * kScale),
       color: kColorPrimaryDarker,
-      child: ScrollConfiguration(
-        behavior: kScrollDraggable,
-        child: ListView.builder(
-          controller: ScrollController(),
-          shrinkWrap: true,
-          itemCount: messages.length,
-          itemBuilder: (c, i) {
-            return SelectableText(
-              '${kTimeFormat.format(messages[i].time)}: ${messages[i].message}',
-              style: textStyle.get(messages[i].level),
-              textAlign: TextAlign.left,
-            );
-          },
+      child: Theme(
+        data: ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.white.withAlpha(100))),
+        child: ScrollConfiguration(
+          //TODO! fix multiline as soon as https://github.com/flutter/flutter/issues/104548 is fixed
+          behavior: kScrollDraggable,
+          child: SelectionArea(
+            child: ListView.builder(
+              controller: ScrollController(),
+              shrinkWrap: true,
+              itemCount: messages.length,
+              itemBuilder: (c, i) {
+                return Text(
+                  '${kTimeFormat.format(messages[i].time)}: ${messages[i].message}',
+                  style: textStyle.get(messages[i].level),
+                  textAlign: TextAlign.left,
+                );
+              },
+            ),
+          ),
         ),
       ),
     );

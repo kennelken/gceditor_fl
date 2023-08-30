@@ -27,10 +27,10 @@ class LandingScreen extends StatefulWidget {
   const LandingScreen({Key? key}) : super(key: key);
 
   @override
-  _LandingScreenState createState() => _LandingScreenState();
+  LandingScreenState createState() => LandingScreenState();
 }
 
-class _LandingScreenState extends State<LandingScreen> {
+class LandingScreenState extends State<LandingScreen> {
   late final TextEditingController _clientIpTextController = TextEditingController();
   late final TextEditingController _portTextController = TextEditingController();
   late final TextEditingController _projectPathTextController = TextEditingController();
@@ -58,6 +58,7 @@ class _LandingScreenState extends State<LandingScreen> {
         final defaultFolder = ref.watch(appStateProvider).state.defaultProjectFolder;
         final defaultFolderPath = defaultFolder?.path ?? '';
         final openPort = ref.watch(networkStateProvider.notifier).state.openPort?.toString() ?? Config.portMin.toString();
+        ref.watch(styleStateProvider);
 
         if (!_initialValuesSet) {
           final appState = providerContainer.read(appStateProvider).state;

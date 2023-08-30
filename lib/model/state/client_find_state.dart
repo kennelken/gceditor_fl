@@ -12,6 +12,7 @@ import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/model_root.dart';
+import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/log_state.dart';
 import 'package:gceditor/model/state/service/client_navigation_service.dart';
 import 'package:gceditor/model/state/style_state.dart';
@@ -25,6 +26,7 @@ class ClientFindState {
   List<FindResultItem>? _results;
   int currentItemIndex = -1;
   FindSettings settings = FindSettings();
+  FindSettings? lastFindSettings;
   bool visible = false;
 
   List<FindResultItem>? getResults() {
@@ -52,28 +54,28 @@ class ClientFindStateNotifier extends ChangeNotifier {
   ClientFindStateNotifier(this.state);
   late _FindContext _findContext;
 
-  void find(DbModel model) async {
+  void find(DbModel model, {FindSettings? settings}) async {
     state.settings.text ??= '';
 
-    if (state.settings.text!.isEmpty) {
-      _findContext = _FindContext(text: '', settings: state.settings.copyWith());
+    settings ??= state.settings;
+    if (settings.text!.isEmpty) {
+      _findContext = _FindContext(text: '', settings: settings.copyWith());
     }
-    if (state.settings.regEx == true) {
-      _findContext = _FindContext(
-          regExp: RegExp(state.settings.text!, caseSensitive: state.settings.caseSensitive == true), settings: state.settings.copyWith());
+    if (settings.regEx == true) {
+      _findContext = _FindContext(regExp: RegExp(settings.text!, caseSensitive: settings.caseSensitive == true), settings: settings.copyWith());
     } else {
-      var text = state.settings.text!;
+      var text = settings.text!;
 
-      if (state.settings.caseSensitive != true) {
+      if (settings.caseSensitive != true) {
         text = text.toLowerCase();
       }
 
-      if (state.settings.word == true) {
-        final regexPattern = Utils.escapeRegexSpecial(state.settings.text!, true);
+      if (settings.word == true) {
+        final regexPattern = Utils.escapeRegexSpecial(settings.text!, true);
         final regex = RegExp(regexPattern);
-        _findContext = _FindContext(regExp: regex, settings: state.settings.copyWith());
+        _findContext = _FindContext(regExp: regex, settings: settings.copyWith());
       } else {
-        _findContext = _FindContext(text: text, settings: state.settings.copyWith());
+        _findContext = _FindContext(text: text, settings: settings.copyWith());
       }
     }
 
@@ -106,6 +108,11 @@ class ClientFindStateNotifier extends ChangeNotifier {
   void toggleVisibility(bool visible) {
     state.visible = visible;
     notifyListeners();
+  }
+
+  void refreshIfVisible() {
+    if (state.lastFindSettings == null) return;
+    find(clientModel, settings: state.lastFindSettings);
   }
 
   void focusOn(FindResultItem item) {
@@ -161,6 +168,7 @@ class ClientFindStateNotifier extends ChangeNotifier {
   void _doFind(DbModel model) {
     state._results ??= [];
     state._results!.clear();
+    state.lastFindSettings = state.settings.copyWith();
 
     final stopWatch = Stopwatch();
     stopWatch.start();
@@ -222,6 +230,14 @@ class ClientFindStateNotifier extends ChangeNotifier {
               case ClassFieldType.date:
               case ClassFieldType.duration:
               case ClassFieldType.color:
+              case ClassFieldType.vector2:
+              case ClassFieldType.vector2Int:
+              case ClassFieldType.vector3:
+              case ClassFieldType.vector3Int:
+              case ClassFieldType.vector4:
+              case ClassFieldType.vector4Int:
+              case ClassFieldType.rectangle:
+              case ClassFieldType.rectangleInt:
                 _doFindInSimpleValue(value.simpleValue, field.typeInfo.type, priorityLow, addResult);
                 break;
 
@@ -410,6 +426,14 @@ class ClientFindStateNotifier extends ChangeNotifier {
       case ClassFieldType.date:
       case ClassFieldType.duration:
       case ClassFieldType.color:
+      case ClassFieldType.vector2:
+      case ClassFieldType.vector2Int:
+      case ClassFieldType.vector3:
+      case ClassFieldType.vector3Int:
+      case ClassFieldType.vector4:
+      case ClassFieldType.vector4Int:
+      case ClassFieldType.rectangle:
+      case ClassFieldType.rectangleInt:
         if (_checkMatch(value.toString())) //
           onFind(value.toString(), priority, FindResultType.value);
         break;

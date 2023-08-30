@@ -16,10 +16,10 @@ class ServerHistoryAdminPanel extends StatefulWidget {
   const ServerHistoryAdminPanel({Key? key}) : super(key: key);
 
   @override
-  _ServerHistoryAdminPanelState createState() => _ServerHistoryAdminPanelState();
+  ServerHistoryAdminPanelState createState() => ServerHistoryAdminPanelState();
 }
 
-class _ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
+class ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
   late final TextEditingController _historyPathTextController;
   late final TextEditingController _tagNameTextController;
 

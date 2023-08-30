@@ -87,7 +87,6 @@ Color getColorByLogLevel(LogLevel logLevel) {
 }
 
 class LogStateReportHandler {
-  @override
   Future<bool> handleError(FlutterErrorDetails error) {
     return handle(error.exceptionAsString());
   }

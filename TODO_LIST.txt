@@ -14,12 +14,3 @@
 		Cell: {"x": "10", "y":"SomeTableRowId.SomeColumnName"}
 
 35. replace MenuBar with PlatformMenuBar when there are implementations for windows and linux
-
-36. BUG: when you delete a row highlighted by a search, the next row becomes highlighted
-36.1. Maybe it should simply do search again every time any command is executed (performance expenses are possible)
-
-37. fix missing icons at the starting page
-37. support native c# serializer (#NET6_0)
-38. add cache object as a parameter to OnParsedImplementation
-39. fix UI jitter under mouse
-40. add Vector2, Vector2I, Vector3, Vector3I, Vector4, Vector4I, Rectangle support (both Godot #GODOT4_OR_GREATER, Unity #UNITY_5_3_OR_NEWER, System.Drawing otherwise)

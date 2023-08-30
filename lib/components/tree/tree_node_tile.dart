@@ -200,7 +200,7 @@ class TreeNodeTile extends ConsumerWidget {
       return const SizedBox();
 
     var icon = FontAwesomeIcons.question;
-    if (data is ClassMetaEntity) icon = FontAwesomeIcons.columns;
+    if (data is ClassMetaEntity) icon = FontAwesomeIcons.tableColumns;
     if (data is ClassMetaEntityEnum) icon = FontAwesomeIcons.list;
     if (data is TableMetaEntity) icon = FontAwesomeIcons.table;
 

@@ -110,13 +110,48 @@ class Config {
   static final RegExp validCharactersForCellTypeFloat = RegExp(r'[\-0-9\.]');
   static final List<FilteringTextInputFormatter> filterCellTypeFloat = [FilteringTextInputFormatter.allow(validCharactersForCellTypeFloat)];
 
-  static final dateFormatRegex = RegExp(r'^(?<y>\d{4})\.(?<m>\d{2})\.(?<d>\d{2}) (?<hh>\d{2}):(?<mm>\d{2})(:(?<ss>\d{2}))?$');
+  static final dateFormatRegex = RegExp(r'^\ *(?<y>\d{4})\.(?<m>\d{2})\.(?<d>\d{2}) (?<hh>\d{2}):(?<mm>\d{2})(:(?<ss>\d{2}))?\ *$');
   static final RegExp validCharactersForDate = RegExp(r'[ 0-9\.:]');
   static final List<FilteringTextInputFormatter> filterCellTypeDate = [FilteringTextInputFormatter.allow(validCharactersForDate)];
 
-  static final durationFormatRegex = RegExp(r'^(?:(?<d>\d+)d)?\ ?(?:(?<h>\d+)h)?\ ?(?:(?<m>\d+)m)?\ ?(?:(?<s>\d+)s)?$');
-  static final RegExp validCharactersForDuration = RegExp(r'[ 0-9dmhs]');
+  static final durationFormatRegex =
+      RegExp(r'^\ *(?:(?<d>\-?\d+)d)?\ *(?:(?<h>\-?\d+)h)?\ *(?:(?<m>\-?\d+)m)?\ *(?:(?<s>\-?\d+)s)?\ *(?:(?<ms>\-?\d+)ms)?\ *$');
+  static final RegExp validCharactersForDuration = RegExp(r'[ 0-9dmhs\-]');
   static final List<FilteringTextInputFormatter> filterCellTypeDuration = [FilteringTextInputFormatter.allow(validCharactersForDuration)];
+
+  static final vector2FormatRegex = RegExp(r'^\ *(?:x:(?<x>\-?\d+(?:\.\d*)?))\ *(?:y:(?<y>\-?\d+(?:\.\d*)?))\ *$');
+  static final RegExp validCharactersForVector2 = RegExp(r'[ 0-9\.xy:\-]');
+  static final List<FilteringTextInputFormatter> filterCellTypeVector2 = [FilteringTextInputFormatter.allow(validCharactersForVector2)];
+
+  static final vector2IntFormatRegex = RegExp(r'^\ *(?:x:(?<x>\-?\d+))\ *(?:y:(?<y>\-?\d+))\ *$');
+  static final RegExp validCharactersForVector2Int = RegExp(r'[ 0-9xy:\-]');
+  static final List<FilteringTextInputFormatter> filterCellTypeVector2Int = [FilteringTextInputFormatter.allow(validCharactersForVector2Int)];
+
+  static final vector3FormatRegex = RegExp(r'^\ *(?:x:(?<x>\-?\d+(?:\.\d*)?))\ *(?:y:(?<y>\-?\d+(?:\.\d*)?))\ *(?:z:(?<z>\-?\d+(?:\.\d*)?))\ *$');
+  static final RegExp validCharactersForVector3 = RegExp(r'[ 0-9\.xyz:\-]');
+  static final List<FilteringTextInputFormatter> filterCellTypeVector3 = [FilteringTextInputFormatter.allow(validCharactersForVector3)];
+
+  static final vector3IntFormatRegex = RegExp(r'^\ *(?:x:(?<x>\-?\d+))\ *(?:y:(?<y>\-?\d+))\ *(?:z:(?<z>\-?\d+))\ *$');
+  static final RegExp validCharactersForVector3Int = RegExp(r'[ 0-9xyz:\-]');
+  static final List<FilteringTextInputFormatter> filterCellTypeVector3Int = [FilteringTextInputFormatter.allow(validCharactersForVector3Int)];
+
+  static final vector4FormatRegex =
+      RegExp(r'^\ *(?:x:(?<x>\-?\d+(?:\.\d*)?))\ *(?:y:(?<y>\-?\d+(?:\.\d*)?))\ *(?:z:(?<z>\-?\d+(?:\.\d*)?))\ *(?:w:(?<w>\-?\d+(?:\.\d*)?))\ *$');
+  static final RegExp validCharactersForVector4 = RegExp(r'[ 0-9\.xyzw:\-]');
+  static final List<FilteringTextInputFormatter> filterCellTypeVector4 = [FilteringTextInputFormatter.allow(validCharactersForVector4)];
+
+  static final vector4IntFormatRegex = RegExp(r'^\ *(?:x:(?<x>\-?\d+))\ *(?:y:(?<y>\-?\d+))\ *(?:z:(?<z>\-?\d+))\ *(?:w:(?<w>\-?\d+))\ *$');
+  static final RegExp validCharactersForVector4Int = RegExp(r'[ 0-9xyzw:\-]');
+  static final List<FilteringTextInputFormatter> filterCellTypeVector4Int = [FilteringTextInputFormatter.allow(validCharactersForVector4Int)];
+
+  static final rectangleFormatRegex =
+      RegExp(r'^\ *(?:x:(?<x>\-?\d+(?:\.\d*)?))\ *(?:y:(?<y>\-?\d+(?:\.\d*)?))\ *(?:w:(?<w>\-?\d+(?:\.\d*)?))\ *(?:h:(?<h>\-?\d+(?:\.\d*)?))\ *$');
+  static final RegExp validCharactersForRectangle = RegExp(r'[ 0-9\.xywh:\-]');
+  static final List<FilteringTextInputFormatter> filterCellTypeRectangle = [FilteringTextInputFormatter.allow(validCharactersForRectangle)];
+
+  static final rectangleIntFormatRegex = RegExp(r'^\ *(?:x:(?<x>\-?\d+))\ *(?:y:(?<y>\-?\d+))\ *(?:w:(?<w>\-?\d+))\ *(?:h:(?<h>\-?\d+))\ *$');
+  static final RegExp validCharactersForRectangleInt = RegExp(r'[ 0-9xywh:\-]');
+  static final List<FilteringTextInputFormatter> filterCellTypeRectangleInt = [FilteringTextInputFormatter.allow(validCharactersForRectangleInt)];
 
   static final validTimezoneFormat = RegExp(r'^[-+]?[0-9]{0,2}(?:\.[05]?)?$');
   static final RegExp validCharactersForTimezone = RegExp(r'[\-+0-9\.]');

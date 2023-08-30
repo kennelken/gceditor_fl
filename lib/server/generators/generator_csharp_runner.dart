@@ -56,6 +56,14 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
   static const _paramClassName = 'className';
   static const _paramRegexDate = 'regexDate';
   static const _paramRegexDuration = 'regexDuration';
+  static const _paramRegexVector2 = 'regexVector2';
+  static const _paramRegexVector2Int = 'regexVector2Int';
+  static const _paramRegexVector3 = 'regexVector3';
+  static const _paramRegexVector3Int = 'regexVector3Int';
+  static const _paramRegexVector4 = 'regexVector4';
+  static const _paramRegexVector4Int = 'regexVector4Int';
+  static const _paramRegexRectangle = 'regexRectangle';
+  static const _paramRegexRectangleInt = 'regexRectangleInt';
   static const _paramAssignValueListProperties = 'assignValueListProperties';
   static const _paramParseFunction = 'parseFunction';
   static const _paramAssignValueCases = 'assignValueCases';
@@ -90,6 +98,14 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
               _paramListInstantiate: _getListInstantiate(model, data),
               _paramRegexDate: Config.dateFormatRegex.pattern,
               _paramRegexDuration: Config.durationFormatRegex.pattern,
+              _paramRegexVector2: Config.vector2FormatRegex.pattern,
+              _paramRegexVector2Int: Config.vector2IntFormatRegex.pattern,
+              _paramRegexVector3: Config.vector3FormatRegex.pattern,
+              _paramRegexVector3Int: Config.vector3IntFormatRegex.pattern,
+              _paramRegexVector4: Config.vector4FormatRegex.pattern,
+              _paramRegexVector4Int: Config.vector4IntFormatRegex.pattern,
+              _paramRegexRectangle: Config.rectangleFormatRegex.pattern,
+              _paramRegexRectangleInt: Config.rectangleIntFormatRegex.pattern,
               _paramAssignValueCases: _getAssignValuesCases(model, data),
               _paramMaxStructDepth: _getMaxStructDepth(model, 3),
             },
@@ -465,6 +481,14 @@ namespace ${data.namespace}
       case ClassFieldType.date:
       case ClassFieldType.duration:
       case ClassFieldType.color:
+      case ClassFieldType.vector2:
+      case ClassFieldType.vector2Int:
+      case ClassFieldType.vector3:
+      case ClassFieldType.vector3Int:
+      case ClassFieldType.vector4:
+      case ClassFieldType.vector4Int:
+      case ClassFieldType.rectangle:
+      case ClassFieldType.rectangleInt:
         return _getSimplePropertyType(field.typeInfo, data);
 
       case ClassFieldType.list:
@@ -516,6 +540,30 @@ namespace ${data.namespace}
 
       case ClassFieldType.color:
         return 'Color';
+
+      case ClassFieldType.vector2:
+        return 'Vector2';
+
+      case ClassFieldType.vector2Int:
+        return 'Vector2Int';
+
+      case ClassFieldType.vector3:
+        return 'Vector3';
+
+      case ClassFieldType.vector3Int:
+        return 'Vector3Int';
+
+      case ClassFieldType.vector4:
+        return 'Vector4';
+
+      case ClassFieldType.vector4Int:
+        return 'Vector4Int';
+
+      case ClassFieldType.rectangle:
+        return 'Rectangle';
+
+      case ClassFieldType.rectangleInt:
+        return 'RectangleInt';
     }
   }
 
@@ -621,6 +669,14 @@ ${_makeSummary('</summary>', indentDepth)}''';
       case ClassFieldType.date:
       case ClassFieldType.duration:
       case ClassFieldType.color:
+      case ClassFieldType.vector2:
+      case ClassFieldType.vector2Int:
+      case ClassFieldType.vector3:
+      case ClassFieldType.vector3Int:
+      case ClassFieldType.vector4:
+      case ClassFieldType.vector4Int:
+      case ClassFieldType.rectangle:
+      case ClassFieldType.rectangleInt:
         return _getAssignSimpleValueFunction(model, data, field.typeInfo, value);
 
       case ClassFieldType.list:
@@ -677,6 +733,30 @@ ${_makeSummary('</summary>', indentDepth)}''';
       case ClassFieldType.color:
         return 'ParseColor(${value})';
 
+      case ClassFieldType.vector2:
+        return 'ParseVector2(${value})';
+
+      case ClassFieldType.vector2Int:
+        return 'ParseVector2Int(${value})';
+
+      case ClassFieldType.vector3:
+        return 'ParseVector3(${value})';
+
+      case ClassFieldType.vector3Int:
+        return 'ParseVector3Int(${value})';
+
+      case ClassFieldType.vector4:
+        return 'ParseVector4(${value})';
+
+      case ClassFieldType.vector4Int:
+        return 'ParseVector4Int(${value})';
+
+      case ClassFieldType.rectangle:
+        return 'ParseRectangle(${value})';
+
+      case ClassFieldType.rectangleInt:
+        return 'ParseRectangleInt(${value})';
+
       case ClassFieldType.list:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
@@ -698,6 +778,14 @@ ${_makeSummary('</summary>', indentDepth)}''';
       case ClassFieldType.duration:
       case ClassFieldType.reference:
       case ClassFieldType.color:
+      case ClassFieldType.vector2:
+      case ClassFieldType.vector2Int:
+      case ClassFieldType.vector3:
+      case ClassFieldType.vector3Int:
+      case ClassFieldType.vector4:
+      case ClassFieldType.vector4Int:
+      case ClassFieldType.rectangle:
+      case ClassFieldType.rectangleInt:
         return '';
 
       case ClassFieldType.list:
@@ -785,7 +873,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
 // by {${_paramUser}}
 //
 // Dependencies:
-// https://www.newtonsoft.com/json is required for this parser to work
+// When .Net 6 or higher is not available, https://www.newtonsoft.com/json is required for this parser to work
 //
 // Usage:
 // var config = GceditorJsonParser.Parse(JSON_TEXT_FILE_GENERATED_BY_GCEDITOR)
@@ -800,13 +888,33 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Linq;
+
+#if NET6_0_OR_GREATER
+using System.Text.Json;
+using System.Text.Json.Serialization;
+#else
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+#endif
+
 #if UNITY_5_3_OR_NEWER
 using UnityEngine;
+using Rectangle = UnityEngine.Rect;
+using RectangleInt = UnityEngine.RectInt;
+#elif GODOT4_0_OR_GREATER
+using Godot;
+using Rectangle = Godot.Rect2;
+using RectangleInt = Godot.Rect2I;
+using Vector2Int = Godot.Vector2I;
+using Vector3Int = Godot.Vector3I;
+using Vector4Int = Godot.Vector4I;
 #else
 using System.Drawing;
+using System.Numerics;
+using RectangleInt = System.Drawing.Rectangle;
+using Rectangle = System.Drawing.RectangleF;
 #endif
+
 {${_paramNamespaceStart}}
 #region Interfaces
     public interface ICloneable<T>
@@ -997,7 +1105,7 @@ using System.Drawing;
     {
         public string Id { get; set; }
 
-        internal virtual void OnParsed({${_paramPrefix}}Root{${_paramPostfix}} root) {}
+        public virtual void OnParsed({${_paramPrefix}}Root{${_paramPostfix}} root, CacheRoot cache) {}
     }
 
 {${_paramClasses}}
@@ -1051,6 +1159,66 @@ using System.Drawing;
     }
 #endregion
 
+#region Geometry classes
+#if !GODOT4_0_OR_GREATER
+    #if !UNITY_5_3_OR_NEWER
+    public struct Vector2Int
+    {
+        public int X;
+        public int Y;
+
+        public Vector2Int(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+    }
+
+    public struct Vector3Int
+    {
+        public int X;
+        public int Y;
+        public int Z;
+
+        public Vector3Int(int x, int y, int z)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+        }
+    }
+    #endif
+
+    public struct Vector4Int
+    {
+        public int X;
+        public int Y;
+        public int Z;
+        public int W;
+
+        public Vector4Int(int x, int y, int z, int w)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+            W = w;
+        }
+    }
+
+    public struct RectInt
+    {
+        public Vector2Int Position;
+        public Vector2Int Size;
+
+        public RectInt(Vector2Int position, Vector2Int size)
+        {
+            Position = position;
+            Size = size;
+        }
+    }
+#endif
+#endregion
+
 {${_paramJsonParser}}
 #pragma warning restore 0414, 0168, 0219, 1998, 0109{${_paramNamespaceEnd}}''';
 
@@ -1084,14 +1252,14 @@ using System.Drawing;
             return \$"{{{${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}}} {{Id: {Id}}}";
         }
 
-        internal override void OnParsed({${_paramPrefix}}Root{${_paramPostfix}} root)
+        public override void OnParsed({${_paramPrefix}}Root{${_paramPostfix}} root, CacheRoot cache)
         {
-            base.OnParsed(root);
-            OnParsedImplementation(root);
+            base.OnParsed(root, cache);
+            OnParsedImplementation(root, cache);
         }
 
         partial void CloneCustom({${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} to);
-        partial void OnParsedImplementation({${_paramPrefix}}Root{${_paramPostfix}} root);
+        partial void OnParsedImplementation({${_paramPrefix}}Root{${_paramPostfix}} root, CacheRoot cache);
     }''';
 
   final String _interfaceTemplate = '''    /// <summary>
@@ -1201,7 +1369,7 @@ using System.Drawing;
 
   final String _parserTemplate = //
       '''#region JSON
-    public static class GceditorJsonParser
+    public static class {${_paramPrefix}}Root{${_paramPostfix}}Parser
     {
         public static {${_paramPrefix}}Root{${_paramPostfix}} Parse(string jsonText, {${_paramPrefix}}Root{${_paramPostfix}} root = null, Action<ErrorData> onError = null)
         {
@@ -1210,7 +1378,11 @@ using System.Drawing;
             var objectsByIds = new Dictionary<string, IIdentifiable>();
             var valuesByIds = new Dictionary<string, JsonItem>();
 
+#if NET6_0_OR_GREATER
+            var jsonRoot = JsonSerializer.Deserialize<JsonRoot>(jsonText, new JsonSerializerOptions { IncludeFields = true });
+#else
             var jsonRoot = JsonConvert.DeserializeObject<JsonRoot>(jsonText);
+#endif
             foreach (var className in jsonRoot.classes.Keys)
             {
                 var listItems = jsonRoot.classes[className];
@@ -1247,8 +1419,10 @@ using System.Drawing;
             root.CreationTime = jsonRoot.date;
             root.Init(new List<IIdentifiable>(objectsByIds.Values));
 
+            var cache = new CacheRoot();
+
             foreach (var objectId in allClasses)
-                (objectsByIds[objectId] as Base{${_paramPrefix}}Item{${_paramPostfix}}).OnParsed(root);
+                (objectsByIds[objectId] as Base{${_paramPrefix}}Item{${_paramPostfix}}).OnParsed(root, cache);
 
             return root;
         }
@@ -1311,6 +1485,19 @@ using System.Drawing;
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
+#if NET6_0_OR_GREATER
+            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
+              return emptyCollectionFactory.Dictionary<TKey, TValue>();
+
+            var result = new Dictionary<TKey, TValue>();
+            foreach (var element in ((JsonElement)values).EnumerateArray())
+            {
+              var key = element.GetProperty("k");
+              var value = element.GetProperty("v");
+              result[getKey(key)] = getValue(value);
+            }
+            return result;
+#else
             var array = values as JArray;
             if (values == null || values == "" || array.Count <= 0)
                 return emptyCollectionFactory.Dictionary<TKey, TValue>();
@@ -1323,6 +1510,7 @@ using System.Drawing;
             }
 
             return result;
+#endif
         }
 
         private static List<T> ParseList<T>(
@@ -1331,6 +1519,15 @@ using System.Drawing;
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
+#if NET6_0_OR_GREATER
+            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
+                return emptyCollectionFactory.List<T>();
+
+            var result = new List<T>();
+            foreach (var element in ((JsonElement)values).EnumerateArray())
+                result.Add(getValue(element));
+            return result;
+#else
             var array = values as JArray;
             if (values == null || values == "" || array.Count <= 0)
                 return emptyCollectionFactory.List<T>();
@@ -1340,6 +1537,7 @@ using System.Drawing;
                 result.Add(getValue(value.Value<string>()));
 
             return result;
+#endif
         }
 
         private static HashSet<T> ParseHashSet<T>(
@@ -1348,46 +1546,74 @@ using System.Drawing;
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
+#if NET6_0_OR_GREATER
+            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
+                return emptyCollectionFactory.HashSet<T>();
+#else
             var array = values as JArray;
             if (values == null || values == "" || array.Count <= 0)
                 return emptyCollectionFactory.HashSet<T>();
-
+#endif
             return new HashSet<T>(ParseList<T>(values, getValue, emptyCollectionFactory));
         }
 
         private static bool ParseBool(object value)
         {
+#if NET6_0_OR_GREATER
+            return ((JsonElement)value).GetBoolean();
+#else
             return Convert.ToInt32(value, CultureInfo.InvariantCulture) == 1;
+#endif
         }
 
         private static int ParseInt(object value)
         {
+#if NET6_0_OR_GREATER
+            return ((JsonElement)value).GetInt32();
+#else
             return Convert.ToInt32(value, CultureInfo.InvariantCulture);
+#endif
         }
 
         private static long ParseLong(object value)
         {
+#if NET6_0_OR_GREATER
+            return ((JsonElement)value).GetInt64();
+#else
             return Convert.ToInt64(value, CultureInfo.InvariantCulture);
+#endif
         }
 
         private static float ParseFloat(object value)
         {
+#if NET6_0_OR_GREATER
+            return ((JsonElement)value).GetSingle();
+#else
             return Convert.ToSingle(value, CultureInfo.InvariantCulture);
+#endif
         }
 
         private static double ParseDouble(object value)
         {
+#if NET6_0_OR_GREATER
+            return ((JsonElement)value).GetDouble();
+#else
             return Convert.ToDouble(value, CultureInfo.InvariantCulture);
+#endif
         }
 
         private static string ParseString(object value)
         {
+#if NET6_0_OR_GREATER
+            return ((JsonElement)value).GetString();
+#else
             return Convert.ToString(value, CultureInfo.InvariantCulture);
+#endif
         }
 
         private static T ParseReference<T>(object value, Dictionary<string, IIdentifiable> objectsByIds) where T : IIdentifiable
         {
-            var id = Convert.ToString(value);
+            var id = ParseString(value);
             if (string.IsNullOrEmpty(id))
                 return default;
 
@@ -1399,17 +1625,17 @@ using System.Drawing;
 
         private static T ParseEnum<T>(object value)
         {
-            var id = Convert.ToString(value);
+            var id = ParseString(value);
             if (string.IsNullOrEmpty(id))
                 return default;
 
             return (T)Enum.Parse(typeof(T), id);
         }
 
-        private static Regex dateFormatRegex = new Regex(@"{${_paramRegexDate}}");
+        private static Regex dateFormatRegex = new Regex(@"{${_paramRegexDate}}", RegexOptions.Compiled);
         private static DateTime ParseDate(object value)
         {
-            var date = Convert.ToString(value);
+            var date = ParseString(value);
             if (string.IsNullOrEmpty(date))
                 return default;
 
@@ -1437,10 +1663,10 @@ using System.Drawing;
             );
         }
 
-        private static Regex durationFormatRegex = new Regex(@"{${_paramRegexDuration}}");
+        private static Regex durationFormatRegex = new Regex(@"{${_paramRegexDuration}}", RegexOptions.Compiled);
         private static TimeSpan ParseDuration(object value)
         {
-            var duration = Convert.ToString(value);
+            var duration = ParseString(value);
             if (string.IsNullOrEmpty(duration))
                 return default;
 
@@ -1452,23 +1678,205 @@ using System.Drawing;
             var hours = match.Groups["h"];
             var minutes = match.Groups["m"];
             var seconds = match.Groups["s"];
+            var milliSeconds = match.Groups["ms"];
 
             return new TimeSpan(
                 days?.Success ?? false ? Convert.ToInt32(days.Value) : 0,
                 hours?.Success ?? false ? Convert.ToInt32(hours.Value) : 0,
                 minutes?.Success ?? false ? Convert.ToInt32(minutes.Value) : 0,
-                seconds?.Success ?? false ? Convert.ToInt32(seconds.Value) : 0
+                seconds?.Success ?? false ? Convert.ToInt32(seconds.Value) : 0,
+                milliSeconds?.Success ?? false ? Convert.ToInt32(milliSeconds.Value) : 0
+            );
+        }
+
+        private static Regex vector2FormatRegex = new Regex(@"{${_paramRegexVector2}}", RegexOptions.Compiled);
+        private static Vector2 ParseVector2(object value)
+        {
+            var vector2 = ParseString(value);
+            if (string.IsNullOrEmpty(vector2))
+                return default;
+
+            var match = vector2FormatRegex.Match(vector2);
+            if (!match.Success)
+                return default;
+
+            var x = match.Groups["x"];
+            var y = match.Groups["y"];
+
+            return new Vector2(
+                x?.Success ?? false ? Convert.ToSingle(x.Value) : 0,
+                y?.Success ?? false ? Convert.ToSingle(y.Value) : 0
+            );
+        }
+
+        private static Regex vector2IntFormatRegex = new Regex(@"{${_paramRegexVector2Int}}", RegexOptions.Compiled);
+        private static Vector2Int ParseVector2Int(object value)
+        {
+            var vector2Int = ParseString(value);
+            if (string.IsNullOrEmpty(vector2Int))
+                return default;
+
+            var match = vector2IntFormatRegex.Match(vector2Int);
+            if (!match.Success)
+                return default;
+
+            var x = match.Groups["x"];
+            var y = match.Groups["y"];
+
+            return new Vector2Int(
+                x?.Success ?? false ? Convert.ToInt32(x.Value) : 0,
+                y?.Success ?? false ? Convert.ToInt32(y.Value) : 0
+            );
+        }
+
+        private static Regex vector3FormatRegex = new Regex(@"{${_paramRegexVector3}}", RegexOptions.Compiled);
+        private static Vector3 ParseVector3(object value)
+        {
+            var vector3 = ParseString(value);
+            if (string.IsNullOrEmpty(vector3))
+                return default;
+
+            var match = vector3FormatRegex.Match(vector3);
+            if (!match.Success)
+                return default;
+
+            var x = match.Groups["x"];
+            var y = match.Groups["y"];
+            var z = match.Groups["z"];
+
+            return new Vector3(
+                x?.Success ?? false ? Convert.ToSingle(x.Value) : 0,
+                y?.Success ?? false ? Convert.ToSingle(y.Value) : 0,
+                z?.Success ?? false ? Convert.ToSingle(z.Value) : 0
+            );
+        }
+
+        private static Regex vector3IntFormatRegex = new Regex(@"{${_paramRegexVector3Int}}", RegexOptions.Compiled);
+        private static Vector3Int ParseVector3Int(object value)
+        {
+            var vector3Int = ParseString(value);
+            if (string.IsNullOrEmpty(vector3Int))
+                return default;
+
+            var match = vector3IntFormatRegex.Match(vector3Int);
+            if (!match.Success)
+                return default;
+
+            var x = match.Groups["x"];
+            var y = match.Groups["y"];
+            var z = match.Groups["z"];
+
+            return new Vector3Int(
+                x?.Success ?? false ? Convert.ToInt32(x.Value) : 0,
+                y?.Success ?? false ? Convert.ToInt32(y.Value) : 0,
+                z?.Success ?? false ? Convert.ToInt32(z.Value) : 0
+            );
+        }
+
+        private static Regex vector4FormatRegex = new Regex(@"{${_paramRegexVector4}}", RegexOptions.Compiled);
+        private static Vector4 ParseVector4(object value)
+        {
+            var vector4 = ParseString(value);
+            if (string.IsNullOrEmpty(vector4))
+                return default;
+
+            var match = vector4FormatRegex.Match(vector4);
+            if (!match.Success)
+                return default;
+
+            var x = match.Groups["x"];
+            var y = match.Groups["y"];
+            var z = match.Groups["z"];
+            var w = match.Groups["w"];
+
+            return new Vector4(
+                x?.Success ?? false ? Convert.ToSingle(x.Value) : 0,
+                y?.Success ?? false ? Convert.ToSingle(y.Value) : 0,
+                z?.Success ?? false ? Convert.ToSingle(z.Value) : 0,
+                w?.Success ?? false ? Convert.ToSingle(w.Value) : 0
+            );
+        }
+
+        private static Regex vector4IntFormatRegex = new Regex(@"{${_paramRegexVector4Int}}", RegexOptions.Compiled);
+        private static Vector4Int ParseVector4Int(object value)
+        {
+            var vector4Int = ParseString(value);
+            if (string.IsNullOrEmpty(vector4Int))
+                return default;
+
+            var match = vector4IntFormatRegex.Match(vector4Int);
+            if (!match.Success)
+                return default;
+
+            var x = match.Groups["x"];
+            var y = match.Groups["y"];
+            var z = match.Groups["z"];
+            var w = match.Groups["w"];
+
+            return new Vector4Int(
+                x?.Success ?? false ? Convert.ToInt32(x.Value) : 0,
+                y?.Success ?? false ? Convert.ToInt32(y.Value) : 0,
+                z?.Success ?? false ? Convert.ToInt32(z.Value) : 0,
+                w?.Success ?? false ? Convert.ToInt32(w.Value) : 0
+            );
+        }
+
+        private static Regex rectangleFormatRegex = new Regex(@"{${_paramRegexRectangle}}", RegexOptions.Compiled);
+        private static Rectangle ParseRectangle(object value)
+        {
+            var rectangle = ParseString(value);
+            if (string.IsNullOrEmpty(rectangle))
+                return default;
+
+            var match = rectangleFormatRegex.Match(rectangle);
+            if (!match.Success)
+                return default;
+
+            var x = match.Groups["x"];
+            var y = match.Groups["y"];
+            var w = match.Groups["w"];
+            var h = match.Groups["h"];
+
+            return new Rectangle(
+                x?.Success ?? false ? Convert.ToSingle(x.Value) : 0,
+                y?.Success ?? false ? Convert.ToSingle(y.Value) : 0,
+                w?.Success ?? false ? Convert.ToSingle(w.Value) : 0,
+                h?.Success ?? false ? Convert.ToSingle(h.Value) : 0
+            );
+        }
+
+        private static Regex rectangleIntFormatRegex = new Regex(@"{${_paramRegexRectangleInt}}", RegexOptions.Compiled);
+        private static RectangleInt ParseRectangleInt(object value)
+        {
+            var rectangleInt = ParseString(value);
+            if (string.IsNullOrEmpty(rectangleInt))
+                return default;
+
+            var match = rectangleIntFormatRegex.Match(rectangleInt);
+            if (!match.Success)
+                return default;
+
+            var x = match.Groups["x"];
+            var y = match.Groups["y"];
+            var w = match.Groups["w"];
+            var h = match.Groups["h"];
+
+            return new RectangleInt(
+                x?.Success ?? false ? Convert.ToInt32(x.Value) : 0,
+                y?.Success ?? false ? Convert.ToInt32(y.Value) : 0,
+                w?.Success ?? false ? Convert.ToInt32(w.Value) : 0,
+                h?.Success ?? false ? Convert.ToInt32(h.Value) : 0
             );
         }
 
         private static Color ParseColor(object value)
         {
-            var argb = Convert.ToInt64(value);
+            var argb = ParseLong(value);
             var alpha = (int)((argb >> 24) & 0xFF);
             var red = (int)((argb >> 16) & 0xFF);
             var green = (int)((argb >> 8) & 0xFF);
             var blue = (int)(argb & 0xFF);
-#if UNITY_5_3_OR_NEWER
+#if UNITY_5_3_OR_NEWER || GODOT4_0_OR_GREATER
             return new Color(red / 255f, green / 255f, blue / 255f, alpha / 255f);
 #else
             return Color.FromArgb(alpha, red, green, blue);
@@ -1512,6 +1920,91 @@ using System.Drawing;
             Entity = entity;
             Exception = exception;
             Message = message;
+        }
+    }
+
+    public class CacheRoot
+    {
+        private Dictionary<object, object> _caches = new Dictionary<object, object>();
+
+        public LazyCache<TKey, TValue> Get<TKey, TValue>(object key, Func<TKey, TValue> getCache, Action<LazyCache<TKey, TValue>> onCreated = null)
+        {
+            if (!_caches.TryGetValue(key, out var result))
+            {
+                var res = new LazyCache<TKey, TValue>(getCache);
+                onCreated?.Invoke(res);
+                _caches[key] = res;
+                result = res;
+            }
+            return result as LazyCache<TKey, TValue>;
+        }
+    }
+
+    public class LazyCache<TKey, TValue>
+    {
+        private readonly Dictionary<TKey, TValue> _values = new();
+        private readonly HashSet<TKey> _warmupKeys = new();
+        private readonly Func<TKey, TValue> _getValue;
+
+        public LazyCache(Func<TKey, TValue> getValue)
+        {
+            _getValue = getValue;
+        }
+
+        public LazyCache<TKey, TValue> WithWarmup(ICollection<TKey> keys, bool now = false)
+        {
+            foreach (var key in keys)
+            {
+                if (_values.ContainsKey(key))
+                  continue;
+
+                _warmupKeys.Add(key);
+            }
+
+            if (now)
+            {
+                Warmup();
+            }
+
+            return this;
+        }
+
+        private void Warmup()
+        {
+            if (_warmupKeys == null)
+               return;
+
+            foreach (var key in _warmupKeys)
+            {
+                DoGet(key);
+            }
+            _warmupKeys.Clear();
+        }
+
+        public TValue this[TKey key] => Get(key);
+
+        public TValue Get(TKey key)
+        {
+            if (_warmupKeys.Count > 0)
+                Warmup();
+
+            return DoGet(key);
+        }
+
+        private TValue DoGet(TKey key)
+        {
+            if (!_values.TryGetValue(key, out var value))
+            {
+                value = _getValue(key);
+                _values[key] = value;
+            }
+            return value;
+        }
+
+        public void Clear()
+        {
+            _values.Clear();
+            _warmupKeys.Clear();
         }
     }
 #endregion''';

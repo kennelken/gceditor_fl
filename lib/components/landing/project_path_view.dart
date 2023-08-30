@@ -47,6 +47,7 @@ class ProjectPathView extends StatelessWidget {
             width: 30 * kScale,
             height: 30 * kScale,
             child: ElevatedButton(
+              style: kButtonContextMenu,
               onPressed: () => _handleBrowseProjectPath(),
               child: Icon(
                 FontAwesomeIcons.file,
@@ -61,6 +62,7 @@ class ProjectPathView extends StatelessWidget {
           width: 30 * kScale,
           height: 30 * kScale,
           child: ElevatedButton(
+            style: kButtonContextMenu,
             onPressed: () => _handleBrowseProjectDirectory(defaultFolder!),
             child: Icon(
               FontAwesomeIcons.folder,

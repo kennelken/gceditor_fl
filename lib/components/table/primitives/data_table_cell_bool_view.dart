@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/components/table/primitives/data_table_cell_view.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/model/db/class_field_description_data_info.dart';
-import 'package:gceditor/model/state/style_state.dart';
+
+import '../../../model/state/style_state.dart';
 
 class DataTableCellBoolView extends ConsumerWidget {
   final DataTableValueCoordinates coordinates;

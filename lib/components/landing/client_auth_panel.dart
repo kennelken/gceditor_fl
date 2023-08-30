@@ -25,10 +25,10 @@ class ClientAuthPanel extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ClientAuthPanelState createState() => _ClientAuthPanelState();
+  ClientAuthPanelState createState() => ClientAuthPanelState();
 }
 
-class _ClientAuthPanelState extends State<ClientAuthPanel> {
+class ClientAuthPanelState extends State<ClientAuthPanel> {
   late final TextEditingController _loginTextController;
   late final TextEditingController _secretTextController;
   late final TextEditingController _passwordTextController;

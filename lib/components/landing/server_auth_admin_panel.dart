@@ -16,10 +16,10 @@ class ServerAuthAdminPanel extends StatefulWidget {
   const ServerAuthAdminPanel({Key? key}) : super(key: key);
 
   @override
-  _ServerAuthAdminPanelState createState() => _ServerAuthAdminPanelState();
+  ServerAuthAdminPanelState createState() => ServerAuthAdminPanelState();
 }
 
-class _ServerAuthAdminPanelState extends State<ServerAuthAdminPanel> {
+class ServerAuthAdminPanelState extends State<ServerAuthAdminPanel> {
   late final TextEditingController _authListPathTextController;
   late final TextEditingController _newLoginTextController;
   late final TextEditingController _newSecretTextController;

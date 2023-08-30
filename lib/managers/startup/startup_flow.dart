@@ -127,6 +127,7 @@ class StartupFlow {
         } else {
           await Future.delayed(const Duration(milliseconds: 50));
         }
+        await Future.delayed(const Duration(milliseconds: 200));
         goToState(runModeFromArgs);
       })
       ..onExit(() {

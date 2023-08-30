@@ -68,6 +68,14 @@ class DataTableCellValue {
       case ClassFieldType.date:
       case ClassFieldType.duration:
       case ClassFieldType.color:
+      case ClassFieldType.vector2:
+      case ClassFieldType.vector2Int:
+      case ClassFieldType.vector3:
+      case ClassFieldType.vector3Int:
+      case ClassFieldType.vector4:
+      case ClassFieldType.vector4Int:
+      case ClassFieldType.rectangle:
+      case ClassFieldType.rectangleInt:
         listCellValues = null;
         dictionaryCellValues = null;
         break;

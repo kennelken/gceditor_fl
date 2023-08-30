@@ -65,7 +65,7 @@ class StyleState {
   ThemeData kInputThemeLight = ThemeData();
 
   // ignore: prefer_function_declarations_over_variables
-  Widget Function(Checkbox checkbox) wrapCheckbox = (_) => _;
+  Widget Function(Checkbox checkbox) wrapCheckbox = (_) => _; //for assigning it later
 
   StyleState();
 
@@ -163,7 +163,6 @@ class StyleStateNotifier extends ChangeNotifier {
 
     state.kAppTheme = ThemeData(
       toggleableActiveColor: kColorAccentBlue,
-      backgroundColor: kColorBackground,
       dialogBackgroundColor: kColorBackground,
       scaffoldBackgroundColor: kColorBackground,
       inputDecorationTheme: InputDecorationTheme(
@@ -186,7 +185,7 @@ class StyleStateNotifier extends ChangeNotifier {
         selectionHandleColor: Colors.red,
       ),
       textTheme: TextTheme(
-        subtitle1: state.kTextExtraSmallLightest,
+        titleMedium: state.kTextExtraSmallLightest,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -215,7 +214,6 @@ class StyleStateNotifier extends ChangeNotifier {
           backgroundColor: kColorButtonActive,
         ),
       ),
-      colorScheme: ColorScheme.fromSwatch(primarySwatch: kColorPrimary).copyWith(secondary: kColorSecondary),
       scrollbarTheme: ScrollbarThemeData(
         thickness: MaterialStateProperty.all(8.0 * state.globalScale),
         //thumbColor: MaterialStateProperty.all(kTextColorLightHalfTransparent),
@@ -226,7 +224,9 @@ class StyleStateNotifier extends ChangeNotifier {
       ),
       checkboxTheme: const CheckboxThemeData(
         side: BorderSide(color: kColorAccentBlue),
+        fillColor: MaterialStatePropertyAll(kColorAccentBlue),
       ),
+      colorScheme: ColorScheme.fromSwatch(primarySwatch: kColorPrimary).copyWith(secondary: kColorSecondary, background: kColorBackground),
     );
 
     state.kInputThemeLight = state.kAppTheme.copyWith(
@@ -247,13 +247,13 @@ class StyleStateNotifier extends ChangeNotifier {
         contentPadding: const EdgeInsets.symmetric(horizontal: 3, vertical: 10),
       ),
       textTheme: TextTheme(
-        subtitle1: kStyle.kTextExtraSmall.copyWith(
+        titleMedium: kStyle.kTextExtraSmall.copyWith(
           color: kColorPrimaryDarker,
         ),
-        bodyText1: kStyle.kTextExtraSmall.copyWith(
+        bodyLarge: kStyle.kTextExtraSmall.copyWith(
           color: kColorPrimaryDarker,
         ),
-        bodyText2: kStyle.kTextExtraSmall.copyWith(
+        bodyMedium: kStyle.kTextExtraSmall.copyWith(
           color: kColorPrimaryDarker,
         ),
       ),

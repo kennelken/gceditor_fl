@@ -9,7 +9,7 @@
 			"request": "launch",
 			"type": "dart",
 			"toolArgs": [
-				"--dart-define=args=-h"
+				//"--dart-define=args=-h"
 				//"--dart-define=args=-s --port=6789 --project_path=E:\\gceditor\\project.json --output_path=E:\\gceditor\\out --auth_path=E:\\gceditor\\auth.json --history_path=E:\\gceditor\\history --history_tag=main"
 				//"--dart-define=args=-c --port=6789 --host=127.0.0.1 --login=admin2 --secret=admin2 --password=admin2"
 				//"--dart-define=args=-cs --port=6789 --project_path=E:\\gceditor\\project.json --output_path=E:\\gceditor\\out --auth_path=E:\\gceditor\\auth.json --history_path=E:\\gceditor\\history --history_tag=main --host=127.0.0.1 --login=admin2 --secret=admin2 --password=admin2"

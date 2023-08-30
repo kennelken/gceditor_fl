@@ -49,6 +49,8 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
           );
         },
         popupProps: PopupProps.menu(
+          fit: FlexFit.loose,
+          constraints: BoxConstraints.loose(const Size.fromHeight(1000)),
           disabledItemFn: (i) => !_isEnabled(i),
           menuProps: const MenuProps(
             elevation: 0,

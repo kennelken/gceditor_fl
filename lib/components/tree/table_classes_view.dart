@@ -10,9 +10,9 @@ import 'package:gceditor/model/db_cmd/db_cmd_reorder_meta_entity.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/client_state.dart';
 
-late final _rootNode = TreeNode(id: '___root_node_classes');
-late final _treeViewController = TreeViewController(rootNode: _rootNode);
-late final _treeScrollController = ScrollController();
+final _rootNode = TreeNode(id: '___root_node_classes');
+final _treeViewController = TreeViewController(rootNode: _rootNode);
+final _treeScrollController = ScrollController();
 
 class TableClassesView extends ConsumerWidget {
   const TableClassesView({Key? key}) : super(key: key);

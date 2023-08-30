@@ -125,7 +125,7 @@ class MultidimensionalMap2<K1, K2, V> {
   Iterable<Tuple3<K1, K2, V>> values() sync* {
     for (final p1 in _data.keys) {
       for (final p2 in _data[p1]!.keys) {
-        yield Tuple3(p1, p2, _data[p1]![p2]!);
+        yield Tuple3(p1, p2, _data[p1]![p2] as V);
       }
     }
   }

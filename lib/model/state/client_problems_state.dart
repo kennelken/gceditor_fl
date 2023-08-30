@@ -314,6 +314,14 @@ void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> resu
             case ClassFieldType.date:
             case ClassFieldType.duration:
             case ClassFieldType.color:
+            case ClassFieldType.vector2:
+            case ClassFieldType.vector2Int:
+            case ClassFieldType.vector3:
+            case ClassFieldType.vector3Int:
+            case ClassFieldType.vector4:
+            case ClassFieldType.vector4Int:
+            case ClassFieldType.rectangle:
+            case ClassFieldType.rectangleInt:
               break;
           }
         } catch (e, stacktrace) {
@@ -435,6 +443,14 @@ void _computeAndAppendInvalidValues(DbModel model, List<DbModelProblem> result) 
             case ClassFieldType.date:
             case ClassFieldType.duration:
             case ClassFieldType.color:
+            case ClassFieldType.vector2:
+            case ClassFieldType.vector2Int:
+            case ClassFieldType.vector3:
+            case ClassFieldType.vector3Int:
+            case ClassFieldType.vector4:
+            case ClassFieldType.vector4Int:
+            case ClassFieldType.rectangle:
+            case ClassFieldType.rectangleInt:
               if (!DbModelUtils.validateSimpleValue(field.typeInfo.type, value.simpleValue))
                 result.add(
                   DbModelProblem(

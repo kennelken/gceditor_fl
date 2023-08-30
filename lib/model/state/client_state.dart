@@ -5,6 +5,7 @@ import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db_cmd/base_db_cmd.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
+import 'package:gceditor/model/state/client_find_state.dart';
 import 'package:gceditor/model/state/log_state.dart';
 import 'package:gceditor/model/state/menubar_state.dart';
 import 'package:gceditor/model/state/server_state.dart';
@@ -82,6 +83,7 @@ class ClientStateNotifier extends ServerStateNotifier {
         break;
     }
 
+    providerContainer.read(clientFindStateProvider).refreshIfVisible();
     super.onCommandExecuted(command);
   }
 }

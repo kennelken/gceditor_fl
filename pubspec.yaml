@@ -21,7 +21,7 @@ environment:
   sdk: ">=2.14.0 <3.0.0"
 
 dependencies:
-  another_flushbar: ^1.10.24
+  another_flushbar: ^1.12.30
   cupertino_icons: ^1.0.2
   darq: ^2.0.0
   dartx: ^1.2.0
@@ -70,6 +70,7 @@ dependencies:
   flutter_colorpicker: ^1.0.1
   top_snackbar_flutter: ^3.1.0
   json_annotation: ^4.4.0
+  collection: ^1.17.1
 
 dependency_overrides:
   intl: ^0.18.0

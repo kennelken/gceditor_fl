@@ -84,6 +84,31 @@ class _DataTableCellTextViewState extends State<DataTableCellTextView> {
         formatter = Config.filterCellTypeDuration;
         break;
 
+      case ClassFieldType.vector2:
+        formatter = Config.filterCellTypeVector2;
+        break;
+      case ClassFieldType.vector2Int:
+        formatter = Config.filterCellTypeVector2Int;
+        break;
+      case ClassFieldType.vector3:
+        formatter = Config.filterCellTypeVector3;
+        break;
+      case ClassFieldType.vector3Int:
+        formatter = Config.filterCellTypeVector3Int;
+        break;
+      case ClassFieldType.vector4:
+        formatter = Config.filterCellTypeVector4;
+        break;
+      case ClassFieldType.vector4Int:
+        formatter = Config.filterCellTypeVector4Int;
+        break;
+      case ClassFieldType.rectangle:
+        formatter = Config.filterCellTypeRectangle;
+        break;
+      case ClassFieldType.rectangleInt:
+        formatter = Config.filterCellTypeRectangleInt;
+        break;
+
       case ClassFieldType.undefined:
       case ClassFieldType.bool:
       case ClassFieldType.reference:

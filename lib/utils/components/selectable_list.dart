@@ -21,10 +21,10 @@ class SelectableList extends StatefulWidget {
   }
 
   @override
-  _SelectableListState createState() => _SelectableListState();
+  SelectableListState createState() => SelectableListState();
 }
 
-class _SelectableListState extends State<SelectableList> {
+class SelectableListState extends State<SelectableList> {
   @override
   Widget build(BuildContext context) {
     return widget.builder(
