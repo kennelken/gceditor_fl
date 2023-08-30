@@ -115,7 +115,6 @@ class DataTableRowIdView extends ConsumerWidget {
                   child: DeleteButton(
                     onAction: _handleDelete,
                     size: 14 * kScale,
-                    color: kColorPrimaryLight,
                     tooltipText: Loc.get.deleteTableItemTooltip,
                   ),
                 ),

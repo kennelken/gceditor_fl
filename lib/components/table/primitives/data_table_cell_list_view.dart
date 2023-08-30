@@ -162,7 +162,6 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
                                   onAction: () => _handleDeleteItem(index),
                                   size: 14 * kScale,
                                   width: 25 * kScale,
-                                  color: kColorPrimaryLight,
                                   tooltipText: Loc.get.delete,
                                 ),
                               ],

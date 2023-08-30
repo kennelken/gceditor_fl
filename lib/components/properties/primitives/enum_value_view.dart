@@ -123,7 +123,6 @@ class _EnumValueViewState extends State<EnumValueView> {
                 onAction: _handleDelete,
                 size: 14 * kScale,
                 width: 25 * kScale,
-                color: kColorPrimaryLight,
                 tooltipText: Loc.get.delete,
               ),
             ],

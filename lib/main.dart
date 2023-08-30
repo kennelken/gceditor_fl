@@ -100,7 +100,7 @@ class MyApp extends StatelessWidget {
                               child: Consumer(
                                 builder: (context, ref, child) {
                                   final visible = ref.watch(logStateProvider).state.visible;
-                                  return visible ? LoggerScreen(key: const ValueKey('LoggerScreen')) : WaitingOverlay(child: page);
+                                  return visible ? const LoggerScreen(key: ValueKey('LoggerScreen')) : WaitingOverlay(child: page);
                                 },
                               ),
                             ),

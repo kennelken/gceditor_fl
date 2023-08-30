@@ -205,7 +205,6 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
                                   onAction: () => _handleDeleteItem(index),
                                   size: 14 * kScale,
                                   width: 25 * kScale,
-                                  color: kColorPrimaryLight,
                                   tooltipText: Loc.get.delete,
                                 ),
                               ],

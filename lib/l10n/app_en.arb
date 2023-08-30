@@ -420,7 +420,7 @@
 	"@requestModelFromServer": {
 		"description": ""
 	},
-	"longTapToDelete": "Please long tap the ''delete'' button to delete the element",
+	"longTapToDelete": "Please hold the ''delete'' button to delete the element",
 	"@longTapToDelete": {
 		"description": ""
 	},

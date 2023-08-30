@@ -34,7 +34,7 @@ class DeleteButton extends StatelessWidget {
           child: FittedBox(
             child: Icon(
               FontAwesomeIcons.trashCan,
-              color: color ?? kColorPrimaryLightTransparent,
+              color: color ?? kColorAccentRed2,
               size: (size ?? 20) * kScale,
             ),
           ),
