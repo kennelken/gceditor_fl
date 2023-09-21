@@ -27,6 +27,7 @@ class TreeNodeTile extends ConsumerWidget {
     final entity = nodeScope.node.data as IIdentifiable;
     final isSelected = ref.watch(tableSelectionStateProvider).state.selectedId == nodeScope.node.id;
     final isExpandable = nodeScope.node.data is ClassMetaGroup || nodeScope.node.data is TableMetaGroup;
+    ref.watch(styleStateProvider);
 
     return Draggable<IIdentifiable>(
       data: nodeScope.node.data as IIdentifiable,

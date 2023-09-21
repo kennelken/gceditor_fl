@@ -43,6 +43,7 @@ class _DataTableViewState extends State<DataTableView> {
     return Consumer(
       builder: (context, ref, child) {
         final table = ref.watch(tableSelectionStateProvider).state.selectedTable;
+        ref.watch(styleStateProvider);
         ref.watch(clientStateProvider);
         ref.watch(columnSizeChangedProvider);
 

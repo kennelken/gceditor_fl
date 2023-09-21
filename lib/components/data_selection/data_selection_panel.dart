@@ -54,6 +54,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
     return Consumer(
       builder: (context, ref, child) {
         final dataSelection = ref.watch(clientDataSelectionStateProvider);
+        ref.watch(styleStateProvider);
 
         return Container(
           height: 40 * kScale,

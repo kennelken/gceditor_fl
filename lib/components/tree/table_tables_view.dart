@@ -10,6 +10,8 @@ import 'package:gceditor/model/db_cmd/db_cmd_reorder_meta_entity.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/client_state.dart';
 
+import '../../model/state/style_state.dart';
+
 final _rootNode = TreeNode(id: '___root_node_tables');
 final _treeViewController = TreeViewController(rootNode: _rootNode);
 final _treeScrollController = ScrollController();
@@ -42,7 +44,8 @@ class TableTablesView extends ConsumerWidget {
 
         return Consumer(
           key: const ValueKey('TableTablesViewTableConmsumer'),
-          builder: (context, watchInner, child) {
+          builder: (context, ref, child) {
+            ref.watch(styleStateProvider);
             return Column(
               children: [
                 Padding(

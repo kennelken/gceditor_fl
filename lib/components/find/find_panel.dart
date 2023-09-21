@@ -52,6 +52,7 @@ class _FindPanelState extends State<FindPanel> {
     return Consumer(builder: (context, ref, child) {
       final settings = ref.watch(clientFindStateProvider).state.settings;
       final results = ref.watch(clientFindStateProvider).state.getResults();
+      ref.watch(styleStateProvider);
       _findTextController.text = settings.text ?? '';
       _preselectFindText();
 
