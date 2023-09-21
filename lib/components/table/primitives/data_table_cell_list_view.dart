@@ -121,7 +121,7 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
         ),
         Expanded(
           child: Theme(
-            data: kStyle.kReorderableListThemeInvisibleScrollbars,
+            data: kStyle.kReorderableListTheme,
             child: ScrollConfiguration(
               behavior: kScrollDraggable,
               child: ReorderableListView.builder(
