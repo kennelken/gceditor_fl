@@ -50,9 +50,8 @@ class TableTablesView extends ConsumerWidget {
                   child: DropAvailableIndicatorLine(visible: canDrop),
                 ),
                 Expanded(
-                  child: Scrollbar(
-                    controller: _treeScrollController,
-                    scrollbarOrientation: ScrollbarOrientation.right,
+                  child: ScrollConfiguration(
+                    behavior: kScrollDraggable,
                     child: TreeView(
                       key: const ValueKey('TableTablesViewTable'),
                       controller: _treeViewController,

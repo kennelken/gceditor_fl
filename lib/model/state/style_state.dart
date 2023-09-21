@@ -162,7 +162,6 @@ class StyleStateNotifier extends ChangeNotifier {
     state.kTableTopRowHeight = 32.0 * state.globalScale; // means a row of home layout
 
     state.kAppTheme = ThemeData(
-      toggleableActiveColor: kColorAccentBlue,
       dialogBackgroundColor: kColorBackground,
       scaffoldBackgroundColor: kColorBackground,
       inputDecorationTheme: InputDecorationTheme(
@@ -216,7 +215,7 @@ class StyleStateNotifier extends ChangeNotifier {
       ),
       scrollbarTheme: ScrollbarThemeData(
         thickness: MaterialStateProperty.all(8.0 * state.globalScale),
-        //thumbColor: MaterialStateProperty.all(kTextColorLightHalfTransparent),
+        thumbColor: MaterialStateProperty.resolveWith(scrollbarThumbColor),
         //trackColor: MaterialStateProperty.all(kTextColorLightHalfTransparent),
         thumbVisibility: MaterialStateProperty.all(true),
         interactive: true,
@@ -344,5 +343,13 @@ class StyleStateNotifier extends ChangeNotifier {
     state.kLabelPadding = 5 * kScale;
 
     notifyListeners();
+  }
+
+  Color? scrollbarThumbColor(Set<MaterialState> states) {
+    if (states.contains(MaterialState.dragged)) //
+      return const Color.fromARGB(200, 0, 0, 0);
+    if (states.contains(MaterialState.hovered)) //
+      return const Color.fromARGB(110, 0, 0, 0);
+    return const Color.fromARGB(50, 0, 0, 0);
   }
 }

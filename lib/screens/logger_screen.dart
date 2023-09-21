@@ -44,6 +44,7 @@ class _LoggerScreenState extends State<LoggerScreen> {
   Widget build(context) {
     return Consumer(builder: (context, ref, child) {
       final messages = ref.watch(logStateProvider).state.messages.toList();
+      final style = ref.watch(styleStateProvider).state;
 
       if (_stickToEnd) {
         Scheduler.addPostFrameCallback(this, (_) {
@@ -63,7 +64,10 @@ class _LoggerScreenState extends State<LoggerScreen> {
         padding: EdgeInsets.all(8 * kScale),
         color: kColorPrimaryDarker,
         child: Theme(
-          data: ThemeData(textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.white.withAlpha(100))),
+          data: ThemeData(
+            textSelectionTheme: TextSelectionThemeData(selectionColor: Colors.white.withAlpha(100)),
+            scrollbarTheme: style.kAppTheme.scrollbarTheme,
+          ),
           child: ScrollConfiguration(
             //TODO! fix multiline as soon as https://github.com/flutter/flutter/issues/104548 is fixed
             behavior: kScrollDraggable,
