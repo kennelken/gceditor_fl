@@ -512,7 +512,7 @@
 	"@statusOffline": {
 		"description": ""
 	},
-	"connectedClientsCount": "'{count, plural, =0{no clients} =1{1 client} other{{count} clients}'",
+	"connectedClientsCount": "{count, plural, =0{no clients} =1{1 client} other{{count} clients}}",
 	"@connectedClientsCount": {
 		"description": "",
 		"placeholders": {
@@ -699,7 +699,7 @@
 	"@historyTitle": {
 		"description": ""
 	},
-	"historyItemsCount": "'{count, plural, =0{empty} =1{1 item} other{{count} items}'",
+	"historyItemsCount": "{count, plural, =0{empty} =1{1 item} other{{count} items}}",
 	"@historyItemsCount": {
 		"description": "",
 		"placeholders": {
