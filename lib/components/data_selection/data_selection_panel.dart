@@ -91,6 +91,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                 TooltipWrapper(
                   message: Loc.get.fromClipboard,
                   child: IconButtonTransparent(
+                    size: 35 * kScale,
                     enabled: _isCopyFromClipboardAvailable,
                     icon: Icon(
                       FontAwesomeIcons.fileImport,
@@ -103,6 +104,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                 TooltipWrapper(
                   message: Loc.get.copy,
                   child: IconButtonTransparent(
+                    size: 35 * kScale,
                     enabled: _isCopyAvailable,
                     icon: Icon(
                       FontAwesomeIcons.copy,
@@ -115,6 +117,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                 TooltipWrapper(
                   message: Loc.get.cut,
                   child: IconButtonTransparent(
+                    size: 35 * kScale,
                     icon: Icon(
                       FontAwesomeIcons.scissors,
                       color: kColorAccentOrange.withAlpha(_isCopyAvailable ? kIconActiveAlpha : kIconInactiveAlpha),
@@ -157,6 +160,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                 TooltipWrapper(
                   message: Loc.get.deselect,
                   child: IconButtonTransparent(
+                    size: 35 * kScale,
                     icon: Icon(
                       FontAwesomeIcons.xmark,
                       color: kColorPrimaryLight,

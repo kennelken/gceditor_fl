@@ -126,6 +126,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
               SizedBox(
                 width: 36 * kScale,
                 child: IconButtonTransparent(
+                  size: 35 * kScale,
                   icon: const IconPlus(),
                   onClick: _handleAddRow,
                 ),

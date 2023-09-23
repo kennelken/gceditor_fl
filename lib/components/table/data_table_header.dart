@@ -76,6 +76,7 @@ class DataTableHeader extends ConsumerWidget {
             width: 33 * kScale,
             height: 33 * kScale,
             child: IconButtonTransparent(
+              size: 35 * kScale,
               icon: const IconPlus(),
               onClick: _handleAddNewRow,
             ),

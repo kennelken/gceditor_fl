@@ -62,6 +62,7 @@ class ServerAuthAdminPanelState extends State<ServerAuthAdminPanel> {
         final defaultFolder = ref.watch(appStateProvider).state.defaultProjectFolder;
         final defaultFolderPath = defaultFolder?.path ?? '';
         final authListState = providerContainer.read(authListStateProvider).state;
+        ref.watch(styleStateProvider);
 
         final authListPath =
             authListState.filePath ?? AppLocalStorage.instance.authListPath ?? path.join(defaultFolderPath, Config.newAuthListDefaultName);

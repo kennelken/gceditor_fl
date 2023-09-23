@@ -5,18 +5,16 @@ import 'package:gceditor/consts/consts.dart';
 class IconButtonTransparent extends StatelessWidget {
   final Widget icon;
   final VoidCallback onClick;
-  late double? size;
+  late double size;
   final bool enabled;
 
   IconButtonTransparent({
     required this.icon,
     required this.onClick,
-    this.size,
+    required this.size,
     this.enabled = true,
     Key? key,
-  }) : super(key: key) {
-    size ??= 35 * kScale;
-  }
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

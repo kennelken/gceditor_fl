@@ -58,10 +58,11 @@ class HistoryDialogItem extends StatelessWidget {
               ),
               SizedBox(width: 20 * kScale),
               IconButtonTransparent(
+                size: 35 * kScale,
                 onClick: _handleCopyClicked,
-                icon: const Icon(
+                icon: Icon(
                   FontAwesomeIcons.copy,
-                  size: 19,
+                  size: 19 * kScale,
                   color: kColorPrimaryLight,
                 ),
               ),

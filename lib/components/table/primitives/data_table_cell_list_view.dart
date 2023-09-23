@@ -112,6 +112,7 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
               SizedBox(
                 width: 36 * kScale,
                 child: IconButtonTransparent(
+                  size: 35 * kScale,
                   icon: const IconPlus(),
                   onClick: _handleAddRow,
                 ),

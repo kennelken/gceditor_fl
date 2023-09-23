@@ -273,6 +273,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       IconButtonTransparent(
+                        size: 35 * kScale,
                         onClick: _applyTypes,
                         icon: Icon(
                           FontAwesomeIcons.check,
@@ -281,6 +282,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                         ),
                       ),
                       IconButtonTransparent(
+                        size: 35 * kScale,
                         onClick: _revertTypes,
                         icon: Icon(
                           FontAwesomeIcons.xmark,

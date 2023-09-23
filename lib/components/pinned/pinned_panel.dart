@@ -76,6 +76,7 @@ class _PinnedPanelState extends State<PinnedPanel> {
                     TooltipWrapper(
                       message: Loc.get.closePinnedItemsTooltip,
                       child: IconButtonTransparent(
+                        size: 35 * kScale,
                         icon: Icon(
                           FontAwesomeIcons.xmark,
                           color: kColorPrimaryLight,

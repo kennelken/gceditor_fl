@@ -76,13 +76,13 @@ class TableView extends ConsumerWidget {
                     TooltipWrapper(
                       message: Loc.get.keyboardShortcutTooltip,
                       child: IconButtonTransparent(
-                        icon: const Icon(
+                        icon: Icon(
                           FontAwesomeIcons.keyboard,
                           color: kColorAccentBlue,
-                          size: 13,
+                          size: 13 * kScale,
                         ),
                         onClick: _handleShowShortcutsClick,
-                        size: 28,
+                        size: 28 * kScale,
                       ),
                     ),
                   ],

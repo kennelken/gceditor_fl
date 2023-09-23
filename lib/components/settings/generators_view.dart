@@ -67,9 +67,10 @@ class GeneratorsViewState extends State<GeneratorsView> {
                   TooltipWrapper(
                     message: Loc.get.runGenerators,
                     child: IconButtonTransparent(
-                      icon: const Icon(
+                      size: 35 * kScale,
+                      icon: Icon(
                         FontAwesomeIcons.forward,
-                        size: 14,
+                        size: 14 * kScale,
                         color: kColorAccentBlue,
                       ),
                       onClick: _handleRunGenerators,

@@ -67,6 +67,7 @@ class ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
     return Consumer(
       builder: (context, ref, child) {
         ref.watch(startupProvider);
+        ref.watch(styleStateProvider);
 
         final defaultFolder = ref.watch(appStateProvider).state.defaultProjectFolder;
         final defaultFolderPath = defaultFolder?.path ?? '';
