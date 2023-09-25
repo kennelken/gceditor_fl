@@ -250,12 +250,13 @@ class ClientFindStateNotifier extends ChangeNotifier {
                 }
                 break;
               case ClassFieldType.dictionary:
-                for (var k = 0; k < value.dictionaryCellValues!.length; k++) {
+                final dictionaryValues = value.dictionaryCellValues()!;
+                for (var k = 0; k < dictionaryValues.length; k++) {
                   closureInnerListRow = k;
                   closureInnerListColumn = 0;
-                  _doFindInSimpleValue(value.dictionaryCellValues![k].key, field.keyTypeInfo!.type, prioritySuperLow, addResult);
+                  _doFindInSimpleValue(dictionaryValues[k].key, field.keyTypeInfo!.type, prioritySuperLow, addResult);
                   closureInnerListColumn = 1;
-                  _doFindInSimpleValue(value.dictionaryCellValues![k].value, field.valueTypeInfo!.type, prioritySuperLow, addResult);
+                  _doFindInSimpleValue(dictionaryValues[k].value, field.valueTypeInfo!.type, prioritySuperLow, addResult);
                 }
                 break;
             }

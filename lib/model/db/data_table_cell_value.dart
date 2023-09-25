@@ -1,12 +1,19 @@
 import 'package:gceditor/model/db/class_meta_field_description.dart';
 import 'package:gceditor/model/db/data_table_cell_dictionary_item.dart';
+import 'package:gceditor/utils/utils.dart';
 
 import 'db_model_shared.dart';
 
 class DataTableCellValue {
   dynamic simpleValue;
   List<dynamic>? listCellValues;
-  List<DataTableCellDictionaryItem>? dictionaryCellValues;
+  List<DataTableCellDictionaryItem>? dictionaryCellValues() => listCellValues == null
+      ? null
+      : List<DataTableCellDictionaryItem>.unmodifiable(
+          (listCellValues?.isNotEmpty ?? false) && listCellValues![0] is DataTableCellDictionaryItem
+              ? List.from(listCellValues!.map((e) => e as DataTableCellDictionaryItem))
+              : List<DataTableCellDictionaryItem>.empty(),
+        );
 
   DataTableCellValue();
 
@@ -19,14 +26,14 @@ class DataTableCellValue {
   }
 
   DataTableCellValue.dictionary(List<DataTableCellDictionaryItem> value) {
-    dictionaryCellValues = value;
+    listCellValues = value;
   }
 
   DataTableCellValue copy() {
     return DataTableCellValue()
       ..simpleValue = simpleValue
-      ..listCellValues = listCellValues?.toList()
-      ..dictionaryCellValues = dictionaryCellValues?.map((e) => e.copy()).toList();
+      ..listCellValues =
+          listCellValues != null ? List.from(listCellValues!.map((e) => ((e as Object?)?.safeAs<DataTableCellDictionaryItem>()?.copy() ?? e))) : null;
   }
 
   factory DataTableCellValue.fromJson(dynamic json) {
@@ -36,17 +43,21 @@ class DataTableCellValue {
     if (json is List<dynamic>) {
       result.listCellValues = json;
       if (json.isEmpty || json[0] is Map<String, dynamic>) {
-        result.dictionaryCellValues = json.map((e) => DataTableCellDictionaryItem.fromJson(e)).toList();
+        result.listCellValues = List.from(json.map((e) => DataTableCellDictionaryItem.fromJson(e)));
       }
     }
     return result;
   }
 
   dynamic toJson() {
-    if (dictionaryCellValues != null) {
-      return dictionaryCellValues!.map((e) => e.toJson()).toList();
-    } else if (listCellValues != null) {
+    if (listCellValues?.isNotEmpty ?? false) {
+      if (listCellValues![0] is DataTableCellDictionaryItem) {
+        return listCellValues!.map((e) => (e as DataTableCellDictionaryItem).toJson()).toList();
+      }
       return listCellValues!.toList();
+    }
+    if (listCellValues != null) {
+      return [];
     }
     return simpleValue;
   }
@@ -77,27 +88,16 @@ class DataTableCellValue {
       case ClassFieldType.rectangle:
       case ClassFieldType.rectangleInt:
         listCellValues = null;
-        dictionaryCellValues = null;
         break;
 
       case ClassFieldType.list:
       case ClassFieldType.set:
-        dictionaryCellValues = null;
         simpleValue = null;
         break;
 
       case ClassFieldType.dictionary:
-        listCellValues = null;
         simpleValue = null;
         break;
     }
-  }
-
-  static dynamic toJsonSt(DataTableCellValue obj) {
-    return obj.toJson();
-  }
-
-  static DataTableCellValue fromJsonSt(dynamic obj) {
-    return DataTableCellValue.fromJson(obj);
   }
 }

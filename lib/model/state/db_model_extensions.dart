@@ -549,8 +549,9 @@ class DbModelUtils {
         return value.listCellValues != null && value.listCellValues!.every((e) => validateSimpleValue(field.valueTypeInfo!.type, e));
 
       case ClassFieldType.dictionary:
-        return value.dictionaryCellValues != null &&
-            value.dictionaryCellValues!.every(
+        final dictionaryValues = value.dictionaryCellValues();
+        return dictionaryValues != null &&
+            dictionaryValues.every(
               (e) => validateSimpleValue(field.keyTypeInfo!.type, e.key) && validateSimpleValue(field.valueTypeInfo!.type, e.value),
             );
 
@@ -942,9 +943,10 @@ class DbModelUtils {
       case ClassFieldType.dictionary:
         if (validateValue(field, value)) //
           return value;
-        if (value.dictionaryCellValues == null) //
+        final dictionaryValues = value.dictionaryCellValues();
+        if (dictionaryValues == null) //
           return null;
-        final resultList = value.dictionaryCellValues!
+        final resultList = dictionaryValues
             .map(
               (e) => DataTableCellDictionaryItem.values(
                 key: convertSimpleValueIfPossible(e.key, field.keyTypeInfo!.type) ?? (getDefaultValue(field.keyTypeInfo!.type)).simpleValue,
@@ -1120,7 +1122,7 @@ class DbModelUtils {
         break;
 
       case ClassFieldType.dictionary:
-        final list = values[index].dictionaryCellValues;
+        final list = values[index].dictionaryCellValues();
         if (list != null) {
           if (field.keyTypeInfo!.type == ClassFieldType.reference && isSuitableClass(field.keyTypeInfo!.classId)) {
             for (var i = 0; i < list.length; i++) {
@@ -1143,15 +1145,17 @@ class DbModelUtils {
   static bool valuesAreEqual(DataTableCellValue a, DataTableCellValue b) {
     if (a.simpleValue != b.simpleValue) return false;
     if (!listEquals(a.listCellValues, b.listCellValues)) return false;
-    if ((a.dictionaryCellValues == null) != (b.dictionaryCellValues == null)) //
+    final aDictionaryValues = a.dictionaryCellValues();
+    final bDictionaryValues = b.dictionaryCellValues();
+    if ((aDictionaryValues == null) != (bDictionaryValues == null)) //
       return false;
-    if (a.dictionaryCellValues != null) {
-      if (a.dictionaryCellValues!.length != b.dictionaryCellValues!.length) //
+    if (aDictionaryValues != null) {
+      if (aDictionaryValues.length != bDictionaryValues!.length) //
         return false;
-      for (var i = 0; i < a.dictionaryCellValues!.length; i++) {
-        if (a.dictionaryCellValues![i].key != b.dictionaryCellValues![i].key) //
+      for (var i = 0; i < aDictionaryValues.length; i++) {
+        if (aDictionaryValues[i].key != bDictionaryValues[i].key) //
           return false;
-        if (a.dictionaryCellValues![i].value != b.dictionaryCellValues![i].value) //
+        if (aDictionaryValues[i].value != bDictionaryValues[i].value) //
           return false;
       }
     }
@@ -1495,8 +1499,9 @@ class DbModelUtils {
             (e) {
               if (e.listCellValues != null) //
                 return jsonEncode(e.listCellValues);
-              if (e.dictionaryCellValues != null) //
-                return jsonEncode(e.dictionaryCellValues!.map((e) => [e.key, e.value]).toList());
+              final dictionaryValues = e.dictionaryCellValues();
+              if (dictionaryValues != null) //
+                return jsonEncode(dictionaryValues.map((e) => [e.key, e.value]).toList());
               return e.simpleValue;
             },
           ),

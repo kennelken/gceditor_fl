@@ -526,3 +526,12 @@ List<String> get allEmoji {
 
   return _allEmoji!;
 }
+
+extension Chaining on Object {
+  T? safeAs<T>() {
+    if (this is T) {
+      return this as T;
+    }
+    return null;
+  }
+}

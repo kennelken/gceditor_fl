@@ -264,7 +264,7 @@ void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> resu
               break;
 
             case ClassFieldType.dictionary:
-              final list = value.dictionaryCellValues!;
+              final list = value.dictionaryCellValues()!;
               for (var k = 0; k < list.length; k++) {
                 final listValue = list[k];
 
@@ -333,7 +333,7 @@ void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> resu
               rowIndex: j,
               fieldIndex: i,
               fieldId: field.id,
-              value: '<Exception>',
+              value: '<Exception> $e',
             ),
           );
         }
@@ -397,7 +397,7 @@ void _computeAndAppendInvalidValues(DbModel model, List<DbModelProblem> result) 
               break;
 
             case ClassFieldType.dictionary:
-              final list = value.dictionaryCellValues!;
+              final list = value.dictionaryCellValues()!;
               for (var k = 0; k < list.length; k++) {
                 final listValue = list[k];
 
@@ -477,7 +477,7 @@ void _computeAndAppendInvalidValues(DbModel model, List<DbModelProblem> result) 
               rowIndex: j,
               fieldIndex: i,
               fieldId: field.id,
-              value: '<Exception>',
+              value: '<Exception> $e',
             ),
           );
         }
@@ -526,7 +526,7 @@ void _computeAndAppendDuplicateUniqueValues(DbModel model, List<DbModelProblem> 
               rowIndex: j,
               fieldIndex: i,
               fieldId: field.id,
-              value: '<Exception>',
+              value: '<Exception> $e',
             ),
           );
         }
@@ -597,7 +597,7 @@ void _computeAndAppendRepeatingSetValues(DbModel model, List<DbModelProblem> res
               rowIndex: j,
               fieldIndex: i,
               fieldId: field.id,
-              value: '<Exception>',
+              value: '<Exception> $e',
             ),
           );
         }
@@ -621,7 +621,7 @@ void _computeAndAppendRepeatingDictionaryKeys(DbModel model, List<DbModelProblem
         try {
           final row = table.rows[j];
 
-          final keys = row.values[i].dictionaryCellValues!.map((e) => e.key).toList();
+          final keys = row.values[i].dictionaryCellValues()!.map((e) => e.key).toList();
 
           final allValues = <dynamic, List<DbModelProblem>>{};
 
@@ -659,7 +659,7 @@ void _computeAndAppendRepeatingDictionaryKeys(DbModel model, List<DbModelProblem
               rowIndex: j,
               fieldIndex: i,
               fieldId: field.id,
-              value: '<Exception>',
+              value: '<Exception> $e',
             ),
           );
         }

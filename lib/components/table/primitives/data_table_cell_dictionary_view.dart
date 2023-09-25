@@ -117,7 +117,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
                 child: Padding(
                   padding: EdgeInsets.only(left: 5 * kScale),
                   child: Text(
-                    Loc.get.cellListSize(_cellValue.dictionaryCellValues!.length),
+                    Loc.get.cellListSize(_cellValue.listCellValues?.length ?? 0),
                     textAlign: TextAlign.left,
                     style: kStyle.kTextExtraSmall,
                   ),
@@ -144,10 +144,10 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
                   ref.watch(columnSizeChangedProvider);
                   return ReorderableListView.builder(
                     scrollController: _scrollController,
-                    itemCount: _cellValue.dictionaryCellValues!.length,
+                    itemCount: _cellValue.listCellValues?.length ?? 0,
                     onReorder: _handleReorder,
                     itemBuilder: (context, index) {
-                      final value = _cellValue.dictionaryCellValues![index];
+                      final value = _cellValue.listCellValues![index] as DataTableCellDictionaryItem;
                       final key = '${index}_${value.key}_${value.value}';
 
                       return SizedBox(
@@ -227,7 +227,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
   void _handleReorder(int oldIndex, int newIndex) {
     setState(
       () {
-        _cellValue = DataTableCellValue.dictionary(Utils.copyAndReorder(_cellValue.copy().dictionaryCellValues!, oldIndex, newIndex));
+        _cellValue = DataTableCellValue.dictionary(Utils.copyAndReorder(_cellValue.copy().dictionaryCellValues()!, oldIndex, newIndex));
 
         widget.onValueChanged(_cellValue);
       },
@@ -238,7 +238,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
     setState(
       () {
         final valuesListCopy = _cellValue.copy();
-        valuesListCopy.dictionaryCellValues!.removeAt(index);
+        valuesListCopy.listCellValues!.removeAt(index);
         _cellValue = valuesListCopy;
 
         widget.onValueChanged(valuesListCopy);
@@ -250,7 +250,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
     setState(
       () {
         final valuesListCopy = _cellValue.copy();
-        valuesListCopy.dictionaryCellValues!.add(
+        valuesListCopy.listCellValues!.add(
           DataTableCellDictionaryItem.values(
             key: DbModelUtils.getDefaultValue(widget.keyFieldType.type).simpleValue,
             value: DbModelUtils.getDefaultValue(widget.valueFieldType.type).simpleValue,
@@ -270,7 +270,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
     setState(
       () {
         final valuesListCopy = _cellValue.copy();
-        valuesListCopy.dictionaryCellValues![index].key = value;
+        valuesListCopy.listCellValues![index].key = value;
         _cellValue = valuesListCopy;
 
         widget.onValueChanged(_cellValue);
@@ -282,7 +282,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
     setState(
       () {
         final valuesListCopy = _cellValue.copy();
-        valuesListCopy.dictionaryCellValues![index].value = value;
+        valuesListCopy.listCellValues![index].value = value;
         _cellValue = valuesListCopy;
 
         widget.onValueChanged(_cellValue);
