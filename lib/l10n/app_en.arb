@@ -255,7 +255,7 @@
 			}
 		}
 	},
-	"dataCopiedCount": "{count, plural, =0{No items copied} =1{Copied 1 item from {table}} other{Copied {count} items from '{table}'}}",
+	"dataCopiedCount": "{count, plural, =0{No items copied} =1{Copied 1 item from {table}} other{Copied {count} items from ''{table}''}}",
 	"@dataCopiedCount": {
 		"description": "",
 		"placeholders": {
@@ -276,7 +276,7 @@
 			}
 		}
 	},
-	"dataCutCount": "{count, plural, =0{No items copied} =1{Cut 1 item from {table}} other{Cut {count} items from '{table}'}}",
+	"dataCutCount": "{count, plural, =0{No items copied} =1{Cut 1 item from {table}} other{Cut {count} items from ''{table}''}}",
 	"@dataCutCount": {
 		"description": "",
 		"placeholders": {
@@ -420,7 +420,7 @@
 	"@requestModelFromServer": {
 		"description": ""
 	},
-	"longTapToDelete": "Please long tap the 'delete' button to delete the element",
+	"longTapToDelete": "Please hold the ''delete'' button to delete the element",
 	"@longTapToDelete": {
 		"description": ""
 	},
@@ -512,7 +512,7 @@
 	"@statusOffline": {
 		"description": ""
 	},
-	"connectedClientsCount": "{count, plural, =0{no clients} =1{1 client} other{{count} clients}",
+	"connectedClientsCount": "{count, plural, =0{no clients} =1{1 client} other{{count} clients}}",
 	"@connectedClientsCount": {
 		"description": "",
 		"placeholders": {
@@ -589,14 +589,14 @@
 	"@portInputTitle": {
 		"description": ""
 	},
-	"errorStartServer": "Could not start the server: '{error}'",
+	"errorStartServer": "Could not start the server: ''{error}''",
 	"@errorStartServer": {
 		"description": "",
 		"placeholders": {
 			"error": {}
 		}
 	},
-	"errorStartClient": "Could not connect to the server: '{error}'",
+	"errorStartClient": "Could not connect to the server: ''{error}''",
 	"@errorStartClient": {
 		"description": "",
 		"placeholders": {
@@ -699,7 +699,7 @@
 	"@historyTitle": {
 		"description": ""
 	},
-	"historyItemsCount": "{count, plural, =0{empty} =1{1 item} other{{count} items}",
+	"historyItemsCount": "{count, plural, =0{empty} =1{1 item} other{{count} items}}",
 	"@historyItemsCount": {
 		"description": "",
 		"placeholders": {
@@ -862,7 +862,7 @@
 	"@generateClassItemsTooltip": {
 		"description": ""
 	},
-	"fillColumnLabel": "Fill column '{column}' with",
+	"fillColumnLabel": "Fill column ''{column}'' with",
 	"@fillColumnLabel": {
 		"description": "",
 		"placeholders": {

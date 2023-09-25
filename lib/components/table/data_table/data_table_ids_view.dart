@@ -73,7 +73,7 @@ class _DataTableIdsViewState extends State<DataTableIdsView> {
       child: SizedBox(
         height: height,
         child: ScrollConfiguration(
-            behavior: kScrollDraggable, // TODO! get rid of a phantom horizontal scroll
+            behavior: kScrollDraggable,
             child: Theme(
               data: kStyle.kReorderableListTheme,
               child: ReorderableListView.builder(

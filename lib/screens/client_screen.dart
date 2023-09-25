@@ -8,10 +8,10 @@ class ClientScreen extends ConsumerWidget {
   const ClientScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    watch(settingsStateProvider);
-    return Row(
-      children: const [
+  Widget build(context, ref) {
+    ref.watch(settingsStateProvider);
+    return const Row(
+      children: [
         Expanded(child: TableView()),
         TablePropertiesView(),
       ],

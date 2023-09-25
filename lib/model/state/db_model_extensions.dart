@@ -29,6 +29,7 @@ import 'package:gceditor/utils/utils.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+import 'custom_data_classes.dart';
 import 'service/client_navigation_service.dart';
 
 final dateFormatter = DateFormat('yyyy.MM.dd HH:mm');
@@ -36,6 +37,19 @@ final dateFormatter = DateFormat('yyyy.MM.dd HH:mm');
 extension ClassFieldTypeExtensions on ClassFieldType {
   bool isList() {
     return hasKeyType() || hasValueType();
+  }
+
+  bool isEssential() {
+    return isList() ||
+        this == ClassFieldType.bool ||
+        this == ClassFieldType.int ||
+        this == ClassFieldType.long ||
+        this == ClassFieldType.float ||
+        this == ClassFieldType.double ||
+        this == ClassFieldType.string ||
+        this == ClassFieldType.text ||
+        this == ClassFieldType.duration ||
+        this == ClassFieldType.date;
   }
 
   bool isSimple() {
@@ -60,7 +74,11 @@ extension ClassMetaFieldDescriptionExtensions on ClassMetaFieldDescription {
 class DbModelUtils {
   static List<ClassFieldType>? _sortedFieldTypes;
   static List<ClassFieldType> get sortedFieldTypes {
-    _sortedFieldTypes ??= ClassFieldType.values.where((e) => e != ClassFieldType.undefined).orderBy((e) => e.isList() ? 1 : 0).toList();
+    _sortedFieldTypes ??= ClassFieldType.values
+        .where((e) => e != ClassFieldType.undefined)
+        .orderBy((e) => e.isEssential() ? 0 : 1)
+        .thenBy((e) => e.isList() ? 1 : 0)
+        .toList();
     return _sortedFieldTypes!;
   }
 
@@ -112,6 +130,7 @@ class DbModelUtils {
     final hours = match.namedGroup('h');
     final minutes = match.namedGroup('m');
     final seconds = match.namedGroup('s');
+    final milliSeconds = match.namedGroup('ms');
 
     try {
       result = Duration(
@@ -119,6 +138,211 @@ class DbModelUtils {
         hours: hours == null ? 0 : int.parse(hours),
         minutes: minutes == null ? 0 : int.parse(minutes),
         seconds: seconds == null ? 0 : int.parse(seconds),
+        milliseconds: milliSeconds == null ? 0 : int.parse(milliSeconds),
+      );
+    } catch (e, callstack) {
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
+      return null;
+    }
+
+    return result;
+  }
+
+  static Vector2? parseVector2(String value) {
+    Vector2? result;
+
+    final match = Config.vector2FormatRegex.firstMatch(value);
+    if (match == null) //
+      return result;
+
+    final x = match.namedGroup('x');
+    final y = match.namedGroup('y');
+
+    try {
+      result = Vector2(
+        x == null ? 0 : double.parse(x),
+        y == null ? 0 : double.parse(y),
+      );
+    } catch (e, callstack) {
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
+      return null;
+    }
+
+    return result;
+  }
+
+  static Vector2Int? parseVector2Int(String value) {
+    Vector2Int? result;
+
+    final match = Config.vector2IntFormatRegex.firstMatch(value);
+    if (match == null) //
+      return result;
+
+    final x = match.namedGroup('x');
+    final y = match.namedGroup('y');
+
+    try {
+      result = Vector2Int(
+        x == null ? 0 : int.parse(x),
+        y == null ? 0 : int.parse(y),
+      );
+    } catch (e, callstack) {
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
+      return null;
+    }
+
+    return result;
+  }
+
+  static Vector3? parseVector3(String value) {
+    Vector3? result;
+
+    final match = Config.vector3FormatRegex.firstMatch(value);
+    if (match == null) //
+      return result;
+
+    final x = match.namedGroup('x');
+    final y = match.namedGroup('y');
+    final z = match.namedGroup('z');
+
+    try {
+      result = Vector3(
+        x == null ? 0 : double.parse(x),
+        y == null ? 0 : double.parse(y),
+        z == null ? 0 : double.parse(z),
+      );
+    } catch (e, callstack) {
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
+      return null;
+    }
+
+    return result;
+  }
+
+  static Vector3Int? parseVector3Int(String value) {
+    Vector3Int? result;
+
+    final match = Config.vector3IntFormatRegex.firstMatch(value);
+    if (match == null) //
+      return result;
+
+    final x = match.namedGroup('x');
+    final y = match.namedGroup('y');
+    final z = match.namedGroup('z');
+
+    try {
+      result = Vector3Int(
+        x == null ? 0 : int.parse(x),
+        y == null ? 0 : int.parse(y),
+        z == null ? 0 : int.parse(z),
+      );
+    } catch (e, callstack) {
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
+      return null;
+    }
+
+    return result;
+  }
+
+  static Vector4? parseVector4(String value) {
+    Vector4? result;
+
+    final match = Config.vector4FormatRegex.firstMatch(value);
+    if (match == null) //
+      return result;
+
+    final x = match.namedGroup('x');
+    final y = match.namedGroup('y');
+    final z = match.namedGroup('z');
+    final w = match.namedGroup('w');
+
+    try {
+      result = Vector4(
+        x == null ? 0 : double.parse(x),
+        y == null ? 0 : double.parse(y),
+        z == null ? 0 : double.parse(z),
+        w == null ? 0 : double.parse(w),
+      );
+    } catch (e, callstack) {
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
+      return null;
+    }
+
+    return result;
+  }
+
+  static Vector4Int? parseVector4Int(String value) {
+    Vector4Int? result;
+
+    final match = Config.vector4IntFormatRegex.firstMatch(value);
+    if (match == null) //
+      return result;
+
+    final x = match.namedGroup('x');
+    final y = match.namedGroup('y');
+    final z = match.namedGroup('z');
+    final w = match.namedGroup('w');
+
+    try {
+      result = Vector4Int(
+        x == null ? 0 : int.parse(x),
+        y == null ? 0 : int.parse(y),
+        z == null ? 0 : int.parse(z),
+        w == null ? 0 : int.parse(w),
+      );
+    } catch (e, callstack) {
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
+      return null;
+    }
+
+    return result;
+  }
+
+  static Rectangle? parseRectangle(String value) {
+    Rectangle? result;
+
+    final match = Config.rectangleFormatRegex.firstMatch(value);
+    if (match == null) //
+      return result;
+
+    final x = match.namedGroup('x');
+    final y = match.namedGroup('y');
+    final w = match.namedGroup('w');
+    final h = match.namedGroup('h');
+
+    try {
+      result = Rectangle(
+        x == null ? 0 : double.parse(x),
+        y == null ? 0 : double.parse(y),
+        w == null ? 0 : double.parse(w),
+        h == null ? 0 : double.parse(h),
+      );
+    } catch (e, callstack) {
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
+      return null;
+    }
+
+    return result;
+  }
+
+  static RectangleInt? parseRectangleInt(String value) {
+    RectangleInt? result;
+
+    final match = Config.rectangleIntFormatRegex.firstMatch(value);
+    if (match == null) //
+      return result;
+
+    final x = match.namedGroup('x');
+    final y = match.namedGroup('y');
+    final w = match.namedGroup('w');
+    final h = match.namedGroup('h');
+
+    try {
+      result = RectangleInt(
+        x == null ? 0 : int.parse(x),
+        y == null ? 0 : int.parse(y),
+        w == null ? 0 : int.parse(w),
+        h == null ? 0 : int.parse(h),
       );
     } catch (e, callstack) {
       providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
@@ -191,6 +415,30 @@ class DbModelUtils {
       case ClassFieldType.duration:
         return DataTableCellValue.simple(simpleValueToText(parseDuration(value)));
 
+      case ClassFieldType.vector2:
+        return DataTableCellValue.simple(simpleValueToText(parseVector2(value)));
+
+      case ClassFieldType.vector2Int:
+        return DataTableCellValue.simple(simpleValueToText(parseVector2Int(value)));
+
+      case ClassFieldType.vector3:
+        return DataTableCellValue.simple(simpleValueToText(parseVector3(value)));
+
+      case ClassFieldType.vector3Int:
+        return DataTableCellValue.simple(simpleValueToText(parseVector3Int(value)));
+
+      case ClassFieldType.vector4:
+        return DataTableCellValue.simple(simpleValueToText(parseVector4(value)));
+
+      case ClassFieldType.vector4Int:
+        return DataTableCellValue.simple(simpleValueToText(parseVector4Int(value)));
+
+      case ClassFieldType.rectangle:
+        return DataTableCellValue.simple(simpleValueToText(parseRectangle(value)));
+
+      case ClassFieldType.rectangleInt:
+        return DataTableCellValue.simple(simpleValueToText(parseRectangleInt(value)));
+
       case ClassFieldType.list:
       case ClassFieldType.set:
         try {
@@ -242,7 +490,7 @@ class DbModelUtils {
   }
 
   static String getRandomId() {
-    return '_' + const Uuid().v4().replaceAll('-', '_').substring(0, 23);
+    return '_${const Uuid().v4().replaceAll('-', '_').substring(0, 23)}';
   }
 
   static bool isDefaultId(String value) {
@@ -338,9 +586,25 @@ class DbModelUtils {
 
       case ClassFieldType.date:
         return value is String && parseDate(value) != null;
-
       case ClassFieldType.duration:
         return value is String && parseDuration(value) != null;
+
+      case ClassFieldType.vector2:
+        return value is String && parseVector2(value) != null;
+      case ClassFieldType.vector2Int:
+        return value is String && parseVector2Int(value) != null;
+      case ClassFieldType.vector3:
+        return value is String && parseVector3(value) != null;
+      case ClassFieldType.vector3Int:
+        return value is String && parseVector3Int(value) != null;
+      case ClassFieldType.vector4:
+        return value is String && parseVector4(value) != null;
+      case ClassFieldType.vector4Int:
+        return value is String && parseVector4Int(value) != null;
+      case ClassFieldType.rectangle:
+        return value is String && parseRectangle(value) != null;
+      case ClassFieldType.rectangleInt:
+        return value is String && parseRectangleInt(value) != null;
 
       case ClassFieldType.list:
       case ClassFieldType.set:
@@ -390,9 +654,25 @@ class DbModelUtils {
 
       case ClassFieldType.date:
         return DataTableCellValue.simple(simpleValueToText(Config.defaultDateTime));
-
       case ClassFieldType.duration:
         return DataTableCellValue.simple(simpleValueToText(Duration.zero));
+
+      case ClassFieldType.vector2:
+        return DataTableCellValue.simple(simpleValueToText(Vector2(0, 0)));
+      case ClassFieldType.vector2Int:
+        return DataTableCellValue.simple(simpleValueToText(Vector2Int(0, 0)));
+      case ClassFieldType.vector3:
+        return DataTableCellValue.simple(simpleValueToText(Vector3(0, 0, 0)));
+      case ClassFieldType.vector3Int:
+        return DataTableCellValue.simple(simpleValueToText(Vector3Int(0, 0, 0)));
+      case ClassFieldType.vector4:
+        return DataTableCellValue.simple(simpleValueToText(Vector4(0, 0, 0, 0)));
+      case ClassFieldType.vector4Int:
+        return DataTableCellValue.simple(simpleValueToText(Vector4Int(0, 0, 0, 0)));
+      case ClassFieldType.rectangle:
+        return DataTableCellValue.simple(simpleValueToText(Rectangle(0, 0, 0, 0)));
+      case ClassFieldType.rectangleInt:
+        return DataTableCellValue.simple(simpleValueToText(RectangleInt(0, 0, 0, 0)));
     }
   }
 
@@ -441,17 +721,31 @@ class DbModelUtils {
 
       case ClassFieldType.list:
         return 250 * scale;
-
       case ClassFieldType.set:
         return 250 * scale;
-
       case ClassFieldType.dictionary:
         return 430 * scale;
 
       case ClassFieldType.date:
         return 200 * scale;
-
       case ClassFieldType.duration:
+        return 200 * scale;
+
+      case ClassFieldType.vector2:
+        return 200 * scale;
+      case ClassFieldType.vector2Int:
+        return 150 * scale;
+      case ClassFieldType.vector3:
+        return 250 * scale;
+      case ClassFieldType.vector3Int:
+        return 200 * scale;
+      case ClassFieldType.vector4:
+        return 250 * scale;
+      case ClassFieldType.vector4Int:
+        return 200 * scale;
+      case ClassFieldType.rectangle:
+        return 250 * scale;
+      case ClassFieldType.rectangleInt:
         return 200 * scale;
     }
   }
@@ -621,6 +915,14 @@ class DbModelUtils {
       case ClassFieldType.color:
       case ClassFieldType.date:
       case ClassFieldType.duration:
+      case ClassFieldType.vector2:
+      case ClassFieldType.vector2Int:
+      case ClassFieldType.vector3:
+      case ClassFieldType.vector3Int:
+      case ClassFieldType.vector4:
+      case ClassFieldType.vector4Int:
+      case ClassFieldType.rectangle:
+      case ClassFieldType.rectangleInt:
         final convertedSimpleValue = convertSimpleValueIfPossible(value.simpleValue, field.typeInfo.type);
         return convertedSimpleValue == null ? null : DataTableCellValue.simple(convertedSimpleValue);
 
@@ -695,6 +997,14 @@ class DbModelUtils {
 
       case ClassFieldType.date:
       case ClassFieldType.duration:
+      case ClassFieldType.vector2:
+      case ClassFieldType.vector2Int:
+      case ClassFieldType.vector3:
+      case ClassFieldType.vector3Int:
+      case ClassFieldType.vector4:
+      case ClassFieldType.vector4Int:
+      case ClassFieldType.rectangle:
+      case ClassFieldType.rectangleInt:
         return null;
 
       case ClassFieldType.undefined:
@@ -781,6 +1091,14 @@ class DbModelUtils {
       case ClassFieldType.date:
       case ClassFieldType.duration:
       case ClassFieldType.color:
+      case ClassFieldType.vector2:
+      case ClassFieldType.vector2Int:
+      case ClassFieldType.vector3:
+      case ClassFieldType.vector3Int:
+      case ClassFieldType.vector4:
+      case ClassFieldType.vector4Int:
+      case ClassFieldType.rectangle:
+      case ClassFieldType.rectangleInt:
         break;
 
       case ClassFieldType.reference:
@@ -860,6 +1178,14 @@ class DbModelUtils {
     if (value is int || value is double || value is String) return value.toString();
     if (value is DateTime) return dateFormatter.format(value);
     if (value is Duration) return _durationToString(value);
+    if (value is Vector2) return _vector2ToString(value);
+    if (value is Vector2Int) return _vector2IntToString(value);
+    if (value is Vector3) return _vector3ToString(value);
+    if (value is Vector3Int) return _vector3IntToString(value);
+    if (value is Vector4) return _vector4ToString(value);
+    if (value is Vector4Int) return _vector4IntToString(value);
+    if (value is Rectangle) return _rectangleToString(value);
+    if (value is RectangleInt) return _rectangleIntToString(value);
     return null;
   }
 
@@ -868,8 +1194,60 @@ class DbModelUtils {
     final hours = (duration - Duration(days: days)).inHours;
     final minutes = (duration - Duration(days: days, hours: hours)).inMinutes;
     final seconds = (duration - Duration(days: days, hours: hours, minutes: minutes)).inSeconds;
+    final milliSeconds = (duration - Duration(days: days, hours: hours, minutes: minutes, seconds: seconds)).inMilliseconds;
 
-    return '${days}d ${hours}h ${minutes}m ${seconds}s';
+    final result = <String>[];
+    if (days != 0) {
+      result.add('${days}d');
+    }
+    if (hours != 0) {
+      result.add('${hours}h');
+    }
+    if (minutes != 0) {
+      result.add('${minutes}m');
+    }
+    if (seconds != 0) {
+      result.add('${seconds}s');
+    }
+    if (milliSeconds != 0) {
+      result.add('${milliSeconds}ms');
+    }
+    if (result.isEmpty) {
+      return '0s';
+    }
+    return result.join(' ');
+  }
+
+  static String _vector2ToString(Vector2 value) {
+    return 'x:${value.x} y:${value.y}';
+  }
+
+  static String _vector2IntToString(Vector2Int value) {
+    return 'x:${value.x} y:${value.y}';
+  }
+
+  static String _vector3ToString(Vector3 value) {
+    return 'x:${value.x} y:${value.y} z:${value.z}';
+  }
+
+  static String _vector3IntToString(Vector3Int value) {
+    return 'x:${value.x} y:${value.y} z:${value.z}';
+  }
+
+  static String _vector4ToString(Vector4 value) {
+    return 'x:${value.x} y:${value.y} z:${value.z} w:${value.w}';
+  }
+
+  static String _vector4IntToString(Vector4Int value) {
+    return 'x:${value.x} y:${value.y} z:${value.z} w:${value.w}';
+  }
+
+  static String _rectangleToString(Rectangle value) {
+    return 'x:${value.x} y:${value.y} w:${value.width} h:${value.height}';
+  }
+
+  static String _rectangleIntToString(RectangleInt value) {
+    return 'x:${value.x} y:${value.y} w:${value.width} h:${value.height}';
   }
 
   static bool validateReferenceExists(DbModel model, ClassFieldDescriptionDataInfo field, String value) {

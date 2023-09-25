@@ -18,10 +18,10 @@ class LoggerPanel extends ConsumerWidget {
   }
 
   @override
-  Widget build(context, watch) {
-    final appState = watch(appStateProvider).state;
-    final logState = watch(logStateProvider).state;
-    final serverHistoryState = watch(serverHistoryStateProvider).state;
+  Widget build(context, ref) {
+    final appState = ref.watch(appStateProvider).state;
+    final logState = ref.watch(logStateProvider).state;
+    final serverHistoryState = ref.watch(serverHistoryStateProvider).state;
 
     return Material(
       color: kColorAccentOrange,
@@ -47,7 +47,7 @@ class LoggerPanel extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  Loc.get.clientStatus(watch(appStateProvider).state.clientConnected ?? false ? Loc.get.statusOnline : Loc.get.statusOffline),
+                  Loc.get.clientStatus(ref.watch(appStateProvider).state.clientConnected ?? false ? Loc.get.statusOnline : Loc.get.statusOffline),
                   style: kStyle.kTextExtraSmallLightest,
                   textAlign: TextAlign.left,
                 ),
@@ -55,9 +55,7 @@ class LoggerPanel extends ConsumerWidget {
                 Text(
                   Loc.get.serverStatus(
                     appState.serverWorking ?? false
-                        ? (Loc.get.connectedClientsCount(appState.clientsCount ?? 0) +
-                            ' ' +
-                            (serverHistoryState.currentTag == null ? '' : '#${serverHistoryState.currentTag}'))
+                        ? ('${Loc.get.connectedClientsCount(appState.clientsCount ?? 0)} ${serverHistoryState.currentTag == null ? '' : '#${serverHistoryState.currentTag}'}')
                         : Loc.get.statusOffline,
                   ),
                   style: kStyle.kTextExtraSmallLightest,

@@ -44,15 +44,15 @@ class TableView extends ConsumerWidget {
   const TableView({Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    final gitState = watch(clientGitStateProvider).state;
-    final historyState = watch(clientHistoryStateProvider).state;
-    final settingsState = watch(settingsStateProvider).state;
-    final problemsState = watch(clientProblemsStateProvider).state;
-    final findState = watch(clientFindStateProvider).state;
-    final pinnedState = watch(pinnedItemsStateProvider).state;
-    final dataSelectionState = watch(clientDataSelectionStateProvider).state;
-    watch(styleStateProvider);
+  Widget build(context, ref) {
+    final gitState = ref.watch(clientGitStateProvider).state;
+    final historyState = ref.watch(clientHistoryStateProvider).state;
+    final settingsState = ref.watch(settingsStateProvider).state;
+    final problemsState = ref.watch(clientProblemsStateProvider).state;
+    final findState = ref.watch(clientFindStateProvider).state;
+    final pinnedState = ref.watch(pinnedItemsStateProvider).state;
+    final dataSelectionState = ref.watch(clientDataSelectionStateProvider).state;
+    ref.watch(styleStateProvider);
 
     return Row(
       children: [
@@ -76,13 +76,13 @@ class TableView extends ConsumerWidget {
                     TooltipWrapper(
                       message: Loc.get.keyboardShortcutTooltip,
                       child: IconButtonTransparent(
-                        icon: const Icon(
+                        icon: Icon(
                           FontAwesomeIcons.keyboard,
                           color: kColorAccentBlue,
-                          size: 13,
+                          size: 13 * kScale,
                         ),
                         onClick: _handleShowShortcutsClick,
-                        size: 28,
+                        size: 28 * kScale,
                       ),
                     ),
                   ],
@@ -198,7 +198,7 @@ class TableView extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                FontAwesomeIcons.exclamationTriangle,
+                                FontAwesomeIcons.triangleExclamation,
                                 size: 13 * kScale,
                                 color: kColorAccentRed2,
                               ),
@@ -209,7 +209,7 @@ class TableView extends ConsumerWidget {
                               ),
                               SizedBox(width: 15 * kScale),
                               Icon(
-                                FontAwesomeIcons.exclamationTriangle,
+                                FontAwesomeIcons.triangleExclamation,
                                 size: 13 * kScale,
                                 color: kColorAccentYellow,
                               ),
@@ -266,7 +266,7 @@ class TableView extends ConsumerWidget {
                         child: IconButtonTransparent(
                           size: 32 * kScale,
                           icon: Icon(
-                            FontAwesomeIcons.syncAlt,
+                            FontAwesomeIcons.rotate,
                             color: gitState.isProcessing ? kColorAccentBlueInactive : kColorAccentBlue,
                             size: 15 * kScale,
                           ),
@@ -279,7 +279,7 @@ class TableView extends ConsumerWidget {
                         child: IconButtonTransparent(
                           size: 32 * kScale,
                           icon: Icon(
-                            FontAwesomeIcons.save,
+                            FontAwesomeIcons.floppyDisk,
                             color: gitState.isProcessing || gitState.selectedItems.isEmpty ? kColorAccentBlueInactive : kColorAccentBlue,
                             size: 15 * kScale,
                           ),
@@ -292,7 +292,7 @@ class TableView extends ConsumerWidget {
                         child: IconButtonTransparent(
                           size: 32 * kScale,
                           icon: Icon(
-                            FontAwesomeIcons.arrowCircleUp,
+                            FontAwesomeIcons.circleArrowUp,
                             color: gitState.isProcessing || gitState.selectedItems.isEmpty ? kColorAccentBlueInactive : kColorAccentBlue,
                             size: 15 * kScale,
                           ),
@@ -305,7 +305,7 @@ class TableView extends ConsumerWidget {
                         child: IconButtonTransparent(
                           size: 32 * kScale,
                           icon: Icon(
-                            FontAwesomeIcons.arrowCircleDown,
+                            FontAwesomeIcons.circleArrowDown,
                             color: gitState.isProcessing || gitState.selectedItems.isEmpty ? kColorAccentBlueInactive : kColorAccentBlue,
                             size: 15 * kScale,
                           ),
@@ -364,7 +364,7 @@ class TableView extends ConsumerWidget {
                         child: IconButtonTransparent(
                           size: 32 * kScale,
                           icon: Icon(
-                            FontAwesomeIcons.syncAlt,
+                            FontAwesomeIcons.rotate,
                             color: historyState.isProcessing ? kColorAccentBlueInactive : kColorAccentBlue,
                             size: 15 * kScale,
                           ),

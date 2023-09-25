@@ -16,7 +16,7 @@ class TableHistoryItemView extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(context, watch) {
+  Widget build(context, ref) {
     final historyState = providerContainer.read(clientHistoryStateProvider).state;
 
     return SizedBox(

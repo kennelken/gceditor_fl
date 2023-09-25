@@ -16,10 +16,10 @@ class ServerHistoryAdminPanel extends StatefulWidget {
   const ServerHistoryAdminPanel({Key? key}) : super(key: key);
 
   @override
-  _ServerHistoryAdminPanelState createState() => _ServerHistoryAdminPanelState();
+  ServerHistoryAdminPanelState createState() => ServerHistoryAdminPanelState();
 }
 
-class _ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
+class ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
   late final TextEditingController _historyPathTextController;
   late final TextEditingController _tagNameTextController;
 
@@ -51,13 +51,13 @@ class _ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
   }
 
   void _handleHistoryPathChanged() {
-    WidgetsBinding.instance!.addPostFrameCallback(
+    WidgetsBinding.instance.addPostFrameCallback(
       (_) => providerContainer.read(serverHistoryStateProvider).setPath(_historyPathTextController.text),
     );
   }
 
   void _handleHistoryTagChanged() {
-    WidgetsBinding.instance!.addPostFrameCallback(
+    WidgetsBinding.instance.addPostFrameCallback(
       (_) => providerContainer.read(serverHistoryStateProvider).setTag(_tagNameTextController.text),
     );
   }
@@ -65,10 +65,11 @@ class _ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
   @override
   Widget build(BuildContext context) {
     return Consumer(
-      builder: (context, watch, child) {
-        watch(startupProvider);
+      builder: (context, ref, child) {
+        ref.watch(startupProvider);
+        ref.watch(styleStateProvider);
 
-        final defaultFolder = watch(appStateProvider).state.defaultProjectFolder;
+        final defaultFolder = ref.watch(appStateProvider).state.defaultProjectFolder;
         final defaultFolderPath = defaultFolder?.path ?? '';
 
         if (!_initialValuesSet) {

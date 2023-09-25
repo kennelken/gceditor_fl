@@ -126,6 +126,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
               SizedBox(
                 width: 36 * kScale,
                 child: IconButtonTransparent(
+                  size: 35 * kScale,
                   icon: const IconPlus(),
                   onClick: _handleAddRow,
                 ),
@@ -139,8 +140,8 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
             child: ScrollConfiguration(
               behavior: kScrollDraggable,
               child: Consumer(
-                builder: (context, watch, child) {
-                  watch(columnSizeChangedProvider);
+                builder: (context, ref, child) {
+                  ref.watch(columnSizeChangedProvider);
                   return ReorderableListView.builder(
                     scrollController: _scrollController,
                     itemCount: _cellValue.dictionaryCellValues!.length,
@@ -200,12 +201,11 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
                                   ),
                                 ),
                               ),
-                              if (watch(clientViewModeStateProvider).state.actionsMode) ...[
+                              if (ref.watch(clientViewModeStateProvider).state.actionsMode) ...[
                                 DeleteButton(
                                   onAction: () => _handleDeleteItem(index),
                                   size: 14 * kScale,
                                   width: 25 * kScale,
-                                  color: kColorPrimaryLight,
                                   tooltipText: Loc.get.delete,
                                 ),
                               ],

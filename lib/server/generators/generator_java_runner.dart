@@ -53,6 +53,14 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
   static const _paramClassName = 'className';
   static const _paramRegexDate = 'regexDate';
   static const _paramRegexDuration = 'regexDuration';
+  static const _paramRegexVector2 = 'regexVector2';
+  static const _paramRegexVector2Int = 'regexVector2Int';
+  static const _paramRegexVector3 = 'regexVector3';
+  static const _paramRegexVector3Int = 'regexVector3Int';
+  static const _paramRegexVector4 = 'regexVector4';
+  static const _paramRegexVector4Int = 'regexVector4Int';
+  static const _paramRegexRectangle = 'regexRectangle';
+  static const _paramRegexRectangleInt = 'regexRectangleInt';
   static const _paramAssignValueListProperties = 'assignValueListProperties';
   static const _paramParseFunction = 'parseFunction';
   static const _paramAssignValueCases = 'assignValueCases';
@@ -86,6 +94,14 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
               _paramListInstantiate: _getListInstantiate(model, data),
               _paramRegexDate: Config.dateFormatRegex.pattern.replaceAll('\\', '\\\\'),
               _paramRegexDuration: Config.durationFormatRegex.pattern.replaceAll('\\', '\\\\'),
+              _paramRegexVector2: Config.vector2FormatRegex.pattern.replaceAll('\\', '\\\\'),
+              _paramRegexVector2Int: Config.vector2IntFormatRegex.pattern.replaceAll('\\', '\\\\'),
+              _paramRegexVector3: Config.vector3FormatRegex.pattern.replaceAll('\\', '\\\\'),
+              _paramRegexVector3Int: Config.vector3IntFormatRegex.pattern.replaceAll('\\', '\\\\'),
+              _paramRegexVector4: Config.vector4FormatRegex.pattern.replaceAll('\\', '\\\\'),
+              _paramRegexVector4Int: Config.vector4IntFormatRegex.pattern.replaceAll('\\', '\\\\'),
+              _paramRegexRectangle: Config.rectangleFormatRegex.pattern.replaceAll('\\', '\\\\'),
+              _paramRegexRectangleInt: Config.rectangleIntFormatRegex.pattern.replaceAll('\\', '\\\\'),
               _paramAssignValueCases: _getAssignValuesCases(model, data),
               _paramMaxStructDepth: _getMaxStructDepth(model, 3),
             },
@@ -398,6 +414,14 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
       case ClassFieldType.date:
       case ClassFieldType.duration:
       case ClassFieldType.color:
+      case ClassFieldType.vector2:
+      case ClassFieldType.vector2Int:
+      case ClassFieldType.vector3:
+      case ClassFieldType.vector3Int:
+      case ClassFieldType.vector4:
+      case ClassFieldType.vector4Int:
+      case ClassFieldType.rectangle:
+      case ClassFieldType.rectangleInt:
         return _getSimplePropertyType(field.typeInfo, data);
 
       case ClassFieldType.list:
@@ -449,6 +473,30 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
 
       case ClassFieldType.color:
         return 'Long';
+
+      case ClassFieldType.vector2:
+        return 'Vector2';
+
+      case ClassFieldType.vector2Int:
+        return 'Vector2Int';
+
+      case ClassFieldType.vector3:
+        return 'Vector3';
+
+      case ClassFieldType.vector3Int:
+        return 'Vector3Int';
+
+      case ClassFieldType.vector4:
+        return 'Vector4';
+
+      case ClassFieldType.vector4Int:
+        return 'Vector4Int';
+
+      case ClassFieldType.rectangle:
+        return 'Retangle';
+
+      case ClassFieldType.rectangleInt:
+        return 'RetangleInt';
     }
   }
 
@@ -557,6 +605,14 @@ ${_makeSummary(' */', indentDepth, false)}''';
       case ClassFieldType.date:
       case ClassFieldType.duration:
       case ClassFieldType.color:
+      case ClassFieldType.vector2:
+      case ClassFieldType.vector2Int:
+      case ClassFieldType.vector3:
+      case ClassFieldType.vector3Int:
+      case ClassFieldType.vector4:
+      case ClassFieldType.vector4Int:
+      case ClassFieldType.rectangle:
+      case ClassFieldType.rectangleInt:
         return _getAssignSimpleValueFunction(model, data, field.typeInfo, value);
 
       case ClassFieldType.list:
@@ -613,6 +669,30 @@ ${_makeSummary(' */', indentDepth, false)}''';
       case ClassFieldType.color:
         return 'ParseColor(${value})';
 
+      case ClassFieldType.vector2:
+        return 'ParseVector2(${value})';
+
+      case ClassFieldType.vector2Int:
+        return 'ParseVector2Int(${value})';
+
+      case ClassFieldType.vector3:
+        return 'ParseVector3(${value})';
+
+      case ClassFieldType.vector3Int:
+        return 'ParseVector3Int(${value})';
+
+      case ClassFieldType.vector4:
+        return 'ParseVector4(${value})';
+
+      case ClassFieldType.vector4Int:
+        return 'ParseVector4Int(${value})';
+
+      case ClassFieldType.rectangle:
+        return 'ParseRectangle(${value})';
+
+      case ClassFieldType.rectangleInt:
+        return 'ParseRectangleInt(${value})';
+
       case ClassFieldType.list:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
@@ -634,6 +714,14 @@ ${_makeSummary(' */', indentDepth, false)}''';
       case ClassFieldType.duration:
       case ClassFieldType.reference:
       case ClassFieldType.color:
+      case ClassFieldType.vector2:
+      case ClassFieldType.vector2Int:
+      case ClassFieldType.vector3:
+      case ClassFieldType.vector3Int:
+      case ClassFieldType.vector4:
+      case ClassFieldType.vector4Int:
+      case ClassFieldType.rectangle:
+      case ClassFieldType.rectangleInt:
         return field.id;
 
       case ClassFieldType.list:
@@ -966,6 +1054,98 @@ class EmptyCollectionFactory
         return (HashMap<TKey, TValue>)dicts;
     }
 }
+
+class Vector2 {
+	public Float x;
+	public Float y;
+
+	public Vector2(Float x, Float y) {
+		this.x = x;
+		this.y = y;
+	}
+}
+
+class Vector2I {
+	public Integer x;
+	public Integer y;
+
+	public Vector2(Integer x, Integer y) {
+		this.x = x;
+		this.y = y;
+	}
+}
+
+class Vector3 {
+	public Float x;
+	public Float y;
+	public Float z;
+
+	public Vector2(Float x, Float y, Float z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+}
+
+class Vector3Int {
+	public Integer x;
+	public Integer y;
+	public Integer z;
+
+	public Vector2(Integer x, Integer y, Integer z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+}
+
+class Vector4 {
+	public Float x;
+	public Float y;
+	public Float z;
+	public Float w;
+
+	public Vector2(Float x, Float y, Float z, Float w) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.w = w;
+	}
+}
+
+class Vector4Int {
+	public Integer x;
+	public Integer y;
+	public Integer z;
+	public Integer w;
+
+	public Vector2(Integer x, Integer y, Integer z, Integer w) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.w = w;
+	}
+}
+
+class Rectangle {
+	public Vector2 Position;
+	public Vector2 Size;
+
+	public Rectangle(Vector2 position, Vector2 size) {
+		Position = position;
+		Size = size;
+	}
+}
+
+class RectangleInt {
+	public Vector2Int Position;
+	public Vector2Int Size;
+
+	public Rectangle(Vector2Int position, Vector2Int size) {
+		Position = position;
+		Size = size;
+	}
+}
 ''';
 
   final String _enumTemplate = '''    /**
@@ -1294,13 +1474,203 @@ class EmptyCollectionFactory
                 var h = matcher.group("h");
                 var m = matcher.group("m");
                 var s = matcher.group("s");
+                var ms = matcher.group("ms");
 
                 var days = d == null ? 0 : Integer.parseInt(d);
                 var hours = h == null ? 0 : Integer.parseInt(h);
                 var minutes = m == null ? 0 : Integer.parseInt(m);
                 var seconds = s == null ? 0 : Integer.parseInt(s);
+                var milliSeconds = ms == null ? 0 : Integer.parseInt(ms);
 
-                return Duration.ofDays(days).plusHours(hours).plusMinutes(minutes).plusSeconds(seconds);
+                return Duration.ofDays(days).plusHours(hours).plusMinutes(minutes).plusSeconds(seconds).plusMilliSeconds(milliSeconds);
+            }
+
+            return null;
+        }
+
+        private static Pattern vector2FormatRegex = Pattern.compile("{${_paramRegexVector2}}");
+        private static Vector2 ParseVector2(Object value)
+        {
+            var valueString = value.toString();
+            if (valueString == null || valueString == "")
+                return null;
+
+            var matcher = vector2FormatRegex.matcher(valueString);
+            if (matcher.matches()) {
+                var x = matcher.group("x");
+                var y = matcher.group("y");
+
+                var xx = x == null ? 0 : Float.parseFloat(x);
+                var yy = y == null ? 0 : Float.parseFloat(y);
+
+                return new Vector2(xx, yy);
+            }
+
+            return null;
+        }
+
+        private static Pattern vector2IntFormatRegex = Pattern.compile("{${_paramRegexVector2Int}}");
+        private static Vector2Int ParseVector2Int(Object value)
+        {
+            var valueString = value.toString();
+            if (valueString == null || valueString == "")
+                return null;
+
+            var matcher = vector2IntFormatRegex.matcher(valueString);
+            if (matcher.matches()) {
+                var x = matcher.group("x");
+                var y = matcher.group("y");
+
+                var xx = x == null ? 0 : Integer.parseInt(x);
+                var yy = y == null ? 0 : Integer.parseInt(y);
+
+                return new Vector2Int(xx, yy);
+            }
+
+            return null;
+        }
+
+        private static Pattern vector3FormatRegex = Pattern.compile("{${_paramRegexVector3}}");
+        private static Vector3 ParseVector3(Object value)
+        {
+            var valueString = value.toString();
+            if (valueString == null || valueString == "")
+                return null;
+
+            var matcher = vector3FormatRegex.matcher(valueString);
+            if (matcher.matches()) {
+                var x = matcher.group("x");
+                var y = matcher.group("y");
+                var z = matcher.group("z");
+
+                var xx = x == null ? 0 : Float.parseFloat(x);
+                var yy = y == null ? 0 : Float.parseFloat(y);
+                var zz = z == null ? 0 : Float.parseFloat(z);
+
+                return new Vector3(xx, yy, zz);
+            }
+
+            return null;
+        }
+
+        private static Pattern vector3IntFormatRegex = Pattern.compile("{${_paramRegexVector3Int}}");
+        private static Vector3Int ParseVector3Int(Object value)
+        {
+            var valueString = value.toString();
+            if (valueString == null || valueString == "")
+                return null;
+
+            var matcher = vector3IntFormatRegex.matcher(valueString);
+            if (matcher.matches()) {
+                var x = matcher.group("x");
+                var y = matcher.group("y");
+                var z = matcher.group("z");
+
+                var xx = x == null ? 0 : Integer.parseInt(x);
+                var yy = y == null ? 0 : Integer.parseInt(y);
+                var zz = z == null ? 0 : Integer.parseInt(z);
+
+                return new Vector3Int(xx, yy, zz);
+            }
+
+            return null;
+        }
+
+        private static Pattern vector4FormatRegex = Pattern.compile("{${_paramRegexVector4}}");
+        private static Vector4 ParseVector4(Object value)
+        {
+            var valueString = value.toString();
+            if (valueString == null || valueString == "")
+                return null;
+
+            var matcher = vector4FormatRegex.matcher(valueString);
+            if (matcher.matches()) {
+                var x = matcher.group("x");
+                var y = matcher.group("y");
+                var z = matcher.group("z");
+                var w = matcher.group("w");
+
+                var xx = x == null ? 0 : Float.parseFloat(x);
+                var yy = y == null ? 0 : Float.parseFloat(y);
+                var zz = z == null ? 0 : Float.parseFloat(z);
+                var ww = w == null ? 0 : Float.parseFloat(w);
+
+                return new Vector4(xx, yy, zz, ww);
+            }
+
+            return null;
+        }
+
+        private static Pattern vector4IntFormatRegex = Pattern.compile("{${_paramRegexVector4Int}}");
+        private static Vector4Int ParseVector4Int(Object value)
+        {
+            var valueString = value.toString();
+            if (valueString == null || valueString == "")
+                return null;
+
+            var matcher = vector4IntFormatRegex.matcher(valueString);
+            if (matcher.matches()) {
+                var x = matcher.group("x");
+                var y = matcher.group("y");
+                var z = matcher.group("z");
+                var w = matcher.group("w");
+
+                var xx = x == null ? 0 : Integer.parseInt(x);
+                var yy = y == null ? 0 : Integer.parseInt(y);
+                var zz = z == null ? 0 : Integer.parseInt(z);
+                var ww = w == null ? 0 : Integer.parseInt(w);
+
+                return new Vector4Int(xx, yy, zz, ww);
+            }
+
+            return null;
+        }
+
+        private static Pattern rectangleFormatRegex = Pattern.compile("{${_paramRegexRectangle}}");
+        private static Rectangle ParseRectangle(Object value)
+        {
+            var valueString = value.toString();
+            if (valueString == null || valueString == "")
+                return null;
+
+            var matcher = rectangleFormatRegex.matcher(valueString);
+            if (matcher.matches()) {
+                var x = matcher.group("x");
+                var y = matcher.group("y");
+                var w = matcher.group("w");
+                var h = matcher.group("h");
+
+                var xx = x == null ? 0 : Float.parseFloat(x);
+                var yy = y == null ? 0 : Float.parseFloat(y);
+                var ww = w == null ? 0 : Float.parseFloat(w);
+                var hh = h == null ? 0 : Float.parseFloat(h);
+
+                return new Rectangle(xx, yy, ww, hh);
+            }
+
+            return null;
+        }
+
+        private static Pattern rectangleIntFormatRegex = Pattern.compile("{${_paramRegexRectangleInt}}");
+        private static RectangleInt ParseRectangleInt(Object value)
+        {
+            var valueString = value.toString();
+            if (valueString == null || valueString == "")
+                return null;
+
+            var matcher = rectangleIntFormatRegex.matcher(valueString);
+            if (matcher.matches()) {
+                var x = matcher.group("x");
+                var y = matcher.group("y");
+                var w = matcher.group("w");
+                var h = matcher.group("h");
+
+                var xx = x == null ? 0 : Integer.parseInt(x);
+                var yy = y == null ? 0 : Integer.parseInt(y);
+                var ww = w == null ? 0 : Integer.parseInt(w);
+                var hh = h == null ? 0 : Integer.parseInt(h);
+
+                return new RectangleInt(xx, yy, ww, hh);
             }
 
             return null;

@@ -85,7 +85,7 @@ class _PropertyStringViewState extends State<PropertyStringView> {
             child: IconButtonTransparent(
               size: 22 * kScale,
               icon: Icon(
-                FontAwesomeIcons.search,
+                FontAwesomeIcons.magnifyingGlass,
                 color: kColorPrimaryLight,
                 size: 12 * kScale,
               ),

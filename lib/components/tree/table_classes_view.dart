@@ -10,21 +10,24 @@ import 'package:gceditor/model/db_cmd/db_cmd_reorder_meta_entity.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/client_state.dart';
 
-late final _rootNode = TreeNode(id: '___root_node_classes');
-late final _treeViewController = TreeViewController(rootNode: _rootNode);
-late final _treeScrollController = ScrollController();
+import '../../model/state/style_state.dart';
+
+final _rootNode = TreeNode(id: '___root_node_classes');
+final _treeViewController = TreeViewController(rootNode: _rootNode);
+final _treeScrollController = ScrollController();
 
 class TableClassesView extends ConsumerWidget {
   const TableClassesView({Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    if (!watch(clientStateProvider).state.isInited) //
+  Widget build(context, ref) {
+    if (!ref.watch(clientStateProvider).state.isInited) //
       return const SizedBox();
+    ref.watch(styleStateProvider);
 
     final hadChildrenBefore = _rootNode.hasChildren;
 
-    final dbModel = watch(clientStateProvider).state.model;
+    final dbModel = ref.watch(clientStateProvider).state.model;
     final elements = dbModel.classes;
     _buildNodes(elements);
     _treeViewController.refreshNode(_rootNode, keepExpandedNodes: true);
@@ -53,9 +56,8 @@ class TableClassesView extends ConsumerWidget {
                   child: DropAvailableIndicatorLine(visible: canDrop),
                 ),
                 Expanded(
-                  child: Scrollbar(
-                    controller: _treeScrollController,
-                    scrollbarOrientation: ScrollbarOrientation.right,
+                  child: ScrollConfiguration(
+                    behavior: kScrollDraggable,
                     child: TreeView(
                       key: const ValueKey('TableClassesViewTable'),
                       controller: _treeViewController,

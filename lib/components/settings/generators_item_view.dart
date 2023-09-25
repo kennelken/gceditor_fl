@@ -32,10 +32,10 @@ class GeneratorsItemView extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _GeneratorsItemViewState createState() => _GeneratorsItemViewState();
+  GeneratorsItemViewState createState() => GeneratorsItemViewState();
 }
 
-class _GeneratorsItemViewState extends State<GeneratorsItemView> {
+class GeneratorsItemViewState extends State<GeneratorsItemView> {
   late BaseGenerator _generatorCopy;
   late TextEditingController _fileNameController;
   late FocusNode _fileNameFocusNode;

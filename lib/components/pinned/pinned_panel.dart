@@ -37,18 +37,18 @@ class _PinnedPanelState extends State<PinnedPanel> {
   @override
   Widget build(context) {
     return Consumer(
-      builder: (context, watch, child) {
-        watch(clientStateProvider);
-        watch(columnSizeChangedProvider);
+      builder: (context, ref, child) {
+        ref.watch(clientStateProvider);
+        ref.watch(columnSizeChangedProvider);
 
-        WidgetsBinding.instance!.addPostFrameCallback(
+        WidgetsBinding.instance.addPostFrameCallback(
           (_) {
             if (_scrollController.hasClients) //
               _scrollController.animateTo(0, duration: kScrollListDuration, curve: Curves.easeInOut);
           },
         );
 
-        final notifier = watch(pinnedItemsStateProvider);
+        final notifier = ref.watch(pinnedItemsStateProvider);
         final tables = notifier.state.tables;
         return Padding(
           padding: EdgeInsets.only(left: 7 * kScale, top: 7 * kScale, right: 3 * kScale),
@@ -76,8 +76,9 @@ class _PinnedPanelState extends State<PinnedPanel> {
                     TooltipWrapper(
                       message: Loc.get.closePinnedItemsTooltip,
                       child: IconButtonTransparent(
+                        size: 35 * kScale,
                         icon: Icon(
-                          FontAwesomeIcons.times,
+                          FontAwesomeIcons.xmark,
                           color: kColorPrimaryLight,
                           size: 20 * kScale,
                         ),

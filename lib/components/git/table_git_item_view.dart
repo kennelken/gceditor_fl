@@ -15,7 +15,7 @@ class TableGitItemView extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(context, watch) {
+  Widget build(context, ref) {
     final gitState = providerContainer.read(clientGitStateProvider).state;
 
     return SizedBox(

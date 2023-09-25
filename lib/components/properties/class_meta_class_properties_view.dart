@@ -76,23 +76,23 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
   @override
   Widget build(context) {
     return Consumer(
-      builder: (context, watch, child) {
+      builder: (context, ref, child) {
         final model = clientModel;
         final classTypes = DbModelUtils.allowedClassTypes.map((e) => EnumWrapper(e)).toList();
 
         final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
           MetaValueCoordinates(classId: widget.data.id),
-          watch(clientFindStateProvider).state,
-          watch(clientNavigationServiceProvider).state,
+          ref.watch(clientFindStateProvider).state,
+          ref.watch(clientNavigationServiceProvider).state,
         );
 
         final parentInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
           MetaValueCoordinates(classId: widget.data.id, parentClass: widget.data.parent ?? ''),
-          watch(clientFindStateProvider).state,
-          watch(clientNavigationServiceProvider).state,
+          ref.watch(clientFindStateProvider).state,
+          ref.watch(clientNavigationServiceProvider).state,
         );
 
-        final clientVersion = watch(clientStateProvider).state.version;
+        final clientVersion = ref.watch(clientStateProvider).state.version;
 
         return ClassMetaPropertiesContainer(
           children: [
@@ -104,7 +104,7 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
               saveCallback: (v) => DbCmdEditMetaEntityId.values(entityId: widget.data.id, newValue: v),
               inputFormatters: Config.filterId,
               inputDecoration: idInputDecoration,
-              showFindIcon: watch(clientViewModeStateProvider).state.actionsMode,
+              showFindIcon: ref.watch(clientViewModeStateProvider).state.actionsMode,
             ),
             kStyle.kPropertiesVerticalDivider,
             PropertyStringView(

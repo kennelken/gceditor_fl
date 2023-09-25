@@ -86,6 +86,14 @@ class DataTableCellView extends StatelessWidget {
       case ClassFieldType.duration:
       case ClassFieldType.reference:
       case ClassFieldType.color:
+      case ClassFieldType.vector2:
+      case ClassFieldType.vector2Int:
+      case ClassFieldType.vector3:
+      case ClassFieldType.vector3Int:
+      case ClassFieldType.vector4:
+      case ClassFieldType.vector4Int:
+      case ClassFieldType.rectangle:
+      case ClassFieldType.rectangleInt:
         return _getSimpleCellImplementation(
           key: ValueKey('${table.id}_${row.id}_${index}_${clientStateVersion}_${row.values[index].simpleValue}'),
           coordinates: coordinates,
@@ -154,6 +162,14 @@ class DataTableCellView extends StatelessWidget {
       case ClassFieldType.text:
       case ClassFieldType.date:
       case ClassFieldType.duration:
+      case ClassFieldType.vector2:
+      case ClassFieldType.vector2Int:
+      case ClassFieldType.vector3:
+      case ClassFieldType.vector3Int:
+      case ClassFieldType.vector4:
+      case ClassFieldType.vector4Int:
+      case ClassFieldType.rectangle:
+      case ClassFieldType.rectangleInt:
         return DataTableCellTextView(
           key: key,
           coordinates: coordinates,

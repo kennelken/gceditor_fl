@@ -27,10 +27,10 @@ class LandingScreen extends StatefulWidget {
   const LandingScreen({Key? key}) : super(key: key);
 
   @override
-  _LandingScreenState createState() => _LandingScreenState();
+  LandingScreenState createState() => LandingScreenState();
 }
 
-class _LandingScreenState extends State<LandingScreen> {
+class LandingScreenState extends State<LandingScreen> {
   late final TextEditingController _clientIpTextController = TextEditingController();
   late final TextEditingController _portTextController = TextEditingController();
   late final TextEditingController _projectPathTextController = TextEditingController();
@@ -54,10 +54,11 @@ class _LandingScreenState extends State<LandingScreen> {
   @override
   Widget build(BuildContext context) {
     return Consumer(
-      builder: (context, watch, child) {
-        final defaultFolder = watch(appStateProvider).state.defaultProjectFolder;
+      builder: (context, ref, child) {
+        final defaultFolder = ref.watch(appStateProvider).state.defaultProjectFolder;
         final defaultFolderPath = defaultFolder?.path ?? '';
-        final openPort = watch(networkStateProvider.notifier).state.openPort?.toString() ?? Config.portMin.toString();
+        final openPort = ref.watch(networkStateProvider.notifier).state.openPort?.toString() ?? Config.portMin.toString();
+        ref.watch(styleStateProvider);
 
         if (!_initialValuesSet) {
           final appState = providerContainer.read(appStateProvider).state;
@@ -263,7 +264,7 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   void _onClientPressed() {
-    final appStateNotifier = context.read(appStateProvider.notifier);
+    final appStateNotifier = providerContainer.read(appStateProvider.notifier);
 
     final ipAddress = _clientIpTextController.text;
     final port = int.parse(_portTextController.text);
@@ -284,7 +285,7 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   void _onStandalonePressed() {
-    final appStateNotifier = context.read(appStateProvider.notifier);
+    final appStateNotifier = providerContainer.read(appStateProvider.notifier);
 
     final port = int.parse(_portTextController.text);
 
@@ -307,7 +308,7 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   void _onServerPressed() {
-    final appStateNotifier = context.read(appStateProvider.notifier);
+    final appStateNotifier = providerContainer.read(appStateProvider.notifier);
 
     final port = int.parse(_portTextController.text);
     appStateNotifier.setServerParams(

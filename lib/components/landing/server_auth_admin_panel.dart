@@ -16,10 +16,10 @@ class ServerAuthAdminPanel extends StatefulWidget {
   const ServerAuthAdminPanel({Key? key}) : super(key: key);
 
   @override
-  _ServerAuthAdminPanelState createState() => _ServerAuthAdminPanelState();
+  ServerAuthAdminPanelState createState() => ServerAuthAdminPanelState();
 }
 
-class _ServerAuthAdminPanelState extends State<ServerAuthAdminPanel> {
+class ServerAuthAdminPanelState extends State<ServerAuthAdminPanel> {
   late final TextEditingController _authListPathTextController;
   late final TextEditingController _newLoginTextController;
   late final TextEditingController _newSecretTextController;
@@ -49,7 +49,7 @@ class _ServerAuthAdminPanelState extends State<ServerAuthAdminPanel> {
   }
 
   void _handleAuthPathChanged() {
-    WidgetsBinding.instance!.addPostFrameCallback(
+    WidgetsBinding.instance.addPostFrameCallback(
       (_) => providerContainer.read(authListStateProvider).setPath(_authListPathTextController.text),
     );
   }
@@ -57,11 +57,12 @@ class _ServerAuthAdminPanelState extends State<ServerAuthAdminPanel> {
   @override
   Widget build(BuildContext context) {
     return Consumer(
-      builder: (context, watch, child) {
-        watch(startupProvider);
-        final defaultFolder = watch(appStateProvider).state.defaultProjectFolder;
+      builder: (context, ref, child) {
+        ref.watch(startupProvider);
+        final defaultFolder = ref.watch(appStateProvider).state.defaultProjectFolder;
         final defaultFolderPath = defaultFolder?.path ?? '';
         final authListState = providerContainer.read(authListStateProvider).state;
+        ref.watch(styleStateProvider);
 
         final authListPath =
             authListState.filePath ?? AppLocalStorage.instance.authListPath ?? path.join(defaultFolderPath, Config.newAuthListDefaultName);

@@ -150,6 +150,14 @@ enum ClassFieldType {
   date,
   duration,
   color,
+  vector2,
+  vector2Int,
+  vector3,
+  vector3Int,
+  vector4,
+  vector4Int,
+  rectangle,
+  rectangleInt,
 }
 
 @JsonEnum()

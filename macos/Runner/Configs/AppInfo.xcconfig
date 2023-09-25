@@ -8,7 +8,7 @@
 PRODUCT_NAME = gceditor
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = xyz.fairfun.gceditor
+PRODUCT_BUNDLE_IDENTIFIER = xyz.fairfun.gceditorFl
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2022 xyz.fairfun. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2023 xyz.fairfun. All rights reserved.

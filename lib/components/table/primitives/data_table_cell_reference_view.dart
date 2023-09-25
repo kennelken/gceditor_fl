@@ -37,7 +37,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(context, watch) {
+  Widget build(context, ref) {
     final model = clientModel;
     final classEntity = model.cache.getClass(fieldType.classId)!;
 
@@ -48,7 +48,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
     if (nullValueLabel == '') //
       nullValueLabel = Loc.get.nullValue;
 
-    final actionsMode = watch(clientViewModeStateProvider).state.actionsMode;
+    final actionsMode = ref.watch(clientViewModeStateProvider).state.actionsMode;
 
     return Align(
       alignment: Alignment.topCenter,
@@ -63,9 +63,9 @@ class DataTableCellReferenceView extends ConsumerWidget {
             isEnabled: (_) => true,
             inputDecoration: DbModelUtils.getDataCellInputDecoration(
               coordinates,
-              watch(clientProblemsStateProvider).state,
-              watch(clientFindStateProvider).state,
-              watch(clientNavigationServiceProvider).state,
+              ref.watch(clientProblemsStateProvider).state,
+              ref.watch(clientFindStateProvider).state,
+              ref.watch(clientNavigationServiceProvider).state,
             ).copyWith(contentPadding: EdgeInsets.only(left: 5 * kScale, right: (actionsMode ? 35 : 0) * kScale)),
             nullValueLabel: null /* nullValueLabel */, //
           ),
@@ -78,7 +78,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
                   IconButtonTransparent(
                     size: 22 * kScale,
                     icon: Icon(
-                      FontAwesomeIcons.search,
+                      FontAwesomeIcons.magnifyingGlass,
                       color: kColorPrimaryLight,
                       size: 12 * kScale,
                     ),

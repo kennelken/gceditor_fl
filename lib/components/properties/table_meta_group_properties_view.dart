@@ -23,12 +23,12 @@ class TableMetaGroupPropertiesViewProperties extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    watch(clientStateProvider);
+  Widget build(context, ref) {
+    ref.watch(clientStateProvider);
     final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
       MetaValueCoordinates(tableId: data.id),
-      watch(clientFindStateProvider).state,
-      watch(clientNavigationServiceProvider).state,
+      ref.watch(clientFindStateProvider).state,
+      ref.watch(clientNavigationServiceProvider).state,
     );
 
     return ClassMetaPropertiesContainer(
@@ -41,7 +41,7 @@ class TableMetaGroupPropertiesViewProperties extends ConsumerWidget {
           saveCallback: (v) => DbCmdEditMetaEntityId.values(entityId: data.id, newValue: v),
           inputFormatters: Config.filterId,
           inputDecoration: idInputDecoration,
-          showFindIcon: watch(clientViewModeStateProvider).state.actionsMode,
+          showFindIcon: ref.watch(clientViewModeStateProvider).state.actionsMode,
         ),
         kStyle.kPropertiesVerticalDivider,
         PropertyStringView(

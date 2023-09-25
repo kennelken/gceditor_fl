@@ -1,4 +1,5 @@
-import 'package:catcher/catcher.dart';
+import 'dart:async';
+
 import 'package:computer/computer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -7,9 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/assets.dart';
 import 'package:gceditor/components/global_shortcuts.dart';
 import 'package:gceditor/components/waiting_overlay.dart';
+import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/screens/logger_screen.dart';
-import 'package:gceditor/utils/utils.dart';
 
 import 'components/logger_panel.dart';
 import 'consts/routes.dart';
@@ -17,44 +18,34 @@ import 'managers/startup/startup_manager.dart';
 import 'model/model_root.dart';
 import 'model/state/log_state.dart';
 
-final computer = Computer();
+final computer = Computer.create();
 List<String>? mainArgs;
+
+late BuildContext rootContext;
+final navigatorKey = GlobalKey<NavigatorState>();
+BuildContext? get popupContext => navigatorKey.currentState?.overlay?.context;
 
 Future<void> main([List<String>? args]) async {
   mainArgs = args;
-  final debugOptions = CatcherOptions(
-    SilentReportMode(),
-    [
-      LogStateReportHandler(),
-    ],
-  );
-
-  final releaseOptions = CatcherOptions(
-    SilentReportMode(),
-    [
-      LogStateReportHandler(),
-    ],
-  );
-
   StartupManager.instance.createNewLoginFlowIfRequired(
-    () => Catcher(
-      debugConfig: debugOptions,
-      releaseConfig: releaseOptions,
-      runAppFunction: () {
+    () {
+      final logHandler = LogStateReportHandler();
+      runZonedGuarded(() {
+        FlutterError.onError = (FlutterErrorDetails errorDetails) {
+          logHandler.handleError(errorDetails);
+        };
         runApp(
           UncontrolledProviderScope(
             container: providerContainer,
             child: const MyApp(),
           ),
         );
-      },
-    ),
+      }, (error, stackTrace) {
+        logHandler.handle(error.toString());
+      });
+    },
   );
 }
-
-BuildContext? get popupContext => navigatorKey.currentState?.overlay?.context;
-late BuildContext rootContext;
-final navigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -63,10 +54,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     precacheImage(AssetImage(Assets.images.icon1024PNG), context);
 
-    return Consumer(builder: (context, watch, child) {
-      watch(styleStateProvider);
-      Utils.rebuildAllChildren(context);
-
+    return Consumer(builder: (context, ref, child) {
+      ref.watch(styleStateProvider);
       return RawKeyboardEvents(
         child: MaterialApp(
           navigatorKey: navigatorKey,
@@ -95,10 +84,11 @@ class MyApp extends StatelessWidget {
           ],
           onGenerateRoute: (settings) {
             final page = getWidgetByScreen(settings.name!);
-            return MaterialPageRoute<dynamic>(
+            return SlowerPageRoute(
               builder: (context) {
                 rootContext = context;
                 return Scaffold(
+                  backgroundColor: kColorPrimaryLighter,
                   body: DefaultTextStyle(
                     style: kStyle.kTextBig,
                     child: Stack(
@@ -108,9 +98,9 @@ class MyApp extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Consumer(
-                                builder: (context, watch, child) {
-                                  final visible = watch(logStateProvider).state.visible;
-                                  return visible ? LoggerScreen(key: const ValueKey('LoggerScreen')) : WaitingOverlay(child: page);
+                                builder: (context, ref, child) {
+                                  final visible = ref.watch(logStateProvider).state.visible;
+                                  return visible ? const LoggerScreen(key: ValueKey('LoggerScreen')) : WaitingOverlay(child: page);
                                 },
                               ),
                             ),
@@ -129,6 +119,13 @@ class MyApp extends StatelessWidget {
       );
     });
   }
+}
+
+class SlowerPageRoute extends MaterialPageRoute<dynamic> {
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 450);
+
+  SlowerPageRoute({builder, settings}) : super(builder: builder, settings: settings);
 }
 
 class ToggleConsole extends Intent {

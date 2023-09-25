@@ -50,8 +50,8 @@ class _FillValueViewState extends State<FillValueView> {
 
   @override
   Widget build(context) {
-    return Consumer(builder: (context, watch, child) {
-      watch(styleStateProvider);
+    return Consumer(builder: (context, ref, child) {
+      ref.watch(styleStateProvider);
       _isValidValue = _parseCurrentValue() != null;
 
       return Container(
@@ -95,6 +95,8 @@ class _FillValueViewState extends State<FillValueView> {
                     ),
                     SizedBox(height: 10 * kScale),
                     TextButton(
+                      style: kButtonWhite,
+                      onPressed: () => _handleExecuteClicked(_valueController.text),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                         child: Text(
@@ -102,8 +104,6 @@ class _FillValueViewState extends State<FillValueView> {
                           style: kStyle.kTextBig.copyWith(color: kColorPrimaryLighter, fontWeight: FontWeight.bold),
                         ),
                       ),
-                      style: kButtonWhite,
-                      onPressed: () => _handleExecuteClicked(_valueController.text),
                     ),
                   ],
                 ),

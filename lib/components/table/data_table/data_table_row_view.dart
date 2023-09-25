@@ -25,8 +25,8 @@ class DataTableRowView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer(
-      builder: (context, watch, child) {
-        final selectionState = watch(clientDataSelectionStateProvider).state;
+      builder: (context, ref, child) {
+        final selectionState = ref.watch(clientDataSelectionStateProvider).state;
         final isSelected = selectionState.selectionTable == table && selectionState.selectedItems.contains(index);
 
         return Material(

@@ -52,8 +52,9 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
   @override
   Widget build(context) {
     return Consumer(
-      builder: (context, watch, child) {
-        final dataSelection = watch(clientDataSelectionStateProvider);
+      builder: (context, ref, child) {
+        final dataSelection = ref.watch(clientDataSelectionStateProvider);
+        ref.watch(styleStateProvider);
 
         return Container(
           height: 40 * kScale,
@@ -90,6 +91,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                 TooltipWrapper(
                   message: Loc.get.fromClipboard,
                   child: IconButtonTransparent(
+                    size: 35 * kScale,
                     enabled: _isCopyFromClipboardAvailable,
                     icon: Icon(
                       FontAwesomeIcons.fileImport,
@@ -102,6 +104,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                 TooltipWrapper(
                   message: Loc.get.copy,
                   child: IconButtonTransparent(
+                    size: 35 * kScale,
                     enabled: _isCopyAvailable,
                     icon: Icon(
                       FontAwesomeIcons.copy,
@@ -114,8 +117,9 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                 TooltipWrapper(
                   message: Loc.get.cut,
                   child: IconButtonTransparent(
+                    size: 35 * kScale,
                     icon: Icon(
-                      FontAwesomeIcons.cut,
+                      FontAwesomeIcons.scissors,
                       color: kColorAccentOrange.withAlpha(_isCopyAvailable ? kIconActiveAlpha : kIconInactiveAlpha),
                       size: 17 * kScale,
                     ),
@@ -156,8 +160,9 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                 TooltipWrapper(
                   message: Loc.get.deselect,
                   child: IconButtonTransparent(
+                    size: 35 * kScale,
                     icon: Icon(
-                      FontAwesomeIcons.times,
+                      FontAwesomeIcons.xmark,
                       color: kColorPrimaryLight,
                       size: 20 * kScale,
                     ),

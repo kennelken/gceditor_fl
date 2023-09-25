@@ -1,13 +1,11 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/components/global_shortcuts.dart';
 import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
-import 'package:menubar/menubar.dart';
+import 'package:menubar/menubar.dart' as menu_bar;
 
 final menubarStateProvider = ChangeNotifierProvider((ref) {
   final notifier = MenubarStateNotifier(MenubarState());
@@ -20,7 +18,7 @@ final menubarStateProvider = ChangeNotifierProvider((ref) {
 });
 
 class MenubarState {
-  List<Submenu>? _items;
+  List<menu_bar.NativeSubmenu>? _items;
 }
 
 class MenubarStateNotifier extends ChangeNotifier {
@@ -43,80 +41,78 @@ class MenubarStateNotifier extends ChangeNotifier {
     final nextRedoCommand = providerContainer.read(clientOwnCommandsStateProvider).state.nextRedoCommand;
 
     state._items = [
-      Submenu(
+      menu_bar.NativeSubmenu(
         label: Loc.get.menubarFile,
         children: [
-          MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarProjectSettings,
-            shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyZ),
-            onClicked: GlobalShortcuts.openProjectSettings,
+            //shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyZ),
+            onSelected: GlobalShortcuts.openProjectSettings,
           ),
-          MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarRunGenerators,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyZ),
-            onClicked: GlobalShortcuts.runGenerators,
+            onSelected: GlobalShortcuts.runGenerators,
           ),
         ],
       ),
-      Submenu(
+      menu_bar.NativeSubmenu(
         label: Loc.get.menubarEdit,
         children: [
-          MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarUndo + (nextUndoCommand != null ? ': ${describeEnum(nextUndoCommand.$type!)}' : ''),
             //shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyZ),
-            enabled: nextUndoCommand != null,
-            onClicked: GlobalShortcuts.undo,
+            onSelected: nextUndoCommand != null ? GlobalShortcuts.undo : null,
           ),
-          MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarRedo + (nextRedoCommand != null ? ': ${describeEnum(nextRedoCommand.$type!)}' : ''),
             //shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyY),
-            enabled: nextRedoCommand != null,
-            onClicked: GlobalShortcuts.redo,
+            onSelected: nextRedoCommand != null ? GlobalShortcuts.redo : null,
           ),
-          MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarFind,
-            onClicked: GlobalShortcuts.openFind,
+            onSelected: GlobalShortcuts.openFind,
           ),
-          MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.requestModelFromServer,
-            onClicked: _requestModelFromServer,
+            onSelected: _requestModelFromServer,
           ),
         ],
       ),
-      Submenu(
+      menu_bar.NativeSubmenu(
         label: Loc.get.menubarView,
         children: [
-          MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.expandedViewMenu,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
-            onClicked: GlobalShortcuts.toggleActions, // is registered in GlobalShortcuts
+            onSelected: GlobalShortcuts.toggleActions, // is registered in GlobalShortcuts
           ),
-          MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarConsole,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
-            onClicked: GlobalShortcuts.toggleConsole, // is registered in GlobalShortcuts
+            onSelected: GlobalShortcuts.toggleConsole, // is registered in GlobalShortcuts
           ),
-          MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarZoomIn,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
-            onClicked: GlobalShortcuts.zoomIn, // is registered in GlobalShortcuts
+            onSelected: GlobalShortcuts.zoomIn, // is registered in GlobalShortcuts
           ),
-          MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarZoomOut,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
-            onClicked: GlobalShortcuts.zoomOut, // is registered in GlobalShortcuts
+            onSelected: GlobalShortcuts.zoomOut, // is registered in GlobalShortcuts
           ),
-          MenuItem(
+          menu_bar.NativeMenuItem(
             label: Loc.get.menubarShowShortcuts,
             //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
-            onClicked: GlobalShortcuts.openShortcutsList, // is registered in GlobalShortcuts
+            onSelected: GlobalShortcuts.openShortcutsList, // is registered in GlobalShortcuts
           ),
         ],
       ),
     ];
 
     if (!kIsWeb) //
-      setApplicationMenu(state._items!);
+      menu_bar.setApplicationMenu(state._items!);
   }
 
   void _removeMenubar() {
@@ -126,7 +122,7 @@ class MenubarStateNotifier extends ChangeNotifier {
     state._items = null;
 
     if (!kIsWeb) //
-      setApplicationMenu([]);
+      menu_bar.setApplicationMenu([]);
   }
 
   void _requestModelFromServer() {

@@ -1,5 +1,6 @@
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/model/state/style_state.dart';
@@ -57,10 +58,15 @@ class IconPlus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Icon(
-      FontAwesomeIcons.plus,
-      color: kColorAccentBlue,
-      size: 18 * kScale,
+    return Consumer(
+      builder: (context, ref, child) {
+        ref.watch(styleStateProvider);
+        return Icon(
+          FontAwesomeIcons.plus,
+          color: kColorAccentBlue,
+          size: 18 * kScale,
+        );
+      },
     );
   }
 }

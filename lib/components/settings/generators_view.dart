@@ -23,10 +23,10 @@ class GeneratorsView extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _GeneratorsViewState createState() => _GeneratorsViewState();
+  GeneratorsViewState createState() => GeneratorsViewState();
 }
 
-class _GeneratorsViewState extends State<GeneratorsView> {
+class GeneratorsViewState extends State<GeneratorsView> {
   late List<BaseGenerator> generators;
   late final CustomPopupMenuController _addNewGeneratorPopupController;
   late final ScrollController _listScrollController;
@@ -67,9 +67,10 @@ class _GeneratorsViewState extends State<GeneratorsView> {
                   TooltipWrapper(
                     message: Loc.get.runGenerators,
                     child: IconButtonTransparent(
-                      icon: const Icon(
+                      size: 35 * kScale,
+                      icon: Icon(
                         FontAwesomeIcons.forward,
-                        size: 14,
+                        size: 14 * kScale,
                         color: kColorAccentBlue,
                       ),
                       onClick: _handleRunGenerators,

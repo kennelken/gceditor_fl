@@ -18,14 +18,14 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.14.0 <3.0.0"
 
 dependencies:
-  another_flushbar: ^1.10.24
+  another_flushbar: ^1.12.30
   cupertino_icons: ^1.0.2
-  darq: ^1.1.1
-  dartx: ^0.7.1
-  file_picker: ^4.0.2
+  darq: ^2.0.0
+  dartx: ^1.2.0
+  file_picker: ^5.2.10
   flutter:
     sdk: flutter
 
@@ -33,19 +33,19 @@ dependencies:
     git:
       url: https://github.com/google/flutter-desktop-embedding.git
       path: plugins/menubar
-      ref: a8ca32b01bafa91624a1fc8e2cdd0c2312d40a84
+      ref: 17d4710c17f4913137e7ec931f6e71eaef443363
   window_size:
     git:
       url: https://github.com/google/flutter-desktop-embedding.git
       path: plugins/window_size
-      ref: a8ca32b01bafa91624a1fc8e2cdd0c2312d40a84
+      ref: 17d4710c17f4913137e7ec931f6e71eaef443363
 
-  flutter_fancy_tree_view: ^0.5.1+1
+  flutter_fancy_tree_view: ^0.5.3+2
   flutter_localizations:
     sdk: flutter
-  flutter_riverpod: ^0.14.0+3
-  font_awesome_flutter: ^9.1.0
-  intl: ^0.17.0
+  flutter_riverpod: ^2.3.6
+  font_awesome_flutter: ^10.5.0
+  intl: ^0.18.0
   listenable_stream: ^1.1.0
   loading_overlay: ^0.3.0
   localstorage: ^4.0.0+1
@@ -57,25 +57,28 @@ dependencies:
   socket_io: ^1.0.1
   socket_io_client: ^1.0.1
   statemachine: ^3.1.0
-  styled_text: ^3.0.2
+  styled_text: ^8.1.0
   tcp_scanner: ^2.0.5
   uuid: ^3.0.4
   custom_pop_up_menu: ^1.2.2
-  dropdown_search: ^1.0.0
+  dropdown_search: ^5.0.0
   linked_scroll_controller: ^0.2.0
-  catcher: ^0.6.8
   crypto: ^3.0.1
-  computer: ^2.0.0
+  computer: ^3.2.1
   args: ^2.3.0
   git: ^2.0.0
   flutter_colorpicker: ^1.0.1
-  top_snackbar_flutter: ^1.0.2
+  top_snackbar_flutter: ^3.1.0
   json_annotation: ^4.4.0
+  collection: ^1.17.1
+
+dependency_overrides:
+  intl: ^0.18.0
 
 dev_dependencies:
   json_serializable: ^6.1.3
   build_runner: ^2.1.2
-  flutter_lints: ^1.0.0
+  flutter_lints: ^2.0.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -44,8 +44,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
     _items = widget.data.items!.reversed.toList();
     final viewModeState = providerContainer.read(clientViewModeStateProvider).state;
 
-    return Consumer(builder: (context, watch, child) {
-      final historyState = watch(clientHistoryStateProvider).state;
+    return Consumer(builder: (context, ref, child) {
+      final historyState = ref.watch(clientHistoryStateProvider).state;
 
       return Container(
         width: MediaQuery.of(popupContext!).size.width - 200,
@@ -114,6 +114,8 @@ class _HistoryDialogState extends State<HistoryDialog> {
                     ),
                     const SizedBox(width: 20),
                     TextButton(
+                      style: kButtonWhite,
+                      onPressed: _handleExecuteClicked,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                         child: Text(
@@ -121,8 +123,6 @@ class _HistoryDialogState extends State<HistoryDialog> {
                           style: kStyle.kTextBig.copyWith(color: kColorPrimaryLighter, fontWeight: FontWeight.bold),
                         ),
                       ),
-                      style: kButtonWhite,
-                      onPressed: _handleExecuteClicked,
                     ),
                     const SizedBox(width: 10),
                   ],

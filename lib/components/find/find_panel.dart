@@ -49,9 +49,10 @@ class _FindPanelState extends State<FindPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(builder: (context, watch, child) {
-      final settings = watch(clientFindStateProvider).state.settings;
-      final results = watch(clientFindStateProvider).state.getResults();
+    return Consumer(builder: (context, ref, child) {
+      final settings = ref.watch(clientFindStateProvider).state.settings;
+      final results = ref.watch(clientFindStateProvider).state.getResults();
+      ref.watch(styleStateProvider);
       _findTextController.text = settings.text ?? '';
       _preselectFindText();
 
@@ -89,8 +90,9 @@ class _FindPanelState extends State<FindPanel> {
                 TooltipWrapper(
                   message: Loc.get.findTooltip,
                   child: IconButtonTransparent(
+                    size: 35 * kScale,
                     icon: Icon(
-                      FontAwesomeIcons.search,
+                      FontAwesomeIcons.magnifyingGlass,
                       color: kColorAccentBlue,
                       size: 20 * kScale,
                     ),
@@ -101,7 +103,7 @@ class _FindPanelState extends State<FindPanel> {
                 TooltipWrapper(
                   message: Loc.get.findIdTooltip,
                   child: IconButtonTransparent(
-                    size: 37 * kStyle.globalScale,
+                    size: 37 * kScale,
                     onClick: _handleOnlyIdClick,
                     icon: FittedBox(
                       child: Text(
@@ -116,7 +118,7 @@ class _FindPanelState extends State<FindPanel> {
                 TooltipWrapper(
                   message: Loc.get.findCaseSensitiveTooltip,
                   child: IconButtonTransparent(
-                    size: 37 * kStyle.globalScale,
+                    size: 37 * kScale,
                     onClick: _handleCaseSensitiveClick,
                     icon: FittedBox(
                       child: Text(
@@ -132,7 +134,7 @@ class _FindPanelState extends State<FindPanel> {
                 TooltipWrapper(
                   message: Loc.get.findFullWordsTooltip,
                   child: IconButtonTransparent(
-                    size: 37 * kStyle.globalScale,
+                    size: 37 * kScale,
                     onClick: _handleWordClick,
                     icon: FittedBox(
                       child: Text(
@@ -147,7 +149,7 @@ class _FindPanelState extends State<FindPanel> {
                 TooltipWrapper(
                   message: Loc.get.findRegexTooltip,
                   child: IconButtonTransparent(
-                    size: 37 * kStyle.globalScale,
+                    size: 37 * kScale,
                     onClick: _handleRegexClick,
                     icon: FittedBox(
                       child: Text(
@@ -163,8 +165,9 @@ class _FindPanelState extends State<FindPanel> {
                 TooltipWrapper(
                   message: Loc.get.findCloseTooltip,
                   child: IconButtonTransparent(
+                    size: 35 * kScale,
                     icon: Icon(
-                      FontAwesomeIcons.times,
+                      FontAwesomeIcons.xmark,
                       color: kColorPrimaryLight,
                       size: 20 * kScale,
                     ),

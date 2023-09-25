@@ -112,6 +112,7 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
               SizedBox(
                 width: 36 * kScale,
                 child: IconButtonTransparent(
+                  size: 35 * kScale,
                   icon: const IconPlus(),
                   onClick: _handleAddRow,
                 ),
@@ -121,7 +122,7 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
         ),
         Expanded(
           child: Theme(
-            data: kStyle.kReorderableListThemeInvisibleScrollbars,
+            data: kStyle.kReorderableListTheme,
             child: ScrollConfiguration(
               behavior: kScrollDraggable,
               child: ReorderableListView.builder(
@@ -131,7 +132,7 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
                 itemBuilder: (context, index) {
                   return Consumer(
                     key: ValueKey(index),
-                    builder: (context, watch, child) {
+                    builder: (context, ref, child) {
                       return SizedBox(
                         height: kStyle.kDataTableInlineRowHeight,
                         child: Padding(
@@ -157,12 +158,11 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
                                   ),
                                 ),
                               ),
-                              if (watch(clientViewModeStateProvider).state.actionsMode) ...[
+                              if (ref.watch(clientViewModeStateProvider).state.actionsMode) ...[
                                 DeleteButton(
                                   onAction: () => _handleDeleteItem(index),
                                   size: 14 * kScale,
                                   width: 25 * kScale,
-                                  color: kColorPrimaryLight,
                                   tooltipText: Loc.get.delete,
                                 ),
                               ],

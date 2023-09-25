@@ -10,8 +10,8 @@ class ShortcutsView extends ConsumerWidget {
   const ShortcutsView({Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    watch(styleStateProvider);
+  Widget build(context, ref) {
+    ref.watch(styleStateProvider);
 
     final items = GlobalShortcuts.getIntents().entries.toList();
 

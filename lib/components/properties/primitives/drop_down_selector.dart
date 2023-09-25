@@ -2,10 +2,11 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/tooltip_wrapper.dart';
-import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/state/style_state.dart';
+
+import '../../../consts/consts.dart';
 
 class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
   final String label;
@@ -36,14 +37,7 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
     return SizedBox(
       height: kStyle.kTableTopRowHeight,
       child: DropdownSearch<T?>(
-        dropdownButtonBuilder: (context) => SizedBox(
-          width: 20 * kStyle.globalScale,
-          child: Icon(
-            FontAwesomeIcons.caretDown,
-            color: kTextColorLight,
-            size: 15 * kStyle.globalScale,
-          ),
-        ),
+        items: items,
         dropdownBuilder: (context, selectedItem) {
           return TooltipWrapper(
             message: (selectedItem is IDescribable) ? (selectedItem as IDescribable).description : null,
@@ -54,56 +48,65 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
             ),
           );
         },
-        scrollbarProps: ScrollbarProps(isAlwaysShown: false),
-        maxHeight: kStyle.dropDownSelectorHeight,
-        dropdownSearchDecoration: (inputDecoration ?? kStyle.kInputTextStyleProperties)
-            .copyWith(labelText: (selectedItem == null ? nullValueLabel : null) ?? label, hintText: ''), // actual view style
-        dropdownSearchBaseStyle: kStyle.kTextExtraSmallLightest,
-        searchFieldProps: TextFieldProps(
-          decoration: kStyle.kInputTextStylePropertiesDropDownSearch.copyWith(hintText: Loc.get.dropDownSearchHint),
-          autofocus: true,
-        ),
-        searchDelay: Duration.zero,
-        showSelectedItems: true,
-        showAsSuffixIcons: true,
-        popupElevation: 0,
-        mode: Mode.MENU,
-        showSearchBox: true,
-        items: items,
-        emptyBuilder: (context, searchEntry) => Center(
-          child: Text(
-            Loc.get.emptyDropDownList,
-            style: kStyle.kTextExtraSmall,
+        popupProps: PopupProps.menu(
+          fit: FlexFit.loose,
+          constraints: BoxConstraints.loose(const Size.fromHeight(1000)),
+          disabledItemFn: (i) => !_isEnabled(i),
+          menuProps: const MenuProps(
+            elevation: 0,
+            barrierColor: kColorPrimaryLightTransparent2,
+            backgroundColor: kColorAccentBlue2,
+          ),
+          itemBuilder: (context, item, isSelected) {
+            final enabled = _isEnabled(item);
+            return TooltipWrapper(
+              message: (item is IDescribable) ? (item as IDescribable).description : null,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 5 * kScale, vertical: 2 * kScale),
+                child: Text(
+                  item?.id ?? Loc.get.nullValue,
+                  maxLines: 1,
+                  style: isSelected ? kStyle.kTextExtraSmallSelected : (enabled ? kStyle.kTextExtraSmall : kStyle.kTextExtraSmallInactive),
+                ),
+              ),
+            );
+          },
+          searchDelay: Duration.zero,
+          showSelectedItems: true,
+          showSearchBox: true,
+          searchFieldProps: TextFieldProps(
+            style: kStyle.kTextExtraSmallLightest,
+            decoration: kStyle.kInputTextStylePropertiesDropDownSearch.copyWith(hintText: Loc.get.dropDownSearchHint),
+            autofocus: true,
+          ),
+          emptyBuilder: (context, searchEntry) => Center(
+            child: Text(
+              Loc.get.emptyDropDownList,
+              style: kStyle.kTextExtraSmall,
+            ),
           ),
         ),
+        dropdownButtonProps: DropdownButtonProps(
+          color: kColorPrimaryLight,
+          padding: EdgeInsets.zero,
+          iconSize: 15 * kScale,
+          constraints: BoxConstraints.tightFor(width: 35 * kScale, height: 25),
+          splashRadius: 20 * kScale,
+          icon: const Icon(FontAwesomeIcons.caretDown),
+        ),
+        dropdownDecoratorProps: DropDownDecoratorProps(
+          dropdownSearchDecoration: (inputDecoration ?? kStyle.kInputTextStyleProperties)
+              .copyWith(labelText: (selectedItem == null ? nullValueLabel : null) ?? label, hintText: ''),
+        ),
+/*      maxHeight: kStyle.dropDownSelectorHeight, */
+/*      showAsSuffixIcons: true,*/
         compareFn: (a, b) => a == b,
-        popupBarrierColor: kColorPrimaryLightTransparent2,
-        popupBackgroundColor: kColorAccentBlue2,
-        popupItemDisabled: (e) => !_isEnabled(e),
-        popupItemBuilder: (context, item, isSelected) {
-          final enabled = _isEnabled(item);
-          return TooltipWrapper(
-            message: (item is IDescribable) ? (item as IDescribable).description : null,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 5 * kScale, vertical: 2 * kScale),
-              child: Text(
-                item?.id ?? Loc.get.nullValue,
-                maxLines: 1,
-                style: isSelected ? kStyle.kTextExtraSmallSelected : (enabled ? kStyle.kTextExtraSmall : kStyle.kTextExtraSmallInactive),
-              ),
-            ),
-          );
-        },
-        clearButton: Icon(
+/*      clearButton: Icon(
           FontAwesomeIcons.times,
           color: kColorPrimaryLight,
           size: 15 * kScale,
         ),
-        dropDownButton: Icon(
-          FontAwesomeIcons.caretDown,
-          color: kColorPrimaryLight,
-          size: 15 * kScale,
-        ),
+        */
         onChanged: onValueChanged,
         selectedItem: selectedItem,
         itemAsString: _getItemName,

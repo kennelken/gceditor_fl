@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:gceditor/consts/config.dart';
@@ -324,7 +323,7 @@ abstract class BaseCommandRequest<T> extends BaseCommand implements IBaseCommand
 
   @override
   List<int> getPayload() {
-    final jsonText = Config.streamJsonOptions.convert(payload == null ? '' : toJson(payload!));
+    final jsonText = Config.streamJsonOptions.convert(payload == null ? '' : toJson(payload as T));
     return utf8.encode(jsonText);
   }
 
@@ -356,7 +355,7 @@ abstract class BaseCommandResponse<T> extends BaseCommand implements IBaseComman
 
   @override
   List<int> getPayload() {
-    final jsonText = Config.streamJsonOptions.convert(payload == null ? '' : toJson(payload!));
+    final jsonText = Config.streamJsonOptions.convert(payload == null ? '' : toJson(payload as T));
     return utf8.encode(jsonText);
   }
 

@@ -30,18 +30,18 @@ class TableMetaTablePropertiesViewProperties extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    final model = watch(clientStateProvider).state.model;
+  Widget build(context, ref) {
+    final model = ref.watch(clientStateProvider).state.model;
     final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
       MetaValueCoordinates(tableId: data.id),
-      watch(clientFindStateProvider).state,
-      watch(clientNavigationServiceProvider).state,
+      ref.watch(clientFindStateProvider).state,
+      ref.watch(clientNavigationServiceProvider).state,
     );
 
     final parentInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
       MetaValueCoordinates(tableId: data.id, parentClass: data.classId.isEmpty ? null : data.classId),
-      watch(clientFindStateProvider).state,
-      watch(clientNavigationServiceProvider).state,
+      ref.watch(clientFindStateProvider).state,
+      ref.watch(clientNavigationServiceProvider).state,
     );
 
     return ClassMetaPropertiesContainer(

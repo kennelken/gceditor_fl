@@ -65,7 +65,7 @@ class StyleState {
   ThemeData kInputThemeLight = ThemeData();
 
   // ignore: prefer_function_declarations_over_variables
-  Widget Function(Checkbox checkbox) wrapCheckbox = (_) => _;
+  Widget Function(Checkbox checkbox) wrapCheckbox = (_) => _; //for assigning it later
 
   StyleState();
 
@@ -162,8 +162,6 @@ class StyleStateNotifier extends ChangeNotifier {
     state.kTableTopRowHeight = 32.0 * state.globalScale; // means a row of home layout
 
     state.kAppTheme = ThemeData(
-      toggleableActiveColor: kColorAccentBlue,
-      backgroundColor: kColorBackground,
       dialogBackgroundColor: kColorBackground,
       scaffoldBackgroundColor: kColorBackground,
       inputDecorationTheme: InputDecorationTheme(
@@ -186,12 +184,13 @@ class StyleStateNotifier extends ChangeNotifier {
         selectionHandleColor: Colors.red,
       ),
       textTheme: TextTheme(
-        subtitle1: state.kTextExtraSmallLightest,
+        titleMedium: state.kTextExtraSmallLightest,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.all(4 * state.globalScale),
-          primary: kColorAccentBlue,
+          backgroundColor: kColorAccentBlue,
+          foregroundColor: kColorAccentBlue,
           textStyle: state.kTextBig,
           shape: const RoundedRectangleBorder(borderRadius: kCardBorder),
         ),
@@ -199,7 +198,7 @@ class StyleStateNotifier extends ChangeNotifier {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           padding: EdgeInsets.all(4 * state.globalScale),
-          primary: kColorTextButton,
+          foregroundColor: kColorTextButton,
           textStyle: state.kTextBig,
           shape: const RoundedRectangleBorder(borderRadius: kCardBorder),
           backgroundColor: kColorButtonActive,
@@ -208,24 +207,25 @@ class StyleStateNotifier extends ChangeNotifier {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           padding: EdgeInsets.all(4 * state.globalScale),
-          primary: kColorTextButton,
+          foregroundColor: kColorTextButton,
           textStyle: state.kTextBig,
           shape: const RoundedRectangleBorder(borderRadius: kCardBorder),
           backgroundColor: kColorButtonActive,
         ),
       ),
-      colorScheme: ColorScheme.fromSwatch(primarySwatch: kColorPrimary).copyWith(secondary: kColorSecondary),
       scrollbarTheme: ScrollbarThemeData(
         thickness: MaterialStateProperty.all(8.0 * state.globalScale),
-        //thumbColor: MaterialStateProperty.all(kTextColorLightHalfTransparent),
+        thumbColor: MaterialStateProperty.resolveWith(scrollbarThumbColor),
         //trackColor: MaterialStateProperty.all(kTextColorLightHalfTransparent),
-        isAlwaysShown: true,
+        thumbVisibility: MaterialStateProperty.all(true),
         interactive: true,
-        showTrackOnHover: true,
+        trackVisibility: MaterialStateProperty.all(true),
       ),
       checkboxTheme: const CheckboxThemeData(
         side: BorderSide(color: kColorAccentBlue),
+        fillColor: MaterialStatePropertyAll(kColorAccentBlue),
       ),
+      colorScheme: ColorScheme.fromSwatch(primarySwatch: kColorPrimary).copyWith(secondary: kColorSecondary, background: kColorBackground),
     );
 
     state.kInputThemeLight = state.kAppTheme.copyWith(
@@ -246,13 +246,13 @@ class StyleStateNotifier extends ChangeNotifier {
         contentPadding: const EdgeInsets.symmetric(horizontal: 3, vertical: 10),
       ),
       textTheme: TextTheme(
-        subtitle1: kStyle.kTextExtraSmall.copyWith(
+        titleMedium: kStyle.kTextExtraSmall.copyWith(
           color: kColorPrimaryDarker,
         ),
-        bodyText1: kStyle.kTextExtraSmall.copyWith(
+        bodyLarge: kStyle.kTextExtraSmall.copyWith(
           color: kColorPrimaryDarker,
         ),
-        bodyText2: kStyle.kTextExtraSmall.copyWith(
+        bodyMedium: kStyle.kTextExtraSmall.copyWith(
           color: kColorPrimaryDarker,
         ),
       ),
@@ -276,7 +276,7 @@ class StyleStateNotifier extends ChangeNotifier {
 
     state.kReorderableListThemeInvisibleScrollbars = state.kReorderableListTheme.copyWith(
       scrollbarTheme: state.kAppTheme.scrollbarTheme.copyWith(
-        isAlwaysShown: false,
+        thumbVisibility: MaterialStateProperty.all(false),
       ),
     );
 
@@ -343,5 +343,13 @@ class StyleStateNotifier extends ChangeNotifier {
     state.kLabelPadding = 5 * kScale;
 
     notifyListeners();
+  }
+
+  Color? scrollbarThumbColor(Set<MaterialState> states) {
+    if (states.contains(MaterialState.dragged)) //
+      return const Color.fromARGB(200, 0, 0, 0);
+    if (states.contains(MaterialState.hovered)) //
+      return const Color.fromARGB(110, 0, 0, 0);
+    return const Color.fromARGB(50, 0, 0, 0);
   }
 }
