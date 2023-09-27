@@ -14,5 +14,3 @@
 		Cell: {"x": "10", "y":"SomeTableRowId.SomeColumnName"}
 
 35. replace MenuBar with PlatformMenuBar when there are implementations for windows and linux
-
-37. set devaultValue to "" as changing a column type

@@ -143,14 +143,14 @@ class DbModelFactory {
     return ClassMetaFieldDescription()
       ..id = id
       ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.int)
-      ..defaultValue = defaultValue?.toString() ?? '0';
+      ..defaultValue = defaultValue?.toString() ?? '';
   }
 
   static ClassMetaFieldDescription fieldFloat(String id, {double? defaultValue}) {
     return ClassMetaFieldDescription()
       ..id = id
       ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.float)
-      ..defaultValue = defaultValue?.toString() ?? '0';
+      ..defaultValue = defaultValue?.toString() ?? '';
   }
 
   static ClassMetaFieldDescription fieldRefClass(String id, String classId, {String? defaultValue}) {
