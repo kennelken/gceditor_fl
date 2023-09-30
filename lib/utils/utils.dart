@@ -171,6 +171,15 @@ class ValueChange<T> {
 }
 
 typedef ReturnBool = bool Function();
+typedef Func0<TOut> = TOut Function();
+typedef Func1<T1, TOut> = TOut Function(T1 param1);
+typedef Func2<T1, T2, TOut> = TOut Function(T1 param1, T2 param2);
+typedef Func3<T1, T2, T3, TOut> = TOut Function(T1 param1, T2 param2, T3 param3);
+typedef Func4<T1, T2, T3, T4, TOut> = TOut Function(T1 param1, T2 param2, T3 param3, T4 param4);
+typedef Action1<T1> = void Function(T1 param1);
+typedef Action2<T1, T2> = void Function(T1 param1, T2 param2);
+typedef Action3<T1, T2, T3> = void Function(T1 param1, T2 param2, T3 param3);
+typedef Action4<T1, T2, T3, T4> = void Function(T1 param1, T2 param2, T3 param3, T4 param4);
 
 extension StringFormatExtension on String {
   String format(Map<String, dynamic> parameters) => Utils.pasteParameters(this, parameters);
@@ -533,5 +542,11 @@ extension Chaining on Object {
       return this as T;
     }
     return null;
+  }
+}
+
+extension ChainingT<T> on T {
+  TOut as<TOut>(Func1<T, TOut> func) {
+    return func(this);
   }
 }

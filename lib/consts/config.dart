@@ -56,8 +56,8 @@ class Config {
   static const bool defaultHistoryExpanded = false;
   static const double defaultGlobalScale = 0.85;
   static const double globalScaleStep = 1.1;
-  static final double minGlobalScale = pow(globalScaleStep, -5).toDouble();
-  static final double maxGlobalScale = pow(globalScaleStep, 9).toDouble();
+  static final double minGlobalScale = pow(globalScaleStep, -6).toDouble();
+  static final double maxGlobalScale = pow(globalScaleStep, 6).toDouble();
   static const int dbCmdBufferLength = 50; // must be >= 1
   static const double defaultSaveDelay = 2.0;
   static const double maxSaveDelay = 60.0;

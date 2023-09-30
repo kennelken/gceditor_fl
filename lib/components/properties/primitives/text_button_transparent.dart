@@ -13,22 +13,18 @@ class TextButtonTransparent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 35 * kScale,
-      child: MaterialButton(
-        minWidth: 0,
-        elevation: 0,
-        focusElevation: 0,
-        hoverElevation: 0,
-        highlightElevation: 0,
-        shape: const Border(),
-        color: kColorTransparent,
-        onPressed: onClick,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-          child: child,
-        ),
-      ),
+    return MaterialButton(
+      height: 35,
+      minWidth: 0,
+      elevation: 0,
+      focusElevation: 0,
+      hoverElevation: 0,
+      highlightElevation: 0,
+      shape: const Border(),
+      color: kColorTransparent,
+      onPressed: onClick,
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+      child: child,
     );
   }
 }

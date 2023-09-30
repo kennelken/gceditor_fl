@@ -95,7 +95,7 @@ class StyleStateNotifier extends ChangeNotifier {
       fontSize: 20 * state.globalScale,
       color: kTextColorLight,
       fontFamily: 'JetbrainsMono',
-      overflow: TextOverflow.clip,
+      overflow: TextOverflow.ellipsis,
       fontWeight: FontWeight.w300,
     );
     state.kDefaultText = state.kTextRegular;

@@ -59,10 +59,11 @@ class PopupMessages {
         style: kStyle.kTextSmall.copyWith(color: message.color),
         maxLines: 6,
       ),
-      duration: message.duration ?? const Duration(milliseconds: 1200),
+      duration: message.duration ?? Duration(milliseconds: (1000 / (_messagesQueue.length + 1)).round()),
       flushbarStyle: FlushbarStyle.FLOATING,
       backgroundColor: kColorPrimaryDarker.withAlpha(200),
       messageColor: message.color ?? kTextColorDark,
+      animationDuration: const Duration(milliseconds: 150),
     ).show(popupContext!);
 
     _occupiedSlots.remove(slot);

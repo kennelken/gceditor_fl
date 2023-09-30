@@ -118,20 +118,21 @@ class TreeNodeTile extends ConsumerWidget {
                           child: Row(
                             children: [
                               _getIcon(nodeScope.node.data as IIdentifiable),
-                              Text(
-                                nodeScope.node.label,
-                                style: isSelected ? kStyle.kTextExtraSmallSelected : kStyle.kTextExtraSmall,
-                                maxLines: 1,
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: Text(
+                                  nodeScope.node.label,
+                                  style: isSelected ? kStyle.kTextExtraSmallSelected : kStyle.kTextExtraSmall,
+                                  maxLines: 1,
+                                ),
                               ),
                               if (nodeScope.node.data is IMetaGroup) ...[
                                 const SizedBox(width: 5),
-                                Expanded(
-                                  child: Text(
-                                    '(${nodeScope.node.children.length})',
-                                    style: kStyle.kTextExtraSmallInactive,
-                                    textAlign: TextAlign.left,
-                                    maxLines: 1,
-                                  ),
+                                Text(
+                                  '(${nodeScope.node.children.length})',
+                                  style: kStyle.kTextExtraSmallInactive,
+                                  textAlign: TextAlign.left,
+                                  maxLines: 1,
                                 )
                               ],
                             ],

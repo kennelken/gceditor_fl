@@ -84,9 +84,10 @@ class TablePropertiesView extends ConsumerWidget {
                             child: Text(
                               selectedClassName,
                               textAlign: TextAlign.left,
+                              softWrap: false,
                               style: kStyle.kTextSmall,
                               maxLines: 1,
-                              overflow: TextOverflow.clip,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ),

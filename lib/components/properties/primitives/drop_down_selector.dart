@@ -45,6 +45,7 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
               _getItemName(selectedItem),
               style: kStyle.kTextExtraSmall,
               maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           );
         },

@@ -40,7 +40,7 @@ class DataTableHeader extends ConsumerWidget {
             Loc.get.noTableSelected,
             style: kStyle.kTextSmall,
             maxLines: 1,
-            overflow: TextOverflow.clip,
+            overflow: TextOverflow.ellipsis,
           )
         ],
         if (hasSelection) ...[
@@ -54,7 +54,7 @@ class DataTableHeader extends ConsumerWidget {
                     ? kStyle.kTextExtraSmallSelected
                     : kStyle.kTextExtraSmall,
                 maxLines: 1,
-                overflow: TextOverflow.clip,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
@@ -147,7 +147,7 @@ class DataTableHeader extends ConsumerWidget {
               currentClass.id,
               style: currentClass == selectedEntity ? kStyle.kTextExtraSmallSelected : kStyle.kTextExtraSmall,
               maxLines: 1,
-              overflow: TextOverflow.clip,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),

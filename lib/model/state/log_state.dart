@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/model/model_root.dart';
+import 'package:gceditor/utils/scheduler.dart';
 
 final logStateProvider = ChangeNotifierProvider((_) => LogStateNotifier(LogState())..setLoggingLevel(Config.loggingLevel));
 
@@ -33,10 +34,11 @@ class LogStateNotifier extends ChangeNotifier {
     state.messages.add(entry);
     print('${entry.level}: ${entry.message}');
 
-    if (!silent) //
-      notifyListeners();
-
     state.onLog.add(entry);
+
+    if (!silent) {
+      Scheduler.addPostFrameCallback(this, (d) => notifyListeners);
+    }
   }
 
   void toggleVisible(bool? visible) {

@@ -44,9 +44,13 @@ class _PropertyBoolViewState extends State<PropertyBoolView> {
               onChanged: _handleValueChanged,
             ),
           ),
-          Text(
-            widget.title,
-            style: kStyle.kTextExtraSmallPropertyHeader,
+          Expanded(
+            child: Text(
+              widget.title,
+              style: kStyle.kTextExtraSmallPropertyHeader,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),

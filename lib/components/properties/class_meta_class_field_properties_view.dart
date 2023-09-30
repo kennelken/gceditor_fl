@@ -115,13 +115,20 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
           Row(
             children: [
               Text(Loc.get.fieldOwnerClass, style: kStyle.kTextExtraSmall),
-              TextButtonTransparent(
-                onClick: _handleParentClassClick,
-                child: Text(
-                  entity.id,
-                  style: kStyle.kTextExtraSmallSelected,
-                  maxLines: 1,
-                  overflow: TextOverflow.clip,
+              const SizedBox(
+                width: 5,
+              ),
+              Flexible(
+                fit: FlexFit.loose,
+                child: TextButtonTransparent(
+                  onClick: _handleParentClassClick,
+                  child: Text(
+                    entity.id,
+                    style: kStyle.kTextExtraSmallSelected,
+                    maxLines: 1,
+                    textAlign: TextAlign.left,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
             ],

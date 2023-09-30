@@ -344,21 +344,25 @@ class TableView extends ConsumerWidget {
                         Loc.get.historyTitle,
                         style: kStyle.kTextSmall,
                       ),
-                      SizedBox(width: 25 * kScale),
+                      SizedBox(width: 10 * kScale),
                       if (historyState.currentTag != null) ...[
-                        Text(
-                          '#${historyState.currentTag}',
-                          style: kStyle.kTextExtraSmallInactive,
+                        Expanded(
+                          child: Text(
+                            '#${historyState.currentTag}',
+                            style: kStyle.kTextExtraSmallInactive,
+                          ),
                         ),
-                        SizedBox(width: 25 * kScale),
                       ],
-                      Expanded(
+                      if (historyState.currentTag == null) ...[
+                        const Expanded(child: SizedBox()),
+                      ],
+                      /* Expanded(
                         child: Text(
                           Loc.get.historyItemsCount(historyState.items.length),
                           style: kStyle.kTextExtraSmallInactive,
                           maxLines: 1,
                         ),
-                      ),
+                      ), */
                       TooltipWrapper(
                         message: Loc.get.historyRefreshTooltip,
                         child: IconButtonTransparent(
