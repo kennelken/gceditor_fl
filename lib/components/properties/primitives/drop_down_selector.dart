@@ -51,6 +51,10 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
         },
         popupProps: PopupProps.menu(
           fit: FlexFit.loose,
+          containerBuilder: (context, popupWidget) => Padding(
+            padding: EdgeInsets.only(bottom: 5 * kScale),
+            child: popupWidget,
+          ),
           constraints: BoxConstraints.loose(const Size.fromHeight(1000)),
           disabledItemFn: (i) => !_isEnabled(i),
           menuProps: const MenuProps(
@@ -80,10 +84,15 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
             decoration: kStyle.kInputTextStylePropertiesDropDownSearch.copyWith(hintText: Loc.get.dropDownSearchHint),
             autofocus: true,
           ),
-          emptyBuilder: (context, searchEntry) => Center(
-            child: Text(
-              Loc.get.emptyDropDownList,
-              style: kStyle.kTextExtraSmall,
+          emptyBuilder: (context, searchEntry) => SizedBox(
+            width: 9999,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 10 * kScale),
+              child: Text(
+                Loc.get.emptyDropDownList,
+                style: kStyle.kTextExtraSmall,
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
         ),
