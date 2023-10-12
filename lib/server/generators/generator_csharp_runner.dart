@@ -1557,11 +1557,7 @@ using Rectangle = System.Drawing.RectangleF;
 
         private static bool ParseBool(object value)
         {
-#if NET6_0_OR_GREATER
-            return ((JsonElement)value).GetBoolean();
-#else
-            return Convert.ToInt32(value, CultureInfo.InvariantCulture) == 1;
-#endif
+            return ParseInt(value) == 1;
         }
 
         private static int ParseInt(object value)
