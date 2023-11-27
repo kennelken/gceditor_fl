@@ -1038,6 +1038,17 @@ using Rectangle = System.Drawing.RectangleF;
             return items as List<T>;
         }
 
+
+        public IList GetAll(Type type)
+        {
+            if (!AllItemsByType.TryGetValue(type, out var items))
+            {
+                items = _emptyCollectionFactory.List(type);
+                AllItemsByType[type] = items;
+            }
+            return items as IList;
+        }
+
         /// <summary>
         /// Supposed to be called only once when the model is parsed
         /// </summary>
@@ -1127,6 +1138,18 @@ using Rectangle = System.Drawing.RectangleF;
             return list as List<T>;
         }
 
+        public IList List(Type type)
+        {
+            if (!_lists.TryGetValue(type, out var list))
+            {
+                var genericListType = typeof(List<>);
+                var concreteListType = genericListType.MakeGenericType(type);
+
+                list = Activator.CreateInstance(concreteListType, Array.Empty<object>());
+                _lists[type] = list;
+            }
+            return list as IList;
+        }
 
         private Dictionary<Type, object> _hashsets = new Dictionary<Type, object>();
         public HashSet<T> HashSet<T>()
