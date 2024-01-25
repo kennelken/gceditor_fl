@@ -387,7 +387,7 @@ class DbModelCache {
     }
 
     for (final classEnum in _allEnums!) {
-      if (_availableReferenceValues![classEnum.id] == null) //
+      if (_availableReferenceValues![classEnum] == null) //
         _availableReferenceValues![classEnum] = <IIdentifiable>[];
 
       for (final enumValue in classEnum.values) {
