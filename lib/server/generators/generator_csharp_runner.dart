@@ -1038,6 +1038,17 @@ using Rectangle = System.Drawing.RectangleF;
             return items as List<T>;
         }
 
+
+        public IList GetAll(Type type)
+        {
+            if (!AllItemsByType.TryGetValue(type, out var items))
+            {
+                items = _emptyCollectionFactory.List(type);
+                AllItemsByType[type] = items;
+            }
+            return items as IList;
+        }
+
         /// <summary>
         /// Supposed to be called only once when the model is parsed
         /// </summary>
@@ -1127,6 +1138,18 @@ using Rectangle = System.Drawing.RectangleF;
             return list as List<T>;
         }
 
+        public IList List(Type type)
+        {
+            if (!_lists.TryGetValue(type, out var list))
+            {
+                var genericListType = typeof(List<>);
+                var concreteListType = genericListType.MakeGenericType(type);
+
+                list = Activator.CreateInstance(concreteListType, Array.Empty<object>());
+                _lists[type] = list;
+            }
+            return list as IList;
+        }
 
         private Dictionary<Type, object> _hashsets = new Dictionary<Type, object>();
         public HashSet<T> HashSet<T>()
@@ -1557,11 +1580,7 @@ using Rectangle = System.Drawing.RectangleF;
 
         private static bool ParseBool(object value)
         {
-#if NET6_0_OR_GREATER
-            return ((JsonElement)value).GetBoolean();
-#else
-            return Convert.ToInt32(value, CultureInfo.InvariantCulture) == 1;
-#endif
+            return ParseInt(value) == 1;
         }
 
         private static int ParseInt(object value)
@@ -1925,71 +1944,98 @@ using Rectangle = System.Drawing.RectangleF;
     {
         private Dictionary<object, object> _caches = new Dictionary<object, object>();
 
-        public LazyCache<TKey, TValue> Get<TKey, TValue>(object key, Func<TKey, TValue> getCache, Action<LazyCache<TKey, TValue>> onCreated = null)
+        public CacheRootItem<TKey, TValue> Get<TKey, TValue>(object key, Func<TKey, TValue> getCache, Action<CacheRootItem<TKey, TValue>> onCreated = null)
         {
             if (!_caches.TryGetValue(key, out var result))
             {
-                var res = new LazyCache<TKey, TValue>(getCache);
+                var res = new CacheRootItem<TKey, TValue>(getCache);
                 onCreated?.Invoke(res);
                 _caches[key] = res;
                 result = res;
             }
-            return result as LazyCache<TKey, TValue>;
+            return result as CacheRootItem<TKey, TValue>;
         }
     }
 
-    public class LazyCache<TKey, TValue>
+    public class CacheRootItem<TKey, TValue>
     {
         private readonly Dictionary<TKey, TValue> _values = new();
-        private readonly HashSet<TKey> _warmupKeys = new();
         private readonly Func<TKey, TValue> _getValue;
 
-        public LazyCache(Func<TKey, TValue> getValue)
+        private Func<ICollection<TKey>> _warmupKeys;
+        private bool _warmedup;
+
+        private Action _populateFunction;
+        private bool _populated;
+
+        public CacheRootItem(Func<TKey, TValue> getValue)
         {
             _getValue = getValue;
         }
 
-        public LazyCache<TKey, TValue> WithWarmup(ICollection<TKey> keys, bool now = false)
+        public CacheRootItem<TKey, TValue> WithWarmup(Func<ICollection<TKey>> keys, bool now = false)
         {
-            foreach (var key in keys)
-            {
-                if (_values.ContainsKey(key))
-                  continue;
-
-                _warmupKeys.Add(key);
-            }
+            _warmedup = false;
+            _warmupKeys = keys;
 
             if (now)
             {
-                Warmup();
+                WarmupIfNeeded();
             }
 
             return this;
         }
 
-        private void Warmup()
+        public CacheRootItem<TKey, TValue> WithPopulate<TPopulate>(Func<ICollection<TPopulate>> source, Func<TPopulate, TKey> key, Func<TPopulate, TValue> value, bool now = false)
         {
-            if (_warmupKeys == null)
-               return;
+            _populated = false;
+            _populateFunction = () =>
+            {
+                foreach (var src in source.Invoke())
+                {
+                    _values[key(src)] = value(src);
+                }
+            };
 
-            foreach (var key in _warmupKeys)
+            if (now)
+            {
+                PopulateIfNeeded();
+            }
+            return this;
+        }
+
+        private void WarmupIfNeeded()
+        {
+            if (_warmupKeys == null || _warmedup)
+                return;
+
+            foreach (var key in _warmupKeys.Invoke())
             {
                 DoGet(key);
             }
-            _warmupKeys.Clear();
+            _warmedup = true;
+        }
+
+        private void PopulateIfNeeded()
+        {
+            if (_populateFunction == null || _populated)
+                return;
+
+            _populateFunction.Invoke();
+            _populated = true;
         }
 
         public TValue this[TKey key] => Get(key);
 
         public TValue Get(TKey key)
         {
-            if (_warmupKeys.Count > 0)
-                Warmup();
+            PopulateIfNeeded();
+            WarmupIfNeeded();
 
             return DoGet(key);
         }
 
-        private TValue DoGet(TKey key)
+        protected TValue DoGet(TKey key)
         {
             if (!_values.TryGetValue(key, out var value))
             {
@@ -1999,10 +2045,17 @@ using Rectangle = System.Drawing.RectangleF;
             return value;
         }
 
-        public void Clear()
+        public void Clear(bool full = false)
         {
             _values.Clear();
-            _warmupKeys.Clear();
+            _warmedup = false;
+            _populated = false;
+
+            if (full)
+            {
+                _warmupKeys = null;
+                _populateFunction = null;
+            }
         }
     }
 #endregion''';
