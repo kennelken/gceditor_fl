@@ -27,6 +27,7 @@ BuildContext? get popupContext => navigatorKey.currentState?.overlay?.context;
 
 Future<void> main([List<String>? args]) async {
   mainArgs = args;
+
   StartupManager.instance.createNewLoginFlowIfRequired(
     () {
       final logHandler = LogStateReportHandler();

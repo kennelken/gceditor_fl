@@ -1,18 +1,13 @@
-19. fix renderbox overflow errors
-
-24. set colors for classes, tables, columns, rows (use as row color in color column)
-
-29. Navigation history and navigate back and forth alt+🡺, alt+🢀
-
-30. new column property: value checkers - a list of checkers (IChecker.validate(field, value)). Every checker should define its own unique properties.
-	Example of such checkers IntChecker, AllowedValuesChecker, BannedValuesChecker, DateChecker, ReferenceChecker, NotNullChecker.
-	Move "Is Unique" property there.
-
-34. new column type: formula. Allows to define a formula, that uses variables from a dictionary-like cell content.
-	Example:
-		Formula: {x} + {y}
-		Cell: {"x": "10", "y":"SomeTableRowId.SomeColumnName"}
-
-35. replace MenuBar with PlatformMenuBar when there are implementations for windows and linux
-
-36. remore false positive changes when it converts 0->0.0->0 in the model.json file
+- fix renderbox overflow errors
+- set colors for classes, tables, columns, rows (use as row color in color column)
+- Navigation history and navigate back and forth alt+🡺, alt+🢀
+- new column property: value checkers - a list of checkers (IChecker.validate(field, value)). Every checker should define its own unique properties.
+---- Example of such checkers IntChecker, AllowedValuesChecker, BannedValuesChecker, DateChecker, ReferenceChecker, NotNullChecker.
+---- Move "Is Unique" property there.
+- new column type: formula. Allows to define a formula, that uses variables from a dictionary-like cell content.
+---- Example:
+-------- Formula: {x} + {y}
+-------- Cell: {"x": "10", "y":"SomeTableRowId.SomeColumnName"}
+- replace MenuBar with PlatformMenuBar when there are implementations for windows and linux
+- remore false positive changes when it converts 0->0.0->0 in the model.json file
+- make the menubar dark
