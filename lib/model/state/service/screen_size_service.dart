@@ -4,6 +4,7 @@ import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/app_local_storage.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/log_state.dart';
+import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window_manager/window_manager.dart';
 
 final screenServiceProvider = ChangeNotifierProvider((_) => ScreenServiceNotifier(ScreenService()));
@@ -47,10 +48,10 @@ class ScreenService {
 
       _initialized = true;
 
-      final currenBounds = await windowManager.getBounds();
+      final displayList = await screenRetriever.getAllDisplays();
+      final intersections = displayList.map((d) => ((d.visiblePosition ?? const Offset(0, 0)) & d.size).intersect(savedWindowRect));
 
-      final intersection = currenBounds.intersect(savedWindowRect);
-      if (intersection.width > 50 && intersection.height > 50) {
+      if (intersections.any((e) => e.width > 50 && e.height > 50)) {
         windowManager.setBounds(savedWindowRect);
         return;
       }
