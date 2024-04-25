@@ -20,6 +20,7 @@ final MaterialColor kColorPrimary = Utils.createMaterialColor(const Color(0xff28
 const Color kColorPrimaryDarkest = Color(0xFF121418);
 const Color kColorPrimaryDarker2 = Color(0xFF1D2025);
 const Color kColorPrimaryDarker = Color(0xff21252b);
+const Color kColorPrimaryLightToDark = Color.fromARGB(255, 43, 47, 55);
 const Color kColorPrimaryLighter = Color(0xFF2E323B);
 const Color kColorPrimaryLighter2 = Color(0xFF3E4452);
 const Color kColorPrimaryLight = Color(0xFF979DAD);
@@ -92,6 +93,10 @@ final ButtonStyle kButtonBlue = ButtonStyle(
 final ButtonStyle kButtonContextMenu = ButtonStyle(
   backgroundColor: MaterialStateProperty.all(kColorPrimaryLighter2),
   foregroundColor: MaterialStateProperty.all(Colors.white),
+);
+final ButtonStyle kButtonContextMenuInactive = ButtonStyle(
+  backgroundColor: MaterialStateProperty.all(kColorPrimaryLighter2),
+  foregroundColor: MaterialStateProperty.all(kColorPrimaryLight),
 );
 final ButtonStyle kButtonTransparent = ButtonStyle(
   backgroundColor: MaterialStateProperty.all(kColorTransparent),

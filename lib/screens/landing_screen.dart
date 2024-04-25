@@ -21,7 +21,8 @@ import 'package:gceditor/model/state/server_history_state.dart';
 import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/screens/loading_screen.dart';
 import 'package:gceditor/server/net_commands.dart';
-import 'package:path/path.dart' as path;
+
+import '../model/state/landing_page_state.dart';
 
 class LandingScreen extends StatefulWidget {
   const LandingScreen({Key? key}) : super(key: key);
@@ -36,8 +37,8 @@ class LandingScreenState extends State<LandingScreen> {
   late final TextEditingController _projectPathTextController = TextEditingController();
   late final TextEditingController _outputPathTextController = TextEditingController();
 
-  String _projectPath = '';
-  String _outputPath = '';
+  String? _projectPath = '';
+  String? _outputPath = '';
 
   bool _initialValuesSet = false;
 
@@ -55,6 +56,8 @@ class LandingScreenState extends State<LandingScreen> {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, child) {
+        final projectPath = ref.watch(landingPageStateProvider).state.projectPath;
+        final outputPath = ref.watch(landingPageStateProvider).state.outputPath;
         final defaultFolder = ref.watch(appStateProvider).state.defaultProjectFolder;
         final defaultFolderPath = defaultFolder?.path ?? '';
         final openPort = ref.watch(networkStateProvider.notifier).state.openPort?.toString() ?? Config.portMin.toString();
@@ -66,14 +69,8 @@ class LandingScreenState extends State<LandingScreen> {
           final preferredPort = appState.port?.toString() ?? (AppLocalStorage.instance.port ?? openPort).toString();
           final preferredIpAddress = appState.ipAddress ?? (AppLocalStorage.instance.ipAddress ?? Config.defaultIp).toString();
 
-          _projectPath =
-              appState.projectFile?.path ?? AppLocalStorage.instance.projectPath ?? path.join(defaultFolderPath, Config.newProjectDefaultName);
-          _outputPath = appState.output?.path ?? AppLocalStorage.instance.outputPath ?? path.join(defaultFolderPath);
-
           _clientIpTextController.text = preferredIpAddress;
           _portTextController.text = preferredPort;
-          _projectPathTextController.text = _projectPath;
-          _outputPathTextController.text = _outputPath;
 
           _initialValuesSet = AppLocalStorage.instance.isReadySync;
 
@@ -81,6 +78,9 @@ class LandingScreenState extends State<LandingScreen> {
           _clientSecret = appState.authData?.secret;
           _clientPassword = appState.authData?.password;
         }
+
+        _projectPath = projectPath;
+        _outputPath = outputPath;
 
         const isServerAvailable = !kIsWeb;
 
@@ -129,45 +129,48 @@ class LandingScreenState extends State<LandingScreen> {
               ),
               Expanded(
                 flex: 2,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 20 * kScale, right: 20 * kScale, top: 20 * kScale, bottom: 20 * kScale),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: SingleChildScrollView(
-                          controller: ScrollController(),
-                          scrollDirection: Axis.vertical,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              TextField(
-                                controller: _clientIpTextController,
-                                decoration: kStyle.kLandingInputTextStyle.copyWith(
-                                  hintText: _clientIpTextController.text,
-                                  labelText: Loc.get.ipAddressInputTitle,
+                child: Container(
+                  color: kColorPrimaryLightToDark,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 20 * kScale, right: 20 * kScale, top: 20 * kScale, bottom: 20 * kScale),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: SingleChildScrollView(
+                            controller: ScrollController(),
+                            scrollDirection: Axis.vertical,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextField(
+                                  controller: _clientIpTextController,
+                                  decoration: kStyle.kLandingInputTextStyle.copyWith(
+                                    hintText: _clientIpTextController.text,
+                                    labelText: Loc.get.ipAddressInputTitle,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 10 * kScale),
-                              TextField(
-                                controller: _portTextController,
-                                decoration: kStyle.kLandingInputTextStyle.copyWith(
-                                  hintText: openPort,
-                                  labelText: Loc.get.portInputTitle,
+                                SizedBox(height: 10 * kScale),
+                                TextField(
+                                  controller: _portTextController,
+                                  decoration: kStyle.kLandingInputTextStyle.copyWith(
+                                    hintText: openPort,
+                                    labelText: Loc.get.portInputTitle,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 60 * kScale),
-                              ClientAuthPanel(
-                                authData: PartialAuthenticationData.values(login: _clientLogin, secret: _clientSecret, password: _clientPassword),
-                                onCredentialsChanged: _handleClientCredentialsChanged,
-                              ),
-                            ],
+                                SizedBox(height: 60 * kScale),
+                                ClientAuthPanel(
+                                  authData: PartialAuthenticationData.values(login: _clientLogin, secret: _clientSecret, password: _clientPassword),
+                                  onCredentialsChanged: _handleClientCredentialsChanged,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 10 * kScale),
-                      getModeButton(Loc.get.clientModeButton, _onClientPressed),
-                    ],
+                        SizedBox(height: 10 * kScale),
+                        getModeButton(Loc.get.clientModeButton, _onClientPressed),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -176,7 +179,7 @@ class LandingScreenState extends State<LandingScreen> {
                 Expanded(
                   flex: 2,
                   child: Padding(
-                    padding: EdgeInsets.only(left: 0 * kScale, right: 20 * kScale, top: 20 * kScale, bottom: 20 * kScale),
+                    padding: EdgeInsets.only(left: 20 * kScale, right: 20 * kScale, top: 20 * kScale, bottom: 20 * kScale),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -198,21 +201,25 @@ class LandingScreenState extends State<LandingScreen> {
                                   ),
                                   SizedBox(height: 10 * kScale),
                                   ProjectPathView(
-                                    defaultFolder: defaultFolder,
-                                    projectPath: _projectPath,
-                                    projectPathTextController: _projectPathTextController,
+                                    defaultPath: ref.read(landingPageStateProvider).getVisibleProjectPath(),
+                                    targetPath: _projectPath,
+                                    targetPathTextController: _projectPathTextController,
                                     labelText: Loc.get.projectPath,
                                     defaultName: Config.newProjectDefaultName,
                                     isFile: true,
+                                    canBeReset: true,
+                                    onChange: (path) => ref.read(landingPageStateProvider).setProjectPath(path),
                                   ),
                                   SizedBox(height: 10 * kScale),
                                   ProjectPathView(
-                                    defaultFolder: defaultFolder,
-                                    projectPath: _outputPath,
-                                    projectPathTextController: _outputPathTextController,
+                                    defaultPath: ref.read(landingPageStateProvider).getVisibleOutputPath(),
+                                    targetPath: _outputPath,
+                                    targetPathTextController: _outputPathTextController,
                                     labelText: Loc.get.outputPath,
-                                    defaultName: '',
+                                    defaultName: Config.newOutputListDefaultName,
                                     isFile: false,
+                                    canBeReset: true,
+                                    onChange: (path) => ref.read(landingPageStateProvider).setOutputPath(path),
                                   ),
                                   SizedBox(height: 60 * kScale),
                                   const Flexible(
@@ -286,6 +293,9 @@ class LandingScreenState extends State<LandingScreen> {
 
   void _onStandalonePressed() {
     final appStateNotifier = providerContainer.read(appStateProvider.notifier);
+    final landingPageStateNotifier = providerContainer.read(landingPageStateProvider.notifier);
+
+    _onBackendCommon();
 
     final port = int.parse(_portTextController.text);
 
@@ -293,8 +303,8 @@ class LandingScreenState extends State<LandingScreen> {
 
     appStateNotifier.setStandaloneParams(
       port,
-      File(_projectPathTextController.text),
-      Directory(_outputPathTextController.text),
+      File(landingPageStateNotifier.getVisibleProjectPath()),
+      Directory(landingPageStateNotifier.getVisibleOutputPath()),
       AuthenticationData.values(
         login: _clientLogin!,
         secret: _clientSecret!,
@@ -309,12 +319,15 @@ class LandingScreenState extends State<LandingScreen> {
 
   void _onServerPressed() {
     final appStateNotifier = providerContainer.read(appStateProvider.notifier);
+    final landingPageStateNotifier = providerContainer.read(landingPageStateProvider.notifier);
+
+    _onBackendCommon();
 
     final port = int.parse(_portTextController.text);
     appStateNotifier.setServerParams(
       port,
-      File(_projectPathTextController.text),
-      Directory(_outputPathTextController.text),
+      File(landingPageStateNotifier.getVisibleProjectPath()),
+      Directory(landingPageStateNotifier.getVisibleOutputPath()),
     );
 
     _saveLocalsStorageData();
@@ -322,19 +335,28 @@ class LandingScreenState extends State<LandingScreen> {
     appStateNotifier.launchApp(AppMode.server);
   }
 
+  void _onBackendCommon() {
+    final landingPageStateNotifier = providerContainer.read(landingPageStateProvider.notifier);
+    final authListStateNotifier = providerContainer.read(authListStateProvider.notifier);
+    final historyStateNotifier = providerContainer.read(serverHistoryStateProvider.notifier);
+
+    authListStateNotifier.setPath(landingPageStateNotifier.getVisibleAuthPath());
+    historyStateNotifier.setPath(landingPageStateNotifier.getVisibleHistoryPath());
+  }
+
   void _saveLocalsStorageData() {
     AppLocalStorage.instance.ipAddress = _clientIpTextController.text;
     AppLocalStorage.instance.port = int.parse(_portTextController.text);
-    AppLocalStorage.instance.projectPath = _projectPathTextController.text;
-    AppLocalStorage.instance.outputPath = _outputPathTextController.text;
-    AppLocalStorage.instance.authListPath = providerContainer.read(authListStateProvider).state.filePath;
+    AppLocalStorage.instance.projectPath = providerContainer.read(landingPageStateProvider).state.projectPath;
+    AppLocalStorage.instance.outputPath = providerContainer.read(landingPageStateProvider).state.outputPath;
+    AppLocalStorage.instance.authListPath = providerContainer.read(landingPageStateProvider).state.authPath;
 
     AppLocalStorage.instance.clientLogin = _clientLogin;
     AppLocalStorage.instance.clientSecret = _clientSecret;
     AppLocalStorage.instance.clientPassword = _rememberClientPassword! ? _clientPassword : '';
     AppLocalStorage.instance.rememberClientPassword = _rememberClientPassword;
 
-    AppLocalStorage.instance.historyPath = providerContainer.read(serverHistoryStateProvider).state.folderPath;
+    AppLocalStorage.instance.historyPath = providerContainer.read(landingPageStateProvider).state.historyPath;
     AppLocalStorage.instance.historyTag = providerContainer.read(serverHistoryStateProvider).state.currentTag;
   }
 

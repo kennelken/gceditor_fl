@@ -45,7 +45,7 @@ class AppLocalStorage {
       documentsPath,
     );
     _ready = await _storage!.ready;
-    providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.debug, 'LocalStorage is ready'));
+    providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.debug, 'LocalStorage is ready at $documentsPath'));
   }
 
   Future<bool> isReady() async {

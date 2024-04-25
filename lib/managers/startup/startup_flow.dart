@@ -23,6 +23,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:statemachine/statemachine.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../model/state/landing_page_state.dart';
 import '../error_notifier_service.dart';
 
 class StartupFlow {
@@ -50,6 +51,7 @@ class StartupFlow {
         () async {
           flutter.WidgetsFlutterBinding.ensureInitialized();
           await AppLocalStorage.instance.isReady();
+          providerContainer.read(landingPageStateProvider).initialize();
           goToState(initializeSystemServices);
         },
       );
