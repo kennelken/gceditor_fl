@@ -10,7 +10,8 @@ import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/model/state/server_history_state.dart';
 import 'package:gceditor/model/state/style_state.dart';
-import 'package:path/path.dart' as path;
+
+import '../../model/state/landing_page_state.dart';
 
 class ServerHistoryAdminPanel extends StatefulWidget {
   const ServerHistoryAdminPanel({Key? key}) : super(key: key);
@@ -24,7 +25,7 @@ class ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
   late final TextEditingController _tagNameTextController;
 
   bool _initialValuesSet = false;
-  String _historyPath = '';
+  String? _historyPath = '';
 
   @override
   void initState() {
@@ -32,14 +33,12 @@ class ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
     _historyPathTextController = TextEditingController();
     _tagNameTextController = TextEditingController();
 
-    _historyPathTextController.addListener(_handleHistoryPathChanged);
     _tagNameTextController.addListener(_handleHistoryTagChanged);
   }
 
   @override
   void deactivate() {
     super.deactivate();
-    _historyPathTextController.removeListener(_handleHistoryPathChanged);
     _tagNameTextController.removeListener(_handleHistoryTagChanged);
   }
 
@@ -48,12 +47,6 @@ class ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
     super.dispose();
     _historyPathTextController.dispose();
     _tagNameTextController.dispose();
-  }
-
-  void _handleHistoryPathChanged() {
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => providerContainer.read(serverHistoryStateProvider).setPath(_historyPathTextController.text),
-    );
   }
 
   void _handleHistoryTagChanged() {
@@ -69,24 +62,22 @@ class ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
         ref.watch(startupProvider);
         ref.watch(styleStateProvider);
 
+        final historyPath = ref.watch(landingPageStateProvider).state.historyPath;
         final defaultFolder = ref.watch(appStateProvider).state.defaultProjectFolder;
         final defaultFolderPath = defaultFolder?.path ?? '';
 
         if (!_initialValuesSet) {
           final historyState = providerContainer.read(serverHistoryStateProvider).state;
 
-          _historyPath =
-              historyState.folderPath ?? AppLocalStorage.instance.historyPath ?? path.join(defaultFolderPath, Config.newHistoryDefaultFolder);
-
           final historyTag = AppLocalStorage.instance.historyTag ?? Config.newHistoryDefaultTag;
 
-          _historyPathTextController.text = _historyPath;
           _tagNameTextController.text = historyTag;
 
           _initialValuesSet = true;
         }
 
-        _handleHistoryPathChanged();
+        _historyPath = historyPath;
+
         _handleHistoryTagChanged();
 
         return Column(
@@ -94,12 +85,14 @@ class ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
           children: [
             SizedBox(
               child: ProjectPathView(
-                defaultFolder: defaultFolder,
-                projectPath: _historyPath,
-                projectPathTextController: _historyPathTextController,
+                defaultPath: ref.read(landingPageStateProvider).getVisibleHistoryPath(),
+                targetPath: _historyPath,
+                targetPathTextController: _historyPathTextController,
                 labelText: Loc.get.historyPath,
-                defaultName: '',
+                defaultName: Config.newHistoryListDefaultName,
                 isFile: false,
+                canBeReset: true,
+                onChange: (path) => ref.read(landingPageStateProvider).setHistoryPath(path),
               ),
             ),
             SizedBox(height: 10 * kScale),

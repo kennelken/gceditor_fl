@@ -10,22 +10,28 @@ import 'package:gceditor/model/state/style_state.dart';
 import 'package:path/path.dart' as path;
 
 class ProjectPathView extends StatelessWidget {
-  final TextEditingController projectPathTextController;
-  final String projectPath;
-  final Directory? defaultFolder;
+  final TextEditingController targetPathTextController;
+  final String? targetPath;
+  final String defaultPath;
   final String? labelText;
-  final String defaultName;
+  final String? defaultName;
   final bool isFile;
+  final bool canBeReset;
+  final ValueSetter<String?> onChange;
 
-  const ProjectPathView({
+  ProjectPathView({
     Key? key,
-    required this.projectPathTextController,
-    required this.projectPath,
-    required this.defaultFolder,
+    required this.targetPathTextController,
+    required this.targetPath,
+    required this.defaultPath,
     required this.labelText,
     required this.defaultName,
     required this.isFile,
-  }) : super(key: key);
+    required this.canBeReset,
+    required this.onChange,
+  }) : super(key: key) {
+    targetPathTextController.text = targetPath ?? defaultPath;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,21 +40,23 @@ class ProjectPathView extends StatelessWidget {
         Expanded(
           flex: 70,
           child: TextField(
-            controller: projectPathTextController,
+            enabled: false,
+            style: kStyle.kTextSmall.copyWith(color: targetPath == null ? kColorPrimaryLight : kColorButtonActive),
+            controller: targetPathTextController,
             decoration: kStyle.kLandingInputTextStyle.copyWith(
-              hintText: projectPath,
+              hintText: targetPath,
               labelText: labelText,
             ),
           ),
         ),
         if (isFile) ...[
-          SizedBox(width: 15 * kScale),
+          SizedBox(width: 7 * kScale),
           SizedBox(
             width: 30 * kScale,
             height: 30 * kScale,
             child: ElevatedButton(
               style: kButtonContextMenu,
-              onPressed: () => _handleBrowseProjectPath(),
+              onPressed: () => _handleBrowsePath(),
               child: Icon(
                 FontAwesomeIcons.file,
                 size: 20 * kScale,
@@ -57,13 +65,29 @@ class ProjectPathView extends StatelessWidget {
             ),
           ),
         ],
-        SizedBox(width: 15 * kScale),
+        if (canBeReset) ...[
+          SizedBox(width: 7 * kScale),
+          SizedBox(
+            width: 30 * kScale,
+            height: 30 * kScale,
+            child: ElevatedButton(
+              style: targetPath == null ? kButtonContextMenuInactive : kButtonContextMenu,
+              onPressed: targetPath == null ? null : () => _handleResetPath(),
+              child: Icon(
+                FontAwesomeIcons.rotateLeft,
+                size: 20 * kScale,
+                color: targetPath == null ? kTextColorLight3 : kTextColorLightest,
+              ),
+            ),
+          ),
+        ],
+        SizedBox(width: 7 * kScale),
         SizedBox(
           width: 30 * kScale,
           height: 30 * kScale,
           child: ElevatedButton(
             style: kButtonContextMenu,
-            onPressed: () => _handleBrowseProjectDirectory(defaultFolder!),
+            onPressed: () => _handleBrowseDirectory(),
             child: Icon(
               FontAwesomeIcons.folder,
               size: 20 * kScale,
@@ -76,26 +100,44 @@ class ProjectPathView extends StatelessWidget {
   }
 
   // ignore: avoid_void_async
-  void _handleBrowseProjectPath() async {
+  void _handleBrowsePath() async {
     final file = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: [Config.projectFileExtension],
       dialogTitle: Loc.get.selectProjectFile,
+      initialDirectory: getInitialDirectory(),
     );
 
     if ((file?.count ?? 0) > 0) {
-      projectPathTextController.text = file!.paths[0]!;
+      onChange.call(file!.paths[0]!);
     }
   }
 
   // ignore: avoid_void_async
-  void _handleBrowseProjectDirectory(Directory rootDirectory) async {
+  void _handleBrowseDirectory() async {
     final folder = await FilePicker.platform.getDirectoryPath(
       dialogTitle: Loc.get.selectProjectDirectory,
+      initialDirectory: getInitialDirectory(),
     );
 
     if ((folder?.length ?? 0) > 0) {
-      projectPathTextController.text = path.join(folder!, defaultName);
+      onChange.call(path.join(folder!, isFile ? defaultName : null));
     }
+  }
+
+  String? getInitialDirectory() {
+    var result = isFile ? path.dirname(targetPathTextController.text) : targetPathTextController.text;
+    if (result.isEmpty) return null;
+
+    while (result.isNotEmpty) {
+      if (Directory(result).existsSync()) break;
+      result = path.dirname(result);
+    }
+
+    return result;
+  }
+
+  void _handleResetPath() {
+    onChange.call(null);
   }
 }

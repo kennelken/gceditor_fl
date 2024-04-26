@@ -253,10 +253,10 @@ packages:
     dependency: "direct main"
     description:
       name: file_picker
-      sha256: "4e42aacde3b993c5947467ab640882c56947d9d27342a5b6f2895b23956954a6"
+      sha256: fa6e189a411f66a9516fbd4ce306666812f9d03f56b6fd03c566eec984654ddd
       url: "https://pub.dev"
     source: hosted
-    version: "6.1.1"
+    version: "7.0.2"
   fixnum:
     dependency: transitive
     description:

@@ -10,7 +10,8 @@ import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/model/state/auth_list_state.dart';
 import 'package:gceditor/model/state/style_state.dart';
-import 'package:path/path.dart' as path;
+
+import '../../model/state/landing_page_state.dart';
 
 class ServerAuthAdminPanel extends StatefulWidget {
   const ServerAuthAdminPanel({Key? key}) : super(key: key);
@@ -30,14 +31,11 @@ class ServerAuthAdminPanelState extends State<ServerAuthAdminPanel> {
     _authListPathTextController = TextEditingController();
     _newLoginTextController = TextEditingController();
     _newSecretTextController = TextEditingController();
-
-    _authListPathTextController.addListener(_handleAuthPathChanged);
   }
 
   @override
   void deactivate() {
     super.deactivate();
-    _authListPathTextController.removeListener(_handleAuthPathChanged);
   }
 
   @override
@@ -48,45 +46,39 @@ class ServerAuthAdminPanelState extends State<ServerAuthAdminPanel> {
     _newSecretTextController.dispose();
   }
 
-  void _handleAuthPathChanged() {
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => providerContainer.read(authListStateProvider).setPath(_authListPathTextController.text),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, child) {
         ref.watch(startupProvider);
+
+        final authPath = ref.watch(landingPageStateProvider).state.authPath;
         final defaultFolder = ref.watch(appStateProvider).state.defaultProjectFolder;
         final defaultFolderPath = defaultFolder?.path ?? '';
         final authListState = providerContainer.read(authListStateProvider).state;
         ref.watch(styleStateProvider);
 
-        final authListPath =
-            authListState.filePath ?? AppLocalStorage.instance.authListPath ?? path.join(defaultFolderPath, Config.newAuthListDefaultName);
+        final authListPath = authPath;
 
         final newLogin = AppLocalStorage.instance.newLogin ?? Config.defaultNewLogin;
         final newSecret = AppLocalStorage.instance.newSecret ?? Config.defaultNewSecret;
 
-        _authListPathTextController.text = authListPath;
         _newLoginTextController.text = newLogin;
         _newSecretTextController.text = newSecret;
-
-        _handleAuthPathChanged();
 
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
               child: ProjectPathView(
-                defaultFolder: defaultFolder,
-                projectPath: authListPath,
-                projectPathTextController: _authListPathTextController,
+                defaultPath: ref.read(landingPageStateProvider).getVisibleAuthPath(),
+                targetPath: authListPath,
+                targetPathTextController: _authListPathTextController,
                 labelText: Loc.get.authListPath,
                 defaultName: Config.newAuthListDefaultName,
                 isFile: true,
+                canBeReset: true,
+                onChange: (path) => ref.read(landingPageStateProvider).setAuthPath(path),
               ),
             ),
             SizedBox(height: 10 * kScale),
