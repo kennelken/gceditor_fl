@@ -136,7 +136,7 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
                       return SizedBox(
                         height: kStyle.kDataTableInlineRowHeight,
                         child: Padding(
-                          padding: EdgeInsets.only(left: 4 * kScale, right: 26 * kScale),
+                          padding: EdgeInsets.only(left: 4 * kScale, right: 29 * kScale),
                           child: Row(
                             children: [
                               Flexible(

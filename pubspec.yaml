@@ -30,12 +30,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  menubar:
-    git:
-      url: https://github.com/google/flutter-desktop-embedding.git
-      path: plugins/menubar
-      ref: 17d4710c17f4913137e7ec931f6e71eaef443363
-
   flutter_fancy_tree_view: ^0.5.3+2
   flutter_localizations:
     sdk: flutter
@@ -68,6 +62,7 @@ dependencies:
   json_annotation: ^4.4.0
   collection: ^1.17.1
   screen_retriever: ^0.1.9
+  menu_bar: ^0.5.3
 
 dependency_overrides:
   intl: ^0.18.0
@@ -106,6 +101,10 @@ flutter:
           weight: 100
         - asset: assets/fonts/JetBrainsMono-Light.ttf
           weight: 300
+        - asset: assets/fonts/JetBrainsMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/JetBrainsMono-Medium.ttf
+          weight: 500
         - asset: assets/fonts/JetBrainsMono-Bold.ttf
           weight: 700
 

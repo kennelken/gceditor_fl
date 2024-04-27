@@ -17,11 +17,13 @@ import 'consts/routes.dart';
 import 'managers/startup/startup_manager.dart';
 import 'model/model_root.dart';
 import 'model/state/log_state.dart';
+import 'model/state/menubar_state.dart';
 
 final computer = Computer.create();
 List<String>? mainArgs;
 
 late BuildContext rootContext;
+late BuildContext localizationContext;
 final navigatorKey = GlobalKey<NavigatorState>();
 BuildContext? get popupContext => navigatorKey.currentState?.overlay?.context;
 
@@ -57,16 +59,53 @@ class MyApp extends StatelessWidget {
 
     return Consumer(builder: (context, ref, child) {
       ref.watch(styleStateProvider);
+      ref.watch(menubarStateProvider).state.menubar;
+
+      menuBar() => ref.read(menubarStateProvider).state.menubar;
+      scaffold() {
+        return Scaffold(
+          backgroundColor: kColorPrimaryLighter,
+          body: Navigator(
+            key: navigatorKey,
+            observers: [
+              HeroController(),
+            ],
+            onGenerateRoute: (settings) {
+              final page = getWidgetByScreen(settings.name!);
+              return SlowerPageRoute(
+                builder: (context) {
+                  rootContext = context;
+                  return DefaultTextStyle(
+                    style: kStyle.kTextBig,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: Consumer(
+                            builder: (context, ref, child) {
+                              final visible = ref.watch(logStateProvider).state.visible;
+                              return visible ? const LoggerScreen(key: ValueKey('LoggerScreen')) : WaitingOverlay(child: page);
+                            },
+                          ),
+                        ),
+                        LoggerPanel(),
+                      ],
+                    ),
+                  );
+                },
+                settings: settings,
+              );
+            },
+          ),
+        );
+      }
+
       return RawKeyboardEvents(
         child: MaterialApp(
-          navigatorKey: navigatorKey,
           shortcuts: {
             ...WidgetsApp.defaultShortcuts,
             ...GlobalShortcuts.getIntents(),
           },
-          navigatorObservers: [
-            HeroController(),
-          ],
           actions: {
             ...WidgetsApp.defaultActions,
             ...GlobalShortcuts.getActions(),
@@ -83,38 +122,9 @@ class MyApp extends StatelessWidget {
           supportedLocales: const [
             Locale('en', ''), // English, no country code
           ],
-          onGenerateRoute: (settings) {
-            final page = getWidgetByScreen(settings.name!);
-            return SlowerPageRoute(
-              builder: (context) {
-                rootContext = context;
-                return Scaffold(
-                  backgroundColor: kColorPrimaryLighter,
-                  body: DefaultTextStyle(
-                    style: kStyle.kTextBig,
-                    child: Stack(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: Consumer(
-                                builder: (context, ref, child) {
-                                  final visible = ref.watch(logStateProvider).state.visible;
-                                  return visible ? const LoggerScreen(key: ValueKey('LoggerScreen')) : WaitingOverlay(child: page);
-                                },
-                              ),
-                            ),
-                            LoggerPanel(),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-              settings: settings,
-            );
+          builder: (context, child) {
+            localizationContext = context;
+            return menuBar()?.call(scaffold()) ?? scaffold();
           },
         ),
       );

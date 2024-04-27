@@ -7,7 +7,6 @@ import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/managers/startup/startup_manager.dart';
 import 'package:gceditor/model/app_local_storage.dart';
 import 'package:gceditor/model/model_root.dart';
-import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/model/state/auth_list_state.dart';
 import 'package:gceditor/model/state/style_state.dart';
 
@@ -53,9 +52,6 @@ class ServerAuthAdminPanelState extends State<ServerAuthAdminPanel> {
         ref.watch(startupProvider);
 
         final authPath = ref.watch(landingPageStateProvider).state.authPath;
-        final defaultFolder = ref.watch(appStateProvider).state.defaultProjectFolder;
-        final defaultFolderPath = defaultFolder?.path ?? '';
-        final authListState = providerContainer.read(authListStateProvider).state;
         ref.watch(styleStateProvider);
 
         final authListPath = authPath;

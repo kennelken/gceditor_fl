@@ -265,7 +265,6 @@ class StyleStateNotifier extends ChangeNotifier {
     );
 
     state.kReorderableListTheme = state.kAppTheme.copyWith(
-      backgroundColor: kColorTransparent,
       canvasColor: kColorTransparent,
       shadowColor: kColorTransparent,
       iconTheme: IconThemeData(
