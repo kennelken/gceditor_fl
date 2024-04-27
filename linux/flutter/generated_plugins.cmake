@@ -3,7 +3,6 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  menubar
   screen_retriever
   window_manager
 )

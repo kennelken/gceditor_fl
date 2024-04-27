@@ -58,8 +58,6 @@ class LandingScreenState extends State<LandingScreen> {
       builder: (context, ref, child) {
         final projectPath = ref.watch(landingPageStateProvider).state.projectPath;
         final outputPath = ref.watch(landingPageStateProvider).state.outputPath;
-        final defaultFolder = ref.watch(appStateProvider).state.defaultProjectFolder;
-        final defaultFolderPath = defaultFolder?.path ?? '';
         final openPort = ref.watch(networkStateProvider.notifier).state.openPort?.toString() ?? Config.portMin.toString();
         ref.watch(styleStateProvider);
 

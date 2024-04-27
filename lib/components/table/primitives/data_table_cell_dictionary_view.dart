@@ -154,7 +154,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
                         key: ValueKey(key),
                         height: kStyle.kDataTableInlineRowHeight,
                         child: Padding(
-                          padding: EdgeInsets.only(left: 4 * kScale, right: 26 * kScale),
+                          padding: EdgeInsets.only(left: 4 * kScale, right: 29 * kScale),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [

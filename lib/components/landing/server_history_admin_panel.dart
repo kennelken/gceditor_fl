@@ -7,7 +7,6 @@ import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/managers/startup/startup_manager.dart';
 import 'package:gceditor/model/app_local_storage.dart';
 import 'package:gceditor/model/model_root.dart';
-import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/model/state/server_history_state.dart';
 import 'package:gceditor/model/state/style_state.dart';
 
@@ -63,16 +62,10 @@ class ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
         ref.watch(styleStateProvider);
 
         final historyPath = ref.watch(landingPageStateProvider).state.historyPath;
-        final defaultFolder = ref.watch(appStateProvider).state.defaultProjectFolder;
-        final defaultFolderPath = defaultFolder?.path ?? '';
 
         if (!_initialValuesSet) {
-          final historyState = providerContainer.read(serverHistoryStateProvider).state;
-
           final historyTag = AppLocalStorage.instance.historyTag ?? Config.newHistoryDefaultTag;
-
           _tagNameTextController.text = historyTag;
-
           _initialValuesSet = true;
         }
 

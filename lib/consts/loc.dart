@@ -5,6 +5,6 @@ import 'package:gceditor/main.dart';
 
 class Loc {
   static AppLocalizations get get {
-    return AppLocalizations.of(rootContext)!;
+    return AppLocalizations.of(localizationContext)!;
   }
 }

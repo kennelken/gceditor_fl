@@ -126,7 +126,7 @@ class _EnumValueViewState extends State<EnumValueView> {
                 tooltipText: Loc.get.delete,
               ),
             ],
-            SizedBox(width: 28 * kScale),
+            SizedBox(width: 30 * kScale),
           ],
         ),
       );

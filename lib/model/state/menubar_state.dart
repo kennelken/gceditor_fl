@@ -1,11 +1,18 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gceditor/components/global_shortcuts.dart';
-import 'package:gceditor/consts/loc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
-import 'package:menubar/menubar.dart' as menu_bar;
+import 'package:gceditor/model/state/style_state.dart';
+import 'package:menu_bar/menu_bar.dart';
+
+import '../../components/global_shortcuts.dart';
+import '../../consts/consts.dart';
+import '../../consts/loc.dart';
+import '../../utils/utils.dart';
+import 'client_view_mode_state.dart';
 
 final menubarStateProvider = ChangeNotifierProvider((ref) {
   final notifier = MenubarStateNotifier(MenubarState());
@@ -18,7 +25,7 @@ final menubarStateProvider = ChangeNotifierProvider((ref) {
 });
 
 class MenubarState {
-  List<menu_bar.NativeSubmenu>? _items;
+  Func1<Widget, Widget>? menubar;
 }
 
 class MenubarStateNotifier extends ChangeNotifier {
@@ -37,92 +44,151 @@ class MenubarStateNotifier extends ChangeNotifier {
       return;
     }
 
-    final nextUndoCommand = providerContainer.read(clientOwnCommandsStateProvider).state.nextUndoCommand;
-    final nextRedoCommand = providerContainer.read(clientOwnCommandsStateProvider).state.nextRedoCommand;
+    nextUndoCommand() => providerContainer.read(clientOwnCommandsStateProvider).state.nextUndoCommand;
+    nextRedoCommand() => providerContainer.read(clientOwnCommandsStateProvider).state.nextRedoCommand;
 
-    state._items = [
-      menu_bar.NativeSubmenu(
-        label: Loc.get.menubarFile,
-        children: [
-          menu_bar.NativeMenuItem(
-            label: Loc.get.menubarProjectSettings,
-            //shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyZ),
-            onSelected: GlobalShortcuts.openProjectSettings,
-          ),
-          menu_bar.NativeMenuItem(
-            label: Loc.get.menubarRunGenerators,
-            //shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyZ),
-            onSelected: GlobalShortcuts.runGenerators,
-          ),
-        ],
-      ),
-      menu_bar.NativeSubmenu(
-        label: Loc.get.menubarEdit,
-        children: [
-          menu_bar.NativeMenuItem(
-            label: Loc.get.menubarUndo + (nextUndoCommand != null ? ': ${describeEnum(nextUndoCommand.$type!)}' : ''),
-            //shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyZ),
-            onSelected: nextUndoCommand != null ? GlobalShortcuts.undo : null,
-          ),
-          menu_bar.NativeMenuItem(
-            label: Loc.get.menubarRedo + (nextRedoCommand != null ? ': ${describeEnum(nextRedoCommand.$type!)}' : ''),
-            //shortcut: LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyY),
-            onSelected: nextRedoCommand != null ? GlobalShortcuts.redo : null,
-          ),
-          menu_bar.NativeMenuItem(
-            label: Loc.get.menubarFind,
-            onSelected: GlobalShortcuts.openFind,
-          ),
-          menu_bar.NativeMenuItem(
-            label: Loc.get.requestModelFromServer,
-            onSelected: _requestModelFromServer,
-          ),
-        ],
-      ),
-      menu_bar.NativeSubmenu(
-        label: Loc.get.menubarView,
-        children: [
-          menu_bar.NativeMenuItem(
-            label: Loc.get.expandedViewMenu,
-            //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
-            onSelected: GlobalShortcuts.toggleActions, // is registered in GlobalShortcuts
-          ),
-          menu_bar.NativeMenuItem(
-            label: Loc.get.menubarConsole,
-            //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
-            onSelected: GlobalShortcuts.toggleConsole, // is registered in GlobalShortcuts
-          ),
-          menu_bar.NativeMenuItem(
-            label: Loc.get.menubarZoomIn,
-            //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
-            onSelected: GlobalShortcuts.zoomIn, // is registered in GlobalShortcuts
-          ),
-          menu_bar.NativeMenuItem(
-            label: Loc.get.menubarZoomOut,
-            //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
-            onSelected: GlobalShortcuts.zoomOut, // is registered in GlobalShortcuts
-          ),
-          menu_bar.NativeMenuItem(
-            label: Loc.get.menubarShowShortcuts,
-            //shortcut: LogicalKeySet(LogicalKeyboardKey.backquote),
-            onSelected: GlobalShortcuts.openShortcutsList, // is registered in GlobalShortcuts
-          ),
-        ],
-      ),
-    ];
+    state.menubar = (app) => Overlay(
+          initialEntries: [
+            OverlayEntry(
+              builder: (context) {
+                return SizedBox(
+                  height: 18,
+                  child: MenuBarWidget(
+                    barStyle: const MenuStyle(
+                      padding: MaterialStatePropertyAll(EdgeInsets.zero),
+                      backgroundColor: MaterialStatePropertyAll(kColorPrimaryDarker2),
+                      maximumSize: MaterialStatePropertyAll(Size(double.infinity, 28.0)),
+                    ),
+                    barButtonStyle: ButtonStyle(
+                      textStyle: MaterialStatePropertyAll(kStyle.kTextExtraSmallLightest.copyWith(fontSize: 12, color: Colors.white)),
+                      padding: const MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 8)),
+                      minimumSize: const MaterialStatePropertyAll(Size(0, 32)),
+                    ),
+                    menuButtonStyle: ButtonStyle(
+                      textStyle: MaterialStatePropertyAll(kStyle.kTextExtraSmallDark.copyWith(fontSize: 12)),
+                      minimumSize: const MaterialStatePropertyAll(Size.fromHeight(30)),
+                      padding: const MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 8, vertical: 8)),
+                    ),
+                    barButtons: [
+                      BarButton(
+                        text: Text(Loc.get.menubarFile, style: _styleBar()),
+                        submenu: SubMenu(
+                          menuItems: [
+                            MenuButton(
+                              text: Text(Loc.get.menubarProjectSettings, style: _styleMenuActive()),
+                              onTap: GlobalShortcuts.openProjectSettings,
+                              shortcutStyle: _styleShortcut(),
+                            ),
+                            MenuButton(
+                              text: Text(Loc.get.menubarRunGenerators, style: _styleMenuActive()),
+                              onTap: GlobalShortcuts.runGenerators,
+                              shortcutText: 'Ctrl+R',
+                              shortcutStyle: _styleShortcut(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      BarButton(
+                        text: Text(Loc.get.menubarEdit, style: _styleBar()),
+                        submenu: SubMenu(
+                          menuItems: [
+                            MenuButton(
+                              text: Text(
+                                Loc.get.menubarUndo + (nextUndoCommand() != null ? ': ${describeEnum(nextUndoCommand()!.$type!)}' : ''),
+                                style: nextUndoCommand() != null ? _styleMenuActive() : _styleMenuInactive(),
+                              ),
+                              onTap: nextUndoCommand() != null ? GlobalShortcuts.undo : null,
+                              shortcutText: 'Ctrl+Z',
+                              shortcutStyle: _styleShortcut(),
+                            ),
+                            MenuButton(
+                              text: Text(
+                                Loc.get.menubarRedo + (nextRedoCommand() != null ? ': ${describeEnum(nextRedoCommand()!.$type!)}' : ''),
+                                style: nextRedoCommand() != null ? _styleMenuActive() : _styleMenuInactive(),
+                              ),
+                              onTap: nextRedoCommand() != null ? GlobalShortcuts.redo : null,
+                              shortcutText: 'Ctrl+Y',
+                              shortcutStyle: _styleShortcut(),
+                            ),
+                            MenuButton(
+                              text: Text(Loc.get.menubarFind, style: _styleMenuActive()),
+                              onTap: GlobalShortcuts.openFind,
+                              shortcutText: 'Ctrl+F',
+                              shortcutStyle: _styleShortcut(),
+                            ),
+                            MenuButton(
+                              text: Text(Loc.get.requestModelFromServer, style: _styleMenuActive()),
+                              onTap: _requestModelFromServer,
+                              shortcutStyle: _styleShortcut(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      BarButton(
+                        text: Text(Loc.get.menubarView, style: _styleBar()),
+                        submenu: SubMenu(
+                          menuItems: [
+                            MenuButton(
+                              text: Text(Loc.get.expandedViewMenu, style: _styleMenuActive()),
+                              onTap: GlobalShortcuts.toggleActions,
+                              shortcutStyle: _styleShortcut(),
+                              icon: Icon(
+                                providerContainer.read(clientViewModeStateProvider).state.actionsMode
+                                    ? FontAwesomeIcons.squareCheck
+                                    : FontAwesomeIcons.square,
+                                color: kColorPrimaryDarker,
+                                size: 17 * kScale,
+                              ),
+                            ),
+                            MenuButton(
+                              text: Text(Loc.get.menubarConsole, style: _styleMenuActive()),
+                              onTap: GlobalShortcuts.toggleConsole,
+                              shortcutText: '~',
+                              shortcutStyle: _styleShortcut(),
+                            ),
+                            MenuButton(
+                              text: Text(Loc.get.menubarZoomIn, style: _styleMenuActive()),
+                              onTap: GlobalShortcuts.zoomIn,
+                              shortcutText: 'Ctrl+Numpad+',
+                              shortcutStyle: _styleShortcut(),
+                            ),
+                            MenuButton(
+                              text: Text(Loc.get.menubarZoomOut, style: _styleMenuActive()),
+                              onTap: GlobalShortcuts.zoomOut,
+                              shortcutText: 'Ctrl+Numpad-',
+                              shortcutStyle: _styleShortcut(),
+                            ),
+                            MenuButton(
+                              text: Text(Loc.get.menubarShowShortcuts, style: _styleMenuActive()),
+                              onTap: GlobalShortcuts.openShortcutsList,
+                              shortcutStyle: _styleShortcut(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    child: app,
+                  ),
+                );
+              },
+            )
+          ],
+        );
 
-    if (!kIsWeb) //
-      menu_bar.setApplicationMenu(state._items!);
+    notifyListeners();
   }
 
+  TextStyle _styleBar() => kStyle.kTextExtraSmallLightest.copyWith(fontSize: 12);
+  TextStyle _styleMenuActive() => kStyle.kTextExtraSmallDark.copyWith(fontSize: 10.5, color: kColorPrimaryDarker, fontWeight: FontWeight.w500);
+  TextStyle _styleMenuInactive() => kStyle.kTextExtraSmallDark.copyWith(fontSize: 10.5, color: Colors.grey.shade700);
+  TextStyle _styleShortcut() => kStyle.kTextExtraSmallDark.copyWith(fontSize: 10.5, color: Colors.grey.shade700);
+
   void _removeMenubar() {
-    if (state._items == null) //
+    if (state.menubar == null) //
       return;
 
-    state._items = null;
-
-    if (!kIsWeb) //
-      menu_bar.setApplicationMenu([]);
+    state.menubar = null;
+    notifyListeners();
   }
 
   void _requestModelFromServer() {
