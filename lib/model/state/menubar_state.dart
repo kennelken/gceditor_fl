@@ -65,8 +65,9 @@ class MenubarStateNotifier extends ChangeNotifier {
                       minimumSize: const MaterialStatePropertyAll(Size(0, 32)),
                     ),
                     menuButtonStyle: ButtonStyle(
+                      backgroundColor: const MaterialStatePropertyAll(kColorPrimaryDarker2),
                       textStyle: MaterialStatePropertyAll(kStyle.kTextExtraSmallDark.copyWith(fontSize: 12)),
-                      minimumSize: const MaterialStatePropertyAll(Size.fromHeight(30)),
+                      minimumSize: const MaterialStatePropertyAll(Size(100, 32)),
                       padding: const MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 8, vertical: 8)),
                     ),
                     barButtons: [
@@ -136,8 +137,8 @@ class MenubarStateNotifier extends ChangeNotifier {
                                 providerContainer.read(clientViewModeStateProvider).state.actionsMode
                                     ? FontAwesomeIcons.squareCheck
                                     : FontAwesomeIcons.square,
-                                color: kColorPrimaryDarker,
-                                size: 17 * kScale,
+                                color: kTextColorLight.withAlpha(170),
+                                size: 12,
                               ),
                             ),
                             MenuButton(
@@ -178,10 +179,10 @@ class MenubarStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  TextStyle _styleBar() => kStyle.kTextExtraSmallLightest.copyWith(fontSize: 12);
-  TextStyle _styleMenuActive() => kStyle.kTextExtraSmallDark.copyWith(fontSize: 10.5, color: kColorPrimaryDarker, fontWeight: FontWeight.w500);
-  TextStyle _styleMenuInactive() => kStyle.kTextExtraSmallDark.copyWith(fontSize: 10.5, color: Colors.grey.shade700);
-  TextStyle _styleShortcut() => kStyle.kTextExtraSmallDark.copyWith(fontSize: 10.5, color: Colors.grey.shade700);
+  TextStyle _styleBar() => kStyle.kTextExtraSmallLightest.copyWith(fontSize: 12, color: kTextColorLight);
+  TextStyle _styleMenuActive() => kStyle.kTextExtraSmallLightest.copyWith(fontSize: 10.5, color: kTextColorLight, fontWeight: FontWeight.w400);
+  TextStyle _styleMenuInactive() => kStyle.kTextExtraSmallLightest.copyWith(fontSize: 10.5, color: kTextColorLight.withAlpha(170));
+  TextStyle _styleShortcut() => kStyle.kTextExtraSmallLightest.copyWith(fontSize: 10.5, color: kTextColorLight.withAlpha(170));
 
   void _removeMenubar() {
     if (state.menubar == null) //

@@ -162,11 +162,6 @@ class StyleStateNotifier extends ChangeNotifier {
     state.kTableTopRowHeight = 32.0 * state.globalScale; // means a row of home layout
 
     state.kAppTheme = ThemeData(
-      menuTheme: const MenuThemeData(
-        style: MenuStyle(
-          padding: MaterialStatePropertyAll(EdgeInsets.symmetric(vertical: 8.0)),
-        ),
-      ),
       dialogBackgroundColor: kColorBackground,
       scaffoldBackgroundColor: kColorBackground,
       inputDecorationTheme: InputDecorationTheme(
