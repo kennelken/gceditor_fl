@@ -177,7 +177,7 @@ class DbCmdEditClassField extends BaseDbCmd {
       final keyType = newType != null ? newKeyType : field.keyTypeInfo;
       final valueType = newType != null ? newValueType : field.valueTypeInfo;
 
-      if (DbModelUtils.parseDefaultValue(type, keyType, valueType, defaultValue!) == null) //
+      if (DbModelUtils.parseDefaultValue(dbModel, type, keyType, valueType, defaultValue!) == null) //
         return DbCmdResult.fail('Incorrect default value');
     }
 

@@ -143,7 +143,7 @@ class _DataTableCellTextViewState extends State<DataTableCellTextView> {
     if (_focusNode.hasFocus) //
       return;
 
-    var newValue = DbModelUtils.parseDefaultValue(widget.fieldType, null, null, _textController.text)?.simpleValue;
+    var newValue = DbModelUtils.parseDefaultValue(clientModel, widget.fieldType, null, null, _textController.text)?.simpleValue;
 
     if (newValue is String && widget.fieldType.type == ClassFieldType.date) {
       newValue = DbModelUtils.applyTimezone(newValue.toString(), -clientModel.settings.timeZone);

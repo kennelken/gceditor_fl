@@ -168,7 +168,7 @@ class DbCmdCopyPaste extends BaseDbCmd {
 
     final toValues = <DataTableRow>[];
     for (var i = 0; i < toIndices.length; i++) {
-      final newRow = DbModelUtils.buildNewRow(dbModel: dbModel, tableId: toTableId, rowId: fromValues[i].id + (idSuffixes?[i] ?? ''));
+      final newRow = DbModelUtils.buildNewRow(model: dbModel, tableId: toTableId, rowId: fromValues[i].id + (idSuffixes?[i] ?? ''));
 
       toValues.add(newRow);
       toTable.rows.insert(
@@ -193,7 +193,7 @@ class DbCmdCopyPaste extends BaseDbCmd {
 
     final tableColumns = dbModel.cache.getAllFieldsById(table.classId)!;
     final columnsData = {for (var columnId in columns) columnId: tableColumns.firstWhereOrNull((ei) => ei.id == columnId)};
-    final result = values.map((e) => DbModelUtils.decodeDataRowCell(e, columns, columnsData)).toList();
+    final result = values.map((e) => DbModelUtils.decodeDataRowCell(dbModel, e, columns, columnsData)).toList();
     return result;
   }
 

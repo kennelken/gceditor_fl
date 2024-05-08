@@ -65,7 +65,7 @@ class DbCmdEditTable extends BaseDbCmd {
             final column = allColumns[j];
             row.values.add(commandArgValues[column.id]?.values[i] ??
                 currentValues[column.id]?.values[i] ??
-                DbModelUtils.parseDefaultValueByFieldOrDefault(column, column.defaultValue));
+                DbModelUtils.parseDefaultValueByFieldOrDefault(dbModel, column, column.defaultValue));
           }
         }
       }

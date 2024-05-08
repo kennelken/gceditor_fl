@@ -141,6 +141,6 @@ class _FillValueViewState extends State<FillValueView> {
   }
 
   DataTableCellValue? _parseCurrentValue() {
-    return DbModelUtils.parseDefaultValueByField(widget.field, _valueController.text, silent: true);
+    return DbModelUtils.parseDefaultValueByField(clientModel, widget.field, _valueController.text, silent: true);
   }
 }

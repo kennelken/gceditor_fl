@@ -65,7 +65,7 @@ class DbCmdEditTableCellValue extends BaseDbCmd {
     if (rowIndex <= -1) //
       return DbCmdResult.fail('Row with id "$rowId" was not found');
 
-    if (!DbModelUtils.validateValue(field, value)) //
+    if (!DbModelUtils.validateValue(dbModel, field, value)) //
       return DbCmdResult.fail('Value "$value" can not be set to field "$fieldId"');
 
     final columnIndex = dbModel.cache.getAllFieldsById(table.classId)!.indexWhere((e) => e.id == fieldId);

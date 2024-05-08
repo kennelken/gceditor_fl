@@ -400,7 +400,7 @@ class DbModelCache {
     _defaultValues = {};
     for (final classEntity in _allClasses!.whereType<ClassMetaEntity>()) {
       for (final field in classEntity.fields) {
-        _defaultValues![field] = DbModelUtils.parseDefaultValueByFieldOrDefault(field, field.defaultValue);
+        _defaultValues![field] = DbModelUtils.parseDefaultValueByFieldOrDefault(model, field, field.defaultValue);
       }
     }
   }

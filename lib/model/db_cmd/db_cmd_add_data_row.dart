@@ -36,7 +36,7 @@ class DbCmdAddDataRow extends BaseDbCmd {
   @override
   DbCmdResult doExecute(DbModel dbModel) {
     final newRow = DbModelUtils.buildNewRow(
-      dbModel: dbModel,
+      model: dbModel,
       rowId: rowId,
       tableId: tableId,
       tableRowValues: tableRowValues,
@@ -69,7 +69,7 @@ class DbCmdAddDataRow extends BaseDbCmd {
       }
 
       for (var i = 0; i < tableRowValues!.values.length; i++) {
-        if (!DbModelUtils.validateValue(allFields[i], tableRowValues!.values[i])) //
+        if (!DbModelUtils.validateValue(dbModel, allFields[i], tableRowValues!.values[i])) //
           return DbCmdResult.fail('Invalid value "${tableRowValues!.values[i]}" at index "$index"');
       }
     }

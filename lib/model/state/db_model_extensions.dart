@@ -65,7 +65,7 @@ extension ClassFieldTypeExtensions on ClassFieldType {
   }
 
   bool hasMultivalueType() {
-    //TODO! @sergey
+    //TODO! @sergey test
     return this == ClassFieldType.listMulti;
   }
 }
@@ -357,12 +357,13 @@ class DbModelUtils {
     return result;
   }
 
-  static DataTableCellValue parseDefaultValueByFieldOrDefault(ClassMetaFieldDescription field, String value) {
-    return parseDefaultValueByField(field, value) ?? getDefaultValue(field.typeInfo.type);
+  static DataTableCellValue parseDefaultValueByFieldOrDefault(DbModel model, ClassMetaFieldDescription field, String value) {
+    return parseDefaultValueByField(model, field, value) ?? getDefaultValue(field.typeInfo.type);
   }
 
-  static DataTableCellValue? parseDefaultValueByField(ClassMetaFieldDescription field, String value, {bool silent = false}) {
+  static DataTableCellValue? parseDefaultValueByField(DbModel model, ClassMetaFieldDescription field, String value, {bool silent = false}) {
     return parseDefaultValue(
+      model,
       field.typeInfo,
       field.keyTypeInfo,
       field.valueTypeInfo,
@@ -372,6 +373,7 @@ class DbModelUtils {
   }
 
   static DataTableCellValue? parseDefaultValue(
+    DbModel model,
     ClassFieldDescriptionDataInfo type,
     ClassFieldDescriptionDataInfo? keyType,
     ClassFieldDescriptionDataInfo? valueType,
@@ -450,27 +452,7 @@ class DbModelUtils {
           final list = jsonDecode(value) ?? [];
           final valuesList = list
               .map(
-                (e) => parseDefaultValue(valueType!, null, null, e.toString())?.simpleValue,
-              )
-              .toList();
-
-          if (valuesList.any((e) => e == null)) //
-            return null;
-
-          final resultList = DataTableCellValue.list(valuesList);
-          return resultList;
-        } catch (e, callstack) {
-          if (!silent) //
-            providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
-          return null;
-        }
-
-      case ClassFieldType.listMulti: //TODO! @sergey
-        try {
-          final list = jsonDecode(value) ?? [];
-          final valuesList = list
-              .map(
-                (e) => parseDefaultValue(valueType!, null, null, e.toString())?.simpleValue,
+                (e) => parseDefaultValue(model, valueType!, null, null, e.toString())?.simpleValue,
               )
               .toList();
 
@@ -487,12 +469,12 @@ class DbModelUtils {
 
       case ClassFieldType.dictionary:
         try {
-          final map = jsonDecode(value) ?? [];
-          final valuesList = map
+          final list = jsonDecode(value) ?? [];
+          final valuesList = list
               .map(
                 (v) => DataTableCellDictionaryItem.values(
-                  key: parseDefaultValue(keyType!, null, null, v[0])?.simpleValue,
-                  value: parseDefaultValue(valueType!, null, null, v[1])?.simpleValue,
+                  key: parseDefaultValue(model, keyType!, null, null, v[0])?.simpleValue,
+                  value: parseDefaultValue(model, valueType!, null, null, v[1])?.simpleValue,
                 ),
               )
               .toList();
@@ -501,6 +483,29 @@ class DbModelUtils {
             return null;
 
           final resultList = DataTableCellValue.dictionary(valuesList);
+          return resultList;
+        } catch (e, callstack) {
+          if (!silent) //
+            providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
+          return null;
+        }
+
+      case ClassFieldType.listMulti: //TODO! @sergey test
+        try {
+          final listMulti = jsonDecode(value) ?? [];
+
+          final valuesList = listMulti
+              .map(
+                (e) => getListMultiColumnsWithValues(model, valueType!, e)!
+                    .map((p) => parseDefaultValue(model, p.$1.typeInfo, null, null, p.$2))
+                    .toList(),
+              )
+              .toList();
+
+          if (valuesList.any((e) => e == null)) //
+            return null;
+
+          final resultList = DataTableCellValue.listMulti(valuesList);
           return resultList;
         } catch (e, callstack) {
           if (!silent) //
@@ -535,7 +540,11 @@ class DbModelUtils {
   }
 
   static List<DataTableRow> copyValues(
-      List<DataTableRow> from, List<ClassMetaFieldDescription> fieldsFrom, List<ClassMetaFieldDescription> fieldsTo) {
+    DbModel model,
+    List<DataTableRow> from,
+    List<ClassMetaFieldDescription> fieldsFrom,
+    List<ClassMetaFieldDescription> fieldsTo,
+  ) {
     final result = <DataTableRow>[];
 
     final indexInOldFields = <int?>[];
@@ -550,7 +559,7 @@ class DbModelUtils {
       }
     }
 
-    final defaultValues = parseDefaultValues(fieldsTo);
+    final defaultValues = parseDefaultValues(model, fieldsTo);
 
     for (var row in from) {
       final newRow = DataTableRow();
@@ -567,20 +576,28 @@ class DbModelUtils {
     return result;
   }
 
-  static bool validateValue(ClassMetaFieldDescription field, DataTableCellValue value) {
+  static bool validateValue(DbModel model, ClassMetaFieldDescription field, DataTableCellValue value) {
     switch (field.typeInfo.type) {
       case ClassFieldType.list:
       case ClassFieldType.set:
-        return value.listCellValues != null && value.listCellValues!.every((e) => validateSimpleValue(field.valueTypeInfo!.type, e));
-
-      case ClassFieldType.listMulti: //TODO! @sergey
-        return value.listCellValues != null && value.listCellValues!.every((e) => validateSimpleValue(field.valueTypeInfo!.type, e));
+        return value.listCellValues != null && //
+            value.listCellValues!.every((e) => validateSimpleValue(field.valueTypeInfo!.type, e));
 
       case ClassFieldType.dictionary:
         final dictionaryValues = value.dictionaryCellValues();
         return dictionaryValues != null &&
             dictionaryValues.every(
               (e) => validateSimpleValue(field.keyTypeInfo!.type, e.key) && validateSimpleValue(field.valueTypeInfo!.type, e.value),
+            );
+
+      case ClassFieldType.listMulti: //TODO! @sergey test
+        final columns = getListMultiColumns(model, field.valueTypeInfo!)!;
+
+        final multiValues = value.multivalueCellValues();
+        return multiValues != null &&
+            multiValues.every(
+              (e) => getListMultiColumnsWithValues(model, field.valueTypeInfo!, e.values)! //
+                  .every((p) => validateSimpleValue(p.$1.typeInfo.type, p.$2)),
             );
 
       default:
@@ -643,10 +660,10 @@ class DbModelUtils {
     }
   }
 
-  static Map<ClassMetaFieldDescription, DataTableCellValue> parseDefaultValues(List<ClassMetaFieldDescription> list) {
+  static Map<ClassMetaFieldDescription, DataTableCellValue> parseDefaultValues(DbModel model, List<ClassMetaFieldDescription> list) {
     final result = <ClassMetaFieldDescription, DataTableCellValue>{};
     for (var field in list) {
-      result[field] = parseDefaultValueByField(field, field.defaultValue) ?? getDefaultValue(field.typeInfo.type);
+      result[field] = parseDefaultValueByField(model, field, field.defaultValue) ?? getDefaultValue(field.typeInfo.type);
     }
     return result;
   }
@@ -928,14 +945,14 @@ class DbModelUtils {
           for (var j = 0; j < table.rows.length; j++) {
             final currentValue = table.rows[j].values[i];
             table.rows[j].values[i] =
-                validateAndConvertValueIfRequired(currentValue, field) ?? parseDefaultValueByFieldOrDefault(field, field.defaultValue);
+                validateAndConvertValueIfRequired(model, currentValue, field) ?? parseDefaultValueByFieldOrDefault(model, field, field.defaultValue);
           }
         }
       }
     }
   }
 
-  static DataTableCellValue? validateAndConvertValueIfRequired(DataTableCellValue value, ClassMetaFieldDescription field) {
+  static DataTableCellValue? validateAndConvertValueIfRequired(DbModel model, DataTableCellValue value, ClassMetaFieldDescription field) {
     switch (field.typeInfo.type) {
       case ClassFieldType.undefined:
       case ClassFieldType.bool:
@@ -962,7 +979,7 @@ class DbModelUtils {
 
       case ClassFieldType.list:
       case ClassFieldType.set:
-        if (validateValue(field, value)) //
+        if (validateValue(model, field, value)) //
           return value;
         if (value.listCellValues == null) //
           return null;
@@ -974,7 +991,7 @@ class DbModelUtils {
         return DataTableCellValue.list(resultList);
 
       case ClassFieldType.listMulti: //TODO! @sergey
-        if (validateValue(field, value)) //
+        if (validateValue(model, field, value)) //
           return value;
         if (value.listCellValues == null) //
           return null;
@@ -986,7 +1003,7 @@ class DbModelUtils {
         return DataTableCellValue.list(resultList);
 
       case ClassFieldType.dictionary:
-        if (validateValue(field, value)) //
+        if (validateValue(model, field, value)) //
           return value;
         final dictionaryValues = value.dictionaryCellValues();
         if (dictionaryValues == null) //
@@ -1512,13 +1529,13 @@ class DbModelUtils {
   }
 
   static DataTableRow buildNewRow({
-    required DbModel dbModel,
+    required DbModel model,
     required String tableId,
     required String rowId,
     DataTableRow? tableRowValues,
   }) {
-    final table = dbModel.cache.getTable(tableId) as TableMetaEntity;
-    final allFields = dbModel.cache.getAllFieldsById(table.classId) ?? [];
+    final table = model.cache.getTable(tableId) as TableMetaEntity;
+    final allFields = model.cache.getAllFieldsById(table.classId) ?? [];
 
     final newRow = DataTableRow()
       ..id = rowId
@@ -1526,7 +1543,7 @@ class DbModelUtils {
 
     for (var i = 0; i < allFields.length; i++) {
       if (i >= newRow.values.length) //
-        newRow.values.add(DbModelUtils.parseDefaultValueByFieldOrDefault(allFields[i], allFields[i].defaultValue));
+        newRow.values.add(DbModelUtils.parseDefaultValueByFieldOrDefault(model, allFields[i], allFields[i].defaultValue));
     }
 
     return newRow;
@@ -1570,7 +1587,12 @@ class DbModelUtils {
         .toList();
   }
 
-  static DataTableRow decodeDataRowCell(List<dynamic> rowData, List<String> columns, Map<String, ClassMetaFieldDescription?> columnsData) {
+  static DataTableRow decodeDataRowCell(
+    DbModel model,
+    List<dynamic> rowData,
+    List<String> columns,
+    Map<String, ClassMetaFieldDescription?> columnsData,
+  ) {
     final result = DataTableRow()
       ..id = rowData[0]
       ..values = rowData.skip(1).select((e, i) {
@@ -1578,17 +1600,17 @@ class DbModelUtils {
         if (columnData == null) //
           return DataTableCellValue.simple(e.toString());
 
-        return DbModelUtils.parseDefaultValueByFieldOrDefault(columnData, e?.toString() ?? '');
+        return DbModelUtils.parseDefaultValueByFieldOrDefault(model, columnData, e?.toString() ?? '');
       }).toList();
     return result;
   }
 
-  static DbCmdResult validateDataByColumns(DbModel dbModel, Map<String, List<DataTableColumn>>? dataColumnsByTable) {
+  static DbCmdResult validateDataByColumns(DbModel model, Map<String, List<DataTableColumn>>? dataColumnsByTable) {
     if (dataColumnsByTable == null) //
       return DbCmdResult.success();
 
     for (var tableId in dataColumnsByTable.keys) {
-      final table = dbModel.cache.getTable(tableId);
+      final table = model.cache.getTable(tableId);
       if (table == null) //
         return DbCmdResult.fail('Entity with id "$tableId" does not exist');
 
@@ -1601,12 +1623,12 @@ class DbModelUtils {
     return DbCmdResult.success();
   }
 
-  static void specifyDataCellValues(DbModel dbModel) {
-    for (final table in dbModel.cache.allDataTables) {
+  static void specifyDataCellValues(DbModel model) {
+    for (final table in model.cache.allDataTables) {
       if (table.classId.isEmpty) //
         return;
 
-      final fields = dbModel.cache.getAllFieldsById(table.classId);
+      final fields = model.cache.getAllFieldsById(table.classId);
       if (fields == null) {
         throw Exception("Could not find columns for class '${table.classId}'");
       }
@@ -1617,6 +1639,24 @@ class DbModelUtils {
         }
       }
     }
+  }
+
+  static List<ClassMetaFieldDescription>? getListMultiColumns(DbModel model, ClassFieldDescriptionDataInfo description) {
+    return model.cache.getAllFieldsById(description.classId!)!;
+  }
+
+  static List<(ClassMetaFieldDescription, T)>? getListMultiColumnsWithValues<T>(
+      DbModel model, ClassFieldDescriptionDataInfo description, List<T>? values) {
+    final columns = getListMultiColumns(model, description);
+    if (columns?.length != values?.length) {
+      providerContainer
+          .read(logStateProvider)
+          .addMessage(LogEntry(LogLevel.error, 'Values (${values?.length}) and columns (${columns?.length}) length mismatch'));
+      return null;
+    }
+
+    var index = 0;
+    return columns!.map((e) => (e, values![index++])).toList();
   }
 }
 
