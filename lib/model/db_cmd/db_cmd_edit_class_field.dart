@@ -158,6 +158,18 @@ class DbCmdEditClassField extends BaseDbCmd {
         if (!newValueType!.type.isSimple()) //
           return DbCmdResult.fail('Specified type is not simple');
       }
+
+      if (newType!.type.hasMultivalueType()) {
+        //TODO! @sergey
+        if (newValueType == null || newValueType!.type == ClassFieldType.undefined) //
+          return DbCmdResult.fail('Value type is not specified');
+
+        if (newValueType!.type == ClassFieldType.reference && newValueType!.classId == null) //
+          return DbCmdResult.fail('Class reference is not specified');
+
+        if (!newValueType!.type.isSimple()) //
+          return DbCmdResult.fail('Specified type is not simple');
+      }
     }
 
     if (defaultValue?.isNotEmpty ?? false) {

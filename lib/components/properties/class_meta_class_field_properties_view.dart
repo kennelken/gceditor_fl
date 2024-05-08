@@ -257,6 +257,43 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                     ],
                   ),
                 ],
+                if (type.hasMultivalueType()) ...[
+                  //TODO! @sergey
+                  kStyle.kPropertiesVerticalDivider,
+                  Row(
+                    children: [
+                      if (!_needClassSelector(valueType)) ...[
+                        Expanded(child: _getValueTypeDropDownSelector(simpleClassFieldTypes))
+                      ] else ...[
+                        SizedBox(
+                          width: 150 * kScale,
+                          child: _getValueTypeDropDownSelector(simpleClassFieldTypes),
+                        ),
+                        _getHorizontalDivider(),
+                        Expanded(
+                          child: Builder(builder: (context) {
+                            final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
+                              MetaValueCoordinates(
+                                classId: classEntity.id,
+                                fieldId: widget.data.id,
+                                fieldValueType: FindResultFieldDefinitionValueType.simple,
+                              ),
+                              ref.watch(clientFindStateProvider).state,
+                              ref.watch(clientNavigationServiceProvider).state,
+                            );
+
+                            return _getReferenceClassSelector(
+                              classes: allClasses,
+                              selectedItem: model.cache.getClass(valueTypeRefId),
+                              onValueSelected: _handleValueTypeRefSelected,
+                              inputDecoration: idInputDecoration,
+                            );
+                          }),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
                 kStyle.kPropertiesVerticalDivider,
                 Row(
                   children: [
@@ -423,6 +460,12 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
     }
 
     if (type.hasValueType()) {
+      if (valueType != widget.data.valueTypeInfo?.type || valueTypeRefId != widget.data.valueTypeInfo?.classId) //
+        return true;
+    }
+
+    if (type.hasMultivalueType()) {
+      //TODO! @sergey
       if (valueType != widget.data.valueTypeInfo?.type || valueTypeRefId != widget.data.valueTypeInfo?.classId) //
         return true;
     }

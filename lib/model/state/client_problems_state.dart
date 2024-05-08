@@ -263,6 +263,29 @@ void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> resu
               }
               break;
 
+            case ClassFieldType.listMulti: //TODO! @sergey
+              if (field.valueTypeInfo!.type == ClassFieldType.reference) {
+                final list = value.listCellValues!;
+                for (var k = 0; k < list.length; k++) {
+                  final listValue = list[k];
+                  if (listValue is! String || !DbModelUtils.validateReferenceExists(model, field.valueTypeInfo!, listValue))
+                    result.add(
+                      DbModelProblem(
+                        severity: ProblemSeverity.error,
+                        type: ProblemType.invalidReference,
+                        tableId: table.id,
+                        rowIndex: j,
+                        fieldIndex: i,
+                        fieldId: field.id,
+                        innerListRowIndex: k,
+                        innerListColumnIndex: 0,
+                        value: listValue?.toString(),
+                      ),
+                    );
+                }
+              }
+              break;
+
             case ClassFieldType.dictionary:
               final list = value.dictionaryCellValues()!;
               for (var k = 0; k < list.length; k++) {
@@ -374,6 +397,29 @@ void _computeAndAppendInvalidValues(DbModel model, List<DbModelProblem> result) 
 
             case ClassFieldType.list:
             case ClassFieldType.set:
+              if (field.valueTypeInfo!.type == ClassFieldType.reference) {
+                final list = value.listCellValues!;
+                for (var k = 0; k < list.length; k++) {
+                  final listValue = list[k];
+                  if (!DbModelUtils.validateSimpleValue(field.valueTypeInfo!.type, listValue))
+                    result.add(
+                      DbModelProblem(
+                        severity: ProblemSeverity.error,
+                        type: ProblemType.invalidValue,
+                        tableId: table.id,
+                        rowIndex: j,
+                        fieldIndex: i,
+                        fieldId: field.id,
+                        innerListRowIndex: k,
+                        innerListColumnIndex: 0,
+                        value: listValue?.toString(),
+                      ),
+                    );
+                }
+              }
+              break;
+
+            case ClassFieldType.listMulti: //TODO! @sergey
               if (field.valueTypeInfo!.type == ClassFieldType.reference) {
                 final list = value.listCellValues!;
                 for (var k = 0; k < list.length; k++) {

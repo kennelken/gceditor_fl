@@ -10,7 +10,7 @@ DataTableColumn _$DataTableColumnFromJson(Map<String, dynamic> json) =>
     DataTableColumn()
       ..id = json['id'] as String
       ..values = (json['values'] as List<dynamic>)
-          .map((e) => DataTableCellValue.fromJson(e))
+          .map(DataTableCellValue.fromJson)
           .toList();
 
 Map<String, dynamic> _$DataTableColumnToJson(DataTableColumn instance) =>

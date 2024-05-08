@@ -36,7 +36,7 @@ final dateFormatter = DateFormat('yyyy.MM.dd HH:mm');
 
 extension ClassFieldTypeExtensions on ClassFieldType {
   bool isList() {
-    return hasKeyType() || hasValueType();
+    return hasKeyType() || hasValueType() || hasValueType();
   }
 
   bool isEssential() {
@@ -62,6 +62,11 @@ extension ClassFieldTypeExtensions on ClassFieldType {
 
   bool hasValueType() {
     return this == ClassFieldType.dictionary || this == ClassFieldType.list || this == ClassFieldType.set;
+  }
+
+  bool hasMultivalueType() {
+    //TODO! @sergey
+    return this == ClassFieldType.listMulti;
   }
 }
 
@@ -460,6 +465,26 @@ class DbModelUtils {
           return null;
         }
 
+      case ClassFieldType.listMulti: //TODO! @sergey
+        try {
+          final list = jsonDecode(value) ?? [];
+          final valuesList = list
+              .map(
+                (e) => parseDefaultValue(valueType!, null, null, e.toString())?.simpleValue,
+              )
+              .toList();
+
+          if (valuesList.any((e) => e == null)) //
+            return null;
+
+          final resultList = DataTableCellValue.list(valuesList);
+          return resultList;
+        } catch (e, callstack) {
+          if (!silent) //
+            providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Error: $e\nclasstack: $callstack'));
+          return null;
+        }
+
       case ClassFieldType.dictionary:
         try {
           final map = jsonDecode(value) ?? [];
@@ -548,6 +573,9 @@ class DbModelUtils {
       case ClassFieldType.set:
         return value.listCellValues != null && value.listCellValues!.every((e) => validateSimpleValue(field.valueTypeInfo!.type, e));
 
+      case ClassFieldType.listMulti: //TODO! @sergey
+        return value.listCellValues != null && value.listCellValues!.every((e) => validateSimpleValue(field.valueTypeInfo!.type, e));
+
       case ClassFieldType.dictionary:
         final dictionaryValues = value.dictionaryCellValues();
         return dictionaryValues != null &&
@@ -608,6 +636,7 @@ class DbModelUtils {
         return value is String && parseRectangleInt(value) != null;
 
       case ClassFieldType.list:
+      case ClassFieldType.listMulti:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         return false;
@@ -652,6 +681,8 @@ class DbModelUtils {
         return DataTableCellValue.list([]);
       case ClassFieldType.dictionary:
         return DataTableCellValue.dictionary([]);
+      case ClassFieldType.listMulti:
+        return DataTableCellValue.listMulti([]);
 
       case ClassFieldType.date:
         return DataTableCellValue.simple(simpleValueToText(Config.defaultDateTime));
@@ -722,6 +753,8 @@ class DbModelUtils {
 
       case ClassFieldType.list:
         return 250 * scale;
+      case ClassFieldType.listMulti:
+        return 430 * scale;
       case ClassFieldType.set:
         return 250 * scale;
       case ClassFieldType.dictionary:
@@ -940,6 +973,18 @@ class DbModelUtils {
             .toList();
         return DataTableCellValue.list(resultList);
 
+      case ClassFieldType.listMulti: //TODO! @sergey
+        if (validateValue(field, value)) //
+          return value;
+        if (value.listCellValues == null) //
+          return null;
+        final resultList = value.listCellValues!
+            .map(
+              (e) => convertSimpleValueIfPossible(e, field.valueTypeInfo!.type) ?? (getDefaultValue(field.valueTypeInfo!.type)).simpleValue,
+            )
+            .toList();
+        return DataTableCellValue.list(resultList);
+
       case ClassFieldType.dictionary:
         if (validateValue(field, value)) //
           return value;
@@ -1011,6 +1056,7 @@ class DbModelUtils {
 
       case ClassFieldType.undefined:
       case ClassFieldType.list:
+      case ClassFieldType.listMulti:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('Unexpected type "${describeEnum(type)}"');
@@ -1110,6 +1156,18 @@ class DbModelUtils {
 
       case ClassFieldType.list:
       case ClassFieldType.set:
+        final list = values[index].listCellValues;
+        if (list != null) {
+          if (field.valueTypeInfo!.type == ClassFieldType.reference && isSuitableClass(field.valueTypeInfo!.classId)) {
+            for (var i = 0; i < list.length; i++) {
+              if (list[i] == whatReplace) //
+                list[i] = replaceTo;
+            }
+          }
+        }
+        break;
+
+      case ClassFieldType.listMulti: //TODO! @sergey
         final list = values[index].listCellValues;
         if (list != null) {
           if (field.valueTypeInfo!.type == ClassFieldType.reference && isSuitableClass(field.valueTypeInfo!.classId)) {
@@ -1502,6 +1560,9 @@ class DbModelUtils {
               final dictionaryValues = e.dictionaryCellValues();
               if (dictionaryValues != null) //
                 return jsonEncode(dictionaryValues.map((e) => [e.key, e.value]).toList());
+              final listMultiValues = e.multivalueCellValues();
+              if (listMultiValues != null) //
+                return jsonEncode(listMultiValues.map((e) => e.values).toList());
               return e.simpleValue;
             },
           ),

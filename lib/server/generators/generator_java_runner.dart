@@ -425,6 +425,9 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
       case ClassFieldType.list:
         return 'ArrayList<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
 
+      case ClassFieldType.listMulti:
+        return 'ArrayList<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
+
       case ClassFieldType.set:
         return 'HashSet<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
 
@@ -459,6 +462,7 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
         return '${data.prefix}${type.classId!}${data.postfix}';
 
       case ClassFieldType.list:
+      case ClassFieldType.listMulti:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('"${describeEnum(type.type)}" is not a simple type');
@@ -616,6 +620,9 @@ ${_makeSummary(' */', indentDepth, false)}''';
       case ClassFieldType.list:
         return 'ParseList(${value}, ${_getSimplePropertyType(field.valueTypeInfo!, data)}.class, v -> ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
+      case ClassFieldType.listMulti:
+        return 'ParseList(${value}, ${_getSimplePropertyType(field.valueTypeInfo!, data)}.class, v -> ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
+
       case ClassFieldType.set:
         return 'ParseHashSet(${value}, ${_getSimplePropertyType(field.valueTypeInfo!, data)}.class, v -> ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
@@ -692,6 +699,7 @@ ${_makeSummary(' */', indentDepth, false)}''';
         return 'ParseRectangleInt(${value})';
 
       case ClassFieldType.list:
+      case ClassFieldType.listMulti:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('Unexpected type "${describeEnum(type.type)}"');
@@ -723,6 +731,7 @@ ${_makeSummary(' */', indentDepth, false)}''';
         return field.id;
 
       case ClassFieldType.list:
+      case ClassFieldType.listMulti:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         return 'CloneUtils.Clone(${field.id})';

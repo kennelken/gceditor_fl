@@ -145,6 +145,7 @@ enum ClassFieldType {
   text,
   reference,
   list,
+  listMulti,
   set,
   dictionary,
   date,

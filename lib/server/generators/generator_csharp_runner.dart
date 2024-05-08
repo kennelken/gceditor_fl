@@ -492,6 +492,9 @@ namespace ${data.namespace}
       case ClassFieldType.list:
         return 'List<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
 
+      case ClassFieldType.listMulti:
+        return 'List<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
+
       case ClassFieldType.set:
         return 'HashSet<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
 
@@ -526,6 +529,7 @@ namespace ${data.namespace}
         return '${data.prefix}${type.classId!}${data.postfix}';
 
       case ClassFieldType.list:
+      case ClassFieldType.listMulti:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('"${describeEnum(type.type)}" is not a simple type');
@@ -680,6 +684,9 @@ ${_makeSummary('</summary>', indentDepth)}''';
       case ClassFieldType.list:
         return 'ParseList(${value}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
+      case ClassFieldType.listMulti:
+        return 'ParseList(${value}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
+
       case ClassFieldType.set:
         return 'ParseHashSet(${value}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
@@ -756,6 +763,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
         return 'ParseRectangleInt(${value})';
 
       case ClassFieldType.list:
+      case ClassFieldType.listMulti:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('Unexpected type "${describeEnum(type.type)}"');
@@ -787,6 +795,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
         return '';
 
       case ClassFieldType.list:
+      case ClassFieldType.listMulti:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         return '.Clone()';

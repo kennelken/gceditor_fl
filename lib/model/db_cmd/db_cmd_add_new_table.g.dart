@@ -26,7 +26,7 @@ Map<String, dynamic> _$DbCmdAddNewTableToJson(DbCmdAddNewTable instance) {
   }
 
   writeNotNull(r'$type', _$DbCmdTypeEnumMap[instance.$type]);
-  writeNotNull('tableMeta', TableMeta.encode(instance.tableMeta));
+  val['tableMeta'] = TableMeta.encode(instance.tableMeta);
   writeNotNull('parentId', instance.parentId);
   writeNotNull('index', instance.index);
   return val;

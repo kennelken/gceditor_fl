@@ -114,6 +114,7 @@ class _DataTableCellTextViewState extends State<DataTableCellTextView> {
       case ClassFieldType.reference:
       case ClassFieldType.color:
       case ClassFieldType.list:
+      case ClassFieldType.listMulti:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         break;

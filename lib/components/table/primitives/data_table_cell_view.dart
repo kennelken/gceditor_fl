@@ -115,6 +115,17 @@ class DataTableCellView extends StatelessWidget {
           cellFactory: _getSimpleCellImplementation,
         );
 
+      case ClassFieldType.listMulti: //TODO! @sergey
+        return DataTableCellListView(
+          key: ValueKey('${table.id}_${row.id}_${index}_$clientStateVersion'),
+          coordinates: coordinates,
+          value: row.values[index],
+          fieldType: field.typeInfo,
+          valueFieldType: field.valueTypeInfo!,
+          onValueChanged: _saveValue,
+          cellFactory: _getSimpleCellImplementation,
+        );
+
       case ClassFieldType.dictionary:
         return DataTableCellDictionaryView(
           key: ValueKey('${table.id}_${row.id}_${index}_$clientStateVersion'),
@@ -197,6 +208,7 @@ class DataTableCellView extends StatelessWidget {
         );
 
       case ClassFieldType.list:
+      case ClassFieldType.listMulti:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('Unexpected type "${fieldInfo.type}"');

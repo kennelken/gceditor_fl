@@ -45,7 +45,7 @@ class DataTableHeader extends ConsumerWidget {
         ],
         if (hasSelection) ...[
           TooltipWrapper(
-            message: selectedTable!.description,
+            message: selectedTable.description,
             child: TextButtonTransparent(
               onClick: () => _handleTableClick(selectedTable),
               child: Text(

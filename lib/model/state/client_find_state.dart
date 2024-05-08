@@ -249,6 +249,16 @@ class ClientFindStateNotifier extends ChangeNotifier {
                   _doFindInSimpleValue(value.listCellValues![k], field.valueTypeInfo!.type, prioritySuperLow, addResult);
                 }
                 break;
+              case ClassFieldType.listMulti:
+                final multivalueValues = value.multivalueCellValues()!;
+                for (var k = 0; k < multivalueValues.length; k++) {
+                  closureInnerListRow = k;
+                  closureInnerListColumn = 0;
+                  for (var value in multivalueValues[k].values!) {
+                    _doFindInSimpleValue(value, value.listCellValues![k], prioritySuperLow, addResult); //TODO! @sergey
+                  }
+                }
+                break;
               case ClassFieldType.dictionary:
                 final dictionaryValues = value.dictionaryCellValues()!;
                 for (var k = 0; k < dictionaryValues.length; k++) {
@@ -446,6 +456,7 @@ class ClientFindStateNotifier extends ChangeNotifier {
 
       case ClassFieldType.undefined:
       case ClassFieldType.list:
+      case ClassFieldType.listMulti:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('Unexpected type "${describeEnum(type)}"');

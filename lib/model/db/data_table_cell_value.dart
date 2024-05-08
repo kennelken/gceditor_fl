@@ -2,6 +2,7 @@ import 'package:gceditor/model/db/class_meta_field_description.dart';
 import 'package:gceditor/model/db/data_table_cell_dictionary_item.dart';
 import 'package:gceditor/utils/utils.dart';
 
+import 'data_table_cell_multivalue_item.dart';
 import 'db_model_shared.dart';
 
 class DataTableCellValue {
@@ -15,6 +16,14 @@ class DataTableCellValue {
               : List<DataTableCellDictionaryItem>.empty(),
         );
 
+  List<DataTableCellMultiValueItem>? multivalueCellValues() => listCellValues == null
+      ? null
+      : List<DataTableCellMultiValueItem>.unmodifiable(
+          (listCellValues?.isNotEmpty ?? false) && listCellValues![0] is DataTableCellMultiValueItem
+              ? List.from(listCellValues!.map((e) => e as DataTableCellMultiValueItem))
+              : List<DataTableCellMultiValueItem>.empty(),
+        );
+
   DataTableCellValue();
 
   DataTableCellValue.simple(dynamic value) {
@@ -26,6 +35,10 @@ class DataTableCellValue {
   }
 
   DataTableCellValue.dictionary(List<DataTableCellDictionaryItem> value) {
+    listCellValues = value;
+  }
+
+  DataTableCellValue.listMulti(List<DataTableCellMultiValueItem> value) {
     listCellValues = value;
   }
 
@@ -91,10 +104,8 @@ class DataTableCellValue {
         break;
 
       case ClassFieldType.list:
+      case ClassFieldType.listMulti:
       case ClassFieldType.set:
-        simpleValue = null;
-        break;
-
       case ClassFieldType.dictionary:
         simpleValue = null;
         break;
