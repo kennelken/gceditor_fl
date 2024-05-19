@@ -8,7 +8,7 @@ import 'package:loading_overlay/loading_overlay.dart';
 class WaitingOverlay extends ConsumerWidget {
   final Widget child;
 
-  const WaitingOverlay({required this.child, Key? key}) : super(key: key);
+  const WaitingOverlay({required this.child, super.key});
 
   @override
   Widget build(context, ref) {

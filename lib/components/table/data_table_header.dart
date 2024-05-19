@@ -21,8 +21,8 @@ var scrollDataTableProvider = ChangeNotifierProvider((_) => ValueChangeNotifier(
 
 class DataTableHeader extends ConsumerWidget {
   const DataTableHeader({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(context, ref) {

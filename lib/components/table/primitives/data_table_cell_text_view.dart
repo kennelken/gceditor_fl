@@ -21,13 +21,13 @@ class DataTableCellTextView extends StatefulWidget {
   final DataTableValueCoordinates coordinates;
 
   const DataTableCellTextView({
-    Key? key,
+    super.key,
     required this.coordinates,
     required this.fieldType,
     required this.value,
     required this.defaultValue,
     required this.onValueChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<DataTableCellTextView> createState() => _DataTableCellTextViewState();
@@ -114,7 +114,7 @@ class _DataTableCellTextViewState extends State<DataTableCellTextView> {
       case ClassFieldType.reference:
       case ClassFieldType.color:
       case ClassFieldType.list:
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         break;

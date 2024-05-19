@@ -6,7 +6,7 @@ import 'package:gceditor/model/state/client_git_state.dart';
 import 'package:gceditor/model/state/style_state.dart';
 
 class TableGitView extends ConsumerWidget {
-  const TableGitView({Key? key}) : super(key: key);
+  const TableGitView({super.key});
 
   @override
   Widget build(context, ref) {

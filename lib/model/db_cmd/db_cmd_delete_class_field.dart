@@ -40,7 +40,7 @@ class DbCmdDeleteClassField extends BaseDbCmd {
     entity.fields.removeAt(index);
 
     for (final table in dbModel.cache.allDataTables) {
-      final allFields = dbModel.cache.getAllFieldsById(table.classId);
+      final allFields = dbModel.cache.getAllFieldsByClassId(table.classId);
       final index = allFields?.indexOf(field) ?? -1;
       if (index > -1) {
         DbModelUtils.deleteRowValuesAtColumn(table, index);
@@ -71,7 +71,7 @@ class DbCmdDeleteClassField extends BaseDbCmd {
 
     final dataColumnsByTable = <String, List<DataTableColumn>>{};
     for (final table in dbModel.cache.allDataTables) {
-      final allFields = dbModel.cache.getAllFieldsById(table.classId);
+      final allFields = dbModel.cache.getAllFieldsByClassId(table.classId);
       if (allFields != null && allFields.contains(field)) {
         dataColumnsByTable[table.id] = DbModelUtils.getDataColumns(dbModel, table, columns: [field]);
       }

@@ -16,11 +16,11 @@ class DataTableRowView extends StatelessWidget {
   final int index;
 
   const DataTableRowView({
-    Key? key,
+    super.key,
     required this.table,
     required this.row,
     required this.index,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

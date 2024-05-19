@@ -11,11 +11,11 @@ class DataTableBodyView extends StatefulWidget {
   final List<PinnedItemInfo>? pinnedItems;
 
   const DataTableBodyView({
-    Key? key,
+    super.key,
     required this.table,
     required this.horizontalScrollController,
     this.pinnedItems,
-  }) : super(key: key);
+  });
 
   @override
   State<DataTableBodyView> createState() => _DataTableBodyViewState();

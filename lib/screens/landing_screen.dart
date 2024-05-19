@@ -25,7 +25,7 @@ import 'package:gceditor/server/net_commands.dart';
 import '../model/state/landing_page_state.dart';
 
 class LandingScreen extends StatefulWidget {
-  const LandingScreen({Key? key}) : super(key: key);
+  const LandingScreen({super.key});
 
   @override
   LandingScreenState createState() => LandingScreenState();

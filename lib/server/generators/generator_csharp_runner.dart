@@ -343,7 +343,7 @@ namespace ${data.namespace}
         inheritedInterfaceFields.addAll(
           classEntity.interfaces //
               .where((e) => e != null)
-              .selectMany((e, index) => model.cache.getAllFieldsById(e!)!),
+              .selectMany((e, index) => model.cache.getAllFieldsByClassId(e!)!),
         );
         break;
     }
@@ -492,7 +492,7 @@ namespace ${data.namespace}
       case ClassFieldType.list:
         return 'List<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
 
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
         return 'List<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
 
       case ClassFieldType.set:
@@ -529,7 +529,7 @@ namespace ${data.namespace}
         return '${data.prefix}${type.classId!}${data.postfix}';
 
       case ClassFieldType.list:
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('"${describeEnum(type.type)}" is not a simple type');
@@ -684,7 +684,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
       case ClassFieldType.list:
         return 'ParseList(${value}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
         return 'ParseList(${value}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
       case ClassFieldType.set:
@@ -763,7 +763,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
         return 'ParseRectangleInt(${value})';
 
       case ClassFieldType.list:
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('Unexpected type "${describeEnum(type.type)}"');
@@ -795,7 +795,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
         return '';
 
       case ClassFieldType.list:
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         return '.Clone()';
@@ -857,7 +857,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
     final classEntity = model.cache.getEntity(classId);
     if (classEntity is ClassMetaEntity && classEntity.classType == ClassType.valueType) {
       depth++;
-      final allFields = model.cache.getAllFieldsById(classEntity.id);
+      final allFields = model.cache.getAllFieldsByClassId(classEntity.id);
       if (allFields != null) {
         final thisDepth = depth;
         for (final field in allFields) {

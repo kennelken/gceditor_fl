@@ -39,7 +39,7 @@ const _$ClassFieldTypeEnumMap = {
   ClassFieldType.text: 'text',
   ClassFieldType.reference: 'reference',
   ClassFieldType.list: 'list',
-  ClassFieldType.listMulti: 'listMulti',
+  ClassFieldType.listInline: 'listInline',
   ClassFieldType.set: 'set',
   ClassFieldType.dictionary: 'dictionary',
   ClassFieldType.date: 'date',

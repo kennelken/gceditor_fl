@@ -19,7 +19,7 @@ import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/model/state/table_selection_state.dart';
 
 class TreeNodeTile extends ConsumerWidget {
-  const TreeNodeTile({Key? key}) : super(key: key);
+  const TreeNodeTile({super.key});
 
   @override
   Widget build(context, ref) {

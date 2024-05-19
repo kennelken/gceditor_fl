@@ -21,10 +21,10 @@ class FillValueView extends StatefulWidget {
   final TableMetaEntity table;
 
   const FillValueView({
-    Key? key,
+    super.key,
     required this.field,
     required this.table,
-  }) : super(key: key);
+  });
 
   @override
   State<FillValueView> createState() => _FillValueViewState();

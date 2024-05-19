@@ -19,6 +19,8 @@ import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/utils/event_notifier.dart';
 import 'package:gceditor/utils/utils.dart';
 
+import 'db_model_extensions.dart';
+
 final selectFindFieldProvider = ChangeNotifierProvider((_) => EventNotifier());
 final clientFindStateProvider = ChangeNotifierProvider((ref) => ClientFindStateNotifier(ClientFindState()));
 
@@ -175,7 +177,7 @@ class ClientFindStateNotifier extends ChangeNotifier {
 
     if (_findContext.settings.text?.isNotEmpty ?? false) {
       for (var table in model.cache.allDataTables) {
-        final allFields = model.cache.getAllFieldsById(table.classId);
+        final allFields = model.cache.getAllFieldsByClassId(table.classId);
         if (allFields == null) //
           continue;
 
@@ -249,13 +251,14 @@ class ClientFindStateNotifier extends ChangeNotifier {
                   _doFindInSimpleValue(value.listCellValues![k], field.valueTypeInfo!.type, prioritySuperLow, addResult);
                 }
                 break;
-              case ClassFieldType.listMulti:
-                final multivalueValues = value.multivalueCellValues()!;
+              case ClassFieldType.listInline:
+                final multivalueValues = value.listMultiCellValues()!;
                 for (var k = 0; k < multivalueValues.length; k++) {
                   closureInnerListRow = k;
                   closureInnerListColumn = 0;
-                  for (var value in multivalueValues[k].values!) {
-                    _doFindInSimpleValue(value, value.listCellValues![k], prioritySuperLow, addResult); //TODO! @sergey
+                  final values = DbModelUtils.getListMultiColumnsWithValues(model, field.valueTypeInfo!, multivalueValues[k].values)!;
+                  for (var value in values) {
+                    _doFindInSimpleValue(value.$2, value.$1.typeInfo.type, prioritySuperLow, addResult); //TODO! @sergey test
                   }
                 }
                 break;
@@ -362,10 +365,10 @@ class ClientFindStateNotifier extends ChangeNotifier {
             fieldValueType = FindResultFieldDefinitionValueType.simple;
           }
           if (fieldValueType == null && field.keyTypeInfo?.classId != null && _checkMatch(field.keyTypeInfo!.classId!, isId: true)) {
-            fieldValueType = FindResultFieldDefinitionValueType.simple;
+            fieldValueType = FindResultFieldDefinitionValueType.key;
           }
           if (fieldValueType == null && field.valueTypeInfo?.classId != null && _checkMatch(field.valueTypeInfo!.classId!, isId: true)) {
-            fieldValueType = FindResultFieldDefinitionValueType.simple;
+            fieldValueType = FindResultFieldDefinitionValueType.value;
           }
 
           if (fieldValueType != null) {
@@ -456,7 +459,7 @@ class ClientFindStateNotifier extends ChangeNotifier {
 
       case ClassFieldType.undefined:
       case ClassFieldType.list:
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('Unexpected type "${describeEnum(type)}"');

@@ -13,13 +13,13 @@ class DeleteButton extends StatelessWidget {
   final String tooltipText;
 
   const DeleteButton({
-    Key? key,
+    super.key,
     required this.onAction,
     this.size,
     this.width,
     this.color,
     required this.tooltipText,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

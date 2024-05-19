@@ -18,12 +18,12 @@ class HistoryDialogItem extends StatelessWidget {
   final void Function() onClick;
 
   const HistoryDialogItem({
-    Key? key,
+    super.key,
     required this.data,
     required this.selected,
     required this.executionResult,
     required this.onClick,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

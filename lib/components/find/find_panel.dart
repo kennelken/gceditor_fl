@@ -13,8 +13,8 @@ import 'package:gceditor/model/state/style_state.dart';
 
 class FindPanel extends StatefulWidget {
   const FindPanel({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<FindPanel> createState() => _FindPanelState();

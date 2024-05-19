@@ -47,9 +47,8 @@ class Config {
   static const double defaultProblemsHeightRatio = 0.2;
   static const double defaultGitHeightRatio = 0.2;
   static const double defaultHistoryHeightRatio = 0.2;
-  static const double minMainColumnHeightRatio = 0.1;
-  static const double defaultKeysToValues = 0.5;
-  static const double minKeysToValuesRatio = 0.1;
+  static const double minMainColumnHeightRatio = 0.05;
+  static const double minInnerCellFlex = 0.1;
   static const bool defaultTablesExpanded = true;
   static const bool defaultClassesExpanded = true;
   static const bool defaultProblemsExpanded = false;

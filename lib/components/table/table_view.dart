@@ -41,7 +41,7 @@ final _addClassController = CustomPopupMenuController();
 final _addTableController = CustomPopupMenuController();
 
 class TableView extends ConsumerWidget {
-  const TableView({Key? key}) : super(key: key);
+  const TableView({super.key});
 
   @override
   Widget build(context, ref) {

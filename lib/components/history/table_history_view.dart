@@ -6,7 +6,7 @@ import 'package:gceditor/model/state/client_history_state.dart';
 import 'package:gceditor/model/state/style_state.dart';
 
 class TableHistoryView extends ConsumerWidget {
-  const TableHistoryView({Key? key}) : super(key: key);
+  const TableHistoryView({super.key});
 
   @override
   Widget build(context, ref) {

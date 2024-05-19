@@ -16,7 +16,7 @@ class DataTableCellValue {
               : List<DataTableCellDictionaryItem>.empty(),
         );
 
-  List<DataTableCellMultiValueItem>? multivalueCellValues() => listCellValues == null
+  List<DataTableCellMultiValueItem>? listMultiCellValues() => listCellValues == null
       ? null
       : List<DataTableCellMultiValueItem>.unmodifiable(
           (listCellValues?.isNotEmpty ?? false) && listCellValues![0] is DataTableCellMultiValueItem
@@ -104,7 +104,7 @@ class DataTableCellValue {
         break;
 
       case ClassFieldType.list:
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         simpleValue = null;

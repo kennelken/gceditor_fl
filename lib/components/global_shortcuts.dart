@@ -238,9 +238,9 @@ class RawKeyboardEvents extends StatefulWidget {
   final Widget child;
 
   const RawKeyboardEvents({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   State<RawKeyboardEvents> createState() => _RawKeyboardEventsState();

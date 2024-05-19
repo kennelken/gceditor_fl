@@ -26,7 +26,7 @@ import 'package:gceditor/model/db_cmd/db_cmd_reorder_class_field.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_reorder_enum.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_reorder_meta_entity.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_resize_column.dart';
-import 'package:gceditor/model/db_cmd/db_cmd_resize_dictionary_key_to_value.dart';
+import 'package:gceditor/model/db_cmd/db_cmd_resize_inner_cell.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
@@ -140,8 +140,8 @@ abstract class BaseDbCmd {
         return DbCmdReorderDataRow.fromJson(element);
       case DbCmdType.resizeColumn:
         return DbCmdResizeColumn.fromJson(element);
-      case DbCmdType.resizeDictionaryKeyToValue:
-        return DbCmdResizeDictionaryKeyToValue.fromJson(element);
+      case DbCmdType.resizeInnerCell:
+        return DbCmdResizeInnerCell.fromJson(element);
       case DbCmdType.copypaste:
         return DbCmdCopyPaste.fromJson(element);
       case DbCmdType.fillColumn:
@@ -183,7 +183,7 @@ enum DbCmdType {
   reorderClassInterface,
   reorderDataRow,
   resizeColumn,
-  resizeDictionaryKeyToValue,
+  resizeInnerCell,
   copypaste,
   fillColumn,
 }

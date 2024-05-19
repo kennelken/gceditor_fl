@@ -58,7 +58,7 @@ class DbCmdEditTable extends BaseDbCmd {
         final row = DataTableRow()..id = currentRowIds[i];
         table.rows.add(row);
 
-        final allColumns = dbModel.cache.getAllFieldsById(table.classId);
+        final allColumns = dbModel.cache.getAllFieldsByClassId(table.classId);
 
         if (allColumns != null) {
           for (var j = 0; j < allColumns.length; j++) {

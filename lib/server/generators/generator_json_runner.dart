@@ -32,7 +32,7 @@ class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with Output
               ..id = row.id,
           );
 
-          final allFields = model.cache.getAllFieldsById(table.classId);
+          final allFields = model.cache.getAllFieldsByClassId(table.classId);
           if (allFields == null) //
             continue;
 

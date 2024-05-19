@@ -13,7 +13,7 @@ import 'package:gceditor/model/state/style_state.dart';
 import '../../model/state/landing_page_state.dart';
 
 class ServerAuthAdminPanel extends StatefulWidget {
-  const ServerAuthAdminPanel({Key? key}) : super(key: key);
+  const ServerAuthAdminPanel({super.key});
 
   @override
   ServerAuthAdminPanelState createState() => ServerAuthAdminPanelState();

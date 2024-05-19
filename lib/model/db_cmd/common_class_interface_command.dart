@@ -91,7 +91,7 @@ mixin CommonClassInterfaceCommand {
       final interfaceFields = dbModel.cache.getAllFields(interfaceEntity).toSet();
 
       for (final table in dbModel.cache.allDataTables) {
-        final allFields = dbModel.cache.getAllFieldsById(table.classId);
+        final allFields = dbModel.cache.getAllFieldsByClassId(table.classId);
         final interferingFields = allFields!.where((f) => interfaceFields.contains(f)).toList();
 
         final dataColumns = DbModelUtils.getDataColumns(dbModel, table, columns: interferingFields);
@@ -129,7 +129,7 @@ mixin CommonClassInterfaceCommand {
     dbModel.cache.invalidate();
 
     for (final table in allTablesUsingClass) {
-      final allFields = dbModel.cache.getAllFieldsById(table.classId)!;
+      final allFields = dbModel.cache.getAllFieldsByClassId(table.classId)!;
       final defaultValues = allFields.map((e) => DbModelUtils.parseDefaultValueByFieldOrDefault(dbModel, e, e.defaultValue)).toList();
 
       for (var i = 0; i < table.rows.length; i++) {

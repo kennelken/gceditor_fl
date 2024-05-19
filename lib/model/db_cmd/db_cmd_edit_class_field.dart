@@ -135,7 +135,22 @@ class DbCmdEditClassField extends BaseDbCmd {
       if (newType!.type == ClassFieldType.reference && newType!.classId == null) //
         return DbCmdResult.fail('Class reference is not specified');
 
-      defaultValue ??= field.defaultValue; // have to check
+      defaultValue ??= field.defaultValue;
+
+      //TODO! @sergey test
+      if (!newType!.type.isSimple()) {
+        final allClassesUsingField = dbModel.cache.allClasses //
+            .where((e) => dbModel.cache.getAllFieldsByClassId(e.id)!.any((f) => f == field))
+            .map((e) => e.id)
+            .toSet();
+        if (dbModel.cache.allClasses.any(
+          (e) => dbModel.cache
+              .getAllFields(e)
+              .any((f) => f.typeInfo.type == ClassFieldType.listInline && allClassesUsingField.contains(f.valueTypeInfo!.classId)),
+        )) {
+          return DbCmdResult.fail('The field can not have a complex type because it is used in a multiValue list');
+        }
+      }
 
       if (newType!.type.hasKeyType()) {
         if (newKeyType == null || newKeyType!.type == ClassFieldType.undefined) //
@@ -159,16 +174,29 @@ class DbCmdEditClassField extends BaseDbCmd {
           return DbCmdResult.fail('Specified type is not simple');
       }
 
-      if (newType!.type.hasMultivalueType()) {
-        //TODO! @sergey
+      if (newType!.type.hasMultiValueType()) {
+        //TODO! @sergey test
         if (newValueType == null || newValueType!.type == ClassFieldType.undefined) //
           return DbCmdResult.fail('Value type is not specified');
 
         if (newValueType!.type == ClassFieldType.reference && newValueType!.classId == null) //
           return DbCmdResult.fail('Class reference is not specified');
 
-        if (!newValueType!.type.isSimple()) //
-          return DbCmdResult.fail('Specified type is not simple');
+        if (newValueType!.type != ClassFieldType.reference) //
+          return DbCmdResult.fail('Specified type must be a reference');
+
+        final newValueClass = dbModel.cache.getClass(newValueType!.classId)!;
+        if (newValueClass is! ClassMetaEntity) return DbCmdResult.fail('Specified type must be a class');
+
+        final valueClassType = newValueClass.classType;
+        if (valueClassType != ClassType.referenceType && valueClassType != ClassType.valueType) //
+          return DbCmdResult.fail('Specified type must be a non abstract class');
+
+        final newColumns = DbModelUtils.getListMultiColumns(dbModel, newValueType!)!;
+        for (var column in newColumns) {
+          if (!column.typeInfo.type.isSimple()) //
+            return DbCmdResult.fail('Specified type contains a column that is not simple');
+        }
       }
     }
 

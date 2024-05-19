@@ -5,9 +5,9 @@ class DropAvailableIndicatorLine extends StatelessWidget {
   final bool visible;
 
   const DropAvailableIndicatorLine({
-    Key? key,
+    super.key,
     this.visible = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -18,6 +18,7 @@ import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/model/state/style_state.dart';
 
+import 'data_table_cell_list_multi_view.dart';
 import 'data_table_cell_list_view.dart';
 import 'data_table_cell_text_view.dart';
 
@@ -36,11 +37,11 @@ class DataTableCellView extends StatelessWidget {
   final int index;
 
   const DataTableCellView({
-    Key? key,
+    super.key,
     required this.table,
     required this.row,
     required this.index,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +62,7 @@ class DataTableCellView extends StatelessWidget {
 
   Widget _getCellImplementation() {
     final model = clientModel;
-    final allFields = model.cache.getAllFieldsById(table.classId)!;
+    final allFields = model.cache.getAllFieldsByClassId(table.classId)!;
     final clientStateVersion = providerContainer.read(clientStateProvider).state.version;
 
     final field = allFields[index];
@@ -115,8 +116,8 @@ class DataTableCellView extends StatelessWidget {
           cellFactory: _getSimpleCellImplementation,
         );
 
-      case ClassFieldType.listMulti: //TODO! @sergey
-        return DataTableCellListView(
+      case ClassFieldType.listInline: //TODO! @sergey test
+        return DataTableCellListMultiView(
           key: ValueKey('${table.id}_${row.id}_${index}_$clientStateVersion'),
           coordinates: coordinates,
           value: row.values[index],
@@ -130,8 +131,6 @@ class DataTableCellView extends StatelessWidget {
         return DataTableCellDictionaryView(
           key: ValueKey('${table.id}_${row.id}_${index}_$clientStateVersion'),
           coordinates: coordinates,
-          table: table,
-          field: field,
           value: row.values[index],
           fieldType: field.typeInfo,
           valueFieldType: field.valueTypeInfo!,
@@ -208,7 +207,7 @@ class DataTableCellView extends StatelessWidget {
         );
 
       case ClassFieldType.list:
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('Unexpected type "${fieldInfo.type}"');
@@ -216,7 +215,7 @@ class DataTableCellView extends StatelessWidget {
   }
 
   void _saveValue(DataTableCellValue value) {
-    final allFields = clientModel.cache.getAllFieldsById(table.classId)!;
+    final allFields = clientModel.cache.getAllFieldsByClassId(table.classId)!;
 
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(
           DbCmdEditTableCellValue.values(

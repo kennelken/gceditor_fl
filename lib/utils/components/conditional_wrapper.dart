@@ -6,11 +6,11 @@ class ConditionalWrapper extends StatelessWidget {
   final Widget child;
 
   const ConditionalWrapper({
-    Key? key,
+    super.key,
     required this.wrapperBuilder,
     required this.enabled,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

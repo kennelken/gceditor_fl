@@ -62,7 +62,7 @@ class DbCmdAddDataRow extends BaseDbCmd {
     if (index < 0 || index > table.rows.length) //
       return DbCmdResult.fail('invalid index "$index"');
 
-    final allFields = dbModel.cache.getAllFieldsById(table.classId) ?? [];
+    final allFields = dbModel.cache.getAllFieldsByClassId(table.classId) ?? [];
     if (tableRowValues != null) {
       if (tableRowValues!.values.length != allFields.length) {
         return DbCmdResult.fail('Invalid data length ("${tableRowValues!.values.length}" != "${allFields.length}")');

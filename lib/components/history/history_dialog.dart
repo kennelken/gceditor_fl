@@ -20,9 +20,9 @@ class HistoryDialog extends StatefulWidget {
   final HistoryItemData data;
 
   const HistoryDialog({
-    Key? key,
+    super.key,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   State<HistoryDialog> createState() => _HistoryDialogState();

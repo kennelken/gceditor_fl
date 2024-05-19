@@ -5,7 +5,7 @@ import 'package:gceditor/components/table/table_view.dart';
 import 'package:gceditor/model/state/settings_state.dart';
 
 class ClientScreen extends ConsumerWidget {
-  const ClientScreen({Key? key}) : super(key: key);
+  const ClientScreen({super.key});
 
   @override
   Widget build(context, ref) {

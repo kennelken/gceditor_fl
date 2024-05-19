@@ -211,7 +211,7 @@ List<DbModelProblem> _computeProblems(String modelJson) {
 
 void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> result) {
   for (var table in model.cache.allDataTables) {
-    final allFields = model.cache.getAllFieldsById(table.classId);
+    final allFields = model.cache.getAllFieldsByClassId(table.classId);
     if (allFields == null) //
       continue;
 
@@ -263,25 +263,31 @@ void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> resu
               }
               break;
 
-            case ClassFieldType.listMulti: //TODO! @sergey
-              if (field.valueTypeInfo!.type == ClassFieldType.reference) {
-                final list = value.listCellValues!;
-                for (var k = 0; k < list.length; k++) {
-                  final listValue = list[k];
-                  if (listValue is! String || !DbModelUtils.validateReferenceExists(model, field.valueTypeInfo!, listValue))
-                    result.add(
-                      DbModelProblem(
-                        severity: ProblemSeverity.error,
-                        type: ProblemType.invalidReference,
-                        tableId: table.id,
-                        rowIndex: j,
-                        fieldIndex: i,
-                        fieldId: field.id,
-                        innerListRowIndex: k,
-                        innerListColumnIndex: 0,
-                        value: listValue?.toString(),
-                      ),
-                    );
+            case ClassFieldType.listInline: //TODO! @sergey test
+              final list = value.listMultiCellValues()!;
+              for (var k = 0; k < list.length; k++) {
+                final listValue = list[k];
+                final values = DbModelUtils.getListMultiColumnsWithValues(model, field.typeInfo, listValue.values)!;
+
+                var innerColumnIndex = -1;
+                for (var t in values) {
+                  innerColumnIndex++;
+                  if (t.$1.typeInfo.type == ClassFieldType.reference) {
+                    if (!DbModelUtils.validateReferenceExists(model, t.$1.typeInfo, t.$2))
+                      result.add(
+                        DbModelProblem(
+                          severity: ProblemSeverity.error,
+                          type: ProblemType.invalidReference,
+                          tableId: table.id,
+                          rowIndex: j,
+                          fieldIndex: i,
+                          fieldId: field.id,
+                          innerListRowIndex: k,
+                          innerListColumnIndex: innerColumnIndex,
+                          value: t.$2?.toString(),
+                        ),
+                      );
+                  }
                 }
               }
               break;
@@ -291,37 +297,24 @@ void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> resu
               for (var k = 0; k < list.length; k++) {
                 final listValue = list[k];
 
-                if (field.keyTypeInfo!.type == ClassFieldType.reference) {
-                  if (!DbModelUtils.validateReferenceExists(model, field.keyTypeInfo!, listValue.key))
-                    result.add(
-                      DbModelProblem(
-                        severity: ProblemSeverity.error,
-                        type: ProblemType.invalidReference,
-                        tableId: table.id,
-                        rowIndex: j,
-                        fieldIndex: i,
-                        fieldId: field.id,
-                        innerListRowIndex: k,
-                        innerListColumnIndex: 0,
-                        value: listValue.key?.toString(),
-                      ),
-                    );
-                }
-                if (field.valueTypeInfo!.type == ClassFieldType.reference) {
-                  if (!DbModelUtils.validateReferenceExists(model, field.valueTypeInfo!, listValue.value))
-                    result.add(
-                      DbModelProblem(
-                        severity: ProblemSeverity.error,
-                        type: ProblemType.invalidReference,
-                        tableId: table.id,
-                        rowIndex: j,
-                        fieldIndex: j,
-                        fieldId: field.id,
-                        innerListRowIndex: k,
-                        innerListColumnIndex: 1,
-                        value: listValue.value?.toString(),
-                      ),
-                    );
+                final values = [(field.keyTypeInfo!, listValue.key, 0), (field.valueTypeInfo!, listValue.value, 1)];
+                for (var t in values) {
+                  if (t.$1.type == ClassFieldType.reference) {
+                    if (!DbModelUtils.validateReferenceExists(model, t.$1, t.$2))
+                      result.add(
+                        DbModelProblem(
+                          severity: ProblemSeverity.error,
+                          type: ProblemType.invalidReference,
+                          tableId: table.id,
+                          rowIndex: j,
+                          fieldIndex: i,
+                          fieldId: field.id,
+                          innerListRowIndex: k,
+                          innerListColumnIndex: t.$3,
+                          value: t.$2?.toString(),
+                        ),
+                      );
+                  }
                 }
               }
               break;
@@ -367,7 +360,7 @@ void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> resu
 
 void _computeAndAppendInvalidValues(DbModel model, List<DbModelProblem> result) {
   for (var table in model.cache.allDataTables) {
-    final allFields = model.cache.getAllFieldsById(table.classId);
+    final allFields = model.cache.getAllFieldsByClassId(table.classId);
     if (allFields == null) //
       continue;
 
@@ -419,12 +412,16 @@ void _computeAndAppendInvalidValues(DbModel model, List<DbModelProblem> result) 
               }
               break;
 
-            case ClassFieldType.listMulti: //TODO! @sergey
-              if (field.valueTypeInfo!.type == ClassFieldType.reference) {
-                final list = value.listCellValues!;
-                for (var k = 0; k < list.length; k++) {
-                  final listValue = list[k];
-                  if (!DbModelUtils.validateSimpleValue(field.valueTypeInfo!.type, listValue))
+            case ClassFieldType.listInline: //TODO! @sergey test
+              final list = value.listMultiCellValues()!;
+              for (var k = 0; k < list.length; k++) {
+                final listValue = list[k];
+                final values = DbModelUtils.getListMultiColumnsWithValues(model, field.typeInfo, listValue.values)!;
+
+                var innerColumnIndex = -1;
+                for (var t in values) {
+                  innerColumnIndex++;
+                  if (!DbModelUtils.validateSimpleValue(t.$1.typeInfo.type, t.$2))
                     result.add(
                       DbModelProblem(
                         severity: ProblemSeverity.error,
@@ -434,8 +431,8 @@ void _computeAndAppendInvalidValues(DbModel model, List<DbModelProblem> result) 
                         fieldIndex: i,
                         fieldId: field.id,
                         innerListRowIndex: k,
-                        innerListColumnIndex: 0,
-                        value: listValue?.toString(),
+                        innerListColumnIndex: innerColumnIndex,
+                        value: t.$2?.toString(),
                       ),
                     );
                 }
@@ -447,35 +444,23 @@ void _computeAndAppendInvalidValues(DbModel model, List<DbModelProblem> result) 
               for (var k = 0; k < list.length; k++) {
                 final listValue = list[k];
 
-                if (!DbModelUtils.validateSimpleValue(field.keyTypeInfo!.type, listValue.key))
-                  result.add(
-                    DbModelProblem(
-                      severity: ProblemSeverity.error,
-                      type: ProblemType.invalidValue,
-                      tableId: table.id,
-                      rowIndex: j,
-                      fieldIndex: i,
-                      fieldId: field.id,
-                      innerListRowIndex: k,
-                      innerListColumnIndex: 0,
-                      value: listValue.key?.toString(),
-                    ),
-                  );
-
-                if (!DbModelUtils.validateSimpleValue(field.valueTypeInfo!.type, listValue.value))
-                  result.add(
-                    DbModelProblem(
-                      severity: ProblemSeverity.error,
-                      type: ProblemType.invalidValue,
-                      tableId: table.id,
-                      rowIndex: j,
-                      fieldIndex: j,
-                      fieldId: field.id,
-                      innerListRowIndex: k,
-                      innerListColumnIndex: 1,
-                      value: listValue.value?.toString(),
-                    ),
-                  );
+                final values = [(field.keyTypeInfo!, listValue.key, 0), (field.valueTypeInfo!, listValue.value, 1)];
+                for (var t in values) {
+                  if (!DbModelUtils.validateSimpleValue(t.$1.type, t.$2))
+                    result.add(
+                      DbModelProblem(
+                        severity: ProblemSeverity.error,
+                        type: ProblemType.invalidValue,
+                        tableId: table.id,
+                        rowIndex: j,
+                        fieldIndex: i,
+                        fieldId: field.id,
+                        innerListRowIndex: k,
+                        innerListColumnIndex: t.$3,
+                        value: t.$2?.toString(),
+                      ),
+                    );
+                }
               }
               break;
 
@@ -536,7 +521,7 @@ void _computeAndAppendDuplicateUniqueValues(DbModel model, List<DbModelProblem> 
   final allValues = MultidimensionalMap2<ClassMetaFieldDescription, dynamic, List<DbModelProblem>>();
 
   for (var table in model.cache.allDataTables) {
-    final allFields = model.cache.getAllFieldsById(table.classId);
+    final allFields = model.cache.getAllFieldsByClassId(table.classId);
     if (allFields == null) //
       continue;
 
@@ -592,7 +577,7 @@ void _computeAndAppendDuplicateUniqueValues(DbModel model, List<DbModelProblem> 
 
 void _computeAndAppendRepeatingSetValues(DbModel model, List<DbModelProblem> result) {
   for (var table in model.cache.allDataTables) {
-    final allFields = model.cache.getAllFieldsById(table.classId);
+    final allFields = model.cache.getAllFieldsByClassId(table.classId);
     if (allFields == null) //
       continue;
 
@@ -654,7 +639,7 @@ void _computeAndAppendRepeatingSetValues(DbModel model, List<DbModelProblem> res
 
 void _computeAndAppendRepeatingDictionaryKeys(DbModel model, List<DbModelProblem> result) {
   for (var table in model.cache.allDataTables) {
-    final allFields = model.cache.getAllFieldsById(table.classId);
+    final allFields = model.cache.getAllFieldsByClassId(table.classId);
     if (allFields == null) //
       continue;
 

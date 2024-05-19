@@ -40,9 +40,9 @@ class ClassMetaClassPropertiesViewProperties extends StatefulWidget {
   final ClassMetaEntity data;
 
   const ClassMetaClassPropertiesViewProperties({
-    Key? key,
+    super.key,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   State<ClassMetaClassPropertiesViewProperties> createState() => _ClassMetaClassPropertiesViewPropertiesState();

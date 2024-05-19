@@ -18,9 +18,10 @@ TableMetaEntity _$TableMetaEntityFromJson(Map<String, dynamic> json) =>
       ..columWidth = (json['columWidth'] as Map<String, dynamic>).map(
         (k, e) => MapEntry(k, (e as num).toDouble()),
       )
-      ..columnKeyToValueWidthRatio =
-          (json['columnKeyToValueWidthRatio'] as Map<String, dynamic>).map(
-        (k, e) => MapEntry(k, (e as num).toDouble()),
+      ..columnInnerCellFlex =
+          (json['columnInnerCellFlex'] as Map<String, dynamic>).map(
+        (k, e) => MapEntry(
+            k, (e as List<dynamic>).map((e) => (e as num).toDouble()).toList()),
       )
       ..rows = (json['rows'] as List<dynamic>)
           .map((e) => DataTableRow.fromJson(e as Map<String, dynamic>))
@@ -43,7 +44,7 @@ Map<String, dynamic> _$TableMetaEntityToJson(TableMetaEntity instance) {
   writeNotNull('rowHeightMultiplier', instance.rowHeightMultiplier);
   writeNotNull('exportList', instance.exportList);
   val['columWidth'] = instance.columWidth;
-  val['columnKeyToValueWidthRatio'] = instance.columnKeyToValueWidthRatio;
+  val['columnInnerCellFlex'] = instance.columnInnerCellFlex;
   val['rows'] = instance.rows.map((e) => e.toJson()).toList();
   return val;
 }

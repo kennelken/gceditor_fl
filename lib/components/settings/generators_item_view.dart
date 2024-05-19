@@ -24,12 +24,12 @@ class GeneratorsItemView extends StatefulWidget {
   static get itemTotalHeight => (itemHeight + 2 * itemPadding) * kScale;
 
   const GeneratorsItemView({
-    Key? key,
+    super.key,
     required this.generator,
     required this.index,
     required this.onChange,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   GeneratorsItemViewState createState() => GeneratorsItemViewState();

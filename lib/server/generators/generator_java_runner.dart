@@ -327,7 +327,7 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
         inheritedInterfaceFields.addAll(
           classEntity.interfaces //
               .where((e) => e != null)
-              .selectMany((e, index) => model.cache.getAllFieldsById(e!)!),
+              .selectMany((e, index) => model.cache.getAllFieldsByClassId(e!)!),
         );
         break;
     }
@@ -425,7 +425,7 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
       case ClassFieldType.list:
         return 'ArrayList<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
 
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
         return 'ArrayList<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
 
       case ClassFieldType.set:
@@ -462,7 +462,7 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
         return '${data.prefix}${type.classId!}${data.postfix}';
 
       case ClassFieldType.list:
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('"${describeEnum(type.type)}" is not a simple type');
@@ -620,7 +620,7 @@ ${_makeSummary(' */', indentDepth, false)}''';
       case ClassFieldType.list:
         return 'ParseList(${value}, ${_getSimplePropertyType(field.valueTypeInfo!, data)}.class, v -> ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
         return 'ParseList(${value}, ${_getSimplePropertyType(field.valueTypeInfo!, data)}.class, v -> ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
       case ClassFieldType.set:
@@ -699,7 +699,7 @@ ${_makeSummary(' */', indentDepth, false)}''';
         return 'ParseRectangleInt(${value})';
 
       case ClassFieldType.list:
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('Unexpected type "${describeEnum(type.type)}"');
@@ -731,7 +731,7 @@ ${_makeSummary(' */', indentDepth, false)}''';
         return field.id;
 
       case ClassFieldType.list:
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         return 'CloneUtils.Clone(${field.id})';
@@ -793,7 +793,7 @@ ${_makeSummary(' */', indentDepth, false)}''';
     final classEntity = model.cache.getEntity(classId);
     if (classEntity is ClassMetaEntity && classEntity.classType == ClassType.valueType) {
       depth++;
-      final allFields = model.cache.getAllFieldsById(classEntity.id);
+      final allFields = model.cache.getAllFieldsByClassId(classEntity.id);
       if (allFields != null) {
         final thisDepth = depth;
         for (final field in allFields) {

@@ -29,6 +29,7 @@ import 'package:gceditor/utils/utils.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+import '../db/data_table_cell_multivalue_item.dart';
 import 'custom_data_classes.dart';
 import 'service/client_navigation_service.dart';
 
@@ -36,7 +37,7 @@ final dateFormatter = DateFormat('yyyy.MM.dd HH:mm');
 
 extension ClassFieldTypeExtensions on ClassFieldType {
   bool isList() {
-    return hasKeyType() || hasValueType() || hasValueType();
+    return hasKeyType() || hasValueType() || hasMultiValueType();
   }
 
   bool isEssential() {
@@ -64,9 +65,9 @@ extension ClassFieldTypeExtensions on ClassFieldType {
     return this == ClassFieldType.dictionary || this == ClassFieldType.list || this == ClassFieldType.set;
   }
 
-  bool hasMultivalueType() {
+  bool hasMultiValueType() {
     //TODO! @sergey test
-    return this == ClassFieldType.listMulti;
+    return this == ClassFieldType.listInline;
   }
 }
 
@@ -490,7 +491,7 @@ class DbModelUtils {
           return null;
         }
 
-      case ClassFieldType.listMulti: //TODO! @sergey test
+      case ClassFieldType.listInline: //TODO! @sergey test
         try {
           final listMulti = jsonDecode(value) ?? [];
 
@@ -590,10 +591,8 @@ class DbModelUtils {
               (e) => validateSimpleValue(field.keyTypeInfo!.type, e.key) && validateSimpleValue(field.valueTypeInfo!.type, e.value),
             );
 
-      case ClassFieldType.listMulti: //TODO! @sergey test
-        final columns = getListMultiColumns(model, field.valueTypeInfo!)!;
-
-        final multiValues = value.multivalueCellValues();
+      case ClassFieldType.listInline: //TODO! @sergey test
+        final multiValues = value.listMultiCellValues();
         return multiValues != null &&
             multiValues.every(
               (e) => getListMultiColumnsWithValues(model, field.valueTypeInfo!, e.values)! //
@@ -653,7 +652,7 @@ class DbModelUtils {
         return value is String && parseRectangleInt(value) != null;
 
       case ClassFieldType.list:
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         return false;
@@ -698,7 +697,7 @@ class DbModelUtils {
         return DataTableCellValue.list([]);
       case ClassFieldType.dictionary:
         return DataTableCellValue.dictionary([]);
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
         return DataTableCellValue.listMulti([]);
 
       case ClassFieldType.date:
@@ -770,7 +769,7 @@ class DbModelUtils {
 
       case ClassFieldType.list:
         return 250 * scale;
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
         return 430 * scale;
       case ClassFieldType.set:
         return 250 * scale;
@@ -801,11 +800,56 @@ class DbModelUtils {
     }
   }
 
-  static double getTableKeyToValueRatio(TableMetaEntity table, ClassMetaFieldDescription field) {
-    if (table.columnKeyToValueWidthRatio.containsKey(field.id)) //
-      return table.columnKeyToValueWidthRatio[field.id]!.clamp(Config.minKeysToValuesRatio, 1 - Config.minKeysToValuesRatio);
+  static List<double> getTableInnerCellsFlex(DbModel model, TableMetaEntity table, ClassMetaFieldDescription field) {
+    if (table.columnInnerCellFlex.containsKey(field.id)) {
+      return table.columnInnerCellFlex[field.id]!;
+    }
 
-    return Config.defaultKeysToValues;
+    final columnsCount = DbModelUtils.getInnerCellsCount(model, field)!;
+    return List<double>.generate(columnsCount, (_) => 1.0 / columnsCount);
+  }
+
+  static List<double> setInnerCellColumnFlex(DbModel model, TableMetaEntity table, ClassMetaFieldDescription field,
+      {List<double>? flex, List<double>? deltaRatio}) {
+    //TODO! @sergey test
+    var result = getTableInnerCellsFlex(model, table, field);
+    if (flex != null) {
+      result = flex;
+    } else if (deltaRatio != null) {
+      result = getTableInnerCellsFlex(model, table, field).select((e, i) => e + deltaRatio[i]).toList();
+    } else {
+      throw Exception('At least on of the following should be specified: "ratio", "deltaRatio"');
+    }
+
+    final sum = result.fold(0.0, (v, e) => v + e);
+    result = result.map((e) => e / sum).toList();
+
+    final indexesToNormalize = <int>{};
+    var sumOfNormalizableValues = 0.0;
+    var sumOfFixedValues = 0.0;
+    for (var i = 0; i < result.length; i++) {
+      if (result[i] <= Config.minInnerCellFlex) {
+        result[i] = Config.minInnerCellFlex;
+        sumOfFixedValues += result[i];
+      } else {
+        indexesToNormalize.add(i);
+        sumOfNormalizableValues += result[i];
+      }
+    }
+
+    if (indexesToNormalize.length != result.length && sumOfNormalizableValues > 0) {
+      final normalizingCoeff = (1 - sumOfFixedValues) / sumOfNormalizableValues;
+
+      for (var i = 0; i < result.length; i++) {
+        if (!indexesToNormalize.contains(i)) //
+          continue;
+
+        result[i] = result[i] * normalizingCoeff;
+      }
+    }
+
+    table.columnInnerCellFlex[field.id] = result;
+    return result;
   }
 
   static double getTableWidth(DbModel model, TableMetaEntity table, bool withIds, {String? upToFieldId}) {
@@ -892,7 +936,7 @@ class DbModelUtils {
   }
 
   static void applyDataColumns(DbModel model, TableMetaEntity table, List<DataTableColumn>? columns) {
-    final allColumns = model.cache.getAllFieldsById(table.classId);
+    final allColumns = model.cache.getAllFieldsByClassId(table.classId);
     if (allColumns == null) //
       return;
 
@@ -919,7 +963,7 @@ class DbModelUtils {
   }
 
   static void insertDefaultValues(DbModel model, TableMetaEntity table, int columnIndex) {
-    final allFields = model.cache.getAllFieldsById(table.classId);
+    final allFields = model.cache.getAllFieldsByClassId(table.classId);
     if (allFields == null) //
       return;
 
@@ -937,7 +981,7 @@ class DbModelUtils {
   }
 
   static void makeDefaultIfRequired(DbModel model, TableMetaEntity table, Set<ClassMetaFieldDescription> fields) {
-    final allFields = model.cache.getAllFieldsById(table.classId);
+    final allFields = model.cache.getAllFieldsByClassId(table.classId);
     if (allFields != null) {
       for (var i = 0; i < allFields.length; i++) {
         final field = allFields[i];
@@ -990,17 +1034,25 @@ class DbModelUtils {
             .toList();
         return DataTableCellValue.list(resultList);
 
-      case ClassFieldType.listMulti: //TODO! @sergey
+      case ClassFieldType.listInline: //TODO! @sergey test
         if (validateValue(model, field, value)) //
           return value;
-        if (value.listCellValues == null) //
+        final listMultiValues = value.listMultiCellValues();
+        if (listMultiValues == null) //
           return null;
-        final resultList = value.listCellValues!
+
+        final resultList = listMultiValues
             .map(
-              (e) => convertSimpleValueIfPossible(e, field.valueTypeInfo!.type) ?? (getDefaultValue(field.valueTypeInfo!.type)).simpleValue,
+              (e) => DataTableCellMultiValueItem.values(
+                values: getListMultiColumnsWithValues(model, field.valueTypeInfo!, e.values)!
+                    .map(
+                      (ev) => convertSimpleValueIfPossible(ev.$1, field.keyTypeInfo!.type) ?? (getDefaultValue(field.keyTypeInfo!.type)).simpleValue,
+                    )
+                    .toList(),
+              ),
             )
             .toList();
-        return DataTableCellValue.list(resultList);
+        return DataTableCellValue.listMulti(resultList);
 
       case ClassFieldType.dictionary:
         if (validateValue(model, field, value)) //
@@ -1073,7 +1125,7 @@ class DbModelUtils {
 
       case ClassFieldType.undefined:
       case ClassFieldType.list:
-      case ClassFieldType.listMulti:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('Unexpected type "${describeEnum(type)}"');
@@ -1091,7 +1143,7 @@ class DbModelUtils {
     final currentAndParentClasses = [classEntity.id, ...model.cache.getParentClasses(classEntity).map((e) => e.id)];
 
     for (final currentTable in model.cache.allDataTables) {
-      final allFields = model.cache.getAllFieldsById(currentTable.classId);
+      final allFields = model.cache.getAllFieldsByClassId(currentTable.classId);
       if (allFields == null) //
         continue;
 
@@ -1099,6 +1151,7 @@ class DbModelUtils {
         final field = allFields[i];
         for (var j = 0; j < currentTable.rows.length; j++) {
           _editTableRowReferenceValue(
+            model,
             (classId) => currentAndParentClasses.contains(classId),
             field,
             currentTable.rows[j].values,
@@ -1114,7 +1167,7 @@ class DbModelUtils {
 
   static void updateEnumReferences(DbModel model, String currentValue, String newValue, ClassMetaEntityEnum classEnum) {
     for (final currentTable in model.cache.allDataTables) {
-      final allFields = model.cache.getAllFieldsById(currentTable.classId);
+      final allFields = model.cache.getAllFieldsByClassId(currentTable.classId);
       if (allFields == null) //
         continue;
 
@@ -1122,6 +1175,7 @@ class DbModelUtils {
         final field = allFields[i];
         for (var j = 0; j < currentTable.rows.length; j++) {
           _editTableRowReferenceValue(
+            model,
             (classId) => classId == classEnum.id,
             field,
             currentTable.rows[j].values,
@@ -1136,6 +1190,7 @@ class DbModelUtils {
   }
 
   static void _editTableRowReferenceValue(
+    DbModel model,
     bool Function(String? classId) isSuitableClass,
     ClassMetaFieldDescription field,
     List<DataTableCellValue> values,
@@ -1184,13 +1239,17 @@ class DbModelUtils {
         }
         break;
 
-      case ClassFieldType.listMulti: //TODO! @sergey
-        final list = values[index].listCellValues;
+      case ClassFieldType.listInline: //TODO! @sergey test
+        final list = values[index].listMultiCellValues();
         if (list != null) {
-          if (field.valueTypeInfo!.type == ClassFieldType.reference && isSuitableClass(field.valueTypeInfo!.classId)) {
-            for (var i = 0; i < list.length; i++) {
-              if (list[i] == whatReplace) //
-                list[i] = replaceTo;
+          final columns = getListMultiColumns(model, field.valueTypeInfo!)!;
+          for (var j = 0; j < columns.length; j++) {
+            final column = columns[j];
+            if (column.typeInfo.type == ClassFieldType.reference && isSuitableClass(column.typeInfo.classId)) {
+              for (var i = 0; i < list.length; i++) {
+                if (list[i].values![j] == whatReplace) //
+                  list[i].values![j] = replaceTo;
+              }
             }
           }
         }
@@ -1371,21 +1430,6 @@ class DbModelUtils {
     return result;
   }
 
-  static double setDictionaryColumnRatio(TableMetaEntity table, ClassMetaFieldDescription field, {double? ratio, double? deltaRatio}) {
-    var result = getTableKeyToValueRatio(table, field);
-    if (ratio != null) {
-      result = ratio;
-    } else if (deltaRatio != null) {
-      result = getTableKeyToValueRatio(table, field) + deltaRatio;
-    } else {
-      throw Exception('At least on of the following should be specified: "ratio", "deltaRatio"');
-    }
-
-    result = result.clamp(Config.minKeysToValuesRatio, 1 - Config.minKeysToValuesRatio);
-    table.columnKeyToValueWidthRatio[field.id] = result;
-    return result;
-  }
-
   static double setIdsColumnWidth(TableMetaEntity table, {double? width, double? deltaWidth}) {
     var result = 0.0;
 
@@ -1402,7 +1446,7 @@ class DbModelUtils {
   }
 
   static void removeInvalidColumnWidth(DbModel model, TableMetaEntity table) {
-    final allFields = model.cache.getAllFieldsById(table.classId);
+    final allFields = model.cache.getAllFieldsByClassId(table.classId);
     if (allFields == null) //
       return;
 
@@ -1412,10 +1456,10 @@ class DbModelUtils {
         table.columWidth.remove(fieldId);
     }
 
-    allStoredFields = table.columnKeyToValueWidthRatio.keys.toList();
+    allStoredFields = table.columnInnerCellFlex.keys.toList();
     for (var fieldId in allStoredFields) {
       if (!allFields.any((e) => e.id == fieldId)) //
-        table.columnKeyToValueWidthRatio.remove(fieldId);
+        table.columnInnerCellFlex.remove(fieldId);
     }
   }
 
@@ -1431,9 +1475,9 @@ class DbModelUtils {
           table.columWidth[newId] = table.columWidth[oldId]!;
           table.columWidth.remove(oldId);
         }
-        if (table.columnKeyToValueWidthRatio.containsKey(oldId)) {
-          table.columnKeyToValueWidthRatio[newId] = table.columnKeyToValueWidthRatio[oldId]!;
-          table.columnKeyToValueWidthRatio.remove(oldId);
+        if (table.columnInnerCellFlex.containsKey(oldId)) {
+          table.columnInnerCellFlex[newId] = table.columnInnerCellFlex[oldId]!;
+          table.columnInnerCellFlex.remove(oldId);
         }
       }
     }
@@ -1449,7 +1493,7 @@ class DbModelUtils {
   }
 
   static DataTableCellValue? getValueByCoordinates(DbModel model, DataTableValueCoordinates coordinates) {
-    final allFields = model.cache.getAllFieldsById(coordinates.table.classId)!;
+    final allFields = model.cache.getAllFieldsByClassId(coordinates.table.classId)!;
     final fieldIndex = allFields.indexOf(coordinates.field!);
     final rows = coordinates.table.rows;
     final row = rows.length > coordinates.rowIndex ? rows[coordinates.rowIndex] : null;
@@ -1535,7 +1579,7 @@ class DbModelUtils {
     DataTableRow? tableRowValues,
   }) {
     final table = model.cache.getTable(tableId) as TableMetaEntity;
-    final allFields = model.cache.getAllFieldsById(table.classId) ?? [];
+    final allFields = model.cache.getAllFieldsByClassId(table.classId) ?? [];
 
     final newRow = DataTableRow()
       ..id = rowId
@@ -1577,7 +1621,7 @@ class DbModelUtils {
               final dictionaryValues = e.dictionaryCellValues();
               if (dictionaryValues != null) //
                 return jsonEncode(dictionaryValues.map((e) => [e.key, e.value]).toList());
-              final listMultiValues = e.multivalueCellValues();
+              final listMultiValues = e.listMultiCellValues();
               if (listMultiValues != null) //
                 return jsonEncode(listMultiValues.map((e) => e.values).toList());
               return e.simpleValue;
@@ -1628,7 +1672,7 @@ class DbModelUtils {
       if (table.classId.isEmpty) //
         return;
 
-      final fields = model.cache.getAllFieldsById(table.classId);
+      final fields = model.cache.getAllFieldsByClassId(table.classId);
       if (fields == null) {
         throw Exception("Could not find columns for class '${table.classId}'");
       }
@@ -1641,8 +1685,8 @@ class DbModelUtils {
     }
   }
 
-  static List<ClassMetaFieldDescription>? getListMultiColumns(DbModel model, ClassFieldDescriptionDataInfo description) {
-    return model.cache.getAllFieldsById(description.classId!)!;
+  static List<ClassMetaFieldDescription>? getListMultiColumns(DbModel model, ClassFieldDescriptionDataInfo valueType) {
+    return model.cache.getAllFieldsByClassId(valueType.classId!)!;
   }
 
   static List<(ClassMetaFieldDescription, T)>? getListMultiColumnsWithValues<T>(
@@ -1657,6 +1701,18 @@ class DbModelUtils {
 
     var index = 0;
     return columns!.map((e) => (e, values![index++])).toList();
+  }
+
+  static int? getInnerCellsCount(DbModel dbModel, ClassMetaFieldDescription field) {
+    switch (field.typeInfo.type) {
+      case ClassFieldType.dictionary:
+        return 2;
+      case ClassFieldType.listInline:
+        final columns = DbModelUtils.getListMultiColumns(dbModel, field.valueTypeInfo!)!;
+        return columns.length;
+      default:
+        return null;
+    }
   }
 }
 

@@ -8,9 +8,9 @@ class AddNewEnumValueButton extends StatelessWidget {
   final VoidCallback onClick;
 
   const AddNewEnumValueButton({
-    Key? key,
+    super.key,
     required this.onClick,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

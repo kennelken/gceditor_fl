@@ -11,8 +11,8 @@ class InfoButton extends StatelessWidget {
   const InfoButton({
     required this.text,
     this.color,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

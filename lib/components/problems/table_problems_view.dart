@@ -6,7 +6,7 @@ import 'package:gceditor/model/state/client_problems_state.dart';
 import 'package:gceditor/model/state/style_state.dart';
 
 class TableProblemsView extends ConsumerWidget {
-  const TableProblemsView({Key? key}) : super(key: key);
+  const TableProblemsView({super.key});
 
   @override
   Widget build(context, ref) {

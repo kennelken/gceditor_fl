@@ -47,7 +47,7 @@ class DbCmdFillColumn extends BaseDbCmd {
 
     for (final tableId in this.dataColumnsByTable!.keys) {
       final table = dbModel.cache.getTable<TableMetaEntity>(tableId)!;
-      final allFields = dbModel.cache.getAllFieldsById(table.classId);
+      final allFields = dbModel.cache.getAllFieldsByClassId(table.classId);
       dataColumnsByTable[table.id] = DbModelUtils.getDataColumns(dbModel, table, columns: allFields);
     }
 

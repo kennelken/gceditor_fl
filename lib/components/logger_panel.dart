@@ -13,7 +13,7 @@ import 'package:gceditor/utils/lazy_cache.dart';
 class LoggerPanel extends ConsumerWidget {
   late final LazyCache<LogLevel, TextStyle> textStyle;
 
-  LoggerPanel({Key? key}) : super(key: key) {
+  LoggerPanel({super.key}) {
     textStyle = LazyCache<LogLevel, TextStyle>(_getTextStyle);
   }
 

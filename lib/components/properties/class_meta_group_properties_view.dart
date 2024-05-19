@@ -18,9 +18,9 @@ class ClassMetaGroupPropertiesViewProperties extends ConsumerWidget {
   final ClassMetaGroup data;
 
   const ClassMetaGroupPropertiesViewProperties({
-    Key? key,
+    super.key,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(context, ref) {

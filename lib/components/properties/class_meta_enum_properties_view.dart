@@ -27,9 +27,9 @@ class ClassMetaEnumPropertiesViewProperties extends StatefulWidget {
   final ClassMetaEntityEnum data;
 
   const ClassMetaEnumPropertiesViewProperties({
-    Key? key,
+    super.key,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   State<ClassMetaEnumPropertiesViewProperties> createState() => _ClassMetaEnumPropertiesViewPropertiesState();

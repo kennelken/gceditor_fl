@@ -30,9 +30,9 @@ class ClassMetaClassFieldPropertiesViewProperties extends StatefulWidget {
   final ClassMetaFieldDescription data;
 
   const ClassMetaClassFieldPropertiesViewProperties({
-    Key? key,
+    super.key,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   State<ClassMetaClassFieldPropertiesViewProperties> createState() => _ClassMetaClassFieldPropertiesViewPropertiesState();
@@ -89,8 +89,10 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
 
         final classFieldTypes = DbModelUtils.sortedFieldTypes.map((e) => EnumWrapper(e)).toList();
         final simpleClassFieldTypes = classFieldTypes.where((e) => e.value.isSimple()).toList();
+        final multiValueFieldTypes = classFieldTypes.where((e) => e.value == ClassFieldType.reference).toList();
 
         final allClasses = [...model.cache.allEnums, ...model.cache.allClasses];
+        final allNonAbstractClasses = model.cache.allNonAbstractClasses;
 
         return ClassMetaPropertiesContainer(children: [
           PropertyStringView(
@@ -203,7 +205,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                               MetaValueCoordinates(
                                 classId: classEntity.id,
                                 fieldId: widget.data.id,
-                                fieldValueType: FindResultFieldDefinitionValueType.simple,
+                                fieldValueType: FindResultFieldDefinitionValueType.key,
                               ),
                               ref.watch(clientFindStateProvider).state,
                               ref.watch(clientNavigationServiceProvider).state,
@@ -239,7 +241,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                               MetaValueCoordinates(
                                 classId: classEntity.id,
                                 fieldId: widget.data.id,
-                                fieldValueType: FindResultFieldDefinitionValueType.simple,
+                                fieldValueType: FindResultFieldDefinitionValueType.value,
                               ),
                               ref.watch(clientFindStateProvider).state,
                               ref.watch(clientNavigationServiceProvider).state,
@@ -257,40 +259,36 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                     ],
                   ),
                 ],
-                if (type.hasMultivalueType()) ...[
-                  //TODO! @sergey
+                if (type.hasMultiValueType()) ...[
+                  //TODO! @sergey test
                   kStyle.kPropertiesVerticalDivider,
                   Row(
                     children: [
-                      if (!_needClassSelector(valueType)) ...[
-                        Expanded(child: _getValueTypeDropDownSelector(simpleClassFieldTypes))
-                      ] else ...[
-                        SizedBox(
-                          width: 150 * kScale,
-                          child: _getValueTypeDropDownSelector(simpleClassFieldTypes),
-                        ),
-                        _getHorizontalDivider(),
-                        Expanded(
-                          child: Builder(builder: (context) {
-                            final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
-                              MetaValueCoordinates(
-                                classId: classEntity.id,
-                                fieldId: widget.data.id,
-                                fieldValueType: FindResultFieldDefinitionValueType.simple,
-                              ),
-                              ref.watch(clientFindStateProvider).state,
-                              ref.watch(clientNavigationServiceProvider).state,
-                            );
+                      SizedBox(
+                        width: 150 * kScale,
+                        child: _getValueTypeDropDownSelector(multiValueFieldTypes),
+                      ),
+                      _getHorizontalDivider(),
+                      Expanded(
+                        child: Builder(builder: (context) {
+                          final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
+                            MetaValueCoordinates(
+                              classId: classEntity.id,
+                              fieldId: widget.data.id,
+                              fieldValueType: FindResultFieldDefinitionValueType.value,
+                            ),
+                            ref.watch(clientFindStateProvider).state,
+                            ref.watch(clientNavigationServiceProvider).state,
+                          );
 
-                            return _getReferenceClassSelector(
-                              classes: allClasses,
-                              selectedItem: model.cache.getClass(valueTypeRefId),
-                              onValueSelected: _handleValueTypeRefSelected,
-                              inputDecoration: idInputDecoration,
-                            );
-                          }),
-                        ),
-                      ],
+                          return _getReferenceClassSelector(
+                            classes: allNonAbstractClasses,
+                            selectedItem: model.cache.getClass(valueTypeRefId),
+                            onValueSelected: _handleValueTypeRefSelected,
+                            inputDecoration: idInputDecoration,
+                          );
+                        }),
+                      ),
                     ],
                   ),
                 ],
@@ -464,8 +462,8 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
         return true;
     }
 
-    if (type.hasMultivalueType()) {
-      //TODO! @sergey
+    if (type.hasMultiValueType()) {
+      //TODO! @sergey test
       if (valueType != widget.data.valueTypeInfo?.type || valueTypeRefId != widget.data.valueTypeInfo?.classId) //
         return true;
     }

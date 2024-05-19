@@ -26,14 +26,14 @@ class DataTableCellListView extends StatefulWidget {
   final ValueChanged<DataTableCellValue> onValueChanged;
 
   const DataTableCellListView({
-    Key? key,
+    super.key,
     required this.coordinates,
     required this.fieldType,
     required this.valueFieldType,
     required this.value,
     required this.cellFactory,
     required this.onValueChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<DataTableCellListView> createState() => _DataTableCellListViewState();

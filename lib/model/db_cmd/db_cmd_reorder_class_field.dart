@@ -43,7 +43,7 @@ class DbCmdReorderClassField extends BaseDbCmd {
       if (table.classId.isEmpty) //
         continue;
 
-      final allFields = dbModel.cache.getAllFieldsById(table.classId);
+      final allFields = dbModel.cache.getAllFieldsByClassId(table.classId);
       final index = allFields?.indexOf(field) ?? -1;
       if (index > -1) //
         indexOffsetByTable[table] = index - indexFrom;

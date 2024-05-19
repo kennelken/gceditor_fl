@@ -7,7 +7,7 @@ import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/state/style_state.dart';
 
 class ShortcutsView extends ConsumerWidget {
-  const ShortcutsView({Key? key}) : super(key: key);
+  const ShortcutsView({super.key});
 
   @override
   Widget build(context, ref) {

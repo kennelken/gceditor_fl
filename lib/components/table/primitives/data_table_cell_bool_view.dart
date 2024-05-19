@@ -14,12 +14,12 @@ class DataTableCellBoolView extends ConsumerWidget {
   final ValueChanged<dynamic> onValueChanged;
 
   const DataTableCellBoolView({
-    Key? key,
+    super.key,
     required this.coordinates,
     required this.fieldType,
     required this.value,
     required this.onValueChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(context, ref) {

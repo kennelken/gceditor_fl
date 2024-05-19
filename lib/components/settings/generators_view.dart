@@ -19,8 +19,8 @@ import 'package:gceditor/utils/utils.dart';
 
 class GeneratorsView extends StatefulWidget {
   const GeneratorsView({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   GeneratorsViewState createState() => GeneratorsViewState();
