@@ -587,6 +587,7 @@ class DbModelUtils {
       case ClassFieldType.dictionary:
         final dictionaryValues = value.dictionaryCellValues();
         return dictionaryValues != null &&
+            dictionaryValues.length == value.listCellValues?.length &&
             dictionaryValues.every(
               (e) => validateSimpleValue(field.keyTypeInfo!.type, e.key) && validateSimpleValue(field.valueTypeInfo!.type, e.value),
             );
@@ -594,6 +595,7 @@ class DbModelUtils {
       case ClassFieldType.listInline: //TODO! @sergey test
         final multiValues = value.listMultiCellValues();
         return multiValues != null &&
+            multiValues.length == value.listCellValues?.length &&
             multiValues.every(
               (e) => getListMultiColumnsWithValues(model, field.valueTypeInfo!, e.values)! //
                   .every((p) => validateSimpleValue(p.$1.typeInfo.type, p.$2)),

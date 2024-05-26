@@ -153,7 +153,7 @@ class _DataTableCellListMultiViewState extends State<DataTableCellListMultiView>
                           padding: EdgeInsets.only(left: 4 * kScale, right: 29 * kScale),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            children: _getInnerCells(ref, context, index, value),
+                            children: _getInnerCells(ref, cellContext, index, value),
                           ),
                         ),
                       );
@@ -168,7 +168,7 @@ class _DataTableCellListMultiViewState extends State<DataTableCellListMultiView>
     );
   }
 
-  List<Widget> _getInnerCells(WidgetRef ref, BuildContext context, int index, DataTableCellMultiValueItem value) {
+  List<Widget> _getInnerCells(WidgetRef ref, BuildContext cellContext, int index, DataTableCellMultiValueItem value) {
     final result = <Widget>[];
 
     final columns = DbModelUtils.getListMultiColumns(clientModel, widget.valueFieldType)!;
@@ -180,7 +180,7 @@ class _DataTableCellListMultiViewState extends State<DataTableCellListMultiView>
           MouseRegion(
             cursor: SystemMouseCursors.resizeColumn,
             child: GestureDetector(
-              onHorizontalDragUpdate: (d) => _handleHorizontalDragUpdate(context, d, i),
+              onHorizontalDragUpdate: (d) => _handleHorizontalDragUpdate(cellContext, d, i - 1),
               onHorizontalDragEnd: _handleHorizontalDragEnd,
               onHorizontalDragStart: _handleHorizontalDragStart,
               child: Container(
@@ -190,21 +190,21 @@ class _DataTableCellListMultiViewState extends State<DataTableCellListMultiView>
             ),
           ),
         );
-        result.add(
-          Expanded(
-            flex: (columnFlexes[i] * Config.flexRatioMultiplier).toInt(),
-            child: Container(
-              decoration: kStyle.kDataTableCellListBoxDecoration,
-              child: widget.cellFactory(
-                coordinates: widget.coordinates.copyWith(innerListRowIndex: index, innerListColumnIndex: i),
-                value: value.values![i],
-                fieldInfo: columns[i].typeInfo,
-                onValueChanged: (value) => _handleValueChanged(index, value),
-              ),
+      }
+      result.add(
+        Expanded(
+          flex: (columnFlexes[i] * Config.flexRatioMultiplier).toInt(),
+          child: Container(
+            decoration: kStyle.kDataTableCellListBoxDecoration,
+            child: widget.cellFactory(
+              coordinates: widget.coordinates.copyWith(innerListRowIndex: index, innerListColumnIndex: i),
+              value: value.values![i],
+              fieldInfo: columns[i].typeInfo,
+              onValueChanged: (value) => _handleValueChanged(index, i, value),
             ),
           ),
-        );
-      }
+        ),
+      );
     }
     if (ref.watch(clientViewModeStateProvider).state.actionsMode) {
       result.add(
@@ -245,9 +245,13 @@ class _DataTableCellListMultiViewState extends State<DataTableCellListMultiView>
     setState(
       () {
         final valuesListCopy = _cellValue.copy();
+
+        final columns = DbModelUtils.getListMultiColumns(clientModel, widget.coordinates.field!.valueTypeInfo!)!;
+        final defaultValues = columns.map((e) => DbModelUtils.getDefaultValue(e.typeInfo.type).simpleValue).toList();
+
         valuesListCopy.listCellValues!.add(
           DataTableCellMultiValueItem.values(
-            values: [null, null],
+            values: defaultValues,
           ),
         );
         _cellValue = valuesListCopy;
@@ -260,11 +264,11 @@ class _DataTableCellListMultiViewState extends State<DataTableCellListMultiView>
     );
   }
 
-  void _handleValueChanged(int rowIndex, dynamic value) {
+  void _handleValueChanged(int rowIndex, int cellIndex, dynamic value) {
     setState(
       () {
         final valuesListCopy = _cellValue.copy();
-        valuesListCopy.listCellValues![rowIndex].value = value;
+        (valuesListCopy.listCellValues![rowIndex] as DataTableCellMultiValueItem).values![cellIndex] = value;
         _cellValue = valuesListCopy;
 
         widget.onValueChanged(_cellValue);

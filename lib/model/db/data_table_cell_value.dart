@@ -45,8 +45,10 @@ class DataTableCellValue {
   DataTableCellValue copy() {
     return DataTableCellValue()
       ..simpleValue = simpleValue
-      ..listCellValues =
-          listCellValues != null ? List.from(listCellValues!.map((e) => ((e as Object?)?.safeAs<DataTableCellDictionaryItem>()?.copy() ?? e))) : null;
+      ..listCellValues = listCellValues != null //
+          ? List.from(listCellValues!.map((e) =>
+              ((e as Object?)?.safeAs<DataTableCellDictionaryItem>()?.copy() ?? (e as Object?)?.safeAs<DataTableCellMultiValueItem>()?.copy() ?? e)))
+          : null;
   }
 
   factory DataTableCellValue.fromJson(dynamic json) {
@@ -55,8 +57,13 @@ class DataTableCellValue {
     result.simpleValue = json;
     if (json is List<dynamic>) {
       result.listCellValues = json;
-      if (json.isEmpty || json[0] is Map<String, dynamic>) {
-        result.listCellValues = List.from(json.map((e) => DataTableCellDictionaryItem.fromJson(e)));
+      final jsonMap = json.isNotEmpty ? json[0] : null;
+      if (jsonMap is Map<String, dynamic>) {
+        if (jsonMap.containsKey('vs')) {
+          result.listCellValues = List.from(json.map((e) => DataTableCellMultiValueItem.fromJson(e)));
+        } else {
+          result.listCellValues = List.from(json.map((e) => DataTableCellDictionaryItem.fromJson(e)));
+        }
       }
     }
     return result;
@@ -66,6 +73,9 @@ class DataTableCellValue {
     if (listCellValues?.isNotEmpty ?? false) {
       if (listCellValues![0] is DataTableCellDictionaryItem) {
         return listCellValues!.map((e) => (e as DataTableCellDictionaryItem).toJson()).toList();
+      }
+      if (listCellValues![0] is DataTableCellMultiValueItem) {
+        return listCellValues!.map((e) => (e as DataTableCellMultiValueItem).toJson()).toList();
       }
       return listCellValues!.toList();
     }

@@ -277,7 +277,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
     setState(
       () {
         final valuesListCopy = _cellValue.copy();
-        valuesListCopy.listCellValues![index].value = value;
+        (valuesListCopy.listCellValues![index] as DataTableCellDictionaryItem).value = value;
         _cellValue = valuesListCopy;
 
         widget.onValueChanged(_cellValue);

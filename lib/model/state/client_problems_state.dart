@@ -267,7 +267,7 @@ void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> resu
               final list = value.listMultiCellValues()!;
               for (var k = 0; k < list.length; k++) {
                 final listValue = list[k];
-                final values = DbModelUtils.getListMultiColumnsWithValues(model, field.typeInfo, listValue.values)!;
+                final values = DbModelUtils.getListMultiColumnsWithValues(model, field.valueTypeInfo!, listValue.values)!;
 
                 var innerColumnIndex = -1;
                 for (var t in values) {
@@ -416,7 +416,7 @@ void _computeAndAppendInvalidValues(DbModel model, List<DbModelProblem> result) 
               final list = value.listMultiCellValues()!;
               for (var k = 0; k < list.length; k++) {
                 final listValue = list[k];
-                final values = DbModelUtils.getListMultiColumnsWithValues(model, field.typeInfo, listValue.values)!;
+                final values = DbModelUtils.getListMultiColumnsWithValues(model, field.valueTypeInfo!, listValue.values)!;
 
                 var innerColumnIndex = -1;
                 for (var t in values) {
