@@ -12,8 +12,8 @@ DbCmdReorderClassField _$DbCmdReorderClassFieldFromJson(
       ..id = json['id'] as String
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..entityId = json['entityId'] as String
-      ..indexFrom = json['indexFrom'] as int
-      ..indexTo = json['indexTo'] as int;
+      ..fieldIndex = json['fieldIndex'] as int
+      ..indexDelta = json['indexDelta'] as int;
 
 Map<String, dynamic> _$DbCmdReorderClassFieldToJson(
     DbCmdReorderClassField instance) {
@@ -29,8 +29,8 @@ Map<String, dynamic> _$DbCmdReorderClassFieldToJson(
 
   writeNotNull(r'$type', _$DbCmdTypeEnumMap[instance.$type]);
   val['entityId'] = instance.entityId;
-  val['indexFrom'] = instance.indexFrom;
-  val['indexTo'] = instance.indexTo;
+  val['fieldIndex'] = instance.fieldIndex;
+  val['indexDelta'] = instance.indexDelta;
   return val;
 }
 

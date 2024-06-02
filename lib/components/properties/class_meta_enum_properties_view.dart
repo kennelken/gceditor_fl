@@ -144,7 +144,7 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
   }
 
   void _handleValuesReorder(int oldIndex, int newIndex) {
-    if (oldIndex == newIndex) //
+    if (oldIndex == newIndex || oldIndex == newIndex - 1) //
       return;
 
     providerContainer
