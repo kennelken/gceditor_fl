@@ -12,7 +12,7 @@ class DataTableCellMultiValueItem {
 
   DataTableCellMultiValueItem copy() {
     return DataTableCellMultiValueItem.values(
-      values: values,
+      values: values?.toList(),
     );
   }
 
