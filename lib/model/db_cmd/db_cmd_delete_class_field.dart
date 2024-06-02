@@ -106,7 +106,6 @@ class DbCmdDeleteClassField extends BaseDbCmd {
     }
 
     final listInlineValuesByTableColumn = <String, Map<int, List<List<dynamic>>>>{};
-
     final fieldsUsingInline = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
     for (var fieldUsingInline in fieldsUsingInline) {
       for (var table in dbModel.cache.allDataTables) {

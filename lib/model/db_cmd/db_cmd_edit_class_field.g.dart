@@ -12,6 +12,15 @@ DbCmdEditClassField _$DbCmdEditClassFieldFromJson(Map<String, dynamic> json) =>
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..entityId = json['entityId'] as String
       ..fieldId = json['fieldId'] as String
+      ..listInlineValuesByTableColumn =
+          (json['listInlineValuesByTableColumn'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(
+            k,
+            (e as Map<String, dynamic>).map(
+              (k, e) => MapEntry(int.parse(k),
+                  (e as List<dynamic>).map((e) => e as List<dynamic>).toList()),
+            )),
+      )
       ..newId = json['newId'] as String?
       ..newDescription = json['newDescription'] as String?
       ..newIsUniqueValue = json['newIsUniqueValue'] as bool?
@@ -51,6 +60,10 @@ Map<String, dynamic> _$DbCmdEditClassFieldToJson(DbCmdEditClassField instance) {
   writeNotNull(r'$type', _$DbCmdTypeEnumMap[instance.$type]);
   val['entityId'] = instance.entityId;
   val['fieldId'] = instance.fieldId;
+  writeNotNull(
+      'listInlineValuesByTableColumn',
+      instance.listInlineValuesByTableColumn?.map(
+          (k, e) => MapEntry(k, e.map((k, e) => MapEntry(k.toString(), e)))));
   writeNotNull('newId', instance.newId);
   writeNotNull('newDescription', instance.newDescription);
   writeNotNull('newIsUniqueValue', instance.newIsUniqueValue);

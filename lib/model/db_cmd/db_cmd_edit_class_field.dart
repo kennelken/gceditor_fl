@@ -8,6 +8,7 @@ import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/utils/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../db/data_table_cell_multivalue_item.dart';
 import 'base_db_cmd.dart';
 import 'db_cmd_result.dart';
 
@@ -17,6 +18,7 @@ part 'db_cmd_edit_class_field.g.dart';
 class DbCmdEditClassField extends BaseDbCmd {
   late String entityId;
   late String fieldId;
+  late Map<String, Map<int, List<List<dynamic>>>>? listInlineValuesByTableColumn;
   String? newId;
   String? newDescription;
   bool? newIsUniqueValue;
@@ -42,6 +44,7 @@ class DbCmdEditClassField extends BaseDbCmd {
     this.newValueType,
     this.newDefaultValue,
     this.valuesByTable,
+    this.listInlineValuesByTableColumn,
   }) : super.withId(id) {
     $type = DbCmdType.editClassField;
   }
@@ -93,6 +96,35 @@ class DbCmdEditClassField extends BaseDbCmd {
 
     if (valuesByTable != null) {
       DbModelUtils.applyManyDataColumns(dbModel, valuesByTable!);
+    }
+
+    dbModel.cache.invalidate();
+
+    final fieldsUsingInline = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
+    for (var fieldUsingInline in fieldsUsingInline) {
+      for (var table in dbModel.cache.allDataTables) {
+        final fields = dbModel.cache.getAllFieldsByClassId(table.classId)!;
+        final columnIndex = fields.indexOf(fieldUsingInline);
+        if (columnIndex <= -1) //
+          continue;
+
+        final listInlineField = fields[columnIndex];
+        final inlineColumns = DbModelUtils.getListMultiColumns(dbModel, listInlineField.valueTypeInfo!);
+        final inlineColumnIndex = inlineColumns!.indexOf(field);
+
+        for (var i = 0; i < table.rows.length; i++) {
+          final row = table.rows[i];
+          final cellValues = row.values[columnIndex].listCellValues!;
+          for (var j = 0; j < cellValues.length; j++) {
+            final cellValue = cellValues[j];
+            final value = listInlineValuesByTableColumn?[(table.id)]?[inlineColumnIndex]?[i][j] ??
+                DbModelUtils.convertSimpleValueIfPossible(
+                    (cellValue as DataTableCellMultiValueItem).values![inlineColumnIndex], field.typeInfo.type) ??
+                dbModel.cache.getDefaultValue(field).simpleValue;
+            (cellValue as DataTableCellMultiValueItem).values![inlineColumnIndex] = value;
+          }
+        }
+      }
     }
 
     return DbCmdResult.success();
@@ -232,6 +264,36 @@ class DbCmdEditClassField extends BaseDbCmd {
       }
     }
 
+    final listInlineValuesByTableColumn = <String, Map<int, List<List<dynamic>>>>{};
+    final fieldsUsingInline = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
+    for (var fieldUsingInline in fieldsUsingInline) {
+      for (var table in dbModel.cache.allDataTables) {
+        final fields = dbModel.cache.getAllFieldsByClassId(table.classId)!;
+        final columnIndex = fields.indexOf(fieldUsingInline);
+        if (columnIndex <= -1) //
+          continue;
+
+        final listInlineField = fields[columnIndex];
+        final inlineColumns = DbModelUtils.getListMultiColumns(dbModel, listInlineField.valueTypeInfo!);
+        final inlineColumnIndex = inlineColumns!.indexOf(field);
+
+        listInlineValuesByTableColumn.addIfMissing(table.id, (_) => {});
+        listInlineValuesByTableColumn[table.id]!.addIfMissing(inlineColumnIndex, (_) => []);
+
+        for (var i = 0; i < table.rows.length; i++) {
+          final row = table.rows[i];
+          final cellValues = row.values[columnIndex].listCellValues!;
+
+          listInlineValuesByTableColumn[table.id]![inlineColumnIndex]!.add([]);
+          for (var j = 0; j < cellValues.length; j++) {
+            final cellValue = cellValues[j];
+            listInlineValuesByTableColumn[table.id]![inlineColumnIndex]![i]
+                .add((cellValue as DataTableCellMultiValueItem).values![inlineColumnIndex]);
+          }
+        }
+      }
+    }
+
     return DbCmdEditClassField.values(
       entityId: entityId,
       fieldId: newId ?? fieldId,
@@ -246,6 +308,7 @@ class DbCmdEditClassField extends BaseDbCmd {
           newValueType != null && field.valueTypeInfo != null ? ClassFieldDescriptionDataInfo.fromJson(field.valueTypeInfo!.toJson().clone()) : null,
       newDefaultValue: newDefaultValue != null ? field.defaultValue : null,
       valuesByTable: valuesByTable,
+      listInlineValuesByTableColumn: listInlineValuesByTableColumn,
     );
   }
 }
