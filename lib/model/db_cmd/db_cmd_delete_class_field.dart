@@ -6,6 +6,7 @@ import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/utils/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../db/data_table_cell_multivalue_item.dart';
 import 'base_db_cmd.dart';
 import 'db_cmd_add_class_field.dart';
 import 'db_cmd_result.dart';
@@ -36,6 +37,33 @@ class DbCmdDeleteClassField extends BaseDbCmd {
     final entity = dbModel.cache.getClass(entityId)! as ClassMetaEntity;
     final index = entity.fields.indexWhere((e) => e.id == fieldId);
     final field = entity.fields[index];
+
+    final fieldsUsingInline = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
+    for (var fieldUsingInline in fieldsUsingInline) {
+      for (var table in dbModel.cache.allDataTables) {
+        final fields = dbModel.cache.getAllFieldsByClassId(table.classId)!;
+        final columnIndex = fields.indexOf(fieldUsingInline);
+        if (columnIndex <= -1) //
+          continue;
+
+        final listInlineField = fields[columnIndex];
+        final inlineColumns = DbModelUtils.getListMultiColumns(dbModel, listInlineField.valueTypeInfo!);
+        final inlineColumnIndex = inlineColumns!.indexOf(field);
+
+        if (table.columnInnerCellFlex.containsKey(listInlineField.id)) {
+          final flexes = table.columnInnerCellFlex[listInlineField.id]!;
+          flexes.removeAt(inlineColumnIndex);
+          flexes.normalize();
+        }
+
+        for (var i = 0; i < table.rows.length; i++) {
+          final row = table.rows[i];
+          for (var cellValue in row.values[columnIndex].listCellValues!) {
+            (cellValue as DataTableCellMultiValueItem).values!.removeAt(inlineColumnIndex);
+          }
+        }
+      }
+    }
 
     entity.fields.removeAt(index);
 
@@ -77,11 +105,44 @@ class DbCmdDeleteClassField extends BaseDbCmd {
       }
     }
 
+    final listInlineValuesByTableColumn = <String, Map<int, List<List<dynamic>>>>{};
+
+    final fieldsUsingInline = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
+    for (var fieldUsingInline in fieldsUsingInline) {
+      for (var table in dbModel.cache.allDataTables) {
+        final fields = dbModel.cache.getAllFieldsByClassId(table.classId)!;
+        final columnIndex = fields.indexOf(fieldUsingInline);
+        if (columnIndex <= -1) //
+          continue;
+
+        final listInlineField = fields[columnIndex];
+        final inlineColumns = DbModelUtils.getListMultiColumns(dbModel, listInlineField.valueTypeInfo!);
+        final inlineColumnIndex = inlineColumns!.indexOf(field);
+
+        listInlineValuesByTableColumn.addIfMissing(table.id, (_) => {});
+        listInlineValuesByTableColumn[table.id]!.addIfMissing(inlineColumnIndex, (_) => []);
+
+        for (var i = 0; i < table.rows.length; i++) {
+          final row = table.rows[i];
+          final cellValues = row.values[columnIndex].listCellValues!;
+
+          listInlineValuesByTableColumn[table.id]![inlineColumnIndex]!.add([]);
+          for (var j = 0; j < cellValues.length; j++) {
+            final cellValue = cellValues[j];
+
+            listInlineValuesByTableColumn[table.id]![inlineColumnIndex]![i]
+                .add((cellValue as DataTableCellMultiValueItem).values![inlineColumnIndex]);
+          }
+        }
+      }
+    }
+
     return DbCmdAddClassField.values(
       entityId: entityId,
       index: entity.fields.indexWhere((e) => e.id == fieldId),
       field: ClassMetaFieldDescription.fromJson(field.toJson().clone()),
       dataColumnsByTable: dataColumnsByTable,
+      listInlineValuesByTableColumn: listInlineValuesByTableColumn,
     );
   }
 }

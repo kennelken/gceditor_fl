@@ -131,6 +131,7 @@ class DbModelProblem {
   ProblemSeverity severity;
   ProblemType type;
   String? value;
+  Object? exception;
 
   DbModelProblem({
     required this.severity,
@@ -142,7 +143,13 @@ class DbModelProblem {
     this.innerListRowIndex,
     this.innerListColumnIndex,
     this.value,
-  });
+    this.exception,
+  }) {
+    if (exception != null) {
+      final left = value != null && value!.isNotEmpty ? '$value ' : '';
+      value = "$left<Exception> ${((exception is FlutterError) ? (exception as FlutterError).message.split('\n')[0] : exception)}";
+    }
+  }
 
   String getDescription() {
     switch (type) {
@@ -349,7 +356,7 @@ void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> resu
               rowIndex: j,
               fieldIndex: i,
               fieldId: field.id,
-              value: '<Exception> $e',
+              exception: e,
             ),
           );
         }
@@ -508,7 +515,7 @@ void _computeAndAppendInvalidValues(DbModel model, List<DbModelProblem> result) 
               rowIndex: j,
               fieldIndex: i,
               fieldId: field.id,
-              value: '<Exception> $e',
+              exception: e,
             ),
           );
         }
@@ -557,7 +564,7 @@ void _computeAndAppendDuplicateUniqueValues(DbModel model, List<DbModelProblem> 
               rowIndex: j,
               fieldIndex: i,
               fieldId: field.id,
-              value: '<Exception> $e',
+              exception: e,
             ),
           );
         }
@@ -628,7 +635,7 @@ void _computeAndAppendRepeatingSetValues(DbModel model, List<DbModelProblem> res
               rowIndex: j,
               fieldIndex: i,
               fieldId: field.id,
-              value: '<Exception> $e',
+              exception: e,
             ),
           );
         }
@@ -690,7 +697,7 @@ void _computeAndAppendRepeatingDictionaryKeys(DbModel model, List<DbModelProblem
               rowIndex: j,
               fieldIndex: i,
               fieldId: field.id,
-              value: '<Exception> $e',
+              exception: e,
             ),
           );
         }

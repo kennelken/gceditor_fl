@@ -46,8 +46,8 @@ class DataTableCellValue {
     return DataTableCellValue()
       ..simpleValue = simpleValue
       ..listCellValues = listCellValues != null //
-          ? List.from(listCellValues!.map((e) =>
-              ((e as Object?)?.safeAs<DataTableCellDictionaryItem>()?.copy() ?? (e as Object?)?.safeAs<DataTableCellMultiValueItem>()?.copy() ?? e)))
+          ? List.from(listCellValues!
+              .map((e) => ((e as Object?)?.safeAs<DataTableCellDictionaryItem>()?.copy() ?? e?.safeAs<DataTableCellMultiValueItem>()?.copy() ?? e)))
           : null;
   }
 

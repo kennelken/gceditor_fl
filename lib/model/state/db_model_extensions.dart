@@ -1695,10 +1695,7 @@ class DbModelUtils {
       DbModel model, ClassFieldDescriptionDataInfo description, List<T>? values) {
     final columns = getListMultiColumns(model, description);
     if (columns?.length != values?.length) {
-      providerContainer
-          .read(logStateProvider)
-          .addMessage(LogEntry(LogLevel.error, 'Values (${values?.length}) and columns (${columns?.length}) length mismatch'));
-      return null;
+      throw Exception('Columns and values number mismatch: columns=${columns?.length}, values=${values?.length}');
     }
 
     var index = 0;
@@ -1715,6 +1712,14 @@ class DbModelUtils {
       default:
         return null;
     }
+  }
+
+  static List<ClassMetaFieldDescription> getFieldsUsingInlineClass(DbModel dbModel, ClassMetaEntity classEntity) {
+    final allFields = dbModel.cache.allClasses
+        .selectMany((c, _) =>
+            dbModel.cache.getAllFields(c).where((f) => f.typeInfo.type == ClassFieldType.listInline && f.valueTypeInfo?.classId == classEntity.id))
+        .toList();
+    return allFields;
   }
 }
 

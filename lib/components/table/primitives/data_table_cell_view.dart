@@ -247,8 +247,8 @@ class DataTableValueCoordinates {
     return table.id == problem.tableId &&
         field?.id == problem.fieldId &&
         rowIndex == problem.rowIndex &&
-        innerListRowIndex == problem.innerListRowIndex &&
-        innerListColumnIndex == problem.innerListColumnIndex;
+        (innerListRowIndex == problem.innerListRowIndex || problem.innerListRowIndex == null) &&
+        (innerListColumnIndex == problem.innerListColumnIndex || problem.innerListColumnIndex == null);
   }
 
   bool fitsFindResult(FindResultItemTableItem? item) {

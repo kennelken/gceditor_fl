@@ -222,8 +222,7 @@ class _DataTableCellListMultiViewState extends State<DataTableCellListMultiView>
   void _handleReorder(int oldIndex, int newIndex) {
     setState(
       () {
-        _cellValue = DataTableCellValue.dictionary(Utils.copyAndReorder(_cellValue.copy().dictionaryCellValues()!, oldIndex, newIndex));
-
+        _cellValue = DataTableCellValue.listMulti(Utils.copyAndReorder(_cellValue.copy().listMultiCellValues()!, oldIndex, newIndex));
         widget.onValueChanged(_cellValue);
       },
     );

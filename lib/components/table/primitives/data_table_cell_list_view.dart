@@ -184,7 +184,6 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
   void _handleReorder(int oldIndex, int newIndex) {
     setState(() {
       _cellValue = DataTableCellValue.list(Utils.copyAndReorder(_cellValue.listCellValues!, oldIndex, newIndex));
-
       widget.onValueChanged(_cellValue);
     });
   }

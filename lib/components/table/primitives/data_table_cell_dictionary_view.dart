@@ -223,7 +223,6 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
     setState(
       () {
         _cellValue = DataTableCellValue.dictionary(Utils.copyAndReorder(_cellValue.copy().dictionaryCellValues()!, oldIndex, newIndex));
-
         widget.onValueChanged(_cellValue);
       },
     );

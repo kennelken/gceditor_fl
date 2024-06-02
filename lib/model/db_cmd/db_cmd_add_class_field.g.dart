@@ -14,6 +14,15 @@ DbCmdAddClassField _$DbCmdAddClassFieldFromJson(Map<String, dynamic> json) =>
       ..index = json['index'] as int
       ..field = ClassMetaFieldDescription.fromJson(
           json['field'] as Map<String, dynamic>)
+      ..listInlineValuesByTableColumn =
+          (json['listInlineValuesByTableColumn'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(
+            k,
+            (e as Map<String, dynamic>).map(
+              (k, e) => MapEntry(int.parse(k),
+                  (e as List<dynamic>).map((e) => e as List<dynamic>).toList()),
+            )),
+      )
       ..dataColumnsByTable =
           (json['dataColumnsByTable'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(
@@ -38,6 +47,10 @@ Map<String, dynamic> _$DbCmdAddClassFieldToJson(DbCmdAddClassField instance) {
   val['entityId'] = instance.entityId;
   val['index'] = instance.index;
   val['field'] = instance.field.toJson();
+  writeNotNull(
+      'listInlineValuesByTableColumn',
+      instance.listInlineValuesByTableColumn?.map(
+          (k, e) => MapEntry(k, e.map((k, e) => MapEntry(k.toString(), e)))));
   writeNotNull(
       'dataColumnsByTable',
       instance.dataColumnsByTable

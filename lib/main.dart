@@ -136,6 +136,7 @@ class SlowerPageRoute extends MaterialPageRoute<dynamic> {
   @override
   Duration get transitionDuration => const Duration(milliseconds: 450);
 
+  // ignore: use_super_parameters
   SlowerPageRoute({builder, super.settings}) : super(builder: builder);
 }
 
