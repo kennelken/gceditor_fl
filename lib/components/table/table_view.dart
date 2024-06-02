@@ -73,18 +73,6 @@ class TableView extends ConsumerWidget {
                         style: kStyle.kTextSmall,
                       ),
                     ),
-                    TooltipWrapper(
-                      message: Loc.get.keyboardShortcutTooltip,
-                      child: IconButtonTransparent(
-                        icon: Icon(
-                          FontAwesomeIcons.keyboard,
-                          color: kColorAccentBlue,
-                          size: 13 * kScale,
-                        ),
-                        onClick: _handleShowShortcutsClick,
-                        size: 28 * kScale,
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -662,10 +650,6 @@ class TableView extends ConsumerWidget {
 
   void _handleToggleHistoryPanel() {
     providerContainer.read(settingsStateProvider).toggleHistoryExpanded();
-  }
-
-  void _handleShowShortcutsClick() {
-    GlobalShortcuts.openShortcutsList();
   }
 
   void _handleSettingsClick() {

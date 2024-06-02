@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gceditor/components/history/history_dialog.dart';
 import 'package:gceditor/components/settings/settings_view.dart';
-import 'package:gceditor/components/settings/shortcuts_view.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/main.dart';
@@ -20,84 +19,6 @@ import 'package:gceditor/model/state/table_selection_state.dart';
 import 'package:gceditor/utils/components/popup_messages.dart';
 
 class GlobalShortcuts {
-  static Map<ShortcutActivator, Intent> getIntents() {
-    return {
-      const SingleActivator(LogicalKeyboardKey.backquote): const ToggleConsoleIntent(),
-      const SingleActivator(LogicalKeyboardKey.escape): const DeselectIntent(),
-      const SingleActivator(LogicalKeyboardKey.keyZ, control: true): const UndoIntent(),
-      const SingleActivator(LogicalKeyboardKey.keyY, control: true): const RedoIntent(),
-      const SingleActivator(LogicalKeyboardKey.keyF, control: true): const FindIntent(),
-      const SingleActivator(LogicalKeyboardKey.keyR, control: true): const RunGeneratorsIntent(),
-      //const SingleActivator(LogicalKeyboardKey.add, control: true): const ZoomInIntent(),
-      //const SingleActivator(LogicalKeyboardKey.greater, control: true): const ZoomInIntent(),
-      //const SingleActivator(LogicalKeyboardKey.minus, control: true): const ZoomOutIntent(),
-      const SingleActivator(LogicalKeyboardKey.zoomIn): const ZoomInIntent(),
-      const SingleActivator(LogicalKeyboardKey.zoomOut): const ZoomOutIntent(),
-      const SingleActivator(LogicalKeyboardKey.numpadAdd, control: true): const ZoomInIntent(),
-      const SingleActivator(LogicalKeyboardKey.numpadSubtract, control: true): const ZoomOutIntent(),
-      const SingleActivator(LogicalKeyboardKey.f8): const NextProblemIntent(),
-    };
-  }
-
-  static Map<Type, Action<Intent>> getActions() {
-    return {
-      ToggleConsoleIntent: CallbackAction<ToggleConsoleIntent>(
-        onInvoke: (ToggleConsoleIntent intent) {
-          toggleConsole();
-          return null;
-        },
-      ),
-      DeselectIntent: CallbackAction<DeselectIntent>(
-        onInvoke: (DeselectIntent intent) {
-          deselect();
-          return null;
-        },
-      ),
-      UndoIntent: CallbackAction<UndoIntent>(
-        onInvoke: (UndoIntent intent) {
-          undo();
-          return null;
-        },
-      ),
-      RedoIntent: CallbackAction<RedoIntent>(
-        onInvoke: (RedoIntent intent) {
-          redo();
-          return null;
-        },
-      ),
-      FindIntent: CallbackAction<FindIntent>(
-        onInvoke: (FindIntent intent) {
-          openFind();
-          return null;
-        },
-      ),
-      RunGeneratorsIntent: CallbackAction<RunGeneratorsIntent>(
-        onInvoke: (RunGeneratorsIntent intent) {
-          runGenerators();
-          return null;
-        },
-      ),
-      ZoomInIntent: CallbackAction<ZoomInIntent>(
-        onInvoke: (ZoomInIntent intent) {
-          zoomIn();
-          return null;
-        },
-      ),
-      ZoomOutIntent: CallbackAction<ZoomOutIntent>(
-        onInvoke: (ZoomOutIntent intent) {
-          zoomOut();
-          return null;
-        },
-      ),
-      NextProblemIntent: CallbackAction<NextProblemIntent>(
-        onInvoke: (NextProblemIntent intent) {
-          providerContainer.read(clientProblemsStateProvider).focusOnNextProblem(null);
-          return null;
-        },
-      ),
-    };
-  }
-
   static void toggleConsole() {
     providerContainer.read(logStateProvider).toggleVisible(null);
   }
@@ -139,6 +60,10 @@ class GlobalShortcuts {
     _zoom(false);
   }
 
+  static void showNextProblem() {
+    providerContainer.read(clientProblemsStateProvider).focusOnNextProblem(null);
+  }
+
   static void _zoom(bool zoomIn) {
     final notifier = providerContainer.read(styleStateProvider);
     final newScale = notifier.state.globalScale * (zoomIn ? Config.globalScaleStep : (1 / Config.globalScaleStep));
@@ -164,18 +89,6 @@ class GlobalShortcuts {
       builder: (context) {
         return const Dialog(
           child: SettingsView(),
-        );
-      },
-    );
-  }
-
-  static void openShortcutsList() {
-    showDialog(
-      context: popupContext!,
-      barrierColor: kColorTransparent,
-      builder: (context) {
-        return const Dialog(
-          child: ShortcutsView(),
         );
       },
     );
@@ -251,62 +164,122 @@ class _RawKeyboardEventsState extends State<RawKeyboardEvents> {
 
   @override
   void initState() {
+    HardwareKeyboard.instance.addHandler(_handleKey);
     focusNode = FocusNode();
     super.initState();
   }
 
   @override
   void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handleKey);
     super.dispose();
     focusNode.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return RawKeyboardListener(
-      focusNode: focusNode,
-      onKey: _handleKeyEvent,
-      autofocus: true,
-      child: widget.child,
-    );
+    return widget.child;
   }
 
-  void _handleKeyEvent(RawKeyEvent data) {
-    providerContainer.read(clientViewModeStateProvider).setControlKey(data.isControlPressed);
-    providerContainer.read(clientViewModeStateProvider).setAltKey(data.isAltPressed);
-    providerContainer.read(clientViewModeStateProvider).setShiftKey(data.isShiftPressed);
+  bool _handleKey(KeyEvent data) {
+    final isKeyDown = data is KeyDownEvent;
+
+    switch (data.logicalKey) {
+      case LogicalKeyboardKey.control:
+      case LogicalKeyboardKey.controlLeft:
+      case LogicalKeyboardKey.controlRight:
+        providerContainer.read(clientViewModeStateProvider).setControlKey(isKeyDown);
+        return true;
+
+      case LogicalKeyboardKey.alt:
+      case LogicalKeyboardKey.altLeft:
+      case LogicalKeyboardKey.altRight:
+        providerContainer.read(clientViewModeStateProvider).setAltKey(isKeyDown);
+        return true;
+
+      case LogicalKeyboardKey.shift:
+      case LogicalKeyboardKey.shiftLeft:
+      case LogicalKeyboardKey.shiftRight:
+        providerContainer.read(clientViewModeStateProvider).setAltKey(isKeyDown);
+        return true;
+
+      case LogicalKeyboardKey.backquote:
+        if (isKeyDown) {
+          GlobalShortcuts.toggleConsole();
+          return true;
+        }
+        break;
+
+      case LogicalKeyboardKey.escape:
+        if (isKeyDown) {
+          GlobalShortcuts.deselect();
+          return true;
+        }
+        break;
+
+      case LogicalKeyboardKey.keyZ:
+        if (isKeyDown && providerContainer.read(clientViewModeStateProvider).state.controlKey) {
+          GlobalShortcuts.undo();
+          return true;
+        }
+        break;
+
+      case LogicalKeyboardKey.keyY:
+        if (isKeyDown && providerContainer.read(clientViewModeStateProvider).state.controlKey) {
+          GlobalShortcuts.redo();
+          return true;
+        }
+        break;
+
+      case LogicalKeyboardKey.keyF:
+        if (isKeyDown && providerContainer.read(clientViewModeStateProvider).state.controlKey) {
+          GlobalShortcuts.openFind();
+          return true;
+        }
+        break;
+
+      case LogicalKeyboardKey.keyR:
+        if (isKeyDown && providerContainer.read(clientViewModeStateProvider).state.controlKey) {
+          GlobalShortcuts.runGenerators();
+          return true;
+        }
+        break;
+
+      case LogicalKeyboardKey.zoomIn:
+        if (isKeyDown && providerContainer.read(clientViewModeStateProvider).state.controlKey) {
+          GlobalShortcuts.zoomIn();
+          return true;
+        }
+        break;
+
+      case LogicalKeyboardKey.zoomOut:
+        if (isKeyDown && providerContainer.read(clientViewModeStateProvider).state.controlKey) {
+          GlobalShortcuts.zoomOut();
+          return true;
+        }
+        break;
+
+      case LogicalKeyboardKey.numpadAdd:
+        if (isKeyDown && providerContainer.read(clientViewModeStateProvider).state.controlKey) {
+          GlobalShortcuts.zoomIn();
+          return true;
+        }
+        break;
+
+      case LogicalKeyboardKey.numpadSubtract:
+        if (isKeyDown && providerContainer.read(clientViewModeStateProvider).state.controlKey) {
+          GlobalShortcuts.zoomOut();
+          return true;
+        }
+        break;
+
+      case LogicalKeyboardKey.f8:
+        if (isKeyDown && providerContainer.read(clientViewModeStateProvider).state.controlKey) {
+          GlobalShortcuts.showNextProblem();
+          return true;
+        }
+        break;
+    }
+    return false;
   }
 }
-
-
-/* class _RawKeyboardEventsState extends State<RawKeyboardEvents> {
-  late final FocusNode focusNode;
-
-  @override
-  void initState() {
-    focusNode = FocusNode();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    focusNode.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Focus(
-      canRequestFocus: true,
-      focusNode: focusNode,
-      onKey: _handleKey,
-      child: widget.child,
-    );
-  }
-
-  KeyEventResult _handleKey(FocusNode node, RawKeyEvent event) {
-    providerContainer.read(clientViewModeStateProvider).setControlKey(event.isControlPressed);
-    return KeyEventResult.ignored;
-  }
-}
- */

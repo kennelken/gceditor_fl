@@ -57,6 +57,8 @@ class TableSelectionState {
   String? selectedTableId;
 
   TableSelectionState();
+
+  bool canBeDeselected() => selectedId != null || selectedEntity != null || selectedFieldId != null || selectedField != null;
 }
 
 class TableSelectionStateNotifier extends ChangeNotifier {

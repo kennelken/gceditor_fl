@@ -102,14 +102,6 @@ class MyApp extends StatelessWidget {
 
       return RawKeyboardEvents(
         child: MaterialApp(
-          shortcuts: {
-            ...WidgetsApp.defaultShortcuts,
-            ...GlobalShortcuts.getIntents(),
-          },
-          actions: {
-            ...WidgetsApp.defaultActions,
-            ...GlobalShortcuts.getActions(),
-          },
           debugShowCheckedModeBanner: false,
           title: 'gceditor',
           theme: kStyle.kAppTheme,
