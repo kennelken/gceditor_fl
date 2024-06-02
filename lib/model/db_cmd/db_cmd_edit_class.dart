@@ -112,6 +112,11 @@ class DbCmdEditClass extends BaseDbCmd {
         if (firstChildTable != null) //
           return DbCmdResult.fail(
               'Can\'t change the classType to "${describeEnum(classType!)}" because it is used as parent in "${firstChildTable.id}"');
+
+        final fieldsUsingInline = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
+        if (fieldsUsingInline.isNotEmpty) //
+          return DbCmdResult.fail(
+              'Can\'t change the classType to "${describeEnum(classType!)}" because it is used in inline lists in: ${fieldsUsingInline.map((e) => '"${e.$1.id}.${e.$2.id}"').join(', ')}');
       }
 
       if (classType != ClassType.interface) {

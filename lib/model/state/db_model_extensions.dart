@@ -1714,10 +1714,12 @@ class DbModelUtils {
     }
   }
 
-  static List<ClassMetaFieldDescription> getFieldsUsingInlineClass(DbModel dbModel, ClassMetaEntity classEntity) {
+  static List<(ClassMetaEntity classMeta, ClassMetaFieldDescription field)> getFieldsUsingInlineClass(DbModel dbModel, ClassMetaEntity classEntity) {
     final allFields = dbModel.cache.allClasses
-        .selectMany((c, _) =>
-            dbModel.cache.getAllFields(c).where((f) => f.typeInfo.type == ClassFieldType.listInline && f.valueTypeInfo?.classId == classEntity.id))
+        .selectMany((c, _) => dbModel.cache
+            .getAllFields(c)
+            .where((f) => f.typeInfo.type == ClassFieldType.listInline && f.valueTypeInfo?.classId == classEntity.id)
+            .map((e) => (c, e)))
         .toList();
     return allFields;
   }

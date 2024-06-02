@@ -42,7 +42,7 @@ class DbCmdDeleteClassField extends BaseDbCmd {
     for (var fieldUsingInline in fieldsUsingInline) {
       for (var table in dbModel.cache.allDataTables) {
         final fields = dbModel.cache.getAllFieldsByClassId(table.classId)!;
-        final columnIndex = fields.indexOf(fieldUsingInline);
+        final columnIndex = fields.indexOf(fieldUsingInline.$2);
         if (columnIndex <= -1) //
           continue;
 
@@ -110,7 +110,7 @@ class DbCmdDeleteClassField extends BaseDbCmd {
     for (var fieldUsingInline in fieldsUsingInline) {
       for (var table in dbModel.cache.allDataTables) {
         final fields = dbModel.cache.getAllFieldsByClassId(table.classId)!;
-        final columnIndex = fields.indexOf(fieldUsingInline);
+        final columnIndex = fields.indexOf(fieldUsingInline.$2);
         if (columnIndex <= -1) //
           continue;
 
