@@ -9,6 +9,7 @@ import 'package:gceditor/utils/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../db/data_table_cell_multivalue_item.dart';
+import '../db_network/data_table_column_inline_values.dart';
 import 'base_db_cmd.dart';
 import 'db_cmd_result.dart';
 
@@ -18,7 +19,7 @@ part 'db_cmd_edit_class_field.g.dart';
 class DbCmdEditClassField extends BaseDbCmd {
   late String entityId;
   late String fieldId;
-  late Map<String, Map<int, List<List<dynamic>>>>? listInlineValuesByTableColumn;
+  late Map<String, List<DataTableColumnInlineValues>>? listInlineValuesByTableColumn;
   String? newId;
   String? newDescription;
   bool? newIsUniqueValue;
@@ -117,7 +118,7 @@ class DbCmdEditClassField extends BaseDbCmd {
           final cellValues = row.values[columnIndex].listCellValues!;
           for (var j = 0; j < cellValues.length; j++) {
             final cellValue = cellValues[j];
-            final value = listInlineValuesByTableColumn?[(table.id)]?[inlineColumnIndex]?[i][j] ??
+            final value = DbModelUtils.getInnerCellValue(dbModel, listInlineValuesByTableColumn?[(table.id)], listInlineField.id, i, j) ??
                 DbModelUtils.convertSimpleValueIfPossible(
                     (cellValue as DataTableCellMultiValueItem).values![inlineColumnIndex], field.typeInfo.type) ??
                 dbModel.cache.getDefaultValue(field).simpleValue;
@@ -264,35 +265,7 @@ class DbCmdEditClassField extends BaseDbCmd {
       }
     }
 
-    final listInlineValuesByTableColumn = <String, Map<int, List<List<dynamic>>>>{};
-    final fieldsUsingInline = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
-    for (var fieldUsingInline in fieldsUsingInline) {
-      for (var table in dbModel.cache.allDataTables) {
-        final fields = dbModel.cache.getAllFieldsByClassId(table.classId)!;
-        final columnIndex = fields.indexOf(fieldUsingInline.$2);
-        if (columnIndex <= -1) //
-          continue;
-
-        final listInlineField = fields[columnIndex];
-        final inlineColumns = DbModelUtils.getListMultiColumns(dbModel, listInlineField.valueTypeInfo!);
-        final inlineColumnIndex = inlineColumns!.indexOf(field);
-
-        listInlineValuesByTableColumn.addIfMissing(table.id, (_) => {});
-        listInlineValuesByTableColumn[table.id]!.addIfMissing(inlineColumnIndex, (_) => []);
-
-        for (var i = 0; i < table.rows.length; i++) {
-          final row = table.rows[i];
-          final cellValues = row.values[columnIndex].listCellValues!;
-
-          listInlineValuesByTableColumn[table.id]![inlineColumnIndex]!.add([]);
-          for (var j = 0; j < cellValues.length; j++) {
-            final cellValue = cellValues[j];
-            listInlineValuesByTableColumn[table.id]![inlineColumnIndex]![i]
-                .add((cellValue as DataTableCellMultiValueItem).values![inlineColumnIndex]);
-          }
-        }
-      }
-    }
+    final listInlineValuesByTableColumn = DbModelUtils.getInlineCellValuesByTable(dbModel, entity);
 
     return DbCmdEditClassField.values(
       entityId: entityId,

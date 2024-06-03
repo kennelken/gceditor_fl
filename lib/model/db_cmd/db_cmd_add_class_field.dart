@@ -8,6 +8,7 @@ import 'package:gceditor/utils/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../db/data_table_cell_multivalue_item.dart';
+import '../db_network/data_table_column_inline_values.dart';
 import 'base_db_cmd.dart';
 import 'db_cmd_delete_class_field.dart';
 import 'db_cmd_result.dart';
@@ -19,7 +20,7 @@ class DbCmdAddClassField extends BaseDbCmd {
   late String entityId;
   late int index;
   late ClassMetaFieldDescription field;
-  late Map<String, Map<int, List<List<dynamic>>>>? listInlineValuesByTableColumn;
+  late Map<String, List<DataTableColumnInlineValues>>? listInlineValuesByTableColumn;
 
   Map<String, List<DataTableColumn>>? dataColumnsByTable;
 
@@ -86,7 +87,8 @@ class DbCmdAddClassField extends BaseDbCmd {
             final cellValues = row.values[columnIndex].listCellValues!;
             for (var j = 0; j < cellValues.length; j++) {
               final cellValue = cellValues[j];
-              final value = listInlineValuesByTableColumn?[(table.id)]?[inlineColumnIndex]?[i][j] ?? dbModel.cache.getDefaultValue(field).simpleValue;
+              final value = DbModelUtils.getInnerCellValue(dbModel, listInlineValuesByTableColumn?[table.id], field.id, i, j) ??
+                  dbModel.cache.getDefaultValue(field).simpleValue;
               (cellValue as DataTableCellMultiValueItem).values!.insert(inlineColumnIndex, value);
             }
           }

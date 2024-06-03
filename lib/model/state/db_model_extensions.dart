@@ -20,6 +20,7 @@ import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_result.dart';
 import 'package:gceditor/model/db_network/data_table_column.dart';
+import 'package:gceditor/model/db_network/data_table_column_inline_values.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/client_find_state.dart';
 import 'package:gceditor/model/state/client_problems_state.dart';
@@ -1722,6 +1723,47 @@ class DbModelUtils {
             .map((e) => (c, e)))
         .toList();
     return allFields;
+  }
+
+  static dynamic getInnerCellValue(DbModel dbModel, List<DataTableColumnInlineValues>? listInlineValuesByTableColumn, String columnId, int i, int j) {
+    final list = listInlineValuesByTableColumn?.firstWhereOrNull((element) => element.columnId == columnId);
+    return list?.values[i][j];
+  }
+
+  static Map<String, List<DataTableColumnInlineValues>> getInlineCellValuesByTable(DbModel dbModel, ClassMetaEntity entity) {
+    final result = <String, List<DataTableColumnInlineValues>>{};
+
+    final fieldsUsingInline = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
+    for (var fieldUsingInline in fieldsUsingInline) {
+      for (var table in dbModel.cache.allDataTables) {
+        final fields = dbModel.cache.getAllFieldsByClassId(table.classId)!;
+        final columnIndex = fields.indexOf(fieldUsingInline.$2);
+        if (columnIndex <= -1) //
+          continue;
+
+        final listInlineField = fields[columnIndex];
+        final inlineColumns = DbModelUtils.getListMultiColumns(dbModel, listInlineField.valueTypeInfo!)!;
+        for (var k = 0; k < inlineColumns.length; k++) {
+          result.addIfMissing(table.id, (_) => []);
+          final values = DataTableColumnInlineValues();
+          result[table.id]!.add(values);
+
+          for (var i = 0; i < table.rows.length; i++) {
+            final row = table.rows[i];
+            final cellValues = row.values[columnIndex].listCellValues!;
+
+            final resultCellValues = <dynamic>[];
+            values.values.add(resultCellValues);
+
+            for (var j = 0; j < cellValues.length; j++) {
+              final cellValue = cellValues[j];
+              resultCellValues.add((cellValue as DataTableCellMultiValueItem).values![k]);
+            }
+          }
+        }
+      }
+    }
+    return result;
   }
 }
 

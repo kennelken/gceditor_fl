@@ -16,10 +16,10 @@ DbCmdEditClassField _$DbCmdEditClassFieldFromJson(Map<String, dynamic> json) =>
           (json['listInlineValuesByTableColumn'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(
             k,
-            (e as Map<String, dynamic>).map(
-              (k, e) => MapEntry(int.parse(k),
-                  (e as List<dynamic>).map((e) => e as List<dynamic>).toList()),
-            )),
+            (e as List<dynamic>)
+                .map((e) => DataTableColumnInlineValues.fromJson(
+                    e as Map<String, dynamic>))
+                .toList()),
       )
       ..newId = json['newId'] as String?
       ..newDescription = json['newDescription'] as String?
@@ -62,8 +62,8 @@ Map<String, dynamic> _$DbCmdEditClassFieldToJson(DbCmdEditClassField instance) {
   val['fieldId'] = instance.fieldId;
   writeNotNull(
       'listInlineValuesByTableColumn',
-      instance.listInlineValuesByTableColumn?.map(
-          (k, e) => MapEntry(k, e.map((k, e) => MapEntry(k.toString(), e)))));
+      instance.listInlineValuesByTableColumn
+          ?.map((k, e) => MapEntry(k, e.map((e) => e.toJson()).toList())));
   writeNotNull('newId', instance.newId);
   writeNotNull('newDescription', instance.newDescription);
   writeNotNull('newIsUniqueValue', instance.newIsUniqueValue);

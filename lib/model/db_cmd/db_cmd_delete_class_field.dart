@@ -105,36 +105,7 @@ class DbCmdDeleteClassField extends BaseDbCmd {
       }
     }
 
-    final listInlineValuesByTableColumn = <String, Map<int, List<List<dynamic>>>>{};
-    final fieldsUsingInline = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
-    for (var fieldUsingInline in fieldsUsingInline) {
-      for (var table in dbModel.cache.allDataTables) {
-        final fields = dbModel.cache.getAllFieldsByClassId(table.classId)!;
-        final columnIndex = fields.indexOf(fieldUsingInline.$2);
-        if (columnIndex <= -1) //
-          continue;
-
-        final listInlineField = fields[columnIndex];
-        final inlineColumns = DbModelUtils.getListMultiColumns(dbModel, listInlineField.valueTypeInfo!);
-        final inlineColumnIndex = inlineColumns!.indexOf(field);
-
-        listInlineValuesByTableColumn.addIfMissing(table.id, (_) => {});
-        listInlineValuesByTableColumn[table.id]!.addIfMissing(inlineColumnIndex, (_) => []);
-
-        for (var i = 0; i < table.rows.length; i++) {
-          final row = table.rows[i];
-          final cellValues = row.values[columnIndex].listCellValues!;
-
-          listInlineValuesByTableColumn[table.id]![inlineColumnIndex]!.add([]);
-          for (var j = 0; j < cellValues.length; j++) {
-            final cellValue = cellValues[j];
-
-            listInlineValuesByTableColumn[table.id]![inlineColumnIndex]![i]
-                .add((cellValue as DataTableCellMultiValueItem).values![inlineColumnIndex]);
-          }
-        }
-      }
-    }
+    final listInlineValuesByTableColumn = DbModelUtils.getInlineCellValuesByTable(dbModel, entity);
 
     return DbCmdAddClassField.values(
       entityId: entityId,
