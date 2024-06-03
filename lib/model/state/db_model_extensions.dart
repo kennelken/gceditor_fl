@@ -804,11 +804,12 @@ class DbModelUtils {
   }
 
   static List<double> getTableInnerCellsFlex(DbModel model, TableMetaEntity table, ClassMetaFieldDescription field) {
-    if (table.columnInnerCellFlex.containsKey(field.id)) {
+    final columnsCount = DbModelUtils.getInnerCellsCount(model, field)!;
+
+    if (table.columnInnerCellFlex.containsKey(field.id) && table.columnInnerCellFlex[field.id]!.length == columnsCount) {
       return table.columnInnerCellFlex[field.id]!;
     }
 
-    final columnsCount = DbModelUtils.getInnerCellsCount(model, field)!;
     return List<double>.generate(columnsCount, (_) => 1.0 / columnsCount);
   }
 
@@ -991,8 +992,12 @@ class DbModelUtils {
         if (fields.contains(allFields[i])) {
           for (var j = 0; j < table.rows.length; j++) {
             final currentValue = table.rows[j].values[i];
-            table.rows[j].values[i] =
-                validateAndConvertValueIfRequired(model, currentValue, field) ?? parseDefaultValueByFieldOrDefault(model, field, field.defaultValue);
+            if (field.typeInfo.type.hasMultiValueType()) {
+              table.rows[j].values[i] = parseDefaultValueByFieldOrDefault(model, field, field.defaultValue);
+            } else {
+              table.rows[j].values[i] = validateAndConvertValueIfRequired(model, currentValue, field) ??
+                  parseDefaultValueByFieldOrDefault(model, field, field.defaultValue);
+            }
           }
         }
       }

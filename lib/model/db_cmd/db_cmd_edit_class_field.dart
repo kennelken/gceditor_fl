@@ -95,7 +95,7 @@ class DbCmdEditClassField extends BaseDbCmd {
       }
     }
 
-    if (valuesByTable != null) {
+    if (field.typeInfo.type.hasMultiValueType()) if (valuesByTable != null) {
       DbModelUtils.applyManyDataColumns(dbModel, valuesByTable!);
     }
 
@@ -224,6 +224,12 @@ class DbCmdEditClassField extends BaseDbCmd {
         final valueClassType = newValueClass.classType;
         if (valueClassType != ClassType.referenceType && valueClassType != ClassType.valueType) //
           return DbCmdResult.fail('Specified type must be a non abstract class');
+
+        if (newValueClass.parent != null) //
+          return DbCmdResult.fail('Specified type must not have base class');
+
+        if (newValueClass.interfaces.isNotEmpty) //
+          return DbCmdResult.fail('Specified type must not have interfaces');
 
         final newColumns = DbModelUtils.getListMultiColumns(dbModel, newValueType!)!;
         for (var column in newColumns) {
