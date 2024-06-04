@@ -379,10 +379,10 @@ class DbModelUtils {
     ClassFieldDescriptionDataInfo type,
     ClassFieldDescriptionDataInfo? keyType,
     ClassFieldDescriptionDataInfo? valueType,
-    String value, {
+    dynamic value, {
     bool silent = false,
   }) {
-    if (value.isEmpty) //
+    if (value is String && value.isEmpty || value == null) //
       return getDefaultValue(type.type);
 
     switch (type.type) {
@@ -390,23 +390,23 @@ class DbModelUtils {
         return null;
 
       case ClassFieldType.bool:
-        final result = Utils.tryParseBool(value);
+        final result = value is bool ? value : Utils.tryParseBool(value);
         return result == null ? null : DataTableCellValue.simple(result == true ? 1 : 0);
 
       case ClassFieldType.int:
       case ClassFieldType.long:
-        var result = int.tryParse(value);
+        var result = value is int || value is double ? value : int.tryParse(value);
         result ??= double.tryParse(value)?.toInt();
         return result == null ? null : DataTableCellValue.simple(result);
 
       case ClassFieldType.color:
-        var result = int.tryParse(value);
+        var result = value is int || value is double ? value : int.tryParse(value);
         result ??= double.tryParse(value)?.toInt();
         return result == null || result > Config.colorMinValue || result > Config.colorMaxValue ? null : DataTableCellValue.simple(result);
 
       case ClassFieldType.float:
       case ClassFieldType.double:
-        final result = double.tryParse(value);
+        final result = value is int || value is double ? value : double.tryParse(value);
         return result == null ? null : DataTableCellValue.simple(result);
 
       case ClassFieldType.string:
@@ -452,7 +452,7 @@ class DbModelUtils {
       case ClassFieldType.set:
         try {
           final list = jsonDecode(value) ?? [];
-          final valuesList = list
+          final valuesList = (list as List<dynamic>)
               .map(
                 (e) => parseDefaultValue(model, valueType!, null, null, e.toString())?.simpleValue,
               )
@@ -472,11 +472,11 @@ class DbModelUtils {
       case ClassFieldType.dictionary:
         try {
           final list = jsonDecode(value) ?? [];
-          final valuesList = list
+          final valuesList = (list as List<dynamic>)
               .map(
                 (v) => DataTableCellDictionaryItem.values(
-                  key: parseDefaultValue(model, keyType!, null, null, v[0])?.simpleValue,
-                  value: parseDefaultValue(model, valueType!, null, null, v[1])?.simpleValue,
+                  key: parseDefaultValue(model, keyType!, null, null, v['k'])?.simpleValue,
+                  value: parseDefaultValue(model, valueType!, null, null, v['v'])?.simpleValue,
                 ),
               )
               .toList();
@@ -494,17 +494,19 @@ class DbModelUtils {
 
       case ClassFieldType.listInline: //TODO! @sergey test
         try {
-          final listMulti = jsonDecode(value) ?? [];
-
-          final valuesList = listMulti
+          final list = jsonDecode(value) ?? [];
+          final valuesList = (list as List<dynamic>)
               .map(
-                (e) => getListMultiColumnsWithValues(model, valueType!, e)!
-                    .map((p) => parseDefaultValue(model, p.$1.typeInfo, null, null, p.$2))
-                    .toList(),
+                (e) => DataTableCellMultiValueItem.values(
+                  values: getListMultiColumnsWithValues(model, valueType!, e['vs'])!
+                      .map((p) => parseDefaultValue(model, p.$1.typeInfo, null, null, p.$2)!.simpleValue)
+                      .toList(),
+                ),
               )
               .toList();
 
-          if (valuesList.any((e) => e == null)) //
+          final expectedColumnsCount = DbModelUtils.getListMultiColumns(model, valueType!)?.length;
+          if (valuesList.any((e) => e.values == null || e.values!.length != expectedColumnsCount)) //
             return null;
 
           final resultList = DataTableCellValue.listMulti(valuesList);
