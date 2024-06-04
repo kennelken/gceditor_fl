@@ -1698,8 +1698,11 @@ class DbModelUtils {
   }
 
   static List<(ClassMetaFieldDescription, T)>? getListMultiColumnsWithValues<T>(
-      DbModel model, ClassFieldDescriptionDataInfo description, List<T>? values) {
-    final columns = getListMultiColumns(model, description);
+    DbModel model,
+    ClassFieldDescriptionDataInfo field,
+    List<T>? values,
+  ) {
+    final columns = getListMultiColumns(model, field);
     if (columns?.length != values?.length) {
       throw Exception('Columns and values number mismatch: columns=${columns?.length}, values=${values?.length}');
     }

@@ -95,7 +95,7 @@ class DbCmdEditClassField extends BaseDbCmd {
       }
     }
 
-    if (field.typeInfo.type.hasMultiValueType()) if (valuesByTable != null) {
+    if (valuesByTable != null) {
       DbModelUtils.applyManyDataColumns(dbModel, valuesByTable!);
     }
 

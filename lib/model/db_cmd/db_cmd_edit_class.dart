@@ -126,7 +126,12 @@ class DbCmdEditClass extends BaseDbCmd {
               'Can\'t change the classType to "${describeEnum(classType!)}" because it is used as an interface in "${firstParentClass.id}"');
       }
     }
+
     if (editParentClassId == true) {
+      final inlineClassUsages = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
+      if (inlineClassUsages.isNotEmpty) //
+        return DbCmdResult.fail('Classes used as listInline can not have parent classes');
+
       if (parentClassId != null) {
         final newParentEntity = dbModel.cache.getClass(parentClassId);
 
