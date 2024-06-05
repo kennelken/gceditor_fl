@@ -162,8 +162,10 @@ class _DataTableCellTextViewState extends State<DataTableCellTextView> {
       }
     }
 
-    if (DbModelUtils.simpleValuesAreEqual(newValue, widget.value)) //
+    if (DbModelUtils.simpleValuesAreEqual(newValue, widget.value)) {
+      _textController.text = widget.value?.toString() ?? '';
       return;
+    }
 
     widget.onValueChanged(newValue);
   }
