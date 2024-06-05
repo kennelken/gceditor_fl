@@ -410,18 +410,25 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
 
   void _handleTypeChange(EnumWrapper<ClassFieldType>? value) {
     setState(() {
+      defaultValueController.text = '';
       type = value!.value;
+
+      if (type.hasMultiValueType()) {
+        valueType = ClassFieldType.reference;
+      }
     });
   }
 
   void _handleKeyTypeChange(EnumWrapper<ClassFieldType>? value) {
     setState(() {
+      defaultValueController.text = '';
       keyType = value!.value;
     });
   }
 
   void _handleValueTypeChange(EnumWrapper<ClassFieldType>? value) {
     setState(() {
+      defaultValueController.text = '';
       valueType = value!.value;
     });
   }
@@ -431,6 +438,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
   }
 
   void _handleTypeRefSelected(ClassMeta? value) {
+    defaultValueController.text = '';
     setState(() {
       typeRefId = value!.id;
     });
@@ -438,12 +446,14 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
 
   void _handleKeyTypeRefSelected(ClassMeta? value) {
     setState(() {
+      defaultValueController.text = '';
       keyTypeRefId = value!.id;
     });
   }
 
   void _handleValueTypeRefSelected(ClassMeta? value) {
     setState(() {
+      defaultValueController.text = '';
       valueTypeRefId = value!.id;
     });
   }
