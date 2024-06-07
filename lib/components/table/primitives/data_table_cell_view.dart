@@ -18,7 +18,7 @@ import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/model/state/style_state.dart';
 
-import 'data_table_cell_list_multi_view.dart';
+import 'data_table_cell_list_inline_view.dart';
 import 'data_table_cell_list_view.dart';
 import 'data_table_cell_text_view.dart';
 
@@ -117,7 +117,7 @@ class DataTableCellView extends StatelessWidget {
         );
 
       case ClassFieldType.listInline: //TODO! @sergey test
-        return DataTableCellListMultiView(
+        return DataTableCellListInlineView(
           key: ValueKey('${table.id}_${row.id}_${index}_$clientStateVersion'),
           coordinates: coordinates,
           value: row.values[index],

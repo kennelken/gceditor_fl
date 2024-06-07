@@ -7,7 +7,7 @@ import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/utils/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../db/data_table_cell_multivalue_item.dart';
+import '../db/data_table_cell_list_inline_item.dart';
 import '../db_network/data_table_column_inline_values.dart';
 import 'base_db_cmd.dart';
 import 'db_cmd_delete_class_field.dart';
@@ -72,7 +72,7 @@ class DbCmdAddClassField extends BaseDbCmd {
             continue;
 
           final listInlineField = fields[columnIndex];
-          final inlineColumns = DbModelUtils.getListMultiColumns(dbModel, listInlineField.valueTypeInfo!);
+          final inlineColumns = DbModelUtils.getListInlineColumns(dbModel, listInlineField.valueTypeInfo!);
           final inlineColumnIndex = inlineColumns!.indexOf(field);
 
           if (table.columnInnerCellFlex.containsKey(listInlineField.id)) {
@@ -89,7 +89,7 @@ class DbCmdAddClassField extends BaseDbCmd {
               final cellValue = cellValues[j];
               final value = DbModelUtils.getInnerCellValue(dbModel, listInlineValuesByTableColumn?[table.id], field.id, i, j) ??
                   dbModel.cache.getDefaultValue(field).simpleValue;
-              (cellValue as DataTableCellMultiValueItem).values!.insert(inlineColumnIndex, value);
+              (cellValue as DataTableCellListInlineItem).values!.insert(inlineColumnIndex, value);
             }
           }
         }

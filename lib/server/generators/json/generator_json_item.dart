@@ -6,7 +6,7 @@ part 'generator_json_item.g.dart';
 @JsonSerializable()
 class GeneratorJsonItem {
   String id = '';
-  Map<String, DataTableCellValue> values = {};
+  Map<String, dynamic> values = {};
 
   GeneratorJsonItem();
 

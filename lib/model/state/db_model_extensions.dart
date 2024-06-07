@@ -30,7 +30,7 @@ import 'package:gceditor/utils/utils.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
-import '../db/data_table_cell_multivalue_item.dart';
+import '../db/data_table_cell_list_inline_item.dart';
 import 'custom_data_classes.dart';
 import 'service/client_navigation_service.dart';
 
@@ -497,19 +497,19 @@ class DbModelUtils {
           final list = jsonDecode(value) ?? [];
           final valuesList = (list as List<dynamic>)
               .map(
-                (e) => DataTableCellMultiValueItem.values(
-                  values: getListMultiColumnsWithValues(model, valueType!, e['vs'])!
+                (e) => DataTableCellListInlineItem.values(
+                  values: getListInlineColumnsWithValues(model, valueType!, e['vs'])!
                       .map((p) => parseDefaultValue(model, p.$1.typeInfo, null, null, p.$2)!.simpleValue)
                       .toList(),
                 ),
               )
               .toList();
 
-          final expectedColumnsCount = DbModelUtils.getListMultiColumns(model, valueType!)?.length;
+          final expectedColumnsCount = DbModelUtils.getListInlineColumns(model, valueType!)?.length;
           if (valuesList.any((e) => e.values == null || e.values!.length != expectedColumnsCount)) //
             return null;
 
-          final resultList = DataTableCellValue.listMulti(valuesList);
+          final resultList = DataTableCellValue.listInline(valuesList);
           return resultList;
         } catch (e, callstack) {
           if (!silent) //
@@ -596,11 +596,11 @@ class DbModelUtils {
             );
 
       case ClassFieldType.listInline: //TODO! @sergey test
-        final multiValues = value.listMultiCellValues();
+        final multiValues = value.listInlineCellValues();
         return multiValues != null &&
             multiValues.length == value.listCellValues?.length &&
             multiValues.every(
-              (e) => getListMultiColumnsWithValues(model, field.valueTypeInfo!, e.values)! //
+              (e) => getListInlineColumnsWithValues(model, field.valueTypeInfo!, e.values)! //
                   .every((p) => validateSimpleValue(p.$1.typeInfo.type, p.$2)),
             );
 
@@ -703,7 +703,7 @@ class DbModelUtils {
       case ClassFieldType.dictionary:
         return DataTableCellValue.dictionary([]);
       case ClassFieldType.listInline:
-        return DataTableCellValue.listMulti([]);
+        return DataTableCellValue.listInline([]);
 
       case ClassFieldType.date:
         return DataTableCellValue.simple(simpleValueToText(Config.defaultDateTime));
@@ -1047,14 +1047,14 @@ class DbModelUtils {
       case ClassFieldType.listInline: //TODO! @sergey test
         if (validateValue(model, field, value)) //
           return value;
-        final listMultiValues = value.listMultiCellValues();
-        if (listMultiValues == null) //
+        final listInlineValues = value.listInlineCellValues();
+        if (listInlineValues == null) //
           return null;
 
-        final resultList = listMultiValues
+        final resultList = listInlineValues
             .map(
-              (e) => DataTableCellMultiValueItem.values(
-                values: getListMultiColumnsWithValues(model, field.valueTypeInfo!, e.values)!
+              (e) => DataTableCellListInlineItem.values(
+                values: getListInlineColumnsWithValues(model, field.valueTypeInfo!, e.values)!
                     .map(
                       (ev) => convertSimpleValueIfPossible(ev.$1, field.keyTypeInfo!.type) ?? (getDefaultValue(field.keyTypeInfo!.type)).simpleValue,
                     )
@@ -1062,7 +1062,7 @@ class DbModelUtils {
               ),
             )
             .toList();
-        return DataTableCellValue.listMulti(resultList);
+        return DataTableCellValue.listInline(resultList);
 
       case ClassFieldType.dictionary:
         if (validateValue(model, field, value)) //
@@ -1250,9 +1250,9 @@ class DbModelUtils {
         break;
 
       case ClassFieldType.listInline: //TODO! @sergey test
-        final list = values[index].listMultiCellValues();
+        final list = values[index].listInlineCellValues();
         if (list != null) {
-          final columns = getListMultiColumns(model, field.valueTypeInfo!)!;
+          final columns = getListInlineColumns(model, field.valueTypeInfo!)!;
           for (var j = 0; j < columns.length; j++) {
             final column = columns[j];
             if (column.typeInfo.type == ClassFieldType.reference && isSuitableClass(column.typeInfo.classId)) {
@@ -1631,9 +1631,9 @@ class DbModelUtils {
               final dictionaryValues = e.dictionaryCellValues();
               if (dictionaryValues != null) //
                 return jsonEncode(dictionaryValues.map((e) => [e.key, e.value]).toList());
-              final listMultiValues = e.listMultiCellValues();
-              if (listMultiValues != null) //
-                return jsonEncode(listMultiValues.map((e) => e.values).toList());
+              final listInlineValues = e.listInlineCellValues();
+              if (listInlineValues != null) //
+                return jsonEncode(listInlineValues.map((e) => e.values).toList());
               return e.simpleValue;
             },
           ),
@@ -1695,16 +1695,16 @@ class DbModelUtils {
     }
   }
 
-  static List<ClassMetaFieldDescription>? getListMultiColumns(DbModel model, ClassFieldDescriptionDataInfo valueType) {
+  static List<ClassMetaFieldDescription>? getListInlineColumns(DbModel model, ClassFieldDescriptionDataInfo valueType) {
     return model.cache.getAllFieldsByClassId(valueType.classId!)!;
   }
 
-  static List<(ClassMetaFieldDescription, T)>? getListMultiColumnsWithValues<T>(
+  static List<(ClassMetaFieldDescription, T)>? getListInlineColumnsWithValues<T>(
     DbModel model,
     ClassFieldDescriptionDataInfo field,
     List<T>? values,
   ) {
-    final columns = getListMultiColumns(model, field);
+    final columns = getListInlineColumns(model, field);
     if (columns?.length != values?.length) {
       throw Exception('Columns and values number mismatch: columns=${columns?.length}, values=${values?.length}');
     }
@@ -1718,7 +1718,7 @@ class DbModelUtils {
       case ClassFieldType.dictionary:
         return 2;
       case ClassFieldType.listInline:
-        final columns = DbModelUtils.getListMultiColumns(dbModel, field.valueTypeInfo!)!;
+        final columns = DbModelUtils.getListInlineColumns(dbModel, field.valueTypeInfo!)!;
         return columns.length;
       default:
         return null;
@@ -1752,7 +1752,7 @@ class DbModelUtils {
           continue;
 
         final listInlineField = fields[columnIndex];
-        final inlineColumns = DbModelUtils.getListMultiColumns(dbModel, listInlineField.valueTypeInfo!)!;
+        final inlineColumns = DbModelUtils.getListInlineColumns(dbModel, listInlineField.valueTypeInfo!)!;
         for (var k = 0; k < inlineColumns.length; k++) {
           result.addIfMissing(table.id, (_) => []);
           final values = DataTableColumnInlineValues();
@@ -1767,7 +1767,7 @@ class DbModelUtils {
 
             for (var j = 0; j < cellValues.length; j++) {
               final cellValue = cellValues[j];
-              resultCellValues.add((cellValue as DataTableCellMultiValueItem).values![k]);
+              resultCellValues.add((cellValue as DataTableCellListInlineItem).values![k]);
             }
           }
         }

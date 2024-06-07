@@ -13,7 +13,7 @@ import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/utils/utils.dart';
 
 import '../../../consts/config.dart';
-import '../../../model/db/data_table_cell_multivalue_item.dart';
+import '../../../model/db/data_table_cell_list_inline_item.dart';
 import '../../../model/db_cmd/db_cmd_resize_inner_cell.dart';
 import '../../../model/state/client_view_mode_state.dart';
 import '../../properties/primitives/delete_button.dart';
@@ -23,7 +23,7 @@ import 'data_table_cell_view.dart';
 List<double>? _initialInnerCellFlex;
 
 //TODO! @sergey
-class DataTableCellListMultiView extends StatefulWidget {
+class DataTableCellListInlineView extends StatefulWidget {
   final DataTableValueCoordinates coordinates;
   final ClassFieldDescriptionDataInfo fieldType;
   final ClassFieldDescriptionDataInfo valueFieldType;
@@ -31,7 +31,7 @@ class DataTableCellListMultiView extends StatefulWidget {
   final DataTableSimpleCellFactory cellFactory;
   final ValueChanged<DataTableCellValue> onValueChanged;
 
-  const DataTableCellListMultiView({
+  const DataTableCellListInlineView({
     super.key,
     required this.coordinates,
     required this.fieldType,
@@ -42,10 +42,10 @@ class DataTableCellListMultiView extends StatefulWidget {
   });
 
   @override
-  State<DataTableCellListMultiView> createState() => _DataTableCellListMultiViewState();
+  State<DataTableCellListInlineView> createState() => _DataTableCellListInlineViewState();
 }
 
-class _DataTableCellListMultiViewState extends State<DataTableCellListMultiView> {
+class _DataTableCellListInlineViewState extends State<DataTableCellListInlineView> {
   late DataTableCellValue _cellValue;
   late final ScrollController _scrollController;
 
@@ -140,7 +140,7 @@ class _DataTableCellListMultiViewState extends State<DataTableCellListMultiView>
                     itemCount: _cellValue.listCellValues?.length ?? 0,
                     onReorder: _handleReorder,
                     itemBuilder: (context, index) {
-                      final value = _cellValue.listCellValues![index] as DataTableCellMultiValueItem;
+                      final value = _cellValue.listCellValues![index] as DataTableCellListInlineItem;
                       var key = '$index';
                       for (var subValue in value.values!) {
                         key += '_$subValue';
@@ -168,10 +168,10 @@ class _DataTableCellListMultiViewState extends State<DataTableCellListMultiView>
     );
   }
 
-  List<Widget> _getInnerCells(WidgetRef ref, BuildContext cellContext, int index, DataTableCellMultiValueItem value) {
+  List<Widget> _getInnerCells(WidgetRef ref, BuildContext cellContext, int index, DataTableCellListInlineItem value) {
     final result = <Widget>[];
 
-    final columns = DbModelUtils.getListMultiColumns(clientModel, widget.valueFieldType)!;
+    final columns = DbModelUtils.getListInlineColumns(clientModel, widget.valueFieldType)!;
     final columnFlexes = DbModelUtils.getTableInnerCellsFlex(clientModel, widget.coordinates.table, widget.coordinates.field!);
 
     for (var i = 0; i < value.values!.length; i++) {
@@ -222,7 +222,7 @@ class _DataTableCellListMultiViewState extends State<DataTableCellListMultiView>
   void _handleReorder(int oldIndex, int newIndex) {
     setState(
       () {
-        _cellValue = DataTableCellValue.listMulti(Utils.copyAndReorder(_cellValue.copy().listMultiCellValues()!, oldIndex, newIndex));
+        _cellValue = DataTableCellValue.listInline(Utils.copyAndReorder(_cellValue.copy().listInlineCellValues()!, oldIndex, newIndex));
         widget.onValueChanged(_cellValue);
       },
     );
@@ -245,11 +245,11 @@ class _DataTableCellListMultiViewState extends State<DataTableCellListMultiView>
       () {
         final valuesListCopy = _cellValue.copy();
 
-        final columns = DbModelUtils.getListMultiColumns(clientModel, widget.coordinates.field!.valueTypeInfo!)!;
+        final columns = DbModelUtils.getListInlineColumns(clientModel, widget.coordinates.field!.valueTypeInfo!)!;
         final defaultValues = columns.map((e) => DbModelUtils.getDefaultValue(e.typeInfo.type).simpleValue).toList();
 
         valuesListCopy.listCellValues!.add(
-          DataTableCellMultiValueItem.values(
+          DataTableCellListInlineItem.values(
             values: defaultValues,
           ),
         );
@@ -267,7 +267,7 @@ class _DataTableCellListMultiViewState extends State<DataTableCellListMultiView>
     setState(
       () {
         final valuesListCopy = _cellValue.copy();
-        (valuesListCopy.listCellValues![rowIndex] as DataTableCellMultiValueItem).values![cellIndex] = value;
+        (valuesListCopy.listCellValues![rowIndex] as DataTableCellListInlineItem).values![cellIndex] = value;
         _cellValue = valuesListCopy;
 
         widget.onValueChanged(_cellValue);
@@ -280,7 +280,7 @@ class _DataTableCellListMultiViewState extends State<DataTableCellListMultiView>
       return;
 
     final relDelta = details.delta.dx / context.size!.width;
-    final columns = DbModelUtils.getListMultiColumns(clientModel, widget.valueFieldType)!;
+    final columns = DbModelUtils.getListInlineColumns(clientModel, widget.valueFieldType)!;
 
     DbModelUtils.setInnerCellColumnFlex(
       clientModel,

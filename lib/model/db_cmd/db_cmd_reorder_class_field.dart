@@ -2,7 +2,7 @@ import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../db/data_table_cell_multivalue_item.dart';
+import '../db/data_table_cell_list_inline_item.dart';
 import '../state/db_model_extensions.dart';
 import 'base_db_cmd.dart';
 import 'db_cmd_result.dart';
@@ -64,7 +64,7 @@ class DbCmdReorderClassField extends BaseDbCmd {
           continue;
 
         final listInlineField = fields[columnIndex];
-        final inlineColumns = DbModelUtils.getListMultiColumns(dbModel, listInlineField.valueTypeInfo!);
+        final inlineColumns = DbModelUtils.getListInlineColumns(dbModel, listInlineField.valueTypeInfo!);
         final inlineColumnIndexFrom = inlineColumns!.indexOf(field);
 
         if (table.columnInnerCellFlex.containsKey(listInlineField.id)) {
@@ -79,7 +79,7 @@ class DbCmdReorderClassField extends BaseDbCmd {
 
           for (var j = 0; j < cellValues.length; j++) {
             final cellValue = cellValues[j];
-            final innerValues = (cellValue as DataTableCellMultiValueItem).values!;
+            final innerValues = (cellValue as DataTableCellListInlineItem).values!;
             final innerValue = innerValues.removeAt(inlineColumnIndexFrom);
             innerValues.insert(inlineColumnIndexFrom + indexDelta, innerValue);
           }

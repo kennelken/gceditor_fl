@@ -8,7 +8,7 @@ import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/utils/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../db/data_table_cell_multivalue_item.dart';
+import '../db/data_table_cell_list_inline_item.dart';
 import '../db_network/data_table_column_inline_values.dart';
 import 'base_db_cmd.dart';
 import 'db_cmd_result.dart';
@@ -110,7 +110,7 @@ class DbCmdEditClassField extends BaseDbCmd {
           continue;
 
         final listInlineField = fields[columnIndex];
-        final inlineColumns = DbModelUtils.getListMultiColumns(dbModel, listInlineField.valueTypeInfo!);
+        final inlineColumns = DbModelUtils.getListInlineColumns(dbModel, listInlineField.valueTypeInfo!);
         final inlineColumnIndex = inlineColumns!.indexOf(field);
 
         for (var i = 0; i < table.rows.length; i++) {
@@ -120,9 +120,9 @@ class DbCmdEditClassField extends BaseDbCmd {
             final cellValue = cellValues[j];
             final value = DbModelUtils.getInnerCellValue(dbModel, listInlineValuesByTableColumn?[(table.id)], listInlineField.id, i, j) ??
                 DbModelUtils.convertSimpleValueIfPossible(
-                    (cellValue as DataTableCellMultiValueItem).values![inlineColumnIndex], field.typeInfo.type) ??
+                    (cellValue as DataTableCellListInlineItem).values![inlineColumnIndex], field.typeInfo.type) ??
                 dbModel.cache.getDefaultValue(field).simpleValue;
-            (cellValue as DataTableCellMultiValueItem).values![inlineColumnIndex] = value;
+            (cellValue as DataTableCellListInlineItem).values![inlineColumnIndex] = value;
           }
         }
       }
@@ -231,7 +231,7 @@ class DbCmdEditClassField extends BaseDbCmd {
         if (newValueClass.interfaces.isNotEmpty) //
           return DbCmdResult.fail('Specified type must not have interfaces');
 
-        final newColumns = DbModelUtils.getListMultiColumns(dbModel, newValueType!)!;
+        final newColumns = DbModelUtils.getListInlineColumns(dbModel, newValueType!)!;
         for (var column in newColumns) {
           if (!column.typeInfo.type.isSimple()) //
             return DbCmdResult.fail('Specified type contains a column that is not simple');

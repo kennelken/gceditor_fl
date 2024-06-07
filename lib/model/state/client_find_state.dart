@@ -252,11 +252,11 @@ class ClientFindStateNotifier extends ChangeNotifier {
                 }
                 break;
               case ClassFieldType.listInline:
-                final multivalueValues = value.listMultiCellValues()!;
+                final multivalueValues = value.listInlineCellValues()!;
                 for (var k = 0; k < multivalueValues.length; k++) {
                   closureInnerListRow = k;
                   closureInnerListColumn = -1;
-                  final values = DbModelUtils.getListMultiColumnsWithValues(model, field.valueTypeInfo!, multivalueValues[k].values)!;
+                  final values = DbModelUtils.getListInlineColumnsWithValues(model, field.valueTypeInfo!, multivalueValues[k].values)!;
                   for (var value in values) {
                     closureInnerListColumn = closureInnerListColumn! + 1;
                     _doFindInSimpleValue(value.$2, value.$1.typeInfo.type, prioritySuperLow, addResult); //TODO! @sergey test

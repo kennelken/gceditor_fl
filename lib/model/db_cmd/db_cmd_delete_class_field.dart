@@ -6,7 +6,7 @@ import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/utils/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../db/data_table_cell_multivalue_item.dart';
+import '../db/data_table_cell_list_inline_item.dart';
 import 'base_db_cmd.dart';
 import 'db_cmd_add_class_field.dart';
 import 'db_cmd_result.dart';
@@ -47,7 +47,7 @@ class DbCmdDeleteClassField extends BaseDbCmd {
           continue;
 
         final listInlineField = fields[columnIndex];
-        final inlineColumns = DbModelUtils.getListMultiColumns(dbModel, listInlineField.valueTypeInfo!);
+        final inlineColumns = DbModelUtils.getListInlineColumns(dbModel, listInlineField.valueTypeInfo!);
         final inlineColumnIndex = inlineColumns!.indexOf(field);
 
         if (table.columnInnerCellFlex.containsKey(listInlineField.id)) {
@@ -59,7 +59,7 @@ class DbCmdDeleteClassField extends BaseDbCmd {
         for (var i = 0; i < table.rows.length; i++) {
           final row = table.rows[i];
           for (var cellValue in row.values[columnIndex].listCellValues!) {
-            (cellValue as DataTableCellMultiValueItem).values!.removeAt(inlineColumnIndex);
+            (cellValue as DataTableCellListInlineItem).values!.removeAt(inlineColumnIndex);
           }
         }
       }

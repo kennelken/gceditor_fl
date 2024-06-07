@@ -271,10 +271,10 @@ void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> resu
               break;
 
             case ClassFieldType.listInline: //TODO! @sergey test
-              final list = value.listMultiCellValues()!;
+              final list = value.listInlineCellValues()!;
               for (var k = 0; k < list.length; k++) {
                 final listValue = list[k];
-                final values = DbModelUtils.getListMultiColumnsWithValues(model, field.valueTypeInfo!, listValue.values)!;
+                final values = DbModelUtils.getListInlineColumnsWithValues(model, field.valueTypeInfo!, listValue.values)!;
 
                 var innerColumnIndex = -1;
                 for (var t in values) {
@@ -420,10 +420,10 @@ void _computeAndAppendInvalidValues(DbModel model, List<DbModelProblem> result) 
               break;
 
             case ClassFieldType.listInline: //TODO! @sergey test
-              final list = value.listMultiCellValues()!;
+              final list = value.listInlineCellValues()!;
               for (var k = 0; k < list.length; k++) {
                 final listValue = list[k];
-                final values = DbModelUtils.getListMultiColumnsWithValues(model, field.valueTypeInfo!, listValue.values)!;
+                final values = DbModelUtils.getListInlineColumnsWithValues(model, field.valueTypeInfo!, listValue.values)!;
 
                 var innerColumnIndex = -1;
                 for (var t in values) {
