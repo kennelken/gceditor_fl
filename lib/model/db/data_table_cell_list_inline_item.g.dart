@@ -6,10 +6,12 @@ part of 'data_table_cell_list_inline_item.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-DataTableCellListInlineItem _$DataTableCellListInlineItemFromJson(Map<String, dynamic> json) =>
+DataTableCellListInlineItem _$DataTableCellListInlineItemFromJson(
+        Map<String, dynamic> json) =>
     DataTableCellListInlineItem()..values = json['vs'] as List<dynamic>?;
 
-Map<String, dynamic> _$DataTableCellListInlineItemToJson(DataTableCellListInlineItem instance) {
+Map<String, dynamic> _$DataTableCellListInlineItemToJson(
+    DataTableCellListInlineItem instance) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
