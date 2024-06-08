@@ -495,10 +495,10 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
         return 'Vector4Int';
 
       case ClassFieldType.rectangle:
-        return 'Retangle';
+        return 'Rectangle';
 
       case ClassFieldType.rectangleInt:
-        return 'RetangleInt';
+        return 'RectangleInt';
     }
   }
 
@@ -582,7 +582,10 @@ ${_makeSummary(' */', indentDepth, false)}''';
           {
             _paramClassName: '${data.prefix}${classEntity.id}${data.postfix}',
             _paramPropertyName: field.id,
-            _paramParseFunction: _getAssignValueFunction(model, data, classEntity, field),
+            _paramParseFunction: _getAssignValueFunction(model, data, classEntity, field).format({
+              _paramPrefix: data.prefix,
+              _paramPostfix: data.postfix,
+            }),
           },
         ),
       );
@@ -592,7 +595,7 @@ ${_makeSummary(' */', indentDepth, false)}''';
   }
 
   String _getAssignValueFunction(DbModel model, GeneratorCsharp data, ClassMetaEntity classEntity, ClassMetaFieldDescription field) {
-    final value = 'valuesById.values.get("${field.id}")';
+    final value = 'valuesById.get("${field.id}")';
 
     switch (field.typeInfo.type) {
       case ClassFieldType.bool:
@@ -621,7 +624,7 @@ ${_makeSummary(' */', indentDepth, false)}''';
         return 'ParseList(${value}, ${_getSimplePropertyType(field.valueTypeInfo!, data)}.class, v -> ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
       case ClassFieldType.listInline:
-        return 'ParseList(${value}, ${_getSimplePropertyType(field.valueTypeInfo!, data)}.class, v -> ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
+        return 'ParseListInline(${value}, ${_getSimplePropertyType(field.valueTypeInfo!, data)}.class, vs -> ({${_paramPrefix}}${field.valueTypeInfo!.classId}{${_paramPostfix}})AssignValues(GetNewInstance("${field.valueTypeInfo!.classId}", null, instance.getId()), objectsByIds, vs, emptyCollectionFactory, onError), emptyCollectionFactory)';
 
       case ClassFieldType.set:
         return 'ParseHashSet(${value}, ${_getSimplePropertyType(field.valueTypeInfo!, data)}.class, v -> ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
@@ -1043,7 +1046,7 @@ class EmptyCollectionFactory
         return (HashSet<T>)hashSet;
     }
 
-    private HashMap<Type, HashMap<Type, Object>> _dictionaries = new HashMap<Type, HashMap<Type, Object>>();
+    private HashMap<Type, HashMap<Type, Object>> _dictionaries = new HashMap<>();
     public <TKey, TValue> HashMap<TKey, TValue> HashMap(Class<TKey> keyClass, Class<TValue> valueClass)
     {
         HashMap<Type, Object> dict = _dictionaries.get(keyClass);
@@ -1063,95 +1066,95 @@ class EmptyCollectionFactory
 }
 
 class Vector2 {
-	public Float x;
-	public Float y;
+    public Float x;
+    public Float y;
 
-	public Vector2(Float x, Float y) {
-		this.x = x;
-		this.y = y;
-	}
+    public Vector2(Float x, Float y) {
+        this.x = x;
+        this.y = y;
+    }
 }
 
-class Vector2I {
-	public Integer x;
-	public Integer y;
+class Vector2Int {
+    public Integer x;
+    public Integer y;
 
-	public Vector2(Integer x, Integer y) {
-		this.x = x;
-		this.y = y;
-	}
+    public Vector2Int(Integer x, Integer y) {
+        this.x = x;
+        this.y = y;
+    }
 }
 
 class Vector3 {
-	public Float x;
-	public Float y;
-	public Float z;
+    public Float x;
+    public Float y;
+    public Float z;
 
-	public Vector2(Float x, Float y, Float z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-	}
+    public Vector3(Float x, Float y, Float z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
 }
 
 class Vector3Int {
-	public Integer x;
-	public Integer y;
-	public Integer z;
+    public Integer x;
+    public Integer y;
+    public Integer z;
 
-	public Vector2(Integer x, Integer y, Integer z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-	}
+    public Vector3Int(Integer x, Integer y, Integer z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
 }
 
 class Vector4 {
-	public Float x;
-	public Float y;
-	public Float z;
-	public Float w;
+    public Float x;
+    public Float y;
+    public Float z;
+    public Float w;
 
-	public Vector2(Float x, Float y, Float z, Float w) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		this.w = w;
-	}
+    public Vector4(Float x, Float y, Float z, Float w) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.w = w;
+    }
 }
 
 class Vector4Int {
-	public Integer x;
-	public Integer y;
-	public Integer z;
-	public Integer w;
+    public Integer x;
+    public Integer y;
+    public Integer z;
+    public Integer w;
 
-	public Vector2(Integer x, Integer y, Integer z, Integer w) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		this.w = w;
-	}
+    public Vector4Int(Integer x, Integer y, Integer z, Integer w) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.w = w;
+    }
 }
 
 class Rectangle {
-	public Vector2 Position;
-	public Vector2 Size;
+    public Vector2 Position;
+    public Vector2 Size;
 
-	public Rectangle(Vector2 position, Vector2 size) {
-		Position = position;
-		Size = size;
-	}
+    public Rectangle(Vector2 position, Vector2 size) {
+        Position = position;
+        Size = size;
+    }
 }
 
 class RectangleInt {
-	public Vector2Int Position;
-	public Vector2Int Size;
+    public Vector2Int Position;
+    public Vector2Int Size;
 
-	public Rectangle(Vector2Int position, Vector2Int size) {
-		Position = position;
-		Size = size;
-	}
+    public RectangleInt(Vector2Int position, Vector2Int size) {
+        Position = position;
+        Size = size;
+    }
 }
 ''';
 
@@ -1266,7 +1269,7 @@ class RectangleInt {
                 {
                     var item = listItems.items.get(i);
 
-                    var instance = GetNewInstance(className, item);
+                    var instance = GetNewInstance(className, item, null);
                     objectsByIds.put(instance.getId(), instance);
                     valuesByIds.put(instance.getId(), item);
                 }
@@ -1274,13 +1277,15 @@ class RectangleInt {
 
             var allClasses = objectsByIds.keySet();
             for (var objectId : allClasses)
-                objectsByIds.put(objectId, AssignValues(objectsByIds.get(objectId), objectsByIds, valuesByIds.get(objectId), emptyCollectionFactory, onError));
+                objectsByIds.put(objectId, AssignValues(objectsByIds.get(objectId), objectsByIds, valuesByIds.get(objectId).values, emptyCollectionFactory, onError));
 
             if (root == null)
               root = new {${_paramPrefix}}Root{${_paramPostfix}}();
             root.CreatedBy = jsonRoot.user;
             root.CreationTime = jsonRoot.date;
             root.Init(new ArrayList<IIdentifiable>(objectsByIds.values()));
+
+            _inlineItemsCounter.clear();
 
             return root;
         }
@@ -1303,7 +1308,7 @@ class RectangleInt {
             public HashMap<String, Object> values;
         }
 
-        private static IIdentifiable GetNewInstance(String className, JsonItem item)
+        private static IIdentifiable GetNewInstance(String className, JsonItem item, String ownerId)
         {
             Base{${_paramPrefix}}Item{${_paramPostfix}} value;
 
@@ -1312,11 +1317,33 @@ class RectangleInt {
                 default:
                     value = new Base{${_paramPrefix}}Item{${_paramPostfix}}(); break;
             }
-            value.Id = item.id;
+            if (item != null)
+            {
+                if (item.id != null)
+                {
+                    value.Id = item.id;
+                }
+                else
+                {
+                    value.Id = GetInlineRowId(ownerId);
+                }
+            }
             return value;
         }
 
-        private static IIdentifiable AssignValues(IIdentifiable instance, HashMap<String, IIdentifiable> objectsByIds, JsonItem valuesById, EmptyCollectionFactory emptyCollectionFactory, Consumer<ErrorData> onError)
+        private static HashMap<String, Integer> _inlineItemsCounter = new HashMap<String, Integer>();
+        private static String GetInlineRowId(String ownerId)
+        {
+            if (!_inlineItemsCounter.containsKey(ownerId))
+            {
+                _inlineItemsCounter.put(ownerId, 0);
+            }
+            var i = _inlineItemsCounter.get(ownerId);
+            _inlineItemsCounter.put(ownerId, i + 1);
+            return String.format("%s#%03d", ownerId, i);
+        }
+
+        private static IIdentifiable AssignValues(IIdentifiable instance, HashMap<String, IIdentifiable> objectsByIds, HashMap<String, Object> valuesById, EmptyCollectionFactory emptyCollectionFactory, Consumer<ErrorData> onError)
         {
             try
             {{${_paramAssignValueCases}}
@@ -1339,9 +1366,12 @@ class RectangleInt {
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
+            if (values == null)
+                return emptyCollectionFactory.HashMap(keyClass, valueClass);
+
             var array = (ArrayList<LinkedHashMap>)values;
-            if (values == null || values == "" || array.size() <= 0)
-                return emptyCollectionFactory.<TKey, TValue>HashMap(keyClass, valueClass);
+            if (array.isEmpty())
+                return emptyCollectionFactory.HashMap(keyClass, valueClass);
 
             var result = new HashMap<TKey, TValue>();
             for (var jsonValue : array)
@@ -1352,6 +1382,29 @@ class RectangleInt {
             return result;
         }
 
+        private static <T> ArrayList<T> ParseListInline(
+            Object values,
+            Class<T> valueClass,
+            Function<HashMap<String, Object>, T> getValue,
+            EmptyCollectionFactory emptyCollectionFactory
+        )
+        {
+            if (values == null)
+                return emptyCollectionFactory.List(valueClass);
+
+            var array = (ArrayList)values;
+            if (array.isEmpty())
+                return emptyCollectionFactory.List(valueClass);
+
+            var result = new ArrayList<T>();
+            for (var jsonValue : array)
+            {
+                var inlineValues = (HashMap<String, Object>)jsonValue;
+                result.add(getValue.apply(inlineValues));
+            }
+            return result;
+        }
+
         private static <T> ArrayList<T> ParseList(
             Object values,
             Class<T> valueClass,
@@ -1359,9 +1412,12 @@ class RectangleInt {
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
+            if (values == null)
+                return emptyCollectionFactory.List(valueClass);
+
             var array = (ArrayList)values;
-            if (values == null || values == "" || array.size() <= 0)
-                return emptyCollectionFactory.<T>List(valueClass);
+            if (array.isEmpty())
+                return emptyCollectionFactory.List(valueClass);
 
             var result = new ArrayList<T>();
             for (var value : array)
@@ -1376,11 +1432,14 @@ class RectangleInt {
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
-            var array = (ArrayList)values;
-            if (values == null || values == "" || array.size() <= 0)
-                return emptyCollectionFactory.<T>HashSet(valueClass);
+            if (values == null)
+                return emptyCollectionFactory.HashSet(valueClass);
 
-            return new HashSet<T>(GceditorJsonParser.<T>ParseList(values, valueClass, getValue, emptyCollectionFactory));
+            var array = (ArrayList)values;
+            if (array.isEmpty())
+                return emptyCollectionFactory.HashSet(valueClass);
+
+            return new HashSet(GceditorJsonParser.ParseList(values, valueClass, getValue, emptyCollectionFactory));
         }
 
         private static boolean ParseBool(Object value)
@@ -1416,7 +1475,7 @@ class RectangleInt {
         private static <T extends IIdentifiable> T ParseReference(Object value, HashMap<String, IIdentifiable> objectsByIds)
         {
             var id = value.toString();
-            if (id == null || id == "")
+            if (id == null || id.isEmpty())
                 return null;
 
             return (T)objectsByIds.get(id);
@@ -1425,20 +1484,20 @@ class RectangleInt {
         private static <T extends Enum<T>> T ParseEnum(Object value, Class<T> enumClass)
         {
             var id = value.toString();
-            if (id == null || id == "")
+            if (id == null || id.isEmpty())
                 return null;
 
             return (T)Enum.valueOf(enumClass, id);
         }
 
-        private static Pattern dateFormatRegex = Pattern.compile("{${_paramRegexDate}}");
+        private static final Pattern _dateFormatRegex = Pattern.compile("{${_paramRegexDate}}");
         private static Instant ParseDate(Object value)
         {
             var date = value.toString();
-            if (date == null || date == "")
+            if (date == null || date.isEmpty())
                 return null;
 
-            var matcher = dateFormatRegex.matcher(date);
+            var matcher = _dateFormatRegex.matcher(date);
             if (matcher.matches()) {
                 var y = matcher.group("y");
                 var m = matcher.group("m");
@@ -1468,14 +1527,14 @@ class RectangleInt {
             return null;
         }
 
-        private static Pattern durationFormatRegex = Pattern.compile("{${_paramRegexDuration}}");
+        private static final Pattern _durationFormatRegex = Pattern.compile("{${_paramRegexDuration}}");
         private static Duration ParseDuration(Object value)
         {
             var duration = value.toString();
-            if (duration == null || duration == "")
+            if (duration == null || duration.isEmpty())
                 return null;
 
-            var matcher = durationFormatRegex.matcher(duration);
+            var matcher = _durationFormatRegex.matcher(duration);
             if (matcher.matches()) {
                 var d = matcher.group("d");
                 var h = matcher.group("h");
@@ -1489,20 +1548,20 @@ class RectangleInt {
                 var seconds = s == null ? 0 : Integer.parseInt(s);
                 var milliSeconds = ms == null ? 0 : Integer.parseInt(ms);
 
-                return Duration.ofDays(days).plusHours(hours).plusMinutes(minutes).plusSeconds(seconds).plusMilliSeconds(milliSeconds);
+                return Duration.ofDays(days).plusHours(hours).plusMinutes(minutes).plusSeconds(seconds).plusMillis(milliSeconds);
             }
 
             return null;
         }
 
-        private static Pattern vector2FormatRegex = Pattern.compile("{${_paramRegexVector2}}");
+        private static final Pattern _vector2FormatRegex = Pattern.compile("{${_paramRegexVector2}}");
         private static Vector2 ParseVector2(Object value)
         {
             var valueString = value.toString();
-            if (valueString == null || valueString == "")
+            if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = vector2FormatRegex.matcher(valueString);
+            var matcher = _vector2FormatRegex.matcher(valueString);
             if (matcher.matches()) {
                 var x = matcher.group("x");
                 var y = matcher.group("y");
@@ -1516,14 +1575,14 @@ class RectangleInt {
             return null;
         }
 
-        private static Pattern vector2IntFormatRegex = Pattern.compile("{${_paramRegexVector2Int}}");
+        private static final Pattern _vector2IntFormatRegex = Pattern.compile("{${_paramRegexVector2Int}}");
         private static Vector2Int ParseVector2Int(Object value)
         {
             var valueString = value.toString();
-            if (valueString == null || valueString == "")
+            if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = vector2IntFormatRegex.matcher(valueString);
+            var matcher = _vector2IntFormatRegex.matcher(valueString);
             if (matcher.matches()) {
                 var x = matcher.group("x");
                 var y = matcher.group("y");
@@ -1537,14 +1596,14 @@ class RectangleInt {
             return null;
         }
 
-        private static Pattern vector3FormatRegex = Pattern.compile("{${_paramRegexVector3}}");
+        private static final Pattern _vector3FormatRegex = Pattern.compile("{${_paramRegexVector3}}");
         private static Vector3 ParseVector3(Object value)
         {
             var valueString = value.toString();
-            if (valueString == null || valueString == "")
+            if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = vector3FormatRegex.matcher(valueString);
+            var matcher = _vector3FormatRegex.matcher(valueString);
             if (matcher.matches()) {
                 var x = matcher.group("x");
                 var y = matcher.group("y");
@@ -1560,14 +1619,14 @@ class RectangleInt {
             return null;
         }
 
-        private static Pattern vector3IntFormatRegex = Pattern.compile("{${_paramRegexVector3Int}}");
+        private static final Pattern _vector3IntFormatRegex = Pattern.compile("{${_paramRegexVector3Int}}");
         private static Vector3Int ParseVector3Int(Object value)
         {
             var valueString = value.toString();
-            if (valueString == null || valueString == "")
+            if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = vector3IntFormatRegex.matcher(valueString);
+            var matcher = _vector3IntFormatRegex.matcher(valueString);
             if (matcher.matches()) {
                 var x = matcher.group("x");
                 var y = matcher.group("y");
@@ -1583,14 +1642,14 @@ class RectangleInt {
             return null;
         }
 
-        private static Pattern vector4FormatRegex = Pattern.compile("{${_paramRegexVector4}}");
+        private static final Pattern _vector4FormatRegex = Pattern.compile("{${_paramRegexVector4}}");
         private static Vector4 ParseVector4(Object value)
         {
             var valueString = value.toString();
-            if (valueString == null || valueString == "")
+            if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = vector4FormatRegex.matcher(valueString);
+            var matcher = _vector4FormatRegex.matcher(valueString);
             if (matcher.matches()) {
                 var x = matcher.group("x");
                 var y = matcher.group("y");
@@ -1608,14 +1667,14 @@ class RectangleInt {
             return null;
         }
 
-        private static Pattern vector4IntFormatRegex = Pattern.compile("{${_paramRegexVector4Int}}");
+        private static final Pattern _vector4IntFormatRegex = Pattern.compile("{${_paramRegexVector4Int}}");
         private static Vector4Int ParseVector4Int(Object value)
         {
             var valueString = value.toString();
-            if (valueString == null || valueString == "")
+            if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = vector4IntFormatRegex.matcher(valueString);
+            var matcher = _vector4IntFormatRegex.matcher(valueString);
             if (matcher.matches()) {
                 var x = matcher.group("x");
                 var y = matcher.group("y");
@@ -1633,14 +1692,14 @@ class RectangleInt {
             return null;
         }
 
-        private static Pattern rectangleFormatRegex = Pattern.compile("{${_paramRegexRectangle}}");
+        private static final Pattern _rectangleFormatRegex = Pattern.compile("{${_paramRegexRectangle}}");
         private static Rectangle ParseRectangle(Object value)
         {
             var valueString = value.toString();
-            if (valueString == null || valueString == "")
+            if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = rectangleFormatRegex.matcher(valueString);
+            var matcher = _rectangleFormatRegex.matcher(valueString);
             if (matcher.matches()) {
                 var x = matcher.group("x");
                 var y = matcher.group("y");
@@ -1652,20 +1711,20 @@ class RectangleInt {
                 var ww = w == null ? 0 : Float.parseFloat(w);
                 var hh = h == null ? 0 : Float.parseFloat(h);
 
-                return new Rectangle(xx, yy, ww, hh);
+                return new Rectangle(new Vector2(xx, yy), new Vector2(ww, hh));
             }
 
             return null;
         }
 
-        private static Pattern rectangleIntFormatRegex = Pattern.compile("{${_paramRegexRectangleInt}}");
+        private static final Pattern _rectangleIntFormatRegex = Pattern.compile("{${_paramRegexRectangleInt}}");
         private static RectangleInt ParseRectangleInt(Object value)
         {
             var valueString = value.toString();
-            if (valueString == null || valueString == "")
+            if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = rectangleIntFormatRegex.matcher(valueString);
+            var matcher = _rectangleIntFormatRegex.matcher(valueString);
             if (matcher.matches()) {
                 var x = matcher.group("x");
                 var y = matcher.group("y");
@@ -1677,7 +1736,7 @@ class RectangleInt {
                 var ww = w == null ? 0 : Integer.parseInt(w);
                 var hh = h == null ? 0 : Integer.parseInt(h);
 
-                return new RectangleInt(xx, yy, ww, hh);
+                return new RectangleInt(new Vector2Int(xx, yy), new Vector2Int(ww, hh));
             }
 
             return null;
