@@ -67,7 +67,6 @@ extension ClassFieldTypeExtensions on ClassFieldType {
   }
 
   bool hasMultiValueType() {
-    //TODO! @sergey test
     return this == ClassFieldType.listInline;
   }
 }
@@ -492,7 +491,7 @@ class DbModelUtils {
           return null;
         }
 
-      case ClassFieldType.listInline: //TODO! @sergey test
+      case ClassFieldType.listInline:
         try {
           final list = jsonDecode(value) ?? [];
           final valuesList = (list as List<dynamic>)
@@ -595,7 +594,7 @@ class DbModelUtils {
               (e) => validateSimpleValue(field.keyTypeInfo!.type, e.key) && validateSimpleValue(field.valueTypeInfo!.type, e.value),
             );
 
-      case ClassFieldType.listInline: //TODO! @sergey test
+      case ClassFieldType.listInline:
         final multiValues = value.listInlineCellValues();
         return multiValues != null &&
             multiValues.length == value.listCellValues?.length &&
@@ -817,7 +816,6 @@ class DbModelUtils {
 
   static List<double> setInnerCellColumnFlex(DbModel model, TableMetaEntity table, ClassMetaFieldDescription field,
       {List<double>? flex, List<double>? deltaRatio}) {
-    //TODO! @sergey test
     var result = getTableInnerCellsFlex(model, table, field);
     if (flex != null) {
       result = flex;
@@ -1044,7 +1042,7 @@ class DbModelUtils {
             .toList();
         return DataTableCellValue.list(resultList);
 
-      case ClassFieldType.listInline: //TODO! @sergey test
+      case ClassFieldType.listInline:
         if (validateValue(model, field, value)) //
           return value;
         final listInlineValues = value.listInlineCellValues();
@@ -1249,7 +1247,7 @@ class DbModelUtils {
         }
         break;
 
-      case ClassFieldType.listInline: //TODO! @sergey test
+      case ClassFieldType.listInline:
         final list = values[index].listInlineCellValues();
         if (list != null) {
           final columns = getListInlineColumns(model, field.valueTypeInfo!)!;

@@ -170,7 +170,6 @@ class DbCmdEditClassField extends BaseDbCmd {
 
       defaultValue ??= field.defaultValue;
 
-      //TODO! @sergey test
       if (!newType!.type.isSimple()) {
         final allClassesUsingField = dbModel.cache.allClasses //
             .where((e) => dbModel.cache.getAllFieldsByClassId(e.id)!.any((f) => f == field))
@@ -208,7 +207,6 @@ class DbCmdEditClassField extends BaseDbCmd {
       }
 
       if (newType!.type.hasMultiValueType()) {
-        //TODO! @sergey test
         if (newValueType == null || newValueType!.type == ClassFieldType.undefined) //
           return DbCmdResult.fail('Value type is not specified');
 

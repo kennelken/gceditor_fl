@@ -22,7 +22,6 @@ import 'data_table_cell_view.dart';
 
 List<double>? _initialInnerCellFlex;
 
-//TODO! @sergey
 class DataTableCellListInlineView extends StatefulWidget {
   final DataTableValueCoordinates coordinates;
   final ClassFieldDescriptionDataInfo fieldType;

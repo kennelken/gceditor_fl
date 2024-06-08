@@ -259,7 +259,7 @@ class ClientFindStateNotifier extends ChangeNotifier {
                   final values = DbModelUtils.getListInlineColumnsWithValues(model, field.valueTypeInfo!, multivalueValues[k].values)!;
                   for (var value in values) {
                     closureInnerListColumn = closureInnerListColumn! + 1;
-                    _doFindInSimpleValue(value.$2, value.$1.typeInfo.type, prioritySuperLow, addResult); //TODO! @sergey test
+                    _doFindInSimpleValue(value.$2, value.$1.typeInfo.type, prioritySuperLow, addResult);
                   }
                 }
                 break;

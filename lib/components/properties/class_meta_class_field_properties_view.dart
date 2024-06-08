@@ -260,7 +260,6 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                   ),
                 ],
                 if (type.hasMultiValueType()) ...[
-                  //TODO! @sergey test
                   kStyle.kPropertiesVerticalDivider,
                   Row(
                     children: [
@@ -473,7 +472,6 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
     }
 
     if (type.hasMultiValueType()) {
-      //TODO! @sergey test
       if (valueType != widget.data.valueTypeInfo?.type || valueTypeRefId != widget.data.valueTypeInfo?.classId) //
         return true;
     }

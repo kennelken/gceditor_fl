@@ -116,7 +116,7 @@ class DataTableCellView extends StatelessWidget {
           cellFactory: _getSimpleCellImplementation,
         );
 
-      case ClassFieldType.listInline: //TODO! @sergey test
+      case ClassFieldType.listInline:
         return DataTableCellListInlineView(
           key: ValueKey('${table.id}_${row.id}_${index}_$clientStateVersion'),
           coordinates: coordinates,

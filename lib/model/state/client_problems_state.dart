@@ -270,7 +270,7 @@ void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> resu
               }
               break;
 
-            case ClassFieldType.listInline: //TODO! @sergey test
+            case ClassFieldType.listInline:
               final list = value.listInlineCellValues()!;
               for (var k = 0; k < list.length; k++) {
                 final listValue = list[k];
@@ -419,7 +419,7 @@ void _computeAndAppendInvalidValues(DbModel model, List<DbModelProblem> result) 
               }
               break;
 
-            case ClassFieldType.listInline: //TODO! @sergey test
+            case ClassFieldType.listInline:
               final list = value.listInlineCellValues()!;
               for (var k = 0; k < list.length; k++) {
                 final listValue = list[k];
