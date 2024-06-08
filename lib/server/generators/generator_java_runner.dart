@@ -931,8 +931,8 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
     {
         _emptyCollectionFactory = new EmptyCollectionFactory();
 
-        AllItems = new HashMap<String, IIdentifiable>();
-        AllItemsByType = new HashMap<Type, Object>();
+        AllItems = new HashMap<>();
+        AllItemsByType = new HashMap<>();
 
         var cache = new HashMap<Type, ArrayList<Class<?>>>();
 
@@ -1022,7 +1022,7 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
 
 class EmptyCollectionFactory
 {
-    private HashMap<Type, Object> _lists = new HashMap<Type, Object>();
+    private HashMap<Type, Object> _lists = new HashMap<>();
     public <T> ArrayList<T> List(Class<T> itemClass)
     {
         var list = _lists.get(itemClass);
@@ -1034,7 +1034,7 @@ class EmptyCollectionFactory
         return (ArrayList<T>)list;
     }
 
-    private HashMap<Type, Object> _hashsets = new HashMap<Type, Object>();
+    private HashMap<Type, Object> _hashsets = new HashMap<>();
     public <T> HashSet<T> HashSet(Class<T> itemClass)
     {
         var hashSet = _hashsets.get(itemClass);
@@ -1331,7 +1331,7 @@ class RectangleInt {
             return value;
         }
 
-        private static HashMap<String, Integer> _inlineItemsCounter = new HashMap<String, Integer>();
+        private static HashMap<String, Integer> _inlineItemsCounter = new HashMap<>();
         private static String GetInlineRowId(String ownerId)
         {
             if (!_inlineItemsCounter.containsKey(ownerId))

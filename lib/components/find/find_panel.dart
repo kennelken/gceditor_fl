@@ -108,7 +108,8 @@ class _FindPanelState extends State<FindPanel> {
                     icon: FittedBox(
                       child: Text(
                         'id',
-                        style: kStyle.kTextExtraSmall.copyWith(color: settings.onlyId == true ? kTextColorLightBlue : kTextColorLightHalfTransparent),
+                        style: kStyle.kTextExtraSmall.copyWith(
+                            color: settings.onlyId == true ? kTextColorLightBlue : kTextColorLightHalfTransparent, fontWeight: FontWeight.w900),
                         maxLines: 1,
                         overflow: TextOverflow.clip,
                       ),
@@ -123,8 +124,9 @@ class _FindPanelState extends State<FindPanel> {
                     icon: FittedBox(
                       child: Text(
                         'Aa',
-                        style: kStyle.kTextExtraSmall
-                            .copyWith(color: settings.caseSensitive == true ? kTextColorLightBlue : kTextColorLightHalfTransparent),
+                        style: kStyle.kTextExtraSmall.copyWith(
+                            color: settings.caseSensitive == true ? kTextColorLightBlue : kTextColorLightHalfTransparent,
+                            fontWeight: FontWeight.w900),
                         maxLines: 1,
                         overflow: TextOverflow.clip,
                       ),
@@ -139,7 +141,8 @@ class _FindPanelState extends State<FindPanel> {
                     icon: FittedBox(
                       child: Text(
                         'W',
-                        style: kStyle.kTextExtraSmall.copyWith(color: settings.word == true ? kTextColorLightBlue : kTextColorLightHalfTransparent),
+                        style: kStyle.kTextExtraSmall.copyWith(
+                            color: settings.word == true ? kTextColorLightBlue : kTextColorLightHalfTransparent, fontWeight: FontWeight.w900),
                         maxLines: 1,
                         overflow: TextOverflow.clip,
                       ),
@@ -154,7 +157,8 @@ class _FindPanelState extends State<FindPanel> {
                     icon: FittedBox(
                       child: Text(
                         '.*',
-                        style: kStyle.kTextExtraSmall.copyWith(color: settings.regEx == true ? kTextColorLightBlue : kTextColorLightHalfTransparent),
+                        style: kStyle.kTextExtraSmall.copyWith(
+                            color: settings.regEx == true ? kTextColorLightBlue : kTextColorLightHalfTransparent, fontWeight: FontWeight.w900),
                         maxLines: 1,
                         overflow: TextOverflow.clip,
                       ),
