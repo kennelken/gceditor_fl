@@ -11,7 +11,7 @@ class TableMetaEntity extends TableMeta {
   double? rowHeightMultiplier;
   bool? exportList;
   Map<String, double> columWidth = {};
-  Map<String, double> columnKeyToValueWidthRatio = {};
+  Map<String, List<double>> columnInnerCellFlex = {};
 
   List<DataTableRow> rows = <DataTableRow>[];
 

@@ -21,13 +21,13 @@ class DataTableCellTextView extends StatefulWidget {
   final DataTableValueCoordinates coordinates;
 
   const DataTableCellTextView({
-    Key? key,
+    super.key,
     required this.coordinates,
     required this.fieldType,
     required this.value,
     required this.defaultValue,
     required this.onValueChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<DataTableCellTextView> createState() => _DataTableCellTextViewState();
@@ -114,6 +114,7 @@ class _DataTableCellTextViewState extends State<DataTableCellTextView> {
       case ClassFieldType.reference:
       case ClassFieldType.color:
       case ClassFieldType.list:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         break;
@@ -142,7 +143,7 @@ class _DataTableCellTextViewState extends State<DataTableCellTextView> {
     if (_focusNode.hasFocus) //
       return;
 
-    var newValue = DbModelUtils.parseDefaultValue(widget.fieldType, null, null, _textController.text)?.simpleValue;
+    var newValue = DbModelUtils.parseDefaultValue(clientModel, widget.fieldType, null, null, _textController.text)?.simpleValue;
 
     if (newValue is String && widget.fieldType.type == ClassFieldType.date) {
       newValue = DbModelUtils.applyTimezone(newValue.toString(), -clientModel.settings.timeZone);
@@ -161,8 +162,10 @@ class _DataTableCellTextViewState extends State<DataTableCellTextView> {
       }
     }
 
-    if (DbModelUtils.simpleValuesAreEqual(newValue, widget.value)) //
+    if (DbModelUtils.simpleValuesAreEqual(newValue, widget.value)) {
+      _textController.text = widget.value?.toString() ?? '';
       return;
+    }
 
     widget.onValueChanged(newValue);
   }

@@ -19,11 +19,11 @@ class DataTableCellColorView extends ConsumerWidget {
   final ValueChanged<dynamic> onValueChanged;
 
   const DataTableCellColorView({
-    Key? key,
+    super.key,
     required this.coordinates,
     required this.value,
     required this.onValueChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(context, ref) {

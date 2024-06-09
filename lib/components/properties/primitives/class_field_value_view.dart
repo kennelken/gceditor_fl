@@ -22,10 +22,10 @@ class ClassFieldValueView extends ConsumerWidget {
   final ClassMetaFieldDescription data;
 
   const ClassFieldValueView({
-    Key? key,
+    super.key,
     required this.entity,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(context, ref) {

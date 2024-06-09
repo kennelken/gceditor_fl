@@ -22,11 +22,11 @@ class PropertyClassInterface extends ConsumerWidget {
   final int index;
 
   const PropertyClassInterface({
-    Key? key,
+    super.key,
     required this.entity,
     required this.interface,
     required this.index,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, ref) {

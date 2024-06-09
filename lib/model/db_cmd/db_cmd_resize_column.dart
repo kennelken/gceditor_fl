@@ -62,7 +62,7 @@ class DbCmdResizeColumn extends BaseDbCmd {
       return DbCmdResult.fail('Entity with id "$tableId" is not a table');
 
     if (fieldId != null) {
-      final allFields = dbModel.cache.getAllFieldsById(table.classId);
+      final allFields = dbModel.cache.getAllFieldsByClassId(table.classId);
       if (allFields == null) //
         return DbCmdResult.fail('Table with id "$tableId" does not have any fields');
 

@@ -10,9 +10,9 @@ class TableGitItemView extends ConsumerWidget {
   final GitItemData data;
 
   const TableGitItemView({
-    Key? key,
+    super.key,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(context, ref) {

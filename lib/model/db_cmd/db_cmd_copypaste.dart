@@ -100,7 +100,7 @@ class DbCmdCopyPaste extends BaseDbCmd {
   @override
   DbCmdResult doExecute(DbModel dbModel) {
     final fromTable = dbModel.cache.getTable<TableMetaEntity>(fromTableId);
-    final columnsFrom = fromColumns ?? dbModel.cache.getAllFieldsById(fromTable?.classId ?? '')?.map((element) => element.id).toList() ?? [];
+    final columnsFrom = fromColumns ?? dbModel.cache.getAllFieldsByClassId(fromTable?.classId ?? '')?.map((element) => element.id).toList() ?? [];
 
     final toTable = dbModel.cache.getTable<TableMetaEntity>(toTableId);
 
@@ -110,7 +110,7 @@ class DbCmdCopyPaste extends BaseDbCmd {
       return DbCmdResult.success();
     }
 
-    final toColumns = dbModel.cache.getAllFieldsById(toTable!.classId)!.map((e) => e.id).toList();
+    final toColumns = dbModel.cache.getAllFieldsByClassId(toTable!.classId)!.map((e) => e.id).toList();
     final fromValues = this.fromValues != null //
         ? createRowsData(this.fromValues, fromColumns!, toTable, dbModel)!
         : fromIndices!.map((e) => fromTable!.rows[e]).toList();
@@ -164,11 +164,11 @@ class DbCmdCopyPaste extends BaseDbCmd {
     List<String> columnsFrom,
   ) {
     final toTable = dbModel.cache.getTable<TableMetaEntity>(toTableId)!;
-    final toColumns = dbModel.cache.getAllFieldsById(toTable.classId)!.map((e) => e.id).toList();
+    final toColumns = dbModel.cache.getAllFieldsByClassId(toTable.classId)!.map((e) => e.id).toList();
 
     final toValues = <DataTableRow>[];
     for (var i = 0; i < toIndices.length; i++) {
-      final newRow = DbModelUtils.buildNewRow(dbModel: dbModel, tableId: toTableId, rowId: fromValues[i].id + (idSuffixes?[i] ?? ''));
+      final newRow = DbModelUtils.buildNewRow(model: dbModel, tableId: toTableId, rowId: fromValues[i].id + (idSuffixes?[i] ?? ''));
 
       toValues.add(newRow);
       toTable.rows.insert(
@@ -191,9 +191,9 @@ class DbCmdCopyPaste extends BaseDbCmd {
     if (values == null) //
       return null;
 
-    final tableColumns = dbModel.cache.getAllFieldsById(table.classId)!;
+    final tableColumns = dbModel.cache.getAllFieldsByClassId(table.classId)!;
     final columnsData = {for (var columnId in columns) columnId: tableColumns.firstWhereOrNull((ei) => ei.id == columnId)};
-    final result = values.map((e) => DbModelUtils.decodeDataRowCell(e, columns, columnsData)).toList();
+    final result = values.map((e) => DbModelUtils.decodeDataRowCell(dbModel, e, columns, columnsData)).toList();
     return result;
   }
 
@@ -316,8 +316,8 @@ class DbCmdCopyPaste extends BaseDbCmd {
   BaseDbCmd createUndoCmd(DbModel dbModel) {
     final fromTable = dbModel.cache.getTable<TableMetaEntity>(fromTableId);
     final toTable = dbModel.cache.getTable<TableMetaEntity>(toTableId);
-    final fromColumns = this.fromColumns ?? dbModel.cache.getAllFieldsById(fromTable?.classId ?? '')?.map((e) => e.id).toList();
-    final toColumns = dbModel.cache.getAllFieldsById(toTable?.classId ?? '')?.map((e) => e.id).toList();
+    final fromColumns = this.fromColumns ?? dbModel.cache.getAllFieldsByClassId(fromTable?.classId ?? '')?.map((e) => e.id).toList();
+    final toColumns = dbModel.cache.getAllFieldsByClassId(toTable?.classId ?? '')?.map((e) => e.id).toList();
     final commonColumnsList = fromColumns != null && toColumns != null ? toColumns.where((element) => fromColumns.contains(element)).toList() : null;
     final commonColumns = commonColumnsList?.toSet();
     final commonColumnsIndexesInFrom = commonColumns?.map((e) => fromColumns!.indexOf(e)).toSet();
@@ -346,7 +346,7 @@ class DbCmdCopyPaste extends BaseDbCmd {
         restoreValues: cut != true ? null : fromIndices!.map((e) => DbModelUtils.encodeDataRowCell(fromTable!.rows[e])).toList(),
         restoreIndices: cut != true ? null : fromIndices,
         restoreTableId: cut != true ? null : fromTableId,
-        restoreColumns: cut != true ? null : dbModel.cache.getAllFieldsById(fromTable!.classId)!.map((e) => e.id).toList(),
+        restoreColumns: cut != true ? null : dbModel.cache.getAllFieldsByClassId(fromTable!.classId)!.map((e) => e.id).toList(),
       );
     }
 
@@ -357,7 +357,7 @@ class DbCmdCopyPaste extends BaseDbCmd {
         fromIndices: toIndices,
         toIndices: fromIndices,
         fromValues: fromIndices!.map((e) => DbModelUtils.encodeDataRowCell(fromTable!.rows[e])).toList(),
-        fromColumns: dbModel.cache.getAllFieldsById(fromTable!.classId)!.map((e) => e.id).toList(),
+        fromColumns: dbModel.cache.getAllFieldsByClassId(fromTable!.classId)!.map((e) => e.id).toList(),
         cut: true,
       );
     }

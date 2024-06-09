@@ -1,41 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gceditor/components/properties/primitives/delete_button.dart';
 import 'package:gceditor/components/properties/primitives/icon_button_transparent.dart';
-import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/db/class_field_description_data_info.dart';
-import 'package:gceditor/model/db/data_table_cell_dictionary_item.dart';
 import 'package:gceditor/model/db/data_table_cell_value.dart';
 import 'package:gceditor/model/db_cmd/base_db_cmd.dart';
-import 'package:gceditor/model/db_cmd/db_cmd_resize_inner_cell.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/client_state.dart';
-import 'package:gceditor/model/state/client_view_mode_state.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/utils/utils.dart';
 
+import '../../../consts/config.dart';
+import '../../../model/db/data_table_cell_list_inline_item.dart';
+import '../../../model/db_cmd/db_cmd_resize_inner_cell.dart';
+import '../../../model/state/client_view_mode_state.dart';
+import '../../properties/primitives/delete_button.dart';
 import '../context_menu_button.dart';
 import 'data_table_cell_view.dart';
 
 List<double>? _initialInnerCellFlex;
 
-class DataTableCellDictionaryView extends StatefulWidget {
+class DataTableCellListInlineView extends StatefulWidget {
   final DataTableValueCoordinates coordinates;
   final ClassFieldDescriptionDataInfo fieldType;
-  final ClassFieldDescriptionDataInfo keyFieldType;
   final ClassFieldDescriptionDataInfo valueFieldType;
   final DataTableCellValue value;
   final DataTableSimpleCellFactory cellFactory;
   final ValueChanged<DataTableCellValue> onValueChanged;
 
-  const DataTableCellDictionaryView({
+  const DataTableCellListInlineView({
     super.key,
     required this.coordinates,
     required this.fieldType,
-    required this.keyFieldType,
     required this.valueFieldType,
     required this.value,
     required this.cellFactory,
@@ -43,10 +41,10 @@ class DataTableCellDictionaryView extends StatefulWidget {
   });
 
   @override
-  State<DataTableCellDictionaryView> createState() => _DataTableCellDictionaryViewState();
+  State<DataTableCellListInlineView> createState() => _DataTableCellListInlineViewState();
 }
 
-class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryView> {
+class _DataTableCellListInlineViewState extends State<DataTableCellListInlineView> {
   late DataTableCellValue _cellValue;
   late final ScrollController _scrollController;
 
@@ -141,9 +139,11 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
                     itemCount: _cellValue.listCellValues?.length ?? 0,
                     onReorder: _handleReorder,
                     itemBuilder: (context, index) {
-                      final value = _cellValue.listCellValues![index] as DataTableCellDictionaryItem;
-                      final key = '${index}_${value.key}_${value.value}';
-                      final innerCellsFlex = DbModelUtils.getTableInnerCellsFlex(clientModel, widget.coordinates.table, widget.coordinates.field!);
+                      final value = _cellValue.listCellValues![index] as DataTableCellListInlineItem;
+                      var key = '$index';
+                      for (var subValue in value.values!) {
+                        key += '_$subValue';
+                      }
 
                       return SizedBox(
                         key: ValueKey(key),
@@ -152,59 +152,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
                           padding: EdgeInsets.only(left: 4 * kScale, right: 29 * kScale),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                flex: 0,
-                                child: Text(
-                                  '$index.',
-                                  style: kStyle.kTextExtraSmallInactive,
-                                ),
-                              ),
-                              Expanded(
-                                flex: (innerCellsFlex[0] * Config.flexRatioMultiplier).toInt(),
-                                child: Container(
-                                  decoration: kStyle.kDataTableCellListBoxDecoration,
-                                  child: widget.cellFactory(
-                                    coordinates: widget.coordinates.copyWith(innerListRowIndex: index, innerListColumnIndex: 0),
-                                    value: value.key,
-                                    fieldInfo: widget.keyFieldType,
-                                    onValueChanged: (value) => _handleKeyChanged(index, value),
-                                  ),
-                                ),
-                              ),
-                              MouseRegion(
-                                cursor: SystemMouseCursors.resizeColumn,
-                                child: GestureDetector(
-                                  onHorizontalDragUpdate: (d) => _handleHorizontalDragUpdate(cellContext, d),
-                                  onHorizontalDragEnd: _handleHorizontalDragEnd,
-                                  onHorizontalDragStart: _handleHorizontalDragStart,
-                                  child: Container(
-                                    width: kDividerLineWidth,
-                                    color: kColorTransparent,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: (innerCellsFlex[1] * Config.flexRatioMultiplier).toInt(),
-                                child: Container(
-                                  decoration: kStyle.kDataTableCellListBoxDecoration,
-                                  child: widget.cellFactory(
-                                    coordinates: widget.coordinates.copyWith(innerListRowIndex: index, innerListColumnIndex: 1),
-                                    value: value.value,
-                                    fieldInfo: widget.valueFieldType,
-                                    onValueChanged: (value) => _handleValueChanged(index, value),
-                                  ),
-                                ),
-                              ),
-                              if (ref.watch(clientViewModeStateProvider).state.actionsMode) ...[
-                                DeleteButton(
-                                  onAction: () => _handleDeleteItem(index),
-                                  size: 14 * kScale,
-                                  width: 25 * kScale,
-                                  tooltipText: Loc.get.delete,
-                                ),
-                              ],
-                            ],
+                            children: _getInnerCells(ref, cellContext, index, value),
                           ),
                         ),
                       );
@@ -219,10 +167,61 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
     );
   }
 
+  List<Widget> _getInnerCells(WidgetRef ref, BuildContext cellContext, int index, DataTableCellListInlineItem value) {
+    final result = <Widget>[];
+
+    final columns = DbModelUtils.getListInlineColumns(clientModel, widget.valueFieldType)!;
+    final columnFlexes = DbModelUtils.getTableInnerCellsFlex(clientModel, widget.coordinates.table, widget.coordinates.field!);
+
+    for (var i = 0; i < value.values!.length; i++) {
+      if (i != 0) {
+        result.add(
+          MouseRegion(
+            cursor: SystemMouseCursors.resizeColumn,
+            child: GestureDetector(
+              onHorizontalDragUpdate: (d) => _handleHorizontalDragUpdate(cellContext, d, i - 1),
+              onHorizontalDragEnd: _handleHorizontalDragEnd,
+              onHorizontalDragStart: _handleHorizontalDragStart,
+              child: Container(
+                width: kDividerLineWidth,
+                color: kColorTransparent,
+              ),
+            ),
+          ),
+        );
+      }
+      result.add(
+        Expanded(
+          flex: (columnFlexes[i] * Config.flexRatioMultiplier).toInt(),
+          child: Container(
+            decoration: kStyle.kDataTableCellListBoxDecoration,
+            child: widget.cellFactory(
+              coordinates: widget.coordinates.copyWith(innerListRowIndex: index, innerListColumnIndex: i),
+              value: value.values![i],
+              fieldInfo: columns[i].typeInfo,
+              onValueChanged: (value) => _handleValueChanged(index, i, value),
+            ),
+          ),
+        ),
+      );
+    }
+    if (ref.watch(clientViewModeStateProvider).state.actionsMode) {
+      result.add(
+        DeleteButton(
+          onAction: () => _handleDeleteItem(index),
+          size: 14 * kScale,
+          width: 25 * kScale,
+          tooltipText: Loc.get.delete,
+        ),
+      );
+    }
+    return result;
+  }
+
   void _handleReorder(int oldIndex, int newIndex) {
     setState(
       () {
-        _cellValue = DataTableCellValue.dictionary(Utils.copyAndReorder(_cellValue.copy().dictionaryCellValues()!, oldIndex, newIndex));
+        _cellValue = DataTableCellValue.listInline(Utils.copyAndReorder(_cellValue.copy().listInlineCellValues()!, oldIndex, newIndex));
         widget.onValueChanged(_cellValue);
       },
     );
@@ -244,10 +243,13 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
     setState(
       () {
         final valuesListCopy = _cellValue.copy();
+
+        final columns = DbModelUtils.getListInlineColumns(clientModel, widget.coordinates.field!.valueTypeInfo!)!;
+        final defaultValues = columns.map((e) => DbModelUtils.getDefaultValue(e.typeInfo.type).simpleValue).toList();
+
         valuesListCopy.listCellValues!.add(
-          DataTableCellDictionaryItem.values(
-            key: DbModelUtils.getDefaultValue(widget.keyFieldType.type).simpleValue,
-            value: DbModelUtils.getDefaultValue(widget.valueFieldType.type).simpleValue,
+          DataTableCellListInlineItem.values(
+            values: defaultValues,
           ),
         );
         _cellValue = valuesListCopy;
@@ -260,11 +262,11 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
     );
   }
 
-  void _handleKeyChanged(int index, dynamic value) {
+  void _handleValueChanged(int rowIndex, int cellIndex, dynamic value) {
     setState(
       () {
         final valuesListCopy = _cellValue.copy();
-        valuesListCopy.listCellValues![index].key = value;
+        (valuesListCopy.listCellValues![rowIndex] as DataTableCellListInlineItem).values![cellIndex] = value;
         _cellValue = valuesListCopy;
 
         widget.onValueChanged(_cellValue);
@@ -272,29 +274,25 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
     );
   }
 
-  void _handleValueChanged(int index, dynamic value) {
-    setState(
-      () {
-        final valuesListCopy = _cellValue.copy();
-        (valuesListCopy.listCellValues![index] as DataTableCellDictionaryItem).value = value;
-        _cellValue = valuesListCopy;
-
-        widget.onValueChanged(_cellValue);
-      },
-    );
-  }
-
-  void _handleHorizontalDragUpdate(BuildContext context, DragUpdateDetails details) {
+  void _handleHorizontalDragUpdate(BuildContext context, DragUpdateDetails details, int innerCellIndex) {
     if (details.delta.dx == 0.0) //
       return;
 
     final relDelta = details.delta.dx / context.size!.width;
+    final columns = DbModelUtils.getListInlineColumns(clientModel, widget.valueFieldType)!;
 
     DbModelUtils.setInnerCellColumnFlex(
       clientModel,
       widget.coordinates.table,
       widget.coordinates.field!,
-      deltaRatio: [relDelta, -relDelta],
+      deltaRatio: List<double>.generate(
+        columns.length,
+        (i) => i == innerCellIndex //
+            ? relDelta
+            : i == innerCellIndex + 1 //
+                ? -relDelta
+                : 0,
+      ).toList(),
     );
     providerContainer.read(columnSizeChangedProvider).dispatchEvent();
   }

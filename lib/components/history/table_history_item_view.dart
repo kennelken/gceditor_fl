@@ -11,9 +11,9 @@ class TableHistoryItemView extends ConsumerWidget {
   final HistoryItemData data;
 
   const TableHistoryItemView({
-    Key? key,
+    super.key,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(context, ref) {

@@ -5,8 +5,8 @@ class LoadingScreen extends StatelessWidget {
   static const appIconTag = 'AppIcon';
 
   const LoadingScreen({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

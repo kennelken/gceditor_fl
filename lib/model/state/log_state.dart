@@ -90,10 +90,16 @@ Color getColorByLogLevel(LogLevel logLevel) {
 
 class LogStateReportHandler {
   Future<bool> handleError(FlutterErrorDetails error) {
+    if (error.toString().contains('RenderFlex overflowed')) //
+      return Future.value(false);
+
     return handle(error.exceptionAsString());
   }
 
   Future<bool> handle(String error) {
+    if (error.contains('RenderFlex overflowed')) //
+      return Future.value(false);
+
     providerContainer.read(logStateProvider).addMessage(
           LogEntry(
             LogLevel.error,

@@ -4,6 +4,7 @@ import 'package:gceditor/model/db_network/data_table_column.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../db/class_meta_entity.dart';
+import '../state/db_model_extensions.dart';
 import 'base_db_cmd.dart';
 import 'db_cmd_delete_class_interface.dart';
 import 'db_cmd_result.dart';
@@ -67,8 +68,12 @@ class DbCmdAddClassInterface extends BaseDbCmd with CommonClassInterfaceCommand 
     if (entity == null) //
       return DbCmdResult.fail('Entity with id "$entityId" does not exist');
 
+    final inlineClassUsages = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
+    if (inlineClassUsages.isNotEmpty) //
+      return DbCmdResult.fail('Classes used as listInline can not have interfaces');
+
     if (index < 0 || index > entity.interfaces.length) //
-      return DbCmdResult.fail('invalid index "$index"');
+      return DbCmdResult.fail('Invalid index "$index"');
 
     return DbCmdResult.success();
   }

@@ -27,10 +27,10 @@ class EnumValueView extends StatefulWidget {
   final EnumValue data;
 
   const EnumValueView({
-    Key? key,
+    super.key,
     required this.entity,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   State<EnumValueView> createState() => _EnumValueViewState();

@@ -4,8 +4,11 @@ import 'package:gceditor/model/db/class_meta_field_description.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db_network/data_table_column.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
+import 'package:gceditor/utils/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../db/data_table_cell_list_inline_item.dart';
+import '../db_network/data_table_column_inline_values.dart';
 import 'base_db_cmd.dart';
 import 'db_cmd_delete_class_field.dart';
 import 'db_cmd_result.dart';
@@ -17,6 +20,7 @@ class DbCmdAddClassField extends BaseDbCmd {
   late String entityId;
   late int index;
   late ClassMetaFieldDescription field;
+  late Map<String, List<DataTableColumnInlineValues>>? listInlineValuesByTableColumn;
 
   Map<String, List<DataTableColumn>>? dataColumnsByTable;
 
@@ -25,6 +29,7 @@ class DbCmdAddClassField extends BaseDbCmd {
     required this.entityId,
     required this.index,
     required this.field,
+    this.listInlineValuesByTableColumn,
     this.dataColumnsByTable,
   }) : super.withId(id) {
     $type = DbCmdType.addClassField;
@@ -53,6 +58,40 @@ class DbCmdAddClassField extends BaseDbCmd {
         DbModelUtils.insertDefaultValues(dbModel, table, fieldIndex);
         if (dataColumnsByTable?[table.id] != null) {
           DbModelUtils.applyDataColumns(dbModel, table, dataColumnsByTable![table.id]!);
+        }
+      }
+
+      dbModel.cache.invalidate();
+
+      final fieldsUsingInline = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
+      for (var fieldUsingInline in fieldsUsingInline) {
+        for (var table in dbModel.cache.allDataTables) {
+          final fields = dbModel.cache.getAllFieldsByClassId(table.classId)!;
+          final columnIndex = fields.indexOf(fieldUsingInline.$2);
+          if (columnIndex <= -1) //
+            continue;
+
+          final listInlineField = fields[columnIndex];
+          final inlineColumns = DbModelUtils.getListInlineColumns(dbModel, listInlineField.valueTypeInfo!);
+          final inlineColumnIndex = inlineColumns!.indexOf(field);
+
+          if (table.columnInnerCellFlex.containsKey(listInlineField.id)) {
+            final newColumnFlex = 1.0 / inlineColumns.length;
+            final flexes = table.columnInnerCellFlex[listInlineField.id]!;
+            flexes.insert(inlineColumnIndex, newColumnFlex);
+            flexes.normalize();
+          }
+
+          for (var i = 0; i < table.rows.length; i++) {
+            final row = table.rows[i];
+            final cellValues = row.values[columnIndex].listCellValues!;
+            for (var j = 0; j < cellValues.length; j++) {
+              final cellValue = cellValues[j];
+              final value = DbModelUtils.getInnerCellValue(dbModel, listInlineValuesByTableColumn?[table.id], field.id, i, j) ??
+                  dbModel.cache.getDefaultValue(field).simpleValue;
+              (cellValue as DataTableCellListInlineItem).values!.insert(inlineColumnIndex, value);
+            }
+          }
         }
       }
     }

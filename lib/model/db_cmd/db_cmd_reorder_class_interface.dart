@@ -49,7 +49,7 @@ class DbCmdReorderClassInterface extends BaseDbCmd {
 
     for (final table in allTablesUsingClass) {
       final allFields = dbModel.cache.getAllFields(entity);
-      final defaultValues = allFields.map((e) => DbModelUtils.parseDefaultValueByFieldOrDefault(e, e.defaultValue)).toList();
+      final defaultValues = allFields.map((e) => DbModelUtils.parseDefaultValueByFieldOrDefault(dbModel, e, e.defaultValue)).toList();
 
       for (var i = 0; i < table.rows.length; i++) {
         table.rows[i].values.clear();

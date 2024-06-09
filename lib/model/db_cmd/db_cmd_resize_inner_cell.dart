@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/db_model.dart';
@@ -8,37 +9,37 @@ import 'package:json_annotation/json_annotation.dart';
 import 'base_db_cmd.dart';
 import 'db_cmd_result.dart';
 
-part 'db_cmd_resize_dictionary_key_to_value.g.dart';
+part 'db_cmd_resize_inner_cell.g.dart';
 
 @JsonSerializable()
-class DbCmdResizeDictionaryKeyToValue extends BaseDbCmd {
+class DbCmdResizeInnerCell extends BaseDbCmd {
   late String tableId;
   late String fieldId;
-  late double ratio;
-  late double oldRatio;
+  late List<double> flexes;
+  late List<double> oldFlexes;
 
-  DbCmdResizeDictionaryKeyToValue.values({
+  DbCmdResizeInnerCell.values({
     String? id,
     required this.tableId,
     required this.fieldId,
-    required this.ratio,
-    required this.oldRatio,
+    required this.flexes,
+    required this.oldFlexes,
   }) : super.withId(id) {
-    $type = DbCmdType.resizeDictionaryKeyToValue;
+    $type = DbCmdType.resizeInnerCell;
   }
 
-  DbCmdResizeDictionaryKeyToValue();
+  DbCmdResizeInnerCell();
 
-  factory DbCmdResizeDictionaryKeyToValue.fromJson(Map<String, dynamic> json) => _$DbCmdResizeDictionaryKeyToValueFromJson(json);
+  factory DbCmdResizeInnerCell.fromJson(Map<String, dynamic> json) => _$DbCmdResizeInnerCellFromJson(json);
   @override
-  Map<String, dynamic> toJson() => _$DbCmdResizeDictionaryKeyToValueToJson(this);
+  Map<String, dynamic> toJson() => _$DbCmdResizeInnerCellToJson(this);
 
   @override
   DbCmdResult doExecute(DbModel dbModel) {
     final table = dbModel.cache.getTable<TableMetaEntity>(tableId)!;
 
     final field = dbModel.cache.getField(fieldId, dbModel.cache.getClass<ClassMetaEntity>(table.classId))!;
-    DbModelUtils.setDictionaryColumnRatio(table, field, ratio: ratio);
+    DbModelUtils.setInnerCellColumnFlex(dbModel, table, field, flex: flexes);
 
     DbModelUtils.removeInvalidColumnWidth(dbModel, table);
 
@@ -54,26 +55,36 @@ class DbCmdResizeDictionaryKeyToValue extends BaseDbCmd {
     if (table is! TableMetaEntity) //
       return DbCmdResult.fail('Entity with id "$tableId" is not a table');
 
-    final allFields = dbModel.cache.getAllFieldsById(table.classId);
+    final allFields = dbModel.cache.getAllFieldsByClassId(table.classId);
     if (allFields == null) //
       return DbCmdResult.fail('Table with id "$tableId" does not have any fields');
 
-    if (!allFields.any((e) => e.id == fieldId)) //
+    final field = allFields.firstWhereOrNull((e) => e.id == fieldId);
+    if (field == null) //
       return DbCmdResult.fail('Table with id "$tableId" does not have field "$fieldId"');
 
-    if (ratio < Config.minMainColumnHeightRatio || ratio > (1 - Config.minMainColumnHeightRatio))
-      return DbCmdResult.fail('Specified invalid ratio $ratio');
+    if (flexes.any((e) => e < Config.minMainColumnHeightRatio)) //
+      return DbCmdResult.fail('Specified invalid ratio $flexes');
+
+    final sum = flexes.fold<double>(0, (v, e) => v + e);
+    if (sum > 1.0001 || sum < 0.9999) {
+      return DbCmdResult.fail('Sum of elements must be 1, but received "$sum"');
+    }
+
+    final columnsCount = DbModelUtils.getInnerCellsCount(dbModel, field);
+    if (flexes.length != columnsCount) //
+      return DbCmdResult.fail('Expected number of columns for dictionary must be "$columnsCount", but received "${flexes.length}"');
 
     return DbCmdResult.success();
   }
 
   @override
   BaseDbCmd createUndoCmd(DbModel dbModel) {
-    return DbCmdResizeDictionaryKeyToValue.values(
+    return DbCmdResizeInnerCell.values(
       tableId: tableId,
       fieldId: fieldId,
-      ratio: oldRatio,
-      oldRatio: ratio,
+      flexes: oldFlexes,
+      oldFlexes: flexes,
     );
   }
 }

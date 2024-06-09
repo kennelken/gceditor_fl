@@ -11,11 +11,11 @@ class ContextMenuButton extends StatelessWidget {
   final Icon? icon;
 
   const ContextMenuButton({
-    Key? key,
+    super.key,
     required this.controller,
     required this.buttons,
     this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -53,8 +53,8 @@ class ContextMenuButton extends StatelessWidget {
 
 class IconPlus extends StatelessWidget {
   const IconPlus({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -76,10 +76,10 @@ class ContextMenuItem extends StatelessWidget {
   final VoidCallback onClick;
 
   const ContextMenuItem({
-    Key? key,
+    super.key,
     required this.text,
     required this.onClick,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

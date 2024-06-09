@@ -8,8 +8,8 @@ class TextButtonTransparent extends StatelessWidget {
   const TextButtonTransparent({
     required this.child,
     required this.onClick,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

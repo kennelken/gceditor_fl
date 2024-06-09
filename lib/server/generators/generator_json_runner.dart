@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:gceditor/model/db/data_table_cell_value.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db/generator_json.dart';
+import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/server/generators/json/generator_json_item_list.dart';
 import 'package:gceditor/server/generators/json/generator_json_root.dart';
 
@@ -25,21 +25,37 @@ class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with Output
         }
 
         for (final row in table.rows) {
-          final rowData = <String, DataTableCellValue>{};
+          final rowData = <String, dynamic>{};
           listEntries.items.add(
             GeneratorJsonItem()
               ..values = rowData
               ..id = row.id,
           );
 
-          final allFields = model.cache.getAllFieldsById(table.classId);
+          final allFields = model.cache.getAllFieldsByClassId(table.classId);
           if (allFields == null) //
             continue;
 
           for (var i = 0; i < allFields.length; i++) {
             final field = allFields[i];
 
-            rowData[field.id] = row.values[i];
+            if (field.typeInfo.type.hasMultiValueType()) {
+              final listRows = row.values[i].listInlineCellValues()!;
+              final columns = DbModelUtils.getListInlineColumns(model, field.valueTypeInfo!)!;
+
+              final outInlineRows = <Map<String, dynamic>>[];
+              rowData[field.id] = outInlineRows;
+
+              for (var i = 0; i < listRows.length; i++) {
+                final inlineRow = <String, dynamic>{};
+                outInlineRows.add(inlineRow);
+                for (var j = 0; j < columns.length; j++) {
+                  inlineRow[columns[j].id] = listRows[i].values![j];
+                }
+              }
+            } else {
+              rowData[field.id] = row.values[i];
+            }
           }
         }
       }

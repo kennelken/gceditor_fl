@@ -12,6 +12,15 @@ DbCmdEditClassField _$DbCmdEditClassFieldFromJson(Map<String, dynamic> json) =>
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..entityId = json['entityId'] as String
       ..fieldId = json['fieldId'] as String
+      ..listInlineValuesByTableColumn =
+          (json['listInlineValuesByTableColumn'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(
+            k,
+            (e as List<dynamic>)
+                .map((e) => DataTableColumnInlineValues.fromJson(
+                    e as Map<String, dynamic>))
+                .toList()),
+      )
       ..newId = json['newId'] as String?
       ..newDescription = json['newDescription'] as String?
       ..newIsUniqueValue = json['newIsUniqueValue'] as bool?
@@ -51,6 +60,10 @@ Map<String, dynamic> _$DbCmdEditClassFieldToJson(DbCmdEditClassField instance) {
   writeNotNull(r'$type', _$DbCmdTypeEnumMap[instance.$type]);
   val['entityId'] = instance.entityId;
   val['fieldId'] = instance.fieldId;
+  writeNotNull(
+      'listInlineValuesByTableColumn',
+      instance.listInlineValuesByTableColumn
+          ?.map((k, e) => MapEntry(k, e.map((e) => e.toJson()).toList())));
   writeNotNull('newId', instance.newId);
   writeNotNull('newDescription', instance.newDescription);
   writeNotNull('newIsUniqueValue', instance.newIsUniqueValue);
@@ -96,7 +109,7 @@ const _$DbCmdTypeEnumMap = {
   DbCmdType.reorderClassInterface: 'reorderClassInterface',
   DbCmdType.reorderDataRow: 'reorderDataRow',
   DbCmdType.resizeColumn: 'resizeColumn',
-  DbCmdType.resizeDictionaryKeyToValue: 'resizeDictionaryKeyToValue',
+  DbCmdType.resizeInnerCell: 'resizeInnerCell',
   DbCmdType.copypaste: 'copypaste',
   DbCmdType.fillColumn: 'fillColumn',
 };

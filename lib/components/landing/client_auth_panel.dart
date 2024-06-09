@@ -19,10 +19,10 @@ class ClientAuthPanel extends StatefulWidget {
   final PartialAuthenticationData authData;
 
   const ClientAuthPanel({
-    Key? key,
+    super.key,
     required this.authData,
     required this.onCredentialsChanged,
-  }) : super(key: key);
+  });
 
   @override
   ClientAuthPanelState createState() => ClientAuthPanelState();

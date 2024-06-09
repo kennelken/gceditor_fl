@@ -472,6 +472,14 @@
 	"@menubarFind": {
 		"description": ""
 	},
+	"menubarNextProblem": "Next Problem",
+	"@menubarNextProblem": {
+		"description": ""
+	},
+	"closeSelectedItem": "Close Selected Item",
+	"@closeSelectedItem": {
+		"description": ""
+	},
 	"menubarView": "View",
 	"@menubarView": {
 		"description": ""

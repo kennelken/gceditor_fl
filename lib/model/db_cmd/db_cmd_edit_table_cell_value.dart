@@ -36,7 +36,7 @@ class DbCmdEditTableCellValue extends BaseDbCmd {
   @override
   DbCmdResult doExecute(DbModel dbModel) {
     final table = dbModel.cache.getTable<TableMetaEntity>(tableId)!;
-    final columnIndex = dbModel.cache.getAllFieldsById(table.classId)!.indexWhere((e) => e.id == fieldId);
+    final columnIndex = dbModel.cache.getAllFieldsByClassId(table.classId)!.indexWhere((e) => e.id == fieldId);
     final rowIndex = table.rows.indexWhere((e) => e.id == rowId);
 
     table.rows[rowIndex].values[columnIndex] = value;
@@ -53,7 +53,7 @@ class DbCmdEditTableCellValue extends BaseDbCmd {
     if (table is! TableMetaEntity) //
       return DbCmdResult.fail('Entity with id "$tableId" is not a table');
 
-    final allFields = dbModel.cache.getAllFieldsById(table.classId);
+    final allFields = dbModel.cache.getAllFieldsByClassId(table.classId);
     if (allFields == null) //
       return DbCmdResult.fail('Table "$tableId" does not contain any fields');
 
@@ -65,10 +65,10 @@ class DbCmdEditTableCellValue extends BaseDbCmd {
     if (rowIndex <= -1) //
       return DbCmdResult.fail('Row with id "$rowId" was not found');
 
-    if (!DbModelUtils.validateValue(field, value)) //
+    if (!DbModelUtils.validateValue(dbModel, field, value)) //
       return DbCmdResult.fail('Value "$value" can not be set to field "$fieldId"');
 
-    final columnIndex = dbModel.cache.getAllFieldsById(table.classId)!.indexWhere((e) => e.id == fieldId);
+    final columnIndex = dbModel.cache.getAllFieldsByClassId(table.classId)!.indexWhere((e) => e.id == fieldId);
     if (value == table.rows[rowIndex].values[columnIndex]) //
       return DbCmdResult.fail('Value "$value" is equal to the current value');
 
@@ -78,7 +78,7 @@ class DbCmdEditTableCellValue extends BaseDbCmd {
   @override
   BaseDbCmd createUndoCmd(DbModel dbModel) {
     final table = dbModel.cache.getTable<TableMetaEntity>(tableId)!;
-    final columnIndex = dbModel.cache.getAllFieldsById(table.classId)!.indexWhere((e) => e.id == fieldId);
+    final columnIndex = dbModel.cache.getAllFieldsByClassId(table.classId)!.indexWhere((e) => e.id == fieldId);
     final rowIndex = table.rows.indexWhere((e) => e.id == rowId);
 
     return DbCmdEditTableCellValue.values(

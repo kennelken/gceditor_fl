@@ -11,8 +11,8 @@ class FindPanelItem extends StatelessWidget {
   const FindPanelItem({
     required this.item,
     required this.index,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

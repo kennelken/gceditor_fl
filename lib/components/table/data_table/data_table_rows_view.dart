@@ -15,12 +15,12 @@ class DataTableRowsView extends StatelessWidget {
   final List<PinnedItemInfo>? pinnedItems;
 
   const DataTableRowsView({
-    Key? key,
+    super.key,
     required this.table,
     required this.scrollControllerHorizontal,
     required this.scrollControllerVertical,
     this.pinnedItems,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

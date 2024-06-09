@@ -36,7 +36,7 @@ class DbCmdAddDataRow extends BaseDbCmd {
   @override
   DbCmdResult doExecute(DbModel dbModel) {
     final newRow = DbModelUtils.buildNewRow(
-      dbModel: dbModel,
+      model: dbModel,
       rowId: rowId,
       tableId: tableId,
       tableRowValues: tableRowValues,
@@ -62,14 +62,14 @@ class DbCmdAddDataRow extends BaseDbCmd {
     if (index < 0 || index > table.rows.length) //
       return DbCmdResult.fail('invalid index "$index"');
 
-    final allFields = dbModel.cache.getAllFieldsById(table.classId) ?? [];
+    final allFields = dbModel.cache.getAllFieldsByClassId(table.classId) ?? [];
     if (tableRowValues != null) {
       if (tableRowValues!.values.length != allFields.length) {
         return DbCmdResult.fail('Invalid data length ("${tableRowValues!.values.length}" != "${allFields.length}")');
       }
 
       for (var i = 0; i < tableRowValues!.values.length; i++) {
-        if (!DbModelUtils.validateValue(allFields[i], tableRowValues!.values[i])) //
+        if (!DbModelUtils.validateValue(dbModel, allFields[i], tableRowValues!.values[i])) //
           return DbCmdResult.fail('Invalid value "${tableRowValues!.values[i]}" at index "$index"');
       }
     }

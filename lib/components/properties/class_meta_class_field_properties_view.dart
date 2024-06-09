@@ -30,9 +30,9 @@ class ClassMetaClassFieldPropertiesViewProperties extends StatefulWidget {
   final ClassMetaFieldDescription data;
 
   const ClassMetaClassFieldPropertiesViewProperties({
-    Key? key,
+    super.key,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   State<ClassMetaClassFieldPropertiesViewProperties> createState() => _ClassMetaClassFieldPropertiesViewPropertiesState();
@@ -89,8 +89,10 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
 
         final classFieldTypes = DbModelUtils.sortedFieldTypes.map((e) => EnumWrapper(e)).toList();
         final simpleClassFieldTypes = classFieldTypes.where((e) => e.value.isSimple()).toList();
+        final multiValueFieldTypes = classFieldTypes.where((e) => e.value == ClassFieldType.reference).toList();
 
         final allClasses = [...model.cache.allEnums, ...model.cache.allClasses];
+        final allNonAbstractClasses = model.cache.allNonAbstractClasses;
 
         return ClassMetaPropertiesContainer(children: [
           PropertyStringView(
@@ -203,7 +205,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                               MetaValueCoordinates(
                                 classId: classEntity.id,
                                 fieldId: widget.data.id,
-                                fieldValueType: FindResultFieldDefinitionValueType.simple,
+                                fieldValueType: FindResultFieldDefinitionValueType.key,
                               ),
                               ref.watch(clientFindStateProvider).state,
                               ref.watch(clientNavigationServiceProvider).state,
@@ -239,7 +241,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                               MetaValueCoordinates(
                                 classId: classEntity.id,
                                 fieldId: widget.data.id,
-                                fieldValueType: FindResultFieldDefinitionValueType.simple,
+                                fieldValueType: FindResultFieldDefinitionValueType.value,
                               ),
                               ref.watch(clientFindStateProvider).state,
                               ref.watch(clientNavigationServiceProvider).state,
@@ -254,6 +256,38 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                           }),
                         ),
                       ],
+                    ],
+                  ),
+                ],
+                if (type.hasMultiValueType()) ...[
+                  kStyle.kPropertiesVerticalDivider,
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 150 * kScale,
+                        child: _getValueTypeDropDownSelector(multiValueFieldTypes),
+                      ),
+                      _getHorizontalDivider(),
+                      Expanded(
+                        child: Builder(builder: (context) {
+                          final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
+                            MetaValueCoordinates(
+                              classId: classEntity.id,
+                              fieldId: widget.data.id,
+                              fieldValueType: FindResultFieldDefinitionValueType.value,
+                            ),
+                            ref.watch(clientFindStateProvider).state,
+                            ref.watch(clientNavigationServiceProvider).state,
+                          );
+
+                          return _getReferenceClassSelector(
+                            classes: allNonAbstractClasses,
+                            selectedItem: model.cache.getClass(valueTypeRefId),
+                            onValueSelected: _handleValueTypeRefSelected,
+                            inputDecoration: idInputDecoration,
+                          );
+                        }),
+                      ),
                     ],
                   ),
                 ],
@@ -375,18 +409,25 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
 
   void _handleTypeChange(EnumWrapper<ClassFieldType>? value) {
     setState(() {
+      defaultValueController.text = '';
       type = value!.value;
+
+      if (type.hasMultiValueType()) {
+        valueType = ClassFieldType.reference;
+      }
     });
   }
 
   void _handleKeyTypeChange(EnumWrapper<ClassFieldType>? value) {
     setState(() {
+      defaultValueController.text = '';
       keyType = value!.value;
     });
   }
 
   void _handleValueTypeChange(EnumWrapper<ClassFieldType>? value) {
     setState(() {
+      defaultValueController.text = '';
       valueType = value!.value;
     });
   }
@@ -396,6 +437,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
   }
 
   void _handleTypeRefSelected(ClassMeta? value) {
+    defaultValueController.text = '';
     setState(() {
       typeRefId = value!.id;
     });
@@ -403,12 +445,14 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
 
   void _handleKeyTypeRefSelected(ClassMeta? value) {
     setState(() {
+      defaultValueController.text = '';
       keyTypeRefId = value!.id;
     });
   }
 
   void _handleValueTypeRefSelected(ClassMeta? value) {
     setState(() {
+      defaultValueController.text = '';
       valueTypeRefId = value!.id;
     });
   }
@@ -423,6 +467,11 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
     }
 
     if (type.hasValueType()) {
+      if (valueType != widget.data.valueTypeInfo?.type || valueTypeRefId != widget.data.valueTypeInfo?.classId) //
+        return true;
+    }
+
+    if (type.hasMultiValueType()) {
       if (valueType != widget.data.valueTypeInfo?.type || valueTypeRefId != widget.data.valueTypeInfo?.classId) //
         return true;
     }

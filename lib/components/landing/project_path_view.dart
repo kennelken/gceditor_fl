@@ -20,7 +20,7 @@ class ProjectPathView extends StatelessWidget {
   final ValueSetter<String?> onChange;
 
   ProjectPathView({
-    Key? key,
+    super.key,
     required this.targetPathTextController,
     required this.targetPath,
     required this.defaultPath,
@@ -29,7 +29,7 @@ class ProjectPathView extends StatelessWidget {
     required this.isFile,
     required this.canBeReset,
     required this.onChange,
-  }) : super(key: key) {
+  }) {
     targetPathTextController.text = targetPath ?? defaultPath;
   }
 

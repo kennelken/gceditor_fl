@@ -12,17 +12,8 @@ DbModel _$DbModelFromJson(Map<String, dynamic> json) => DbModel()
   ..settings =
       DbModelSettings.fromJson(json['settings'] as Map<String, dynamic>);
 
-Map<String, dynamic> _$DbModelToJson(DbModel instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('classes', ClassMeta.encodeEntries(instance.classes));
-  writeNotNull('tables', TableMeta.encodeEntries(instance.tables));
-  val['settings'] = instance.settings.toJson();
-  return val;
-}
+Map<String, dynamic> _$DbModelToJson(DbModel instance) => <String, dynamic>{
+      'classes': ClassMeta.encodeEntries(instance.classes),
+      'tables': TableMeta.encodeEntries(instance.tables),
+      'settings': instance.settings.toJson(),
+    };

@@ -6,11 +6,11 @@ class PlatformOnly extends StatelessWidget {
   final Set<TargetPlatform>? except;
 
   const PlatformOnly({
-    Key? key,
+    super.key,
     required this.child,
     this.only,
     this.except,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

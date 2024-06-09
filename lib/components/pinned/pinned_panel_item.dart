@@ -10,10 +10,10 @@ class PinnedPanelItem extends StatefulWidget {
   final List<PinnedItemInfo> pinnedItems;
 
   const PinnedPanelItem({
-    Key? key,
+    super.key,
     required this.table,
     required this.pinnedItems,
-  }) : super(key: key);
+  });
 
   @override
   State<PinnedPanelItem> createState() => _PinnedPanelItemState();

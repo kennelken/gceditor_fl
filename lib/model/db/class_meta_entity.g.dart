@@ -36,7 +36,7 @@ Map<String, dynamic> _$ClassMetaEntityToJson(ClassMetaEntity instance) {
   val['id'] = instance.id;
   val['description'] = instance.description;
   writeNotNull('parent', instance.parent);
-  val['classType'] = _$ClassTypeEnumMap[instance.classType];
+  val['classType'] = _$ClassTypeEnumMap[instance.classType]!;
   writeNotNull('exportList', instance.exportList);
   val['fields'] = instance.fields.map((e) => e.toJson()).toList();
   val['interfaces'] = instance.interfaces;

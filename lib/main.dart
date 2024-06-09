@@ -51,7 +51,7 @@ Future<void> main([List<String>? args]) async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -102,14 +102,6 @@ class MyApp extends StatelessWidget {
 
       return RawKeyboardEvents(
         child: MaterialApp(
-          shortcuts: {
-            ...WidgetsApp.defaultShortcuts,
-            ...GlobalShortcuts.getIntents(),
-          },
-          actions: {
-            ...WidgetsApp.defaultActions,
-            ...GlobalShortcuts.getActions(),
-          },
           debugShowCheckedModeBanner: false,
           title: 'gceditor',
           theme: kStyle.kAppTheme,
@@ -136,7 +128,8 @@ class SlowerPageRoute extends MaterialPageRoute<dynamic> {
   @override
   Duration get transitionDuration => const Duration(milliseconds: 450);
 
-  SlowerPageRoute({builder, settings}) : super(builder: builder, settings: settings);
+  // ignore: use_super_parameters
+  SlowerPageRoute({builder, super.settings}) : super(builder: builder);
 }
 
 class ToggleConsole extends Intent {

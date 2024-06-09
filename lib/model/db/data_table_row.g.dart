@@ -9,7 +9,7 @@ part of 'data_table_row.dart';
 DataTableRow _$DataTableRowFromJson(Map<String, dynamic> json) => DataTableRow()
   ..id = json['id'] as String
   ..values = (json['values'] as List<dynamic>)
-      .map((e) => DataTableCellValue.fromJson(e))
+      .map(DataTableCellValue.fromJson)
       .toList();
 
 Map<String, dynamic> _$DataTableRowToJson(DataTableRow instance) =>

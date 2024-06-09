@@ -6,18 +6,24 @@ import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/style_state.dart';
+import 'package:gceditor/model/state/table_selection_state.dart';
 import 'package:menu_bar/menu_bar.dart';
 
 import '../../components/global_shortcuts.dart';
 import '../../consts/consts.dart';
 import '../../consts/loc.dart';
 import '../../utils/utils.dart';
+import 'client_problems_state.dart';
 import 'client_view_mode_state.dart';
 
 final menubarStateProvider = ChangeNotifierProvider((ref) {
   final notifier = MenubarStateNotifier(MenubarState());
 
   ref.read(clientOwnCommandsStateProvider).addListener(() {
+    notifier.refresh();
+  });
+
+  ref.read(tableSelectionStateProvider).addListener(() {
     notifier.refresh();
   });
 
@@ -46,6 +52,8 @@ class MenubarStateNotifier extends ChangeNotifier {
 
     nextUndoCommand() => providerContainer.read(clientOwnCommandsStateProvider).state.nextUndoCommand;
     nextRedoCommand() => providerContainer.read(clientOwnCommandsStateProvider).state.nextRedoCommand;
+    hasNextProblem() => providerContainer.read(clientProblemsStateProvider).state.problems.length > 1;
+    hasSelectedItem() => providerContainer.read(tableSelectionStateProvider).state.canBeDeselected();
 
     state.menubar = (app) => Overlay(
           initialEntries: [
@@ -118,6 +126,24 @@ class MenubarStateNotifier extends ChangeNotifier {
                               shortcutStyle: _styleShortcut(),
                             ),
                             MenuButton(
+                              text: Text(
+                                Loc.get.menubarNextProblem,
+                                style: hasNextProblem() ? _styleMenuActive() : _styleMenuInactive(),
+                              ),
+                              onTap: hasNextProblem() ? GlobalShortcuts.showNextProblem : null,
+                              shortcutText: 'F8',
+                              shortcutStyle: _styleShortcut(),
+                            ),
+                            MenuButton(
+                              text: Text(
+                                Loc.get.closeSelectedItem,
+                                style: hasSelectedItem() ? _styleMenuActive() : _styleMenuInactive(),
+                              ),
+                              onTap: hasSelectedItem() ? GlobalShortcuts.deselect : null,
+                              shortcutText: 'Esc',
+                              shortcutStyle: _styleShortcut(),
+                            ),
+                            MenuButton(
                               text: Text(Loc.get.requestModelFromServer, style: _styleMenuActive()),
                               onTap: _requestModelFromServer,
                               shortcutStyle: _styleShortcut(),
@@ -157,11 +183,6 @@ class MenubarStateNotifier extends ChangeNotifier {
                               text: Text(Loc.get.menubarZoomOut, style: _styleMenuActive()),
                               onTap: GlobalShortcuts.zoomOut,
                               shortcutText: 'Ctrl+Numpad-',
-                              shortcutStyle: _styleShortcut(),
-                            ),
-                            MenuButton(
-                              text: Text(Loc.get.menubarShowShortcuts, style: _styleMenuActive()),
-                              onTap: GlobalShortcuts.openShortcutsList,
                               shortcutStyle: _styleShortcut(),
                             ),
                           ],
