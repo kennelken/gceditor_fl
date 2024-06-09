@@ -1122,9 +1122,10 @@ using Rectangle = System.Drawing.RectangleF;
 #endregion
 
 #region Classes definitions
-    public partial class Base{${_paramPrefix}}Item{${_paramPostfix}} : IIdentifiable
+    public abstract partial class Base{${_paramPrefix}}Item{${_paramPostfix}} : IIdentifiable
     {
-        public string Id { get; set; }
+        public string Id { get; init; }
+        public bool IsGlobal { get; init; }
 
         public virtual void OnParsed({${_paramPrefix}}Root{${_paramPostfix}} root, CacheRoot cache) {}
     }
@@ -1269,12 +1270,14 @@ using Rectangle = System.Drawing.RectangleF;
     {{${_paramPropertiesBody}}
 
         /// <summary>
-        /// Clone of the item. Warning: references to the model entities are not being copied!
+        /// Clone of the item. Warning: references to the model entities are not copied!
         /// </summary>
         public new {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} Clone()
         {
             {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} result = new {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}
-            {{${_methodCloneBody}}
+            {
+                Id = Id,
+                IsGlobal = IsGlobal,{${_methodCloneBody}}
             };
             CloneCustom(result);
             return result;
@@ -1379,7 +1382,7 @@ using Rectangle = System.Drawing.RectangleF;
   final _getNewInstanceRowTemplate = '''
 
                 case "{${_paramClassName}}":
-                    return new {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}} { Id = item?.id ?? GetInlineRowId(ownerId) };
+                    return new {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}} { Id = item?.id ?? GetInlineRowId(ownerId), IsGlobal = item?.id != null };
   ''';
 
   final String _assignValueCaseTemplate = '''
@@ -1490,7 +1493,7 @@ using Rectangle = System.Drawing.RectangleF;
             switch (className)
             {{${_paramListInstantiate}}
                 default:
-                    return new Base{${_paramPrefix}}Item{${_paramPostfix}} { Id = item?.id ?? GetInlineRowId(ownerId)};
+                    throw new Exception(\$"Can not create a new instance of an unexpected class '{className}'");
             }
         }
 
@@ -1956,7 +1959,19 @@ using Rectangle = System.Drawing.RectangleF;
     {
         public static List<T> Clone<T>(this List<T> source)
         {
-            return new List<T>(source);
+            var result = new List<T>(source.Count);
+            foreach (var item in source)
+            {
+                if (item is Base{${_paramPrefix}}Item{${_paramPostfix}} modelItem && !modelItem.IsGlobal)
+                {
+                    result.Add((modelItem as ICloneable<T>).Clone());
+                }
+                else
+                {
+                    result.Add(item);
+                }
+            }
+            return result;
         }
     }
 

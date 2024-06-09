@@ -854,7 +854,19 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
     {
         public static <T> ArrayList<T> Clone(ArrayList<T> source)
         {
-            return (ArrayList<T>)source.clone();
+            var result = new ArrayList<T>();
+            for (var item : source)
+            {
+                if (item instanceof Base{${_paramPrefix}}Item{${_paramPostfix}} modelItem && !modelItem.IsGlobal)
+                {
+                    result.add((T)modelItem.Clone());
+                }
+                else
+                {
+                    result.add(item);
+                }
+            }
+            return result;
         }
 
         public static <T> HashSet<T> Clone(HashSet<T> source)
@@ -1007,10 +1019,12 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
         }
     }
 
-    public static class Base{${_paramPrefix}}Item{${_paramPostfix}} implements IIdentifiable
+    public abstract static class Base{${_paramPrefix}}Item{${_paramPostfix}} implements IIdentifiable, ICloneable
     {
         protected String Id;
         public String getId() { return Id; }
+
+        protected Boolean IsGlobal;
     }
 
 {${_paramClasses}}
@@ -1172,11 +1186,13 @@ class RectangleInt {
     {{${_paramPropertiesBody}}
 
         /**
-         *  Clone of the item. Warning: references to the model entities are not being copied!
+         *  Clone of the item. Warning: references to the model entities are not copied!
          */
         public {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} Clone()
         {
             {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} result = new {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}();{${_methodCloneBody}}
+            result.Id = Id;
+            result.IsGlobal = IsGlobal;
             return result;
         }
 
@@ -1253,14 +1269,14 @@ class RectangleInt {
       '''
     public static class GceditorJsonParser
     {
-        public static {${_paramPrefix}}Root{${_paramPostfix}} Parse(String jsonText, {${_paramPrefix}}Root{${_paramPostfix}} root, Consumer<ErrorData> onError) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException
+        public static {${_paramPrefix}}Root{${_paramPostfix}} Parse(String jsonText, {${_paramPrefix}}Root{${_paramPostfix}} root, Consumer<ErrorData> onError) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException, IllegalArgumentException
         {
-            EmptyCollectionFactory emptyCollectionFactory = new EmptyCollectionFactory();
+            var emptyCollectionFactory = new EmptyCollectionFactory();
 
             var objectsByIds = new HashMap<String, IIdentifiable>();
             var valuesByIds = new HashMap<String, JsonItem>();
 
-            ObjectMapper objectMapper = new ObjectMapper();
+            var objectMapper = new ObjectMapper();
             var jsonRoot = objectMapper.readValue(jsonText, {${_paramPrefix}}Root{${_paramPostfix}}.GceditorJsonParser.JsonRoot.class);
             for (var className : jsonRoot.classes.keySet())
             {
@@ -1308,30 +1324,23 @@ class RectangleInt {
             public HashMap<String, Object> values;
         }
 
-        private static IIdentifiable GetNewInstance(String className, JsonItem item, String ownerId)
+        private static IIdentifiable GetNewInstance(String className, JsonItem item, String ownerId) throws IllegalArgumentException
         {
             Base{${_paramPrefix}}Item{${_paramPostfix}} value;
 
             switch (className)
             {{${_paramListInstantiate}}
                 default:
-                    value = new Base{${_paramPrefix}}Item{${_paramPostfix}}(); break;
+                    throw new IllegalArgumentException(String.format("Can not create a new instance of an unexpected class '%s'", className));
             }
-            if (item != null)
-            {
-                if (item.id != null)
-                {
-                    value.Id = item.id;
-                }
-                else
-                {
-                    value.Id = GetInlineRowId(ownerId);
-                }
-            }
+            value.Id = item != null && item.id != null
+                ? item.id
+                : GetInlineRowId(ownerId);
+            value.IsGlobal = item != null && item.id != null;
             return value;
         }
 
-        private static HashMap<String, Integer> _inlineItemsCounter = new HashMap<>();
+        private final static HashMap<String, Integer> _inlineItemsCounter = new HashMap<>();
         private static String GetInlineRowId(String ownerId)
         {
             if (!_inlineItemsCounter.containsKey(ownerId))
@@ -1442,7 +1451,7 @@ class RectangleInt {
             return new HashSet(GceditorJsonParser.ParseList(values, valueClass, getValue, emptyCollectionFactory));
         }
 
-        private static boolean ParseBool(Object value)
+        private static Boolean ParseBool(Object value)
         {
             return Integer.parseInt(value.toString()) == 1;
         }
