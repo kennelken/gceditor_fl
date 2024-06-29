@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gceditor/assets.dart';
 import 'package:gceditor/components/global_shortcuts.dart';
 import 'package:gceditor/components/waiting_overlay.dart';
 import 'package:gceditor/consts/consts.dart';
@@ -55,8 +54,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    precacheImage(AssetImage(Assets.images.icon1024PNG), context);
-
     return Consumer(builder: (context, ref, child) {
       ref.watch(styleStateProvider);
       ref.watch(menubarStateProvider).state.menubar;
@@ -67,9 +64,6 @@ class MyApp extends StatelessWidget {
           backgroundColor: kColorPrimaryLighter,
           body: Navigator(
             key: navigatorKey,
-            observers: [
-              HeroController(),
-            ],
             onGenerateRoute: (settings) {
               final page = getWidgetByScreen(settings.name!);
               return SlowerPageRoute(
