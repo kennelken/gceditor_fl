@@ -172,7 +172,7 @@ class TableView extends ConsumerWidget {
                     ),
                     const Expanded(child: SizedBox()),
                     Material(
-                      color: kColorPrimaryDarker,
+                      color: kColorTransparent,
                       child: TooltipWrapper(
                         message: Loc.get.nextProblemTooltip,
                         child: InkWell(
