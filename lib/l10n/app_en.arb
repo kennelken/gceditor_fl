@@ -368,6 +368,10 @@
 	"@exportFieldTitle": {
 		"description": ""
 	},
+	"exportFieldTooltip": "If enabled, the column values will be exported when generators are run",
+	"@exportFieldTooltip": {
+		"description": ""
+	},
 	"exportElementsList": "generate items references",
 	"@exportElementsList": {
 		"description": ""
@@ -378,6 +382,10 @@
 	},
 	"isUniqueValueTitle": "unique values",
 	"@isUniqueValueTitle": {
+		"description": ""
+	},
+	"isUniqueValueTooltip": "If enabled, duplicating value of this column will be warned about",
+	"@isUniqueValueTooltip": {
 		"description": ""
 	},
 	"dropDownSearchHint": "Search",

@@ -26,6 +26,8 @@ import 'package:gceditor/model/state/enum_wrapper.dart';
 import 'package:gceditor/model/state/service/client_navigation_service.dart';
 import 'package:gceditor/model/state/style_state.dart';
 
+import '../tooltip_wrapper.dart';
+
 class ClassMetaClassFieldPropertiesViewProperties extends StatefulWidget {
   final ClassMetaFieldDescription data;
 
@@ -136,16 +138,22 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
             ],
           ),
           kStyle.kPropertiesVerticalDivider,
-          PropertyBoolView(
-            title: Loc.get.exportFieldTitle,
-            value: widget.data.toExport,
-            saveCallback: _handleToExportChanged,
+          TooltipWrapper(
+            message: Loc.get.exportFieldTooltip,
+            child: PropertyBoolView(
+              title: Loc.get.exportFieldTitle,
+              value: widget.data.toExport,
+              saveCallback: _handleToExportChanged,
+            ),
           ),
           if (type.isSimple()) ...[
-            PropertyBoolView(
-              title: Loc.get.isUniqueValueTitle,
-              value: widget.data.isUniqueValue,
-              saveCallback: _handleIsUniqueValueChanged,
+            TooltipWrapper(
+              message: Loc.get.isUniqueValueTooltip,
+              child: PropertyBoolView(
+                title: Loc.get.isUniqueValueTitle,
+                value: widget.data.isUniqueValue,
+                saveCallback: _handleIsUniqueValueChanged,
+              ),
             ),
             kStyle.kPropertiesVerticalDivider
           ],
