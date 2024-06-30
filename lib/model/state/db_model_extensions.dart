@@ -1523,8 +1523,7 @@ class DbModelUtils {
     final isSelected = (navigationService.longLastingNavigationData?.fitsFindResult(findResult) ?? false) ||
         (navigationService.longLastingNavigationData?.fitsProblem(problem) ?? false);
 
-    return findResult?.color().withAlpha(isSelected ? kFindResultBackgroundAlphaSelected : kFindResultBackgroundAlpha) ??
-        problem?.color ??
+    return (findResult?.color() ?? problem?.color)?.withAlpha(isSelected ? kFindResultBackgroundAlphaSelected : kFindResultBackgroundAlpha) ??
         kColorTransparent;
   }
 

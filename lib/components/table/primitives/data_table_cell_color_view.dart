@@ -28,7 +28,6 @@ class DataTableCellColorView extends ConsumerWidget {
   @override
   Widget build(context, ref) {
     final initialColor = Color(value);
-
     return Container(
       color: DbModelUtils.getDataCellColor(
         coordinates,

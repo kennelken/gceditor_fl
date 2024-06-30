@@ -553,7 +553,7 @@ void _computeAndAppendDuplicateUniqueValues(DbModel model, List<DbModelProblem> 
                   rowIndex: j,
                   fieldIndex: i,
                   fieldId: field.id,
-                  value: row.values[i].toString(),
+                  value: value.toString(),
                 ),
               );
         } catch (e, stacktrace) {
