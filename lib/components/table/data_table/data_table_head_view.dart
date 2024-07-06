@@ -14,10 +14,10 @@ class DataTableHeadView extends StatelessWidget {
   final ScrollController scrollController;
 
   const DataTableHeadView({
-    Key? key,
+    super.key,
     required this.table,
     required this.scrollController,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

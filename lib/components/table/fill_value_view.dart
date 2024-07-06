@@ -21,10 +21,10 @@ class FillValueView extends StatefulWidget {
   final TableMetaEntity table;
 
   const FillValueView({
-    Key? key,
+    super.key,
     required this.field,
     required this.table,
-  }) : super(key: key);
+  });
 
   @override
   State<FillValueView> createState() => _FillValueViewState();
@@ -141,6 +141,6 @@ class _FillValueViewState extends State<FillValueView> {
   }
 
   DataTableCellValue? _parseCurrentValue() {
-    return DbModelUtils.parseDefaultValueByField(widget.field, _valueController.text, silent: true);
+    return DbModelUtils.parseDefaultValueByField(clientModel, widget.field, _valueController.text, silent: true);
   }
 }

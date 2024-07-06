@@ -30,12 +30,12 @@ class DataTableColumnHeadView extends ConsumerWidget {
   final MetaValueCoordinates coordinates;
 
   const DataTableColumnHeadView({
-    Key? key,
+    super.key,
     required this.table,
     required this.field,
     required this.index,
     required this.coordinates,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(context, ref) {

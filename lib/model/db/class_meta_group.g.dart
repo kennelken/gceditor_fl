@@ -25,7 +25,7 @@ Map<String, dynamic> _$ClassMetaGroupToJson(ClassMetaGroup instance) {
   writeNotNull(r'$type', _$ClassMetaTypeEnumMap[instance.$type]);
   val['id'] = instance.id;
   val['description'] = instance.description;
-  writeNotNull('entries', ClassMeta.encodeEntries(instance.entries));
+  val['entries'] = ClassMeta.encodeEntries(instance.entries);
   return val;
 }
 

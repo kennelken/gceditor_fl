@@ -13,10 +13,10 @@ class SelectableList extends StatefulWidget {
   ) builder;
 
   SelectableList({
-    Key? key,
+    super.key,
     required this.builder,
     SelectionListController? controller,
-  }) : super(key: key) {
+  }) {
     _controller = controller ?? SelectionListController();
   }
 

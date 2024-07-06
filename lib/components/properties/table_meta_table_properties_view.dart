@@ -25,9 +25,9 @@ class TableMetaTablePropertiesViewProperties extends ConsumerWidget {
   final TableMetaEntity data;
 
   const TableMetaTablePropertiesViewProperties({
-    Key? key,
+    super.key,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(context, ref) {

@@ -8,6 +8,8 @@ import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/utils/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../db/data_table_cell_list_inline_item.dart';
+import '../db_network/data_table_column_inline_values.dart';
 import 'base_db_cmd.dart';
 import 'db_cmd_result.dart';
 
@@ -17,6 +19,7 @@ part 'db_cmd_edit_class_field.g.dart';
 class DbCmdEditClassField extends BaseDbCmd {
   late String entityId;
   late String fieldId;
+  late Map<String, List<DataTableColumnInlineValues>>? listInlineValuesByTableColumn;
   String? newId;
   String? newDescription;
   bool? newIsUniqueValue;
@@ -42,6 +45,7 @@ class DbCmdEditClassField extends BaseDbCmd {
     this.newValueType,
     this.newDefaultValue,
     this.valuesByTable,
+    this.listInlineValuesByTableColumn,
   }) : super.withId(id) {
     $type = DbCmdType.editClassField;
   }
@@ -95,6 +99,35 @@ class DbCmdEditClassField extends BaseDbCmd {
       DbModelUtils.applyManyDataColumns(dbModel, valuesByTable!);
     }
 
+    dbModel.cache.invalidate();
+
+    final fieldsUsingInline = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
+    for (var fieldUsingInline in fieldsUsingInline) {
+      for (var table in dbModel.cache.allDataTables) {
+        final fields = dbModel.cache.getAllFieldsByClassId(table.classId)!;
+        final columnIndex = fields.indexOf(fieldUsingInline.$2);
+        if (columnIndex <= -1) //
+          continue;
+
+        final listInlineField = fields[columnIndex];
+        final inlineColumns = DbModelUtils.getListInlineColumns(dbModel, listInlineField.valueTypeInfo!);
+        final inlineColumnIndex = inlineColumns!.indexOf(field);
+
+        for (var i = 0; i < table.rows.length; i++) {
+          final row = table.rows[i];
+          final cellValues = row.values[columnIndex].listCellValues!;
+          for (var j = 0; j < cellValues.length; j++) {
+            final cellValue = cellValues[j];
+            final value = DbModelUtils.getInnerCellValue(dbModel, listInlineValuesByTableColumn?[(table.id)], listInlineField.id, i, j) ??
+                DbModelUtils.convertSimpleValueIfPossible(
+                    (cellValue as DataTableCellListInlineItem).values![inlineColumnIndex], field.typeInfo.type) ??
+                dbModel.cache.getDefaultValue(field).simpleValue;
+            (cellValue as DataTableCellListInlineItem).values![inlineColumnIndex] = value;
+          }
+        }
+      }
+    }
+
     return DbCmdResult.success();
   }
 
@@ -135,7 +168,21 @@ class DbCmdEditClassField extends BaseDbCmd {
       if (newType!.type == ClassFieldType.reference && newType!.classId == null) //
         return DbCmdResult.fail('Class reference is not specified');
 
-      defaultValue ??= field.defaultValue; // have to check
+      defaultValue ??= field.defaultValue;
+
+      if (!newType!.type.isSimple()) {
+        final allClassesUsingField = dbModel.cache.allClasses //
+            .where((e) => dbModel.cache.getAllFieldsByClassId(e.id)!.any((f) => f == field))
+            .map((e) => e.id)
+            .toSet();
+        if (dbModel.cache.allClasses.any(
+          (e) => dbModel.cache
+              .getAllFields(e)
+              .any((f) => f.typeInfo.type == ClassFieldType.listInline && allClassesUsingField.contains(f.valueTypeInfo!.classId)),
+        )) {
+          return DbCmdResult.fail('The field can not have a complex type because it is used in a multiValue list');
+        }
+      }
 
       if (newType!.type.hasKeyType()) {
         if (newKeyType == null || newKeyType!.type == ClassFieldType.undefined) //
@@ -158,6 +205,36 @@ class DbCmdEditClassField extends BaseDbCmd {
         if (!newValueType!.type.isSimple()) //
           return DbCmdResult.fail('Specified type is not simple');
       }
+
+      if (newType!.type.hasMultiValueType()) {
+        if (newValueType == null || newValueType!.type == ClassFieldType.undefined) //
+          return DbCmdResult.fail('Value type is not specified');
+
+        if (newValueType!.type == ClassFieldType.reference && newValueType!.classId == null) //
+          return DbCmdResult.fail('Class reference is not specified');
+
+        if (newValueType!.type != ClassFieldType.reference) //
+          return DbCmdResult.fail('Specified type must be a reference');
+
+        final newValueClass = dbModel.cache.getClass(newValueType!.classId)!;
+        if (newValueClass is! ClassMetaEntity) return DbCmdResult.fail('Specified type must be a class');
+
+        final valueClassType = newValueClass.classType;
+        if (valueClassType != ClassType.referenceType && valueClassType != ClassType.valueType) //
+          return DbCmdResult.fail('Specified type must be a non abstract class');
+
+        if (newValueClass.parent != null) //
+          return DbCmdResult.fail('Specified type must not have base class');
+
+        if (newValueClass.interfaces.isNotEmpty) //
+          return DbCmdResult.fail('Specified type must not have interfaces');
+
+        final newColumns = DbModelUtils.getListInlineColumns(dbModel, newValueType!)!;
+        for (var column in newColumns) {
+          if (!column.typeInfo.type.isSimple()) //
+            return DbCmdResult.fail('Specified type contains a column that is not simple');
+        }
+      }
     }
 
     if (defaultValue?.isNotEmpty ?? false) {
@@ -165,7 +242,7 @@ class DbCmdEditClassField extends BaseDbCmd {
       final keyType = newType != null ? newKeyType : field.keyTypeInfo;
       final valueType = newType != null ? newValueType : field.valueTypeInfo;
 
-      if (DbModelUtils.parseDefaultValue(type, keyType, valueType, defaultValue!) == null) //
+      if (DbModelUtils.parseDefaultValue(dbModel, type, keyType, valueType, defaultValue!) == null) //
         return DbCmdResult.fail('Incorrect default value');
     }
 
@@ -192,6 +269,8 @@ class DbCmdEditClassField extends BaseDbCmd {
       }
     }
 
+    final listInlineValuesByTableColumn = DbModelUtils.getInlineCellValuesByTable(dbModel, entity);
+
     return DbCmdEditClassField.values(
       entityId: entityId,
       fieldId: newId ?? fieldId,
@@ -206,6 +285,7 @@ class DbCmdEditClassField extends BaseDbCmd {
           newValueType != null && field.valueTypeInfo != null ? ClassFieldDescriptionDataInfo.fromJson(field.valueTypeInfo!.toJson().clone()) : null,
       newDefaultValue: newDefaultValue != null ? field.defaultValue : null,
       valuesByTable: valuesByTable,
+      listInlineValuesByTableColumn: listInlineValuesByTableColumn,
     );
   }
 }

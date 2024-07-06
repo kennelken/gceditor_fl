@@ -17,7 +17,7 @@ final _treeViewController = TreeViewController(rootNode: _rootNode);
 final _treeScrollController = ScrollController();
 
 class TableClassesView extends ConsumerWidget {
-  const TableClassesView({Key? key}) : super(key: key);
+  const TableClassesView({super.key});
 
   @override
   Widget build(context, ref) {

@@ -12,8 +12,8 @@ import 'package:gceditor/model/state/style_state.dart';
 
 class PinnedPanel extends StatefulWidget {
   const PinnedPanel({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<PinnedPanel> createState() => _PinnedPanelState();

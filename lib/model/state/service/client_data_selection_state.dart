@@ -129,7 +129,7 @@ class ClientDataSelectionStateNotifier extends ChangeNotifier {
     updateVisibility(true);
     notifyListeners();
 
-    final allField = clientModel.cache.getAllFieldsById(state.selectionTable!.classId)!;
+    final allField = clientModel.cache.getAllFieldsByClassId(state.selectionTable!.classId)!;
     final columnNames = [idColumnName, ...allField.map((e) => e.id)].join(csvDelimiter);
 
     final rows = state.copiedItems!.map(

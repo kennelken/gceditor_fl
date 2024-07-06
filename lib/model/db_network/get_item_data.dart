@@ -27,7 +27,7 @@ class GitItemData {
         branchName = item.branchName,
         type = item.type;
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeToJson: false)
   Color get color {
     switch (type) {
       case GitItemType.undefined:

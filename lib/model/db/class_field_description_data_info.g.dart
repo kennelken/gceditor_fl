@@ -6,13 +6,16 @@ part of 'class_field_description_data_info.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ClassFieldDescriptionDataInfo _$ClassFieldDescriptionDataInfoFromJson(Map<String, dynamic> json) => ClassFieldDescriptionDataInfo()
-  ..type = $enumDecode(_$ClassFieldTypeEnumMap, json['type'])
-  ..classId = json['classId'] as String?;
+ClassFieldDescriptionDataInfo _$ClassFieldDescriptionDataInfoFromJson(
+        Map<String, dynamic> json) =>
+    ClassFieldDescriptionDataInfo()
+      ..type = $enumDecode(_$ClassFieldTypeEnumMap, json['type'])
+      ..classId = json['classId'] as String?;
 
-Map<String, dynamic> _$ClassFieldDescriptionDataInfoToJson(ClassFieldDescriptionDataInfo instance) {
+Map<String, dynamic> _$ClassFieldDescriptionDataInfoToJson(
+    ClassFieldDescriptionDataInfo instance) {
   final val = <String, dynamic>{
-    'type': _$ClassFieldTypeEnumMap[instance.type],
+    'type': _$ClassFieldTypeEnumMap[instance.type]!,
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -36,6 +39,7 @@ const _$ClassFieldTypeEnumMap = {
   ClassFieldType.text: 'text',
   ClassFieldType.reference: 'reference',
   ClassFieldType.list: 'list',
+  ClassFieldType.listInline: 'listInline',
   ClassFieldType.set: 'set',
   ClassFieldType.dictionary: 'dictionary',
   ClassFieldType.date: 'date',

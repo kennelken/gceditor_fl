@@ -343,7 +343,7 @@ namespace ${data.namespace}
         inheritedInterfaceFields.addAll(
           classEntity.interfaces //
               .where((e) => e != null)
-              .selectMany((e, index) => model.cache.getAllFieldsById(e!)!),
+              .selectMany((e, index) => model.cache.getAllFieldsByClassId(e!)!),
         );
         break;
     }
@@ -492,6 +492,9 @@ namespace ${data.namespace}
       case ClassFieldType.list:
         return 'List<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
 
+      case ClassFieldType.listInline:
+        return 'List<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
+
       case ClassFieldType.set:
         return 'HashSet<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
 
@@ -526,6 +529,7 @@ namespace ${data.namespace}
         return '${data.prefix}${type.classId!}${data.postfix}';
 
       case ClassFieldType.list:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('"${describeEnum(type.type)}" is not a simple type');
@@ -642,7 +646,10 @@ ${_makeSummary('</summary>', indentDepth)}''';
           {
             _paramClassName: '${data.prefix}${classEntity.id}${data.postfix}',
             _paramPropertyName: field.id,
-            _paramParseFunction: _getAssignValueFunction(model, data, classEntity, field),
+            _paramParseFunction: _getAssignValueFunction(model, data, classEntity, field).format({
+              _paramPrefix: data.prefix,
+              _paramPostfix: data.postfix,
+            }),
           },
         ),
       );
@@ -652,7 +659,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
   }
 
   String _getAssignValueFunction(DbModel model, GeneratorCsharp data, ClassMetaEntity classEntity, ClassMetaFieldDescription field) {
-    final value = 'valuesById.values["${field.id}"]';
+    final value = 'valuesById["${field.id}"]';
 
     switch (field.typeInfo.type) {
       case ClassFieldType.bool:
@@ -679,6 +686,9 @@ ${_makeSummary('</summary>', indentDepth)}''';
 
       case ClassFieldType.list:
         return 'ParseList(${value}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
+
+      case ClassFieldType.listInline:
+        return 'ParseListInline(${value}, vs => AssignValues(GetNewInstance("${field.valueTypeInfo!.classId}", null, instance.Id), objectsByIds, vs, emptyCollectionFactory, onError) as {${_paramPrefix}}${field.valueTypeInfo!.classId}{${_paramPostfix}}, emptyCollectionFactory)';
 
       case ClassFieldType.set:
         return 'ParseHashSet(${value}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
@@ -756,6 +766,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
         return 'ParseRectangleInt(${value})';
 
       case ClassFieldType.list:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('Unexpected type "${describeEnum(type.type)}"');
@@ -787,6 +798,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
         return '';
 
       case ClassFieldType.list:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         return '.Clone()';
@@ -848,7 +860,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
     final classEntity = model.cache.getEntity(classId);
     if (classEntity is ClassMetaEntity && classEntity.classType == ClassType.valueType) {
       depth++;
-      final allFields = model.cache.getAllFieldsById(classEntity.id);
+      final allFields = model.cache.getAllFieldsByClassId(classEntity.id);
       if (allFields != null) {
         final thisDepth = depth;
         for (final field in allFields) {
@@ -871,12 +883,12 @@ ${_makeSummary('</summary>', indentDepth)}''';
 // by {${_paramUser}}
 //
 // Dependencies:
-// When .Net 6 or higher is not available, https://www.newtonsoft.com/json is required for this parser to work
+// When used in Unity, https://www.newtonsoft.com/json is required for this parser to work
 //
 // Usage:
-// var config = GceditorJsonParser.Parse(JSON_TEXT_FILE_GENERATED_BY_GCEDITOR)
+// var config = {${_paramPrefix}}Root{${_paramPostfix}}Parser.Parse(JSON_TEXT_FILE_GENERATED_BY_GCEDITOR)
 // Example:
-// var config = GceditorJsonParser.Parse(_config.text)
+// var config = {${_paramPrefix}}Root{${_paramPostfix}}Parser.Parse(_config.text)
 // use 'config' as a source of config data
 
 #pragma warning disable 0414, 0168, 0219, 1998, 0109, all
@@ -887,7 +899,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Linq;
 
-#if NET6_0_OR_GREATER
+#if !UNITY_5_3_OR_NEWER
 using System.Text.Json;
 using System.Text.Json.Serialization;
 #else
@@ -1110,9 +1122,10 @@ using Rectangle = System.Drawing.RectangleF;
 #endregion
 
 #region Classes definitions
-    public partial class Base{${_paramPrefix}}Item{${_paramPostfix}} : IIdentifiable
+    public abstract partial class Base{${_paramPrefix}}Item{${_paramPostfix}} : IIdentifiable
     {
-        public string Id { get; set; }
+        public string Id { get; init; }
+        public bool IsGlobal { get; init; }
 
         public virtual void OnParsed({${_paramPrefix}}Root{${_paramPostfix}} root, CacheRoot cache) {}
     }
@@ -1257,12 +1270,14 @@ using Rectangle = System.Drawing.RectangleF;
     {{${_paramPropertiesBody}}
 
         /// <summary>
-        /// Clone of the item. Warning: references to the model entities are not being copied!
+        /// Clone of the item. Warning: references to the model entities are not copied!
         /// </summary>
         public new {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} Clone()
         {
             {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} result = new {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}
-            {{${_methodCloneBody}}
+            {
+                Id = Id,
+                IsGlobal = IsGlobal,{${_methodCloneBody}}
             };
             CloneCustom(result);
             return result;
@@ -1367,7 +1382,7 @@ using Rectangle = System.Drawing.RectangleF;
   final _getNewInstanceRowTemplate = '''
 
                 case "{${_paramClassName}}":
-                    return new {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}} { Id = item.id };
+                    return new {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}} { Id = item?.id ?? GetInlineRowId(ownerId), IsGlobal = item?.id != null };
   ''';
 
   final String _assignValueCaseTemplate = '''
@@ -1399,7 +1414,7 @@ using Rectangle = System.Drawing.RectangleF;
             var objectsByIds = new Dictionary<string, IIdentifiable>();
             var valuesByIds = new Dictionary<string, JsonItem>();
 
-#if NET6_0_OR_GREATER
+#if !UNITY_5_3_OR_NEWER
             var jsonRoot = JsonSerializer.Deserialize<JsonRoot>(jsonText, new JsonSerializerOptions { IncludeFields = true });
 #else
             var jsonRoot = JsonConvert.DeserializeObject<JsonRoot>(jsonText);
@@ -1430,10 +1445,10 @@ using Rectangle = System.Drawing.RectangleF;
             for (var i = 0; i < maxStructDepth; i++)
             {
                 foreach (var objectId in allStructs)
-                    objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId], emptyCollectionFactory, onError);
+                    objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId].values, emptyCollectionFactory, onError);
             }
             foreach (var objectId in allClasses)
-                objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId], emptyCollectionFactory, onError);
+                objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId].values, emptyCollectionFactory, onError);
 
             root ??= new {${_paramPrefix}}Root{${_paramPostfix}}();
             root.CreatedBy = jsonRoot.user;
@@ -1444,6 +1459,8 @@ using Rectangle = System.Drawing.RectangleF;
 
             foreach (var objectId in allClasses)
                 (objectsByIds[objectId] as Base{${_paramPrefix}}Item{${_paramPostfix}}).OnParsed(root, cache);
+
+            _inlineItemsCounter.Clear();
 
             return root;
         }
@@ -1471,16 +1488,24 @@ using Rectangle = System.Drawing.RectangleF;
             public object v;
         }
 
-        private static IIdentifiable GetNewInstance(string className, JsonItem item)
+        private static IIdentifiable GetNewInstance(string className, JsonItem item, string ownerId = null)
         {
             switch (className)
             {{${_paramListInstantiate}}
                 default:
-                    return new Base{${_paramPrefix}}Item{${_paramPostfix}} { Id = item.id };
+                    throw new Exception(\$"Can not create a new instance of an unexpected class '{className}'");
             }
         }
 
-        private static IIdentifiable AssignValues(IIdentifiable instance, Dictionary<string, IIdentifiable> objectsByIds, JsonItem valuesById, EmptyCollectionFactory emptyCollectionFactory, Action<ErrorData> onError)
+        private static Dictionary<string, int> _inlineItemsCounter = new();
+        private static string GetInlineRowId(string ownerId)
+        {
+            _inlineItemsCounter.TryGetValue(ownerId, out var i);
+            _inlineItemsCounter[ownerId] = i + 1;
+            return \$"{ownerId}#{i:000}";
+        }
+
+        private static IIdentifiable AssignValues(IIdentifiable instance, Dictionary<string, IIdentifiable> objectsByIds, Dictionary<string, object> valuesById, EmptyCollectionFactory emptyCollectionFactory, Action<ErrorData> onError)
         {
             try
             {
@@ -1506,9 +1531,9 @@ using Rectangle = System.Drawing.RectangleF;
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
-#if NET6_0_OR_GREATER
+#if !UNITY_5_3_OR_NEWER
             if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
-              return emptyCollectionFactory.Dictionary<TKey, TValue>();
+                return emptyCollectionFactory.Dictionary<TKey, TValue>();
 
             var result = new Dictionary<TKey, TValue>();
             foreach (var element in ((JsonElement)values).EnumerateArray())
@@ -1517,7 +1542,6 @@ using Rectangle = System.Drawing.RectangleF;
               var value = element.GetProperty("v");
               result[getKey(key)] = getValue(value);
             }
-            return result;
 #else
             var array = values as JArray;
             if (values == null || values == "" || array.Count <= 0)
@@ -1529,9 +1553,39 @@ using Rectangle = System.Drawing.RectangleF;
                 var value = jsonValue.ToObject<JsonDictionaryItem>();
                 result[getKey(value.k)] = getValue(value.v);
             }
-
-            return result;
 #endif
+            return result;
+        }
+
+        private static List<T> ParseListInline<T>(
+            object values,
+            Func<Dictionary<string, object>, T> getValue,
+            EmptyCollectionFactory emptyCollectionFactory
+        )
+        {
+#if !UNITY_5_3_OR_NEWER
+            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
+                return emptyCollectionFactory.List<T>();
+
+            var result = new List<T>();
+            foreach (var element in ((JsonElement)values).EnumerateArray())
+            {
+                var inlineValues = element.EnumerateObject().ToDictionary(o => o.Name, o => o.Value as object);
+                result.Add(getValue(inlineValues));
+            }
+#else
+            var array = values as JArray;
+            if (values == null || values == "" || array.Count <= 0)
+                return emptyCollectionFactory.List<T>();
+
+            var result = new List<T>();
+            foreach (JToken jsonValue in array)
+            {
+                var value = jsonValue.ToObject<Dictionary<string, object>>();
+                result.Add(getValue(value));
+            }
+#endif
+            return result;
         }
 
         private static List<T> ParseList<T>(
@@ -1540,14 +1594,13 @@ using Rectangle = System.Drawing.RectangleF;
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
-#if NET6_0_OR_GREATER
+#if !UNITY_5_3_OR_NEWER
             if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
                 return emptyCollectionFactory.List<T>();
 
             var result = new List<T>();
             foreach (var element in ((JsonElement)values).EnumerateArray())
                 result.Add(getValue(element));
-            return result;
 #else
             var array = values as JArray;
             if (values == null || values == "" || array.Count <= 0)
@@ -1557,8 +1610,8 @@ using Rectangle = System.Drawing.RectangleF;
             foreach (var value in array)
                 result.Add(getValue(value.Value<string>()));
 
-            return result;
 #endif
+            return result;
         }
 
         private static HashSet<T> ParseHashSet<T>(
@@ -1567,7 +1620,7 @@ using Rectangle = System.Drawing.RectangleF;
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
-#if NET6_0_OR_GREATER
+#if !UNITY_5_3_OR_NEWER
             if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
                 return emptyCollectionFactory.HashSet<T>();
 #else
@@ -1585,7 +1638,7 @@ using Rectangle = System.Drawing.RectangleF;
 
         private static int ParseInt(object value)
         {
-#if NET6_0_OR_GREATER
+#if !UNITY_5_3_OR_NEWER
             return ((JsonElement)value).GetInt32();
 #else
             return Convert.ToInt32(value, CultureInfo.InvariantCulture);
@@ -1594,7 +1647,7 @@ using Rectangle = System.Drawing.RectangleF;
 
         private static long ParseLong(object value)
         {
-#if NET6_0_OR_GREATER
+#if !UNITY_5_3_OR_NEWER
             return ((JsonElement)value).GetInt64();
 #else
             return Convert.ToInt64(value, CultureInfo.InvariantCulture);
@@ -1603,7 +1656,7 @@ using Rectangle = System.Drawing.RectangleF;
 
         private static float ParseFloat(object value)
         {
-#if NET6_0_OR_GREATER
+#if !UNITY_5_3_OR_NEWER
             return ((JsonElement)value).GetSingle();
 #else
             return Convert.ToSingle(value, CultureInfo.InvariantCulture);
@@ -1612,7 +1665,7 @@ using Rectangle = System.Drawing.RectangleF;
 
         private static double ParseDouble(object value)
         {
-#if NET6_0_OR_GREATER
+#if !UNITY_5_3_OR_NEWER
             return ((JsonElement)value).GetDouble();
 #else
             return Convert.ToDouble(value, CultureInfo.InvariantCulture);
@@ -1621,7 +1674,7 @@ using Rectangle = System.Drawing.RectangleF;
 
         private static string ParseString(object value)
         {
-#if NET6_0_OR_GREATER
+#if !UNITY_5_3_OR_NEWER
             return ((JsonElement)value).GetString();
 #else
             return Convert.ToString(value, CultureInfo.InvariantCulture);
@@ -1906,7 +1959,19 @@ using Rectangle = System.Drawing.RectangleF;
     {
         public static List<T> Clone<T>(this List<T> source)
         {
-            return new List<T>(source);
+            var result = new List<T>(source.Count);
+            foreach (var item in source)
+            {
+                if (item is Base{${_paramPrefix}}Item{${_paramPostfix}} modelItem && !modelItem.IsGlobal)
+                {
+                    result.Add((modelItem as ICloneable<T>).Clone());
+                }
+                else
+                {
+                    result.Add(item);
+                }
+            }
+            return result;
         }
     }
 

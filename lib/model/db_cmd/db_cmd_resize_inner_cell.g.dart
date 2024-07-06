@@ -1,23 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'db_cmd_resize_dictionary_key_to_value.dart';
+part of 'db_cmd_resize_inner_cell.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-DbCmdResizeDictionaryKeyToValue _$DbCmdResizeDictionaryKeyToValueFromJson(
+DbCmdResizeInnerCell _$DbCmdResizeInnerCellFromJson(
         Map<String, dynamic> json) =>
-    DbCmdResizeDictionaryKeyToValue()
+    DbCmdResizeInnerCell()
       ..id = json['id'] as String
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..tableId = json['tableId'] as String
       ..fieldId = json['fieldId'] as String
-      ..ratio = (json['ratio'] as num).toDouble()
-      ..oldRatio = (json['oldRatio'] as num).toDouble();
+      ..flexes = (json['flexes'] as List<dynamic>)
+          .map((e) => (e as num).toDouble())
+          .toList()
+      ..oldFlexes = (json['oldFlexes'] as List<dynamic>)
+          .map((e) => (e as num).toDouble())
+          .toList();
 
-Map<String, dynamic> _$DbCmdResizeDictionaryKeyToValueToJson(
-    DbCmdResizeDictionaryKeyToValue instance) {
+Map<String, dynamic> _$DbCmdResizeInnerCellToJson(
+    DbCmdResizeInnerCell instance) {
   final val = <String, dynamic>{
     'id': instance.id,
   };
@@ -31,8 +35,8 @@ Map<String, dynamic> _$DbCmdResizeDictionaryKeyToValueToJson(
   writeNotNull(r'$type', _$DbCmdTypeEnumMap[instance.$type]);
   val['tableId'] = instance.tableId;
   val['fieldId'] = instance.fieldId;
-  val['ratio'] = instance.ratio;
-  val['oldRatio'] = instance.oldRatio;
+  val['flexes'] = instance.flexes;
+  val['oldFlexes'] = instance.oldFlexes;
   return val;
 }
 
@@ -66,7 +70,7 @@ const _$DbCmdTypeEnumMap = {
   DbCmdType.reorderClassInterface: 'reorderClassInterface',
   DbCmdType.reorderDataRow: 'reorderDataRow',
   DbCmdType.resizeColumn: 'resizeColumn',
-  DbCmdType.resizeDictionaryKeyToValue: 'resizeDictionaryKeyToValue',
+  DbCmdType.resizeInnerCell: 'resizeInnerCell',
   DbCmdType.copypaste: 'copypaste',
   DbCmdType.fillColumn: 'fillColumn',
 };

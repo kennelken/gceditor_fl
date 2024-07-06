@@ -25,7 +25,7 @@ Map<String, dynamic> _$TableMetaGroupToJson(TableMetaGroup instance) {
   writeNotNull(r'$type', _$TableMetaTypeEnumMap[instance.$type]);
   val['id'] = instance.id;
   val['description'] = instance.description;
-  writeNotNull('entries', TableMeta.encodeEntries(instance.entries));
+  val['entries'] = TableMeta.encodeEntries(instance.entries);
   return val;
 }
 

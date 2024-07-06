@@ -131,6 +131,7 @@ class DbModelProblem {
   ProblemSeverity severity;
   ProblemType type;
   String? value;
+  Object? exception;
 
   DbModelProblem({
     required this.severity,
@@ -142,7 +143,13 @@ class DbModelProblem {
     this.innerListRowIndex,
     this.innerListColumnIndex,
     this.value,
-  });
+    this.exception,
+  }) {
+    if (exception != null) {
+      final left = value != null && value!.isNotEmpty ? '$value ' : '';
+      value = "$left<Exception> ${((exception is FlutterError) ? (exception as FlutterError).message.split('\n')[0] : exception)}";
+    }
+  }
 
   String getDescription() {
     switch (type) {
@@ -211,7 +218,7 @@ List<DbModelProblem> _computeProblems(String modelJson) {
 
 void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> result) {
   for (var table in model.cache.allDataTables) {
-    final allFields = model.cache.getAllFieldsById(table.classId);
+    final allFields = model.cache.getAllFieldsByClassId(table.classId);
     if (allFields == null) //
       continue;
 
@@ -263,42 +270,58 @@ void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> resu
               }
               break;
 
+            case ClassFieldType.listInline:
+              final list = value.listInlineCellValues()!;
+              for (var k = 0; k < list.length; k++) {
+                final listValue = list[k];
+                final values = DbModelUtils.getListInlineColumnsWithValues(model, field.valueTypeInfo!, listValue.values)!;
+
+                var innerColumnIndex = -1;
+                for (var t in values) {
+                  innerColumnIndex++;
+                  if (t.$1.typeInfo.type == ClassFieldType.reference) {
+                    if (!DbModelUtils.validateReferenceExists(model, t.$1.typeInfo, t.$2))
+                      result.add(
+                        DbModelProblem(
+                          severity: ProblemSeverity.error,
+                          type: ProblemType.invalidReference,
+                          tableId: table.id,
+                          rowIndex: j,
+                          fieldIndex: i,
+                          fieldId: field.id,
+                          innerListRowIndex: k,
+                          innerListColumnIndex: innerColumnIndex,
+                          value: t.$2?.toString(),
+                        ),
+                      );
+                  }
+                }
+              }
+              break;
+
             case ClassFieldType.dictionary:
               final list = value.dictionaryCellValues()!;
               for (var k = 0; k < list.length; k++) {
                 final listValue = list[k];
 
-                if (field.keyTypeInfo!.type == ClassFieldType.reference) {
-                  if (!DbModelUtils.validateReferenceExists(model, field.keyTypeInfo!, listValue.key))
-                    result.add(
-                      DbModelProblem(
-                        severity: ProblemSeverity.error,
-                        type: ProblemType.invalidReference,
-                        tableId: table.id,
-                        rowIndex: j,
-                        fieldIndex: i,
-                        fieldId: field.id,
-                        innerListRowIndex: k,
-                        innerListColumnIndex: 0,
-                        value: listValue.key?.toString(),
-                      ),
-                    );
-                }
-                if (field.valueTypeInfo!.type == ClassFieldType.reference) {
-                  if (!DbModelUtils.validateReferenceExists(model, field.valueTypeInfo!, listValue.value))
-                    result.add(
-                      DbModelProblem(
-                        severity: ProblemSeverity.error,
-                        type: ProblemType.invalidReference,
-                        tableId: table.id,
-                        rowIndex: j,
-                        fieldIndex: j,
-                        fieldId: field.id,
-                        innerListRowIndex: k,
-                        innerListColumnIndex: 1,
-                        value: listValue.value?.toString(),
-                      ),
-                    );
+                final values = [(field.keyTypeInfo!, listValue.key, 0), (field.valueTypeInfo!, listValue.value, 1)];
+                for (var t in values) {
+                  if (t.$1.type == ClassFieldType.reference) {
+                    if (!DbModelUtils.validateReferenceExists(model, t.$1, t.$2))
+                      result.add(
+                        DbModelProblem(
+                          severity: ProblemSeverity.error,
+                          type: ProblemType.invalidReference,
+                          tableId: table.id,
+                          rowIndex: j,
+                          fieldIndex: i,
+                          fieldId: field.id,
+                          innerListRowIndex: k,
+                          innerListColumnIndex: t.$3,
+                          value: t.$2?.toString(),
+                        ),
+                      );
+                  }
                 }
               }
               break;
@@ -333,7 +356,7 @@ void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> resu
               rowIndex: j,
               fieldIndex: i,
               fieldId: field.id,
-              value: '<Exception> $e',
+              exception: e,
             ),
           );
         }
@@ -344,7 +367,7 @@ void _computeAndAppendInvalidReferences(DbModel model, List<DbModelProblem> resu
 
 void _computeAndAppendInvalidValues(DbModel model, List<DbModelProblem> result) {
   for (var table in model.cache.allDataTables) {
-    final allFields = model.cache.getAllFieldsById(table.classId);
+    final allFields = model.cache.getAllFieldsByClassId(table.classId);
     if (allFields == null) //
       continue;
 
@@ -396,40 +419,55 @@ void _computeAndAppendInvalidValues(DbModel model, List<DbModelProblem> result) 
               }
               break;
 
+            case ClassFieldType.listInline:
+              final list = value.listInlineCellValues()!;
+              for (var k = 0; k < list.length; k++) {
+                final listValue = list[k];
+                final values = DbModelUtils.getListInlineColumnsWithValues(model, field.valueTypeInfo!, listValue.values)!;
+
+                var innerColumnIndex = -1;
+                for (var t in values) {
+                  innerColumnIndex++;
+                  if (!DbModelUtils.validateSimpleValue(t.$1.typeInfo.type, t.$2))
+                    result.add(
+                      DbModelProblem(
+                        severity: ProblemSeverity.error,
+                        type: ProblemType.invalidValue,
+                        tableId: table.id,
+                        rowIndex: j,
+                        fieldIndex: i,
+                        fieldId: field.id,
+                        innerListRowIndex: k,
+                        innerListColumnIndex: innerColumnIndex,
+                        value: t.$2?.toString(),
+                      ),
+                    );
+                }
+              }
+              break;
+
             case ClassFieldType.dictionary:
               final list = value.dictionaryCellValues()!;
               for (var k = 0; k < list.length; k++) {
                 final listValue = list[k];
 
-                if (!DbModelUtils.validateSimpleValue(field.keyTypeInfo!.type, listValue.key))
-                  result.add(
-                    DbModelProblem(
-                      severity: ProblemSeverity.error,
-                      type: ProblemType.invalidValue,
-                      tableId: table.id,
-                      rowIndex: j,
-                      fieldIndex: i,
-                      fieldId: field.id,
-                      innerListRowIndex: k,
-                      innerListColumnIndex: 0,
-                      value: listValue.key?.toString(),
-                    ),
-                  );
-
-                if (!DbModelUtils.validateSimpleValue(field.valueTypeInfo!.type, listValue.value))
-                  result.add(
-                    DbModelProblem(
-                      severity: ProblemSeverity.error,
-                      type: ProblemType.invalidValue,
-                      tableId: table.id,
-                      rowIndex: j,
-                      fieldIndex: j,
-                      fieldId: field.id,
-                      innerListRowIndex: k,
-                      innerListColumnIndex: 1,
-                      value: listValue.value?.toString(),
-                    ),
-                  );
+                final values = [(field.keyTypeInfo!, listValue.key, 0), (field.valueTypeInfo!, listValue.value, 1)];
+                for (var t in values) {
+                  if (!DbModelUtils.validateSimpleValue(t.$1.type, t.$2))
+                    result.add(
+                      DbModelProblem(
+                        severity: ProblemSeverity.error,
+                        type: ProblemType.invalidValue,
+                        tableId: table.id,
+                        rowIndex: j,
+                        fieldIndex: i,
+                        fieldId: field.id,
+                        innerListRowIndex: k,
+                        innerListColumnIndex: t.$3,
+                        value: t.$2?.toString(),
+                      ),
+                    );
+                }
               }
               break;
 
@@ -477,7 +515,7 @@ void _computeAndAppendInvalidValues(DbModel model, List<DbModelProblem> result) 
               rowIndex: j,
               fieldIndex: i,
               fieldId: field.id,
-              value: '<Exception> $e',
+              exception: e,
             ),
           );
         }
@@ -490,7 +528,7 @@ void _computeAndAppendDuplicateUniqueValues(DbModel model, List<DbModelProblem> 
   final allValues = MultidimensionalMap2<ClassMetaFieldDescription, dynamic, List<DbModelProblem>>();
 
   for (var table in model.cache.allDataTables) {
-    final allFields = model.cache.getAllFieldsById(table.classId);
+    final allFields = model.cache.getAllFieldsByClassId(table.classId);
     if (allFields == null) //
       continue;
 
@@ -503,10 +541,11 @@ void _computeAndAppendDuplicateUniqueValues(DbModel model, List<DbModelProblem> 
         try {
           final row = table.rows[j];
 
-          if (allValues.get(field, row.values[i]) == null) //
-            allValues.set(field, row.values[i], []);
+          var value = row.values[i].simpleValue;
+          if (allValues.get(field, value) == null) //
+            allValues.set(field, value, []);
 
-          allValues.get(field, row.values[i])!.add(
+          allValues.get(field, value)!.add(
                 DbModelProblem(
                   severity: ProblemSeverity.warning,
                   type: ProblemType.notUniqueValue,
@@ -514,7 +553,7 @@ void _computeAndAppendDuplicateUniqueValues(DbModel model, List<DbModelProblem> 
                   rowIndex: j,
                   fieldIndex: i,
                   fieldId: field.id,
-                  value: row.values[i].toString(),
+                  value: value.toString(),
                 ),
               );
         } catch (e, stacktrace) {
@@ -526,7 +565,7 @@ void _computeAndAppendDuplicateUniqueValues(DbModel model, List<DbModelProblem> 
               rowIndex: j,
               fieldIndex: i,
               fieldId: field.id,
-              value: '<Exception> $e',
+              exception: e,
             ),
           );
         }
@@ -546,7 +585,7 @@ void _computeAndAppendDuplicateUniqueValues(DbModel model, List<DbModelProblem> 
 
 void _computeAndAppendRepeatingSetValues(DbModel model, List<DbModelProblem> result) {
   for (var table in model.cache.allDataTables) {
-    final allFields = model.cache.getAllFieldsById(table.classId);
+    final allFields = model.cache.getAllFieldsByClassId(table.classId);
     if (allFields == null) //
       continue;
 
@@ -597,7 +636,7 @@ void _computeAndAppendRepeatingSetValues(DbModel model, List<DbModelProblem> res
               rowIndex: j,
               fieldIndex: i,
               fieldId: field.id,
-              value: '<Exception> $e',
+              exception: e,
             ),
           );
         }
@@ -608,7 +647,7 @@ void _computeAndAppendRepeatingSetValues(DbModel model, List<DbModelProblem> res
 
 void _computeAndAppendRepeatingDictionaryKeys(DbModel model, List<DbModelProblem> result) {
   for (var table in model.cache.allDataTables) {
-    final allFields = model.cache.getAllFieldsById(table.classId);
+    final allFields = model.cache.getAllFieldsByClassId(table.classId);
     if (allFields == null) //
       continue;
 
@@ -659,7 +698,7 @@ void _computeAndAppendRepeatingDictionaryKeys(DbModel model, List<DbModelProblem
               rowIndex: j,
               fieldIndex: i,
               fieldId: field.id,
-              value: '<Exception> $e',
+              exception: e,
             ),
           );
         }

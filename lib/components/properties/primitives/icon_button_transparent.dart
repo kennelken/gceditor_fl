@@ -13,8 +13,8 @@ class IconButtonTransparent extends StatelessWidget {
     required this.onClick,
     required this.size,
     this.enabled = true,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -24,8 +24,8 @@ import '../tooltip_wrapper.dart';
 
 class DataSelectionPanel extends StatefulWidget {
   const DataSelectionPanel({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<DataSelectionPanel> createState() => _DataSelectionPanelState();

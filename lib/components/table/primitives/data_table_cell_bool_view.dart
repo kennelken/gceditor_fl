@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/components/table/primitives/data_table_cell_view.dart';
-import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/model/db/class_field_description_data_info.dart';
 
+import '../../../model/state/client_find_state.dart';
+import '../../../model/state/client_problems_state.dart';
+import '../../../model/state/db_model_extensions.dart';
+import '../../../model/state/service/client_navigation_service.dart';
 import '../../../model/state/style_state.dart';
 
 class DataTableCellBoolView extends ConsumerWidget {
@@ -14,12 +17,12 @@ class DataTableCellBoolView extends ConsumerWidget {
   final ValueChanged<dynamic> onValueChanged;
 
   const DataTableCellBoolView({
-    Key? key,
+    super.key,
     required this.coordinates,
     required this.fieldType,
     required this.value,
     required this.onValueChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(context, ref) {
@@ -27,7 +30,12 @@ class DataTableCellBoolView extends ConsumerWidget {
       alignment: Alignment.topCenter,
       child: Container(
         width: 9999,
-        color: kColorTransparent,
+        color: DbModelUtils.getDataCellColor(
+          coordinates,
+          ref.watch(clientProblemsStateProvider).state,
+          ref.watch(clientFindStateProvider).state,
+          ref.watch(clientNavigationServiceProvider).state,
+        ),
         child: FittedBox(
           alignment: Alignment.center,
           fit: BoxFit.scaleDown,

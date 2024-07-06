@@ -22,10 +22,10 @@ class ClassFieldValueView extends ConsumerWidget {
   final ClassMetaFieldDescription data;
 
   const ClassFieldValueView({
-    Key? key,
+    super.key,
     required this.entity,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(context, ref) {
@@ -38,7 +38,7 @@ class ClassFieldValueView extends ConsumerWidget {
 
     ref.watch(clientStateProvider);
     return Padding(
-      padding: EdgeInsets.only(top: 2 * kScale, bottom: 4 * kScale),
+      padding: EdgeInsets.only(top: 2 * kScale, bottom: 4 * kScale, right: 3 * kScale),
       child: TooltipWrapper(
         message: data.description,
         child: SizedBox(
@@ -78,7 +78,7 @@ class ClassFieldValueView extends ConsumerWidget {
                   tooltipText: Loc.get.deleteFieldTooltip,
                 ),
               ],
-              SizedBox(width: 28 * kScale),
+              SizedBox(width: 30 * kScale),
             ],
           ),
         ),

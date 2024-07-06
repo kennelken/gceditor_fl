@@ -30,6 +30,7 @@ class DbModelCache {
   List<ClassMeta>? _allClassesMetas;
   List<TableMetaEntity>? _allDataTables;
   List<ClassMetaEntity>? _allClasses;
+  List<ClassMetaEntity>? _allNonAbstractClasses;
   List<ClassMetaEntityEnum>? _allEnums;
 
   Map<ClassMetaEntity, List<ClassMetaFieldDescription>>? _inheritedFields;
@@ -59,6 +60,7 @@ class DbModelCache {
     _allClassesMetas = null;
     _allDataTables = null;
     _allClasses = null;
+    _allNonAbstractClasses = null;
     _allEnums = null;
     _inheritedFields = null;
     _allFields = null;
@@ -133,6 +135,7 @@ class DbModelCache {
     _allClassesMetas = [];
     _classParents = {};
     _allClasses = [];
+    _allNonAbstractClasses = [];
     _allEnums = [];
 
     final result = <ClassMeta>[];
@@ -155,6 +158,9 @@ class DbModelCache {
       }
     } else if (classMeta is ClassMetaEntity) {
       _allClasses!.add(classMeta);
+      if (classMeta.classType == ClassType.referenceType || classMeta.classType == ClassType.valueType) {
+        _allNonAbstractClasses!.add(classMeta);
+      }
     } else if (classMeta is ClassMetaEntityEnum) {
       _allEnums!.add(classMeta);
     }
@@ -258,6 +264,11 @@ class DbModelCache {
   List<ClassMetaEntity> get allClasses {
     _validateIfRequired();
     return _allClasses!;
+  }
+
+  List<ClassMetaEntity> get allNonAbstractClasses {
+    _validateIfRequired();
+    return _allNonAbstractClasses!;
   }
 
   List<TableMetaEntity> get allDataTables {
@@ -387,7 +398,7 @@ class DbModelCache {
     }
 
     for (final classEnum in _allEnums!) {
-      if (_availableReferenceValues![classEnum.id] == null) //
+      if (_availableReferenceValues![classEnum] == null) //
         _availableReferenceValues![classEnum] = <IIdentifiable>[];
 
       for (final enumValue in classEnum.values) {
@@ -400,7 +411,7 @@ class DbModelCache {
     _defaultValues = {};
     for (final classEntity in _allClasses!.whereType<ClassMetaEntity>()) {
       for (final field in classEntity.fields) {
-        _defaultValues![field] = DbModelUtils.parseDefaultValueByFieldOrDefault(field, field.defaultValue);
+        _defaultValues![field] = DbModelUtils.parseDefaultValueByFieldOrDefault(model, field, field.defaultValue);
       }
     }
   }
@@ -415,7 +426,7 @@ class DbModelCache {
     return _allFields![entity]!;
   }
 
-  List<ClassMetaFieldDescription>? getAllFieldsById(String id) {
+  List<ClassMetaFieldDescription>? getAllFieldsByClassId(String id) {
     if (id.isEmpty) //
       return null;
 

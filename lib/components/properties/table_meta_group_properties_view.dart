@@ -18,9 +18,9 @@ class TableMetaGroupPropertiesViewProperties extends ConsumerWidget {
   final TableMetaGroup data;
 
   const TableMetaGroupPropertiesViewProperties({
-    Key? key,
+    super.key,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(context, ref) {

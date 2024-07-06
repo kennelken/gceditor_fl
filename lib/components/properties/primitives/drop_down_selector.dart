@@ -19,7 +19,7 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
   final String? nullValueLabel;
 
   DropDownSelector({
-    Key? key,
+    super.key,
     required List<T> items,
     required this.label,
     required this.selectedItem,
@@ -28,7 +28,7 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
     this.addNull = true,
     this.inputDecoration,
     this.nullValueLabel,
-  }) : super(key: key) {
+  }) {
     this.items = addNull ? [null, ...items] : items;
   }
 

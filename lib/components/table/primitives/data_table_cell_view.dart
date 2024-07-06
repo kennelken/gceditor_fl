@@ -18,6 +18,7 @@ import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/model/state/style_state.dart';
 
+import 'data_table_cell_list_inline_view.dart';
 import 'data_table_cell_list_view.dart';
 import 'data_table_cell_text_view.dart';
 
@@ -36,11 +37,11 @@ class DataTableCellView extends StatelessWidget {
   final int index;
 
   const DataTableCellView({
-    Key? key,
+    super.key,
     required this.table,
     required this.row,
     required this.index,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +62,7 @@ class DataTableCellView extends StatelessWidget {
 
   Widget _getCellImplementation() {
     final model = clientModel;
-    final allFields = model.cache.getAllFieldsById(table.classId)!;
+    final allFields = model.cache.getAllFieldsByClassId(table.classId)!;
     final clientStateVersion = providerContainer.read(clientStateProvider).state.version;
 
     final field = allFields[index];
@@ -115,12 +116,21 @@ class DataTableCellView extends StatelessWidget {
           cellFactory: _getSimpleCellImplementation,
         );
 
+      case ClassFieldType.listInline:
+        return DataTableCellListInlineView(
+          key: ValueKey('${table.id}_${row.id}_${index}_$clientStateVersion'),
+          coordinates: coordinates,
+          value: row.values[index],
+          fieldType: field.typeInfo,
+          valueFieldType: field.valueTypeInfo!,
+          onValueChanged: _saveValue,
+          cellFactory: _getSimpleCellImplementation,
+        );
+
       case ClassFieldType.dictionary:
         return DataTableCellDictionaryView(
           key: ValueKey('${table.id}_${row.id}_${index}_$clientStateVersion'),
           coordinates: coordinates,
-          table: table,
-          field: field,
           value: row.values[index],
           fieldType: field.typeInfo,
           valueFieldType: field.valueTypeInfo!,
@@ -197,6 +207,7 @@ class DataTableCellView extends StatelessWidget {
         );
 
       case ClassFieldType.list:
+      case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
         throw Exception('Unexpected type "${fieldInfo.type}"');
@@ -204,7 +215,7 @@ class DataTableCellView extends StatelessWidget {
   }
 
   void _saveValue(DataTableCellValue value) {
-    final allFields = clientModel.cache.getAllFieldsById(table.classId)!;
+    final allFields = clientModel.cache.getAllFieldsByClassId(table.classId)!;
 
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(
           DbCmdEditTableCellValue.values(
@@ -236,8 +247,8 @@ class DataTableValueCoordinates {
     return table.id == problem.tableId &&
         field?.id == problem.fieldId &&
         rowIndex == problem.rowIndex &&
-        innerListRowIndex == problem.innerListRowIndex &&
-        innerListColumnIndex == problem.innerListColumnIndex;
+        (innerListRowIndex == problem.innerListRowIndex || problem.innerListRowIndex == null) &&
+        (innerListColumnIndex == problem.innerListColumnIndex || problem.innerListColumnIndex == null);
   }
 
   bool fitsFindResult(FindResultItemTableItem? item) {

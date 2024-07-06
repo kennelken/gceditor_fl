@@ -9,10 +9,10 @@ class TableProblemsItemView extends StatelessWidget {
   final DbModelProblem problem;
 
   const TableProblemsItemView({
-    Key? key,
+    super.key,
     required this.index,
     required this.problem,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

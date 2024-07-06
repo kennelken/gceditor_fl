@@ -29,12 +29,12 @@ class DataTableCellReferenceView extends ConsumerWidget {
   final ValueChanged<dynamic> onValueChanged;
 
   const DataTableCellReferenceView({
-    Key? key,
+    super.key,
     required this.coordinates,
     required this.fieldType,
     required this.value,
     required this.onValueChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(context, ref) {

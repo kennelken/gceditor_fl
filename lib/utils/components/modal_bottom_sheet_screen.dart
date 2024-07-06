@@ -4,9 +4,7 @@ import 'package:gceditor/consts/consts.dart';
 class ModalBottomSheetScreen extends StatelessWidget {
   final Widget _child;
 
-  const ModalBottomSheetScreen({required Widget child, Key? key})
-      : _child = child,
-        super(key: key);
+  const ModalBottomSheetScreen({required Widget child, super.key}) : _child = child;
 
   @override
   Widget build(BuildContext context) {

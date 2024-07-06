@@ -24,7 +24,7 @@ final clientStateProvider = ChangeNotifierProvider((_) => ClientStateNotifier(Cl
 class ClientState extends ServerState {}
 
 class ClientStateNotifier extends ServerStateNotifier {
-  ClientStateNotifier(ClientState state) : super(state);
+  ClientStateNotifier(ClientState super.state);
 
   @override
   void setModel(DbModel model) {
@@ -70,7 +70,7 @@ class ClientStateNotifier extends ServerStateNotifier {
       case DbCmdType.reorderClassField:
       case DbCmdType.reorderClassInterface:
       case DbCmdType.resizeColumn:
-      case DbCmdType.resizeDictionaryKeyToValue:
+      case DbCmdType.resizeInnerCell:
       case DbCmdType.fillColumn:
         break;
 

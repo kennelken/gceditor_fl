@@ -40,9 +40,9 @@ class ClassMetaClassPropertiesViewProperties extends StatefulWidget {
   final ClassMetaEntity data;
 
   const ClassMetaClassPropertiesViewProperties({
-    Key? key,
+    super.key,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   State<ClassMetaClassPropertiesViewProperties> createState() => _ClassMetaClassPropertiesViewPropertiesState();
@@ -242,12 +242,11 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
   }
 
   void _handleColumnsReorder(int oldIndex, int newIndex) {
-    if (oldIndex == newIndex) //
+    if (oldIndex == newIndex || oldIndex == newIndex - 1) //
       return;
 
-    providerContainer
-        .read(clientOwnCommandsStateProvider)
-        .addCommand(DbCmdReorderClassField.values(entityId: widget.data.id, indexFrom: oldIndex, indexTo: newIndex));
+    providerContainer.read(clientOwnCommandsStateProvider).addCommand(DbCmdReorderClassField.values(
+        entityId: widget.data.id, fieldIndex: oldIndex, indexDelta: newIndex - oldIndex + (newIndex > oldIndex ? -1 : 0)));
 
     setState(() {
       _columns.insert(newIndex, _columns[oldIndex]);
@@ -299,7 +298,7 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
   }
 
   void _handleInterfaceReorder(int oldIndex, int newIndex) {
-    if (oldIndex == newIndex) //
+    if (oldIndex == newIndex || oldIndex == newIndex - 1) //
       return;
 
     providerContainer

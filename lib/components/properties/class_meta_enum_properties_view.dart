@@ -27,9 +27,9 @@ class ClassMetaEnumPropertiesViewProperties extends StatefulWidget {
   final ClassMetaEntityEnum data;
 
   const ClassMetaEnumPropertiesViewProperties({
-    Key? key,
+    super.key,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   State<ClassMetaEnumPropertiesViewProperties> createState() => _ClassMetaEnumPropertiesViewPropertiesState();
@@ -144,7 +144,7 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
   }
 
   void _handleValuesReorder(int oldIndex, int newIndex) {
-    if (oldIndex == newIndex) //
+    if (oldIndex == newIndex || oldIndex == newIndex - 1) //
       return;
 
     providerContainer

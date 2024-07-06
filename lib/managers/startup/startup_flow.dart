@@ -21,8 +21,9 @@ import 'package:listenable_stream/listenable_stream.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:statemachine/statemachine.dart';
-import 'package:window_size/window_size.dart';
+import 'package:window_manager/window_manager.dart';
 
+import '../../model/state/landing_page_state.dart';
 import '../error_notifier_service.dart';
 
 class StartupFlow {
@@ -50,6 +51,7 @@ class StartupFlow {
         () async {
           flutter.WidgetsFlutterBinding.ensureInitialized();
           await AppLocalStorage.instance.isReady();
+          providerContainer.read(landingPageStateProvider).initialize();
           goToState(initializeSystemServices);
         },
       );
@@ -275,7 +277,7 @@ class StartupFlow {
 
   void _setTitle(AppMode mode, String? path) {
     if (!kIsWeb) {
-      setWindowTitle('${Config.appName} - ${describeEnum(mode)}${(path != null) ? ' - $path' : ''}');
+      windowManager.setTitle('${Config.appName} - ${describeEnum(mode)}${(path != null) ? ' - $path' : ''}');
     }
   }
 }

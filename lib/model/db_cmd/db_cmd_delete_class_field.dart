@@ -6,6 +6,7 @@ import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/utils/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../db/data_table_cell_list_inline_item.dart';
 import 'base_db_cmd.dart';
 import 'db_cmd_add_class_field.dart';
 import 'db_cmd_result.dart';
@@ -37,10 +38,37 @@ class DbCmdDeleteClassField extends BaseDbCmd {
     final index = entity.fields.indexWhere((e) => e.id == fieldId);
     final field = entity.fields[index];
 
+    final fieldsUsingInline = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
+    for (var fieldUsingInline in fieldsUsingInline) {
+      for (var table in dbModel.cache.allDataTables) {
+        final fields = dbModel.cache.getAllFieldsByClassId(table.classId)!;
+        final columnIndex = fields.indexOf(fieldUsingInline.$2);
+        if (columnIndex <= -1) //
+          continue;
+
+        final listInlineField = fields[columnIndex];
+        final inlineColumns = DbModelUtils.getListInlineColumns(dbModel, listInlineField.valueTypeInfo!);
+        final inlineColumnIndex = inlineColumns!.indexOf(field);
+
+        if (table.columnInnerCellFlex.containsKey(listInlineField.id)) {
+          final flexes = table.columnInnerCellFlex[listInlineField.id]!;
+          flexes.removeAt(inlineColumnIndex);
+          flexes.normalize();
+        }
+
+        for (var i = 0; i < table.rows.length; i++) {
+          final row = table.rows[i];
+          for (var cellValue in row.values[columnIndex].listCellValues!) {
+            (cellValue as DataTableCellListInlineItem).values!.removeAt(inlineColumnIndex);
+          }
+        }
+      }
+    }
+
     entity.fields.removeAt(index);
 
     for (final table in dbModel.cache.allDataTables) {
-      final allFields = dbModel.cache.getAllFieldsById(table.classId);
+      final allFields = dbModel.cache.getAllFieldsByClassId(table.classId);
       final index = allFields?.indexOf(field) ?? -1;
       if (index > -1) {
         DbModelUtils.deleteRowValuesAtColumn(table, index);
@@ -71,17 +99,20 @@ class DbCmdDeleteClassField extends BaseDbCmd {
 
     final dataColumnsByTable = <String, List<DataTableColumn>>{};
     for (final table in dbModel.cache.allDataTables) {
-      final allFields = dbModel.cache.getAllFieldsById(table.classId);
+      final allFields = dbModel.cache.getAllFieldsByClassId(table.classId);
       if (allFields != null && allFields.contains(field)) {
         dataColumnsByTable[table.id] = DbModelUtils.getDataColumns(dbModel, table, columns: [field]);
       }
     }
+
+    final listInlineValuesByTableColumn = DbModelUtils.getInlineCellValuesByTable(dbModel, entity);
 
     return DbCmdAddClassField.values(
       entityId: entityId,
       index: entity.fields.indexWhere((e) => e.id == fieldId),
       field: ClassMetaFieldDescription.fromJson(field.toJson().clone()),
       dataColumnsByTable: dataColumnsByTable,
+      listInlineValuesByTableColumn: listInlineValuesByTableColumn,
     );
   }
 }

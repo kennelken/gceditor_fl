@@ -20,11 +20,11 @@ class DataTableIdsView extends StatefulWidget {
   final List<PinnedItemInfo>? pinnedItems;
 
   const DataTableIdsView({
-    Key? key,
+    super.key,
     required this.scrollController,
     required this.table,
     this.pinnedItems,
-  }) : super(key: key);
+  });
 
   @override
   State<DataTableIdsView> createState() => _DataTableIdsViewState();

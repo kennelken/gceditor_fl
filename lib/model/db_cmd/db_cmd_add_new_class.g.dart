@@ -26,7 +26,7 @@ Map<String, dynamic> _$DbCmdAddNewClassToJson(DbCmdAddNewClass instance) {
   }
 
   writeNotNull(r'$type', _$DbCmdTypeEnumMap[instance.$type]);
-  writeNotNull('classMeta', ClassMeta.encode(instance.classMeta));
+  val['classMeta'] = ClassMeta.encode(instance.classMeta);
   writeNotNull('parentId', instance.parentId);
   writeNotNull('index', instance.index);
   return val;
@@ -62,7 +62,7 @@ const _$DbCmdTypeEnumMap = {
   DbCmdType.reorderClassInterface: 'reorderClassInterface',
   DbCmdType.reorderDataRow: 'reorderDataRow',
   DbCmdType.resizeColumn: 'resizeColumn',
-  DbCmdType.resizeDictionaryKeyToValue: 'resizeDictionaryKeyToValue',
+  DbCmdType.resizeInnerCell: 'resizeInnerCell',
   DbCmdType.copypaste: 'copypaste',
   DbCmdType.fillColumn: 'fillColumn',
 };

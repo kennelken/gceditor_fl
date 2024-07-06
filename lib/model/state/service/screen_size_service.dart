@@ -4,7 +4,8 @@ import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/app_local_storage.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/log_state.dart';
-import 'package:window_size/window_size.dart';
+import 'package:screen_retriever/screen_retriever.dart';
+import 'package:window_manager/window_manager.dart';
 
 final screenServiceProvider = ChangeNotifierProvider((_) => ScreenServiceNotifier(ScreenService()));
 
@@ -34,31 +35,33 @@ class ScreenService {
 
   Future _restoreScreenSize() async {
     try {
-      final windowInfo = await getWindowInfo();
+      WidgetsFlutterBinding.ensureInitialized();
+      await windowManager.ensureInitialized();
 
-      setWindowMinSize(Config.minWidowSize);
+      await windowManager.setMinimumSize(Config.minWidowSize);
 
       final savedWindowRect = AppLocalStorage.instance.windowRect;
-      if (savedWindowRect == null || windowInfo.screen == null) {
+      if (savedWindowRect == null) {
         _initialized = true;
         return;
       }
 
-      final allScreens = await getScreenList();
-
       _initialized = true;
 
-      for (var screen in allScreens) {
-        final intersection = screen.visibleFrame.intersect(savedWindowRect);
-        if (intersection.width > 50 && intersection.height > 50) {
-          setWindowFrame(savedWindowRect);
-          return;
-        }
+      final displayList = await screenRetriever.getAllDisplays();
+      final intersections = displayList.map((d) => ((d.visiblePosition ?? const Offset(0, 0)) & d.size).intersect(savedWindowRect));
+
+      if (intersections.any((e) => e.width > 50 && e.height > 50)) {
+        windowManager.setBounds(savedWindowRect);
+        return;
       }
     } catch (e) {
       providerContainer
           .read(logStateProvider)
           .addMessage(LogEntry(LogLevel.log, 'Exception in _restoreScreenSize. Probably the current platform is not supported.'));
+    } finally {
+      windowManager.show();
+      windowManager.focus();
     }
   }
 
@@ -69,11 +72,11 @@ class ScreenService {
         continue;
 
       try {
-        final windowInfo = await getWindowInfo();
-        if (windowInfo.frame == _windowRect) //
+        final bounds = await windowManager.getBounds();
+        if (bounds == _windowRect) //
           continue;
 
-        _windowRect = windowInfo.frame;
+        _windowRect = bounds;
         AppLocalStorage.instance.windowRect = _windowRect;
       } catch (e) {
         //

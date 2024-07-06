@@ -76,7 +76,7 @@ const _$DbCmdTypeEnumMap = {
   DbCmdType.reorderClassInterface: 'reorderClassInterface',
   DbCmdType.reorderDataRow: 'reorderDataRow',
   DbCmdType.resizeColumn: 'resizeColumn',
-  DbCmdType.resizeDictionaryKeyToValue: 'resizeDictionaryKeyToValue',
+  DbCmdType.resizeInnerCell: 'resizeInnerCell',
   DbCmdType.copypaste: 'copypaste',
   DbCmdType.fillColumn: 'fillColumn',
 };

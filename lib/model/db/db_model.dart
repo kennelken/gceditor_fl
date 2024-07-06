@@ -8,9 +8,9 @@ part 'db_model.g.dart';
 
 @JsonSerializable()
 class DbModel {
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   late final DbModelCache _cache = DbModelCache(this);
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   DbModelCache get cache => _cache;
 
   @JsonKey(toJson: ClassMeta.encodeEntries, fromJson: ClassMeta.decodeEntries)

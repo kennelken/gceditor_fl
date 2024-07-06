@@ -9,8 +9,8 @@ import '../utils/scheduler.dart';
 
 class LoggerScreen extends StatefulWidget {
   const LoggerScreen({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<LoggerScreen> createState() => _LoggerScreenState();

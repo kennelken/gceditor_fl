@@ -61,7 +61,7 @@ class DbCmdEditClass extends BaseDbCmd {
 
       for (final table in allTablesUsingClass) {
         final allFields = dbModel.cache.getAllFields(entity);
-        final defaultValues = allFields.map((e) => DbModelUtils.parseDefaultValueByFieldOrDefault(e, e.defaultValue)).toList();
+        final defaultValues = allFields.map((e) => DbModelUtils.parseDefaultValueByFieldOrDefault(dbModel, e, e.defaultValue)).toList();
 
         for (var i = 0; i < table.rows.length; i++) {
           table.rows[i].values.clear();
@@ -112,6 +112,11 @@ class DbCmdEditClass extends BaseDbCmd {
         if (firstChildTable != null) //
           return DbCmdResult.fail(
               'Can\'t change the classType to "${describeEnum(classType!)}" because it is used as parent in "${firstChildTable.id}"');
+
+        final fieldsUsingInline = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
+        if (fieldsUsingInline.isNotEmpty) //
+          return DbCmdResult.fail(
+              'Can\'t change the classType to "${describeEnum(classType!)}" because it is used in inline lists in: ${fieldsUsingInline.map((e) => '"${e.$1.id}.${e.$2.id}"').join(', ')}');
       }
 
       if (classType != ClassType.interface) {
@@ -121,7 +126,12 @@ class DbCmdEditClass extends BaseDbCmd {
               'Can\'t change the classType to "${describeEnum(classType!)}" because it is used as an interface in "${firstParentClass.id}"');
       }
     }
+
     if (editParentClassId == true) {
+      final inlineClassUsages = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
+      if (inlineClassUsages.isNotEmpty) //
+        return DbCmdResult.fail('Classes used as listInline can not have parent classes');
+
       if (parentClassId != null) {
         final newParentEntity = dbModel.cache.getClass(parentClassId);
 

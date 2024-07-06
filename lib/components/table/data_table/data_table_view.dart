@@ -11,8 +11,8 @@ import 'data_table_body_view.dart';
 
 class DataTableView extends StatefulWidget {
   const DataTableView({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<DataTableView> createState() => _DataTableViewState();

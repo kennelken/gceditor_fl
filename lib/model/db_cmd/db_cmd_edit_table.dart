@@ -58,14 +58,14 @@ class DbCmdEditTable extends BaseDbCmd {
         final row = DataTableRow()..id = currentRowIds[i];
         table.rows.add(row);
 
-        final allColumns = dbModel.cache.getAllFieldsById(table.classId);
+        final allColumns = dbModel.cache.getAllFieldsByClassId(table.classId);
 
         if (allColumns != null) {
           for (var j = 0; j < allColumns.length; j++) {
             final column = allColumns[j];
             row.values.add(commandArgValues[column.id]?.values[i] ??
                 currentValues[column.id]?.values[i] ??
-                DbModelUtils.parseDefaultValueByFieldOrDefault(column, column.defaultValue));
+                DbModelUtils.parseDefaultValueByFieldOrDefault(dbModel, column, column.defaultValue));
           }
         }
       }

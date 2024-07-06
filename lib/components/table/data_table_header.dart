@@ -21,8 +21,8 @@ var scrollDataTableProvider = ChangeNotifierProvider((_) => ValueChangeNotifier(
 
 class DataTableHeader extends ConsumerWidget {
   const DataTableHeader({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(context, ref) {
@@ -45,7 +45,7 @@ class DataTableHeader extends ConsumerWidget {
         ],
         if (hasSelection) ...[
           TooltipWrapper(
-            message: selectedTable!.description,
+            message: selectedTable.description,
             child: TextButtonTransparent(
               onClick: () => _handleTableClick(selectedTable),
               child: Text(

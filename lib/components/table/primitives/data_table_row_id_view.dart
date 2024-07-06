@@ -36,13 +36,13 @@ class DataTableRowIdView extends ConsumerWidget {
   late final DataTableValueCoordinates? coordinates;
 
   DataTableRowIdView({
-    Key? key,
+    super.key,
     required this.table,
     required this.row,
     required this.index,
     required this.isPinnedItem,
     required this.coordinates,
-  }) : super(key: key) {
+  }) {
     _controller = TextEditingController(text: row?.id ?? '');
     _focusNode = FocusNode();
     _focusNode.addListener(_handleFocusChanged);

@@ -7,10 +7,10 @@ class TooltipWrapper extends StatelessWidget {
   final String? message;
 
   const TooltipWrapper({
-    Key? key,
+    super.key,
     required this.child,
     required this.message,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -6,12 +6,10 @@ import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/db/class_field_description_data_info.dart';
-import 'package:gceditor/model/db/class_meta_field_description.dart';
 import 'package:gceditor/model/db/data_table_cell_dictionary_item.dart';
 import 'package:gceditor/model/db/data_table_cell_value.dart';
-import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/db_cmd/base_db_cmd.dart';
-import 'package:gceditor/model/db_cmd/db_cmd_resize_dictionary_key_to_value.dart';
+import 'package:gceditor/model/db_cmd/db_cmd_resize_inner_cell.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/client_view_mode_state.dart';
@@ -22,12 +20,10 @@ import 'package:gceditor/utils/utils.dart';
 import '../context_menu_button.dart';
 import 'data_table_cell_view.dart';
 
-double? _initialRatio;
+List<double>? _initialInnerCellFlex;
 
 class DataTableCellDictionaryView extends StatefulWidget {
   final DataTableValueCoordinates coordinates;
-  final TableMetaEntity table;
-  final ClassMetaFieldDescription field;
   final ClassFieldDescriptionDataInfo fieldType;
   final ClassFieldDescriptionDataInfo keyFieldType;
   final ClassFieldDescriptionDataInfo valueFieldType;
@@ -36,17 +32,15 @@ class DataTableCellDictionaryView extends StatefulWidget {
   final ValueChanged<DataTableCellValue> onValueChanged;
 
   const DataTableCellDictionaryView({
-    Key? key,
+    super.key,
     required this.coordinates,
-    required this.table,
-    required this.field,
     required this.fieldType,
     required this.keyFieldType,
     required this.valueFieldType,
     required this.value,
     required this.cellFactory,
     required this.onValueChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<DataTableCellDictionaryView> createState() => _DataTableCellDictionaryViewState();
@@ -149,12 +143,13 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
                     itemBuilder: (context, index) {
                       final value = _cellValue.listCellValues![index] as DataTableCellDictionaryItem;
                       final key = '${index}_${value.key}_${value.value}';
+                      final innerCellsFlex = DbModelUtils.getTableInnerCellsFlex(clientModel, widget.coordinates.table, widget.coordinates.field!);
 
                       return SizedBox(
                         key: ValueKey(key),
                         height: kStyle.kDataTableInlineRowHeight,
                         child: Padding(
-                          padding: EdgeInsets.only(left: 4 * kScale, right: 26 * kScale),
+                          padding: EdgeInsets.only(left: 4 * kScale, right: 29 * kScale),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -166,7 +161,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
                                 ),
                               ),
                               Expanded(
-                                flex: (DbModelUtils.getTableKeyToValueRatio(widget.table, widget.field) * Config.flexRatioMultiplier).toInt(),
+                                flex: (innerCellsFlex[0] * Config.flexRatioMultiplier).toInt(),
                                 child: Container(
                                   decoration: kStyle.kDataTableCellListBoxDecoration,
                                   child: widget.cellFactory(
@@ -190,7 +185,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
                                 ),
                               ),
                               Expanded(
-                                flex: ((1 - DbModelUtils.getTableKeyToValueRatio(widget.table, widget.field)) * Config.flexRatioMultiplier).toInt(),
+                                flex: (innerCellsFlex[1] * Config.flexRatioMultiplier).toInt(),
                                 child: Container(
                                   decoration: kStyle.kDataTableCellListBoxDecoration,
                                   child: widget.cellFactory(
@@ -228,7 +223,6 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
     setState(
       () {
         _cellValue = DataTableCellValue.dictionary(Utils.copyAndReorder(_cellValue.copy().dictionaryCellValues()!, oldIndex, newIndex));
-
         widget.onValueChanged(_cellValue);
       },
     );
@@ -282,7 +276,7 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
     setState(
       () {
         final valuesListCopy = _cellValue.copy();
-        valuesListCopy.listCellValues![index].value = value;
+        (valuesListCopy.listCellValues![index] as DataTableCellDictionaryItem).value = value;
         _cellValue = valuesListCopy;
 
         widget.onValueChanged(_cellValue);
@@ -294,26 +288,34 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
     if (details.delta.dx == 0.0) //
       return;
 
-    DbModelUtils.setDictionaryColumnRatio(widget.table, widget.field, deltaRatio: details.delta.dx / context.size!.width);
+    final relDelta = details.delta.dx / context.size!.width;
+
+    DbModelUtils.setInnerCellColumnFlex(
+      clientModel,
+      widget.coordinates.table,
+      widget.coordinates.field!,
+      deltaRatio: [relDelta, -relDelta],
+    );
     providerContainer.read(columnSizeChangedProvider).dispatchEvent();
   }
 
   void _handleHorizontalDragStart(DragStartDetails details) {
-    _initialRatio = DbModelUtils.getTableKeyToValueRatio(widget.table, widget.field);
+    _initialInnerCellFlex = DbModelUtils.getTableInnerCellsFlex(clientModel, widget.coordinates.table, widget.coordinates.field!);
   }
 
   void _handleHorizontalDragEnd(DragEndDetails details) {
-    if (_initialRatio != null && _initialRatio != DbModelUtils.getTableKeyToValueRatio(widget.table, widget.field)) {
+    if (_initialInnerCellFlex != null &&
+        _initialInnerCellFlex != DbModelUtils.getTableInnerCellsFlex(clientModel, widget.coordinates.table, widget.coordinates.field!)) {
       providerContainer.read(clientOwnCommandsStateProvider).addCommand(
-            DbCmdResizeDictionaryKeyToValue.values(
-              tableId: widget.table.id,
-              fieldId: widget.field.id,
-              ratio: DbModelUtils.getTableKeyToValueRatio(widget.table, widget.field),
-              oldRatio: _initialRatio!,
+            DbCmdResizeInnerCell.values(
+              tableId: widget.coordinates.table.id,
+              fieldId: widget.coordinates.field!.id,
+              flexes: DbModelUtils.getTableInnerCellsFlex(clientModel, widget.coordinates.table, widget.coordinates.field!),
+              oldFlexes: _initialInnerCellFlex!,
             ),
           );
     }
 
-    _initialRatio = null;
+    _initialInnerCellFlex = null;
   }
 }

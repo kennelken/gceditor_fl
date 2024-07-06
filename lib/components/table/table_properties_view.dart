@@ -35,7 +35,7 @@ import 'package:nil/nil.dart';
 LazyCache<Type, List<Color>> _colorsByType = LazyCache<Type, List<Color>>(_getColor);
 
 class TablePropertiesView extends ConsumerWidget {
-  const TablePropertiesView({Key? key}) : super(key: key);
+  const TablePropertiesView({super.key});
 
   @override
   Widget build(context, ref) {
@@ -236,7 +236,7 @@ class TablePropertiesView extends ConsumerWidget {
 
 List<Color>? _getColor(Type type) {
   switch (type) {
-    case ClassMetaFieldDescription:
+    case ClassMetaFieldDescription _:
       return [kColorAccentBlue2, kColorAccentBlue3];
   }
   return [kColorAccentBlue2, kColorAccentBlue3];

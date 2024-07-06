@@ -27,10 +27,10 @@ class EnumValueView extends StatefulWidget {
   final EnumValue data;
 
   const EnumValueView({
-    Key? key,
+    super.key,
     required this.entity,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   State<EnumValueView> createState() => _EnumValueViewState();
@@ -126,7 +126,7 @@ class _EnumValueViewState extends State<EnumValueView> {
                 tooltipText: Loc.get.delete,
               ),
             ],
-            SizedBox(width: 28 * kScale),
+            SizedBox(width: 30 * kScale),
           ],
         ),
       );
