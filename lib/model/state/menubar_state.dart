@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -63,20 +62,20 @@ class MenubarStateNotifier extends ChangeNotifier {
                   height: 18,
                   child: MenuBarWidget(
                     barStyle: const MenuStyle(
-                      padding: MaterialStatePropertyAll(EdgeInsets.zero),
-                      backgroundColor: MaterialStatePropertyAll(kColorPrimaryDarker2),
-                      maximumSize: MaterialStatePropertyAll(Size(double.infinity, 28.0)),
+                      padding: WidgetStatePropertyAll(EdgeInsets.zero),
+                      backgroundColor: WidgetStatePropertyAll(kColorPrimaryDarker2),
+                      maximumSize: WidgetStatePropertyAll(Size(double.infinity, 28.0)),
                     ),
                     barButtonStyle: ButtonStyle(
-                      textStyle: MaterialStatePropertyAll(kStyle.kTextExtraSmallLightest.copyWith(fontSize: 12, color: Colors.white)),
-                      padding: const MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 8)),
-                      minimumSize: const MaterialStatePropertyAll(Size(0, 32)),
+                      textStyle: WidgetStatePropertyAll(kStyle.kTextExtraSmallLightest.copyWith(fontSize: 12, color: Colors.white)),
+                      padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 8)),
+                      minimumSize: const WidgetStatePropertyAll(Size(0, 32)),
                     ),
                     menuButtonStyle: ButtonStyle(
-                      backgroundColor: const MaterialStatePropertyAll(kColorPrimaryDarker2),
-                      textStyle: MaterialStatePropertyAll(kStyle.kTextExtraSmallDark.copyWith(fontSize: 12)),
-                      minimumSize: const MaterialStatePropertyAll(Size(100, 32)),
-                      padding: const MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 8, vertical: 8)),
+                      backgroundColor: const WidgetStatePropertyAll(kColorPrimaryDarker2),
+                      textStyle: WidgetStatePropertyAll(kStyle.kTextExtraSmallDark.copyWith(fontSize: 12)),
+                      minimumSize: const WidgetStatePropertyAll(Size(100, 32)),
+                      padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 8, vertical: 8)),
                     ),
                     barButtons: [
                       BarButton(
@@ -103,7 +102,7 @@ class MenubarStateNotifier extends ChangeNotifier {
                           menuItems: [
                             MenuButton(
                               text: Text(
-                                Loc.get.menubarUndo + (nextUndoCommand() != null ? ': ${describeEnum(nextUndoCommand()!.$type!)}' : ''),
+                                Loc.get.menubarUndo + (nextUndoCommand() != null ? ': ${nextUndoCommand()!.$type!.name}' : ''),
                                 style: nextUndoCommand() != null ? _styleMenuActive() : _styleMenuInactive(),
                               ),
                               onTap: nextUndoCommand() != null ? GlobalShortcuts.undo : null,
@@ -112,7 +111,7 @@ class MenubarStateNotifier extends ChangeNotifier {
                             ),
                             MenuButton(
                               text: Text(
-                                Loc.get.menubarRedo + (nextRedoCommand() != null ? ': ${describeEnum(nextRedoCommand()!.$type!)}' : ''),
+                                Loc.get.menubarRedo + (nextRedoCommand() != null ? ': ${nextRedoCommand()!.$type!.name}' : ''),
                                 style: nextRedoCommand() != null ? _styleMenuActive() : _styleMenuInactive(),
                               ),
                               onTap: nextRedoCommand() != null ? GlobalShortcuts.redo : null,

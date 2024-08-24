@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 
 class EnumWrapper<T extends Enum> implements IIdentifiable {
@@ -7,6 +6,6 @@ class EnumWrapper<T extends Enum> implements IIdentifiable {
   late String id;
 
   EnumWrapper(this.value) {
-    id = describeEnum(value);
+    id = value.name;
   }
 }

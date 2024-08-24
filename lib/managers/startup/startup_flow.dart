@@ -277,7 +277,7 @@ class StartupFlow {
 
   void _setTitle(AppMode mode, String? path) {
     if (!kIsWeb) {
-      windowManager.setTitle('${Config.appName} - ${describeEnum(mode)}${(path != null) ? ' - $path' : ''}');
+      windowManager.setTitle('${Config.appName} - ${mode.name}${(path != null) ? ' - $path' : ''}');
     }
   }
 }

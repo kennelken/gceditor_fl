@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db/class_field_description_data_info.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
@@ -195,7 +194,7 @@ class DbModelFactory {
   static BaseGenerator generator(GeneratorType generatorType) {
     switch (generatorType) {
       case GeneratorType.undefined:
-        throw Exception('Unexpected generator type "${describeEnum(generatorType)}"');
+        throw Exception('Unexpected generator type "${generatorType.name}"');
 
       case GeneratorType.json:
         return GeneratorJson()

@@ -28,8 +28,8 @@ class ModalBottomSheetScreen extends StatelessWidget {
       useRootNavigator: true,
       context: context,
       isScrollControlled: true,
-      builder: (c) => WillPopScope(
-        onWillPop: () async => true,
+      builder: (c) => PopScope(
+        canPop: true,
         child: SingleChildScrollView(
           child: Container(
             padding: EdgeInsets.only(

@@ -3,7 +3,6 @@
 import 'dart:math';
 
 import 'package:darq/darq.dart';
-import 'package:flutter/foundation.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db/class_field_description_data_info.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
@@ -221,7 +220,7 @@ namespace ${data.namespace}
           _paramPrefixInterface: data.prefixInterface,
           _paramPostfix: data.postfix,
           _paramClass: classEntity.id,
-          _paramMetaEntityType: describeEnum(MetaEntityType.Class),
+          _paramMetaEntityType: MetaEntityType.Class.name,
           _paramItemsListPropertiesList: allItems.entries
               .selectMany((kvp, _) => kvp.value.map((e) => _paramItemsListPropertyEntryTemplate.format({
                     _paramPrefix: data.prefix,
@@ -257,7 +256,7 @@ namespace ${data.namespace}
           _paramPrefixInterface: data.prefixInterface,
           _paramPostfix: data.postfix,
           _paramClass: tableEntity.id,
-          _paramMetaEntityType: describeEnum(MetaEntityType.Table),
+          _paramMetaEntityType: MetaEntityType.Table.name,
           _paramItemsListPropertiesList: tableEntity.rows
               .map((e) => _paramItemsListPropertyEntryTemplate.format({
                     _paramPrefix: data.prefix,
@@ -532,7 +531,7 @@ namespace ${data.namespace}
       case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
-        throw Exception('"${describeEnum(type.type)}" is not a simple type');
+        throw Exception('"${type.type.name}" is not a simple type');
 
       case ClassFieldType.date:
         return 'DateTime';
@@ -769,7 +768,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
       case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
-        throw Exception('Unexpected type "${describeEnum(type.type)}"');
+        throw Exception('Unexpected type "${type.type.name}"');
     }
   }
 
@@ -811,7 +810,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
           _paramPrefix: data.prefix,
           _paramPrefixInterface: data.prefixInterface,
           _paramPostfix: data.postfix,
-          _paramMetaEntityType: describeEnum(MetaEntityType.Class),
+          _paramMetaEntityType: MetaEntityType.Class.name,
         }));
 
     final tables = model.cache.allDataTables.where((e) => e.exportList == true).map((e) => _listItemsListAssignmentRowTemplate.format({
@@ -819,7 +818,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
           _paramPrefix: data.prefix,
           _paramPrefixInterface: data.prefixInterface,
           _paramPostfix: data.postfix,
-          _paramMetaEntityType: describeEnum(MetaEntityType.Table),
+          _paramMetaEntityType: MetaEntityType.Table.name,
         }));
 
     return classes.concat(tables).join();
@@ -831,7 +830,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
           _paramPrefix: data.prefix,
           _paramPrefixInterface: data.prefixInterface,
           _paramPostfix: data.postfix,
-          _paramMetaEntityType: describeEnum(MetaEntityType.Class),
+          _paramMetaEntityType: MetaEntityType.Class.name,
         }));
 
     final tables = model.cache.allDataTables.where((e) => e.exportList == true).map((e) => _listItemsListDeclarationRowTemplate.format({
@@ -839,7 +838,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
           _paramPrefix: data.prefix,
           _paramPrefixInterface: data.prefixInterface,
           _paramPostfix: data.postfix,
-          _paramMetaEntityType: describeEnum(MetaEntityType.Table),
+          _paramMetaEntityType: MetaEntityType.Table.name,
         }));
 
     final result = classes.concat(tables).join();

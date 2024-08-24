@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gceditor/components/properties/primitives/delete_button.dart';
 import 'package:gceditor/components/tooltip_wrapper.dart';
@@ -113,7 +112,7 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
 
     switch (_generatorCopy.$type!) {
       case GeneratorType.undefined:
-        throw Exception('Unexpected generator type "${describeEnum(_generatorCopy.$type!)}"');
+        throw Exception('Unexpected generator type "${_generatorCopy.$type!.name}"');
 
       case GeneratorType.json:
         _indentationController.text = (_generatorCopy as GeneratorJson).indentation;
@@ -151,7 +150,7 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
                     SizedBox(width: 4 * kScale),
                     Expanded(
                       child: Text(
-                        describeEnum(_generatorCopy.$type!),
+                        _generatorCopy.$type!.name,
                         style: kStyle.kTextExtraSmall.copyWith(color: kTextColorDark),
                       ),
                     ),
@@ -267,7 +266,7 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
   List<Widget> _getOptions() {
     switch (_generatorCopy.$type!) {
       case GeneratorType.undefined:
-        throw Exception('Unexpected generator type "${describeEnum(_generatorCopy.$type!)}"');
+        throw Exception('Unexpected generator type "${_generatorCopy.$type!}"');
 
       case GeneratorType.json:
         return [

@@ -214,18 +214,18 @@ class StyleStateNotifier extends ChangeNotifier {
         ),
       ),
       scrollbarTheme: ScrollbarThemeData(
-        thickness: MaterialStateProperty.all(8.0 * state.globalScale),
-        thumbColor: MaterialStateProperty.resolveWith(scrollbarThumbColor),
+        thickness: WidgetStateProperty.all(8.0 * state.globalScale),
+        thumbColor: WidgetStateProperty.resolveWith(scrollbarThumbColor),
         //trackColor: MaterialStateProperty.all(kTextColorLightHalfTransparent),
-        thumbVisibility: MaterialStateProperty.all(true),
+        thumbVisibility: WidgetStateProperty.all(true),
         interactive: true,
-        trackVisibility: MaterialStateProperty.all(true),
+        trackVisibility: WidgetStateProperty.all(true),
       ),
       checkboxTheme: const CheckboxThemeData(
         side: BorderSide(color: kColorAccentBlue),
-        fillColor: MaterialStatePropertyAll(kColorAccentBlue),
+        fillColor: WidgetStatePropertyAll(kColorAccentBlue),
       ),
-      colorScheme: ColorScheme.fromSwatch(primarySwatch: kColorPrimary).copyWith(secondary: kColorSecondary, background: kColorBackground),
+      colorScheme: ColorScheme.fromSwatch(primarySwatch: kColorPrimary).copyWith(secondary: kColorSecondary, surface: kColorBackground),
     );
 
     state.kInputThemeLight = state.kAppTheme.copyWith(
@@ -275,7 +275,7 @@ class StyleStateNotifier extends ChangeNotifier {
 
     state.kReorderableListThemeInvisibleScrollbars = state.kReorderableListTheme.copyWith(
       scrollbarTheme: state.kAppTheme.scrollbarTheme.copyWith(
-        thumbVisibility: MaterialStateProperty.all(false),
+        thumbVisibility: WidgetStateProperty.all(false),
       ),
     );
 
@@ -344,10 +344,10 @@ class StyleStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  Color? scrollbarThumbColor(Set<MaterialState> states) {
-    if (states.contains(MaterialState.dragged)) //
+  Color? scrollbarThumbColor(Set<WidgetState> states) {
+    if (states.contains(WidgetState.dragged)) //
       return const Color.fromARGB(200, 0, 0, 0);
-    if (states.contains(MaterialState.hovered)) //
+    if (states.contains(WidgetState.hovered)) //
       return const Color.fromARGB(110, 0, 0, 0);
     return const Color.fromARGB(50, 0, 0, 0);
   }

@@ -83,24 +83,24 @@ const int kIconActiveAlpha = 255;
 const double kDividerLineWidth = 4;
 
 final ButtonStyle kButtonWhite = ButtonStyle(
-  backgroundColor: MaterialStateProperty.all(kColorButtonActive),
-  foregroundColor: MaterialStateProperty.all(kTextColorDark),
+  backgroundColor: WidgetStateProperty.all(kColorButtonActive),
+  foregroundColor: WidgetStateProperty.all(kTextColorDark),
 );
 final ButtonStyle kButtonBlue = ButtonStyle(
-  backgroundColor: MaterialStateProperty.all(kColorAccentBlue),
-  foregroundColor: MaterialStateProperty.all(Colors.white),
+  backgroundColor: WidgetStateProperty.all(kColorAccentBlue),
+  foregroundColor: WidgetStateProperty.all(Colors.white),
 );
 final ButtonStyle kButtonContextMenu = ButtonStyle(
-  backgroundColor: MaterialStateProperty.all(kColorPrimaryLighter2),
-  foregroundColor: MaterialStateProperty.all(Colors.white),
+  backgroundColor: WidgetStateProperty.all(kColorPrimaryLighter2),
+  foregroundColor: WidgetStateProperty.all(Colors.white),
 );
 final ButtonStyle kButtonContextMenuInactive = ButtonStyle(
-  backgroundColor: MaterialStateProperty.all(kColorPrimaryLighter2),
-  foregroundColor: MaterialStateProperty.all(kColorPrimaryLight),
+  backgroundColor: WidgetStateProperty.all(kColorPrimaryLighter2),
+  foregroundColor: WidgetStateProperty.all(kColorPrimaryLight),
 );
 final ButtonStyle kButtonTransparent = ButtonStyle(
-  backgroundColor: MaterialStateProperty.all(kColorTransparent),
-  foregroundColor: MaterialStateProperty.all(Colors.white),
+  backgroundColor: WidgetStateProperty.all(kColorTransparent),
+  foregroundColor: WidgetStateProperty.all(Colors.white),
 );
 
 const Radius kCardRadius = Radius.circular(2.0);

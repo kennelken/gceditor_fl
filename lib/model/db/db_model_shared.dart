@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/class_meta_entity_enum.dart';
 import 'package:gceditor/model/db/class_meta_group.dart';
@@ -41,11 +40,11 @@ abstract class BaseGenerator {
 
   static BaseGenerator decode(dynamic element) {
     final type = element['\$type'];
-    if (type == describeEnum(GeneratorType.json)) {
+    if (type == GeneratorType.json.name) {
       return GeneratorJson.fromJson(element);
-    } else if (type == describeEnum(GeneratorType.csharp)) {
+    } else if (type == GeneratorType.csharp.name) {
       return GeneratorCsharp.fromJson(element);
-    } else if (type == describeEnum(GeneratorType.java)) {
+    } else if (type == GeneratorType.java.name) {
       return GeneratorJava.fromJson(element);
     } else {
       throw Exception('Unsupported generator type $type');
@@ -88,11 +87,11 @@ abstract class ClassMeta implements IIdentifiable, IDescribable {
 
   static ClassMeta decode(Map<String, dynamic> element) {
     final type = element['\$type'];
-    if (type == describeEnum(ClassMetaType.$group)) {
+    if (type == ClassMetaType.$group.name) {
       return ClassMetaGroup.fromJson(element);
-    } else if (type == describeEnum(ClassMetaType.$class)) {
+    } else if (type == ClassMetaType.$class.name) {
       return ClassMetaEntity.fromJson(element);
-    } else if (type == describeEnum(ClassMetaType.$enum)) {
+    } else if (type == ClassMetaType.$enum.name) {
       return ClassMetaEntityEnum.fromJson(element);
     } else {
       throw Exception('Unsupported class meta type $type');
@@ -123,9 +122,9 @@ abstract class TableMeta implements IIdentifiable, IDescribable {
 
   static TableMeta decode(Map<String, dynamic> element) {
     final type = element['\$type'];
-    if (type == describeEnum(TableMetaType.$group)) {
+    if (type == TableMetaType.$group.name) {
       return TableMetaGroup.fromJson(element);
-    } else if (type == describeEnum(TableMetaType.$table)) {
+    } else if (type == TableMetaType.$table.name) {
       return TableMetaEntity.fromJson(element);
     } else {
       throw Exception('Unsupported table meta type "$type"');

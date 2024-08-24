@@ -1136,7 +1136,7 @@ class DbModelUtils {
       case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
-        throw Exception('Unexpected type "${describeEnum(type)}"');
+        throw Exception('Unexpected type "${type.name}"');
     }
   }
 

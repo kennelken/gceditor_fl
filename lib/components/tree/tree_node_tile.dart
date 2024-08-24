@@ -64,9 +64,9 @@ class TreeNodeTile extends ConsumerWidget {
             const LinesWidget(),
             if (isExpandable) //
               DragTarget<IIdentifiable>(
-                onAccept: (item) {
-                  if (_canDrop(item, entity)) {
-                    _doDrop(item, entity, true);
+                onAcceptWithDetails: (item) {
+                  if (_canDrop(item.data, entity)) {
+                    _doDrop(item.data, entity, true);
                     nodeScope.expand(context);
                   }
                 },
@@ -101,9 +101,9 @@ class TreeNodeTile extends ConsumerWidget {
                       .setSelectedEntity(entity: isSelected ? null : nodeScope.node.data as IIdentifiable);
                 },
                 child: DragTarget<IIdentifiable>(
-                  onAccept: (item) {
-                    if (_canDrop(item, entity)) {
-                      _doDrop(item, entity, false);
+                  onAcceptWithDetails: (item) {
+                    if (_canDrop(item.data, entity)) {
+                      _doDrop(item.data, entity, false);
                     }
                   },
                   builder: (context, candidateData, rejectedData) {

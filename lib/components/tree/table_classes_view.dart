@@ -39,9 +39,9 @@ class TableClassesView extends ConsumerWidget {
     }
 
     return DragTarget<IIdentifiable>(
-      onAccept: (item) {
-        if (_canDrop(item)) //
-          _doDrop(item);
+      onAcceptWithDetails: (item) {
+        if (_canDrop(item.data)) //
+          _doDrop(item.data);
       },
       builder: (context, candidateData, rejectedData) {
         final canDrop = candidateData.any((c) => _canDrop(c));
