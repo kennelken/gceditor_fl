@@ -40,23 +40,20 @@ class AppLocalStorage {
       await Directory(documentsPath).create(recursive: true);
     }
 
-    _storage = LocalStorage(
-      storageName,
-      documentsPath,
-    );
-    _ready = await _storage!.ready;
+    _storage = localStorage;
+    _ready = await Future.value(true); //await _storage!.ready;
     providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.debug, 'LocalStorage is ready at $documentsPath'));
   }
 
   Future<bool> isReady() async {
     await Utils.waitWhile(() => _storage == null);
-    return _storage!.ready;
+    return Future.value(true); //_storage!.ready;
   }
 
   bool get isReadySync => _ready;
 
   String? get ipAddress {
-    return _storage?.getItem('ipAddress') as String?;
+    return _storage?.getItem('ipAddress');
   }
 
   set ipAddress(String? value) {
@@ -72,7 +69,7 @@ class AppLocalStorage {
   }
 
   String? get projectPath {
-    return _storage?.getItem('projectPath') as String?;
+    return _storage?.getItem('projectPath');
   }
 
   set projectPath(String? value) {
@@ -80,7 +77,7 @@ class AppLocalStorage {
   }
 
   String? get outputPath {
-    return _storage?.getItem('outputPath') as String?;
+    return _storage?.getItem('outputPath');
   }
 
   set outputPath(String? value) {
@@ -88,7 +85,7 @@ class AppLocalStorage {
   }
 
   String? get authListPath {
-    return _storage?.getItem('authListPath') as String?;
+    return _storage?.getItem('authListPath');
   }
 
   set authListPath(String? value) {
@@ -96,7 +93,7 @@ class AppLocalStorage {
   }
 
   String? get historyPath {
-    return _storage?.getItem('historyPath') as String?;
+    return _storage?.getItem('historyPath');
   }
 
   set historyPath(String? value) {
@@ -104,7 +101,7 @@ class AppLocalStorage {
   }
 
   String? get historyTag {
-    return _storage?.getItem('historyTag') as String?;
+    return _storage?.getItem('historyTag');
   }
 
   set historyTag(String? value) {
@@ -112,7 +109,7 @@ class AppLocalStorage {
   }
 
   String? get clientLogin {
-    return _storage?.getItem('clientLogin') as String?;
+    return _storage?.getItem('clientLogin');
   }
 
   set clientLogin(String? value) {
@@ -120,7 +117,7 @@ class AppLocalStorage {
   }
 
   String? get clientSecret {
-    return _storage?.getItem('clientSecret') as String?;
+    return _storage?.getItem('clientSecret');
   }
 
   set clientSecret(String? value) {
@@ -128,7 +125,7 @@ class AppLocalStorage {
   }
 
   String? get clientPassword {
-    return _storage?.getItem('clientPassword') as String?;
+    return _storage?.getItem('clientPassword');
   }
 
   set clientPassword(String? value) {
@@ -144,7 +141,7 @@ class AppLocalStorage {
   }
 
   String? get newLogin {
-    return _storage?.getItem('newLogin') as String?;
+    return _storage?.getItem('newLogin');
   }
 
   set newLogin(String? value) {
@@ -152,7 +149,7 @@ class AppLocalStorage {
   }
 
   String? get newSecret {
-    return _storage?.getItem('newSecret') as String?;
+    return _storage?.getItem('newSecret');
   }
 
   set newSecret(String? value) {
@@ -160,7 +157,8 @@ class AppLocalStorage {
   }
 
   double? get classesWidth {
-    return _storage?.getItem('classesWidth') as double?;
+    final val = _storage?.getItem('classesWidth');
+    return val == null ? null : double.tryParse(val);
   }
 
   set classesWidth(double? value) {
@@ -288,7 +286,7 @@ class AppLocalStorage {
   }
 
   Rect? get windowRect {
-    final jsonText = _storage?.getItem('windowRect') as String?;
+    final jsonText = _storage?.getItem('windowRect');
     if (!(jsonText?.isEmpty ?? true)) {
       try {
         final ltrb = jsonDecode(jsonText!) as List<dynamic>;
@@ -309,7 +307,7 @@ class AppLocalStorage {
   void saveProperty(String name, dynamic value) {
     _mutex.protect(() async {
       try {
-        await _storage!.setItem(name, value);
+        _storage!.setItem(name, value);
       } catch (e, callstack) {
         providerContainer
             .read(logStateProvider)

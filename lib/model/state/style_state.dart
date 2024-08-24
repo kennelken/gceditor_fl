@@ -65,7 +65,7 @@ class StyleState {
   ThemeData kInputThemeLight = ThemeData();
 
   // ignore: prefer_function_declarations_over_variables
-  Widget Function(Checkbox checkbox) wrapCheckbox = (_) => _; //for assigning it later
+  Widget Function(Checkbox checkbox) wrapCheckbox = (v) => v; //for assigning it later
 
   StyleState();
 
