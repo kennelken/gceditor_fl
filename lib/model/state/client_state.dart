@@ -129,7 +129,7 @@ class ClientOwnCommandsStateNotifier extends ChangeNotifier {
     if (!validationResult.success) {
       providerContainer
           .read(logStateProvider)
-          .addMessage(LogEntry(LogLevel.error, 'Can not add command "${describeEnum(cmd.$type!)}". Error: "${validationResult.error}"'));
+          .addMessage(LogEntry(LogLevel.error, 'Can not add command "${cmd.$type!.name}". Error: "${validationResult.error}"'));
 
       providerContainer.read(clientStateProvider).incrementVersion();
       return false;

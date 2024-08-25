@@ -12,7 +12,7 @@ DbCmdAddClassInterface _$DbCmdAddClassInterfaceFromJson(
       ..id = json['id'] as String
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..entityId = json['entityId'] as String
-      ..index = json['index'] as int
+      ..index = (json['index'] as num).toInt()
       ..interfaceId = json['interfaceId'] as String?
       ..dataColumnsByTable =
           (json['dataColumnsByTable'] as Map<String, dynamic>?)?.map(

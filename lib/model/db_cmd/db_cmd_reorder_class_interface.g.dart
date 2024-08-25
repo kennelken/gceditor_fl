@@ -12,8 +12,8 @@ DbCmdReorderClassInterface _$DbCmdReorderClassInterfaceFromJson(
       ..id = json['id'] as String
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..entityId = json['entityId'] as String
-      ..indexFrom = json['indexFrom'] as int
-      ..indexTo = json['indexTo'] as int;
+      ..indexFrom = (json['indexFrom'] as num).toInt()
+      ..indexTo = (json['indexTo'] as num).toInt();
 
 Map<String, dynamic> _$DbCmdReorderClassInterfaceToJson(
     DbCmdReorderClassInterface instance) {

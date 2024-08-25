@@ -11,8 +11,8 @@ DbCmdReorderEnum _$DbCmdReorderEnumFromJson(Map<String, dynamic> json) =>
       ..id = json['id'] as String
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..entityId = json['entityId'] as String
-      ..indexFrom = json['indexFrom'] as int
-      ..indexTo = json['indexTo'] as int;
+      ..indexFrom = (json['indexFrom'] as num).toInt()
+      ..indexTo = (json['indexTo'] as num).toInt();
 
 Map<String, dynamic> _$DbCmdReorderEnumToJson(DbCmdReorderEnum instance) {
   final val = <String, dynamic>{

@@ -168,6 +168,7 @@ typedef Func1<T1, TOut> = TOut Function(T1 param1);
 typedef Func2<T1, T2, TOut> = TOut Function(T1 param1, T2 param2);
 typedef Func3<T1, T2, T3, TOut> = TOut Function(T1 param1, T2 param2, T3 param3);
 typedef Func4<T1, T2, T3, T4, TOut> = TOut Function(T1 param1, T2 param2, T3 param3, T4 param4);
+typedef Action0 = void Function();
 typedef Action1<T1> = void Function(T1 param1);
 typedef Action2<T1, T2> = void Function(T1 param1, T2 param2);
 typedef Action3<T1, T2, T3> = void Function(T1 param1, T2 param2, T3 param3);
@@ -244,4 +245,9 @@ extension MapExtensions<TKey, TValue> on Map<TKey, TValue> {
       return;
     this[key] = value(key);
   }
+}
+
+class ValueWrapper<T> {
+  late T value;
+  ValueWrapper({required this.value});
 }

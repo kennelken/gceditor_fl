@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
@@ -95,35 +94,33 @@ class DbCmdEditClass extends BaseDbCmd {
     if (classType != null) {
       if (classType == ClassType.valueType) {
         if (entity.parent != null) //
-          return DbCmdResult.fail('"${describeEnum(classType!)}" type can not have a parent class');
+          return DbCmdResult.fail('"${classType!.name}" type can not have a parent class');
 
         final allSubclasses = dbModel.cache.getImplementingClasses(entity);
         if (allSubclasses.isNotEmpty) //
-          return DbCmdResult.fail('"${describeEnum(classType!)}" type can not have subclasses');
+          return DbCmdResult.fail('"${classType!.name}" type can not have subclasses');
       }
 
       if (classType == ClassType.interface) {
         final firstChildClass = dbModel.cache.allClasses.firstWhereOrNull((c) => c.parent == entity.id);
         if (firstChildClass != null) //
-          return DbCmdResult.fail(
-              'Can\'t change the classType to "${describeEnum(classType!)}" because it is used as parent in "${firstChildClass.id}"');
+          return DbCmdResult.fail('Can\'t change the classType to "${classType!.name}" because it is used as parent in "${firstChildClass.id}"');
 
         final firstChildTable = dbModel.cache.allDataTables.firstWhereOrNull((c) => c.classId == entity.id);
         if (firstChildTable != null) //
-          return DbCmdResult.fail(
-              'Can\'t change the classType to "${describeEnum(classType!)}" because it is used as parent in "${firstChildTable.id}"');
+          return DbCmdResult.fail('Can\'t change the classType to "${classType!.name}" because it is used as parent in "${firstChildTable.id}"');
 
         final fieldsUsingInline = DbModelUtils.getFieldsUsingInlineClass(dbModel, entity);
         if (fieldsUsingInline.isNotEmpty) //
           return DbCmdResult.fail(
-              'Can\'t change the classType to "${describeEnum(classType!)}" because it is used in inline lists in: ${fieldsUsingInline.map((e) => '"${e.$1.id}.${e.$2.id}"').join(', ')}');
+              'Can\'t change the classType to "${classType!.name}" because it is used in inline lists in: ${fieldsUsingInline.map((e) => '"${e.$1.id}.${e.$2.id}"').join(', ')}');
       }
 
       if (classType != ClassType.interface) {
         final firstParentClass = dbModel.cache.allClasses.firstWhereOrNull((c) => c.interfaces.any((element) => element == entity.id));
         if (firstParentClass != null) //
           return DbCmdResult.fail(
-              'Can\'t change the classType to "${describeEnum(classType!)}" because it is used as an interface in "${firstParentClass.id}"');
+              'Can\'t change the classType to "${classType!.name}" because it is used as an interface in "${firstParentClass.id}"');
       }
     }
 
@@ -159,7 +156,7 @@ class DbCmdEditClass extends BaseDbCmd {
         }
 
         if (newParentEntity.classType != ClassType.referenceType) //
-          return DbCmdResult.fail('Inheritance is not supported for class type "${describeEnum(newParentEntity.classType)}"');
+          return DbCmdResult.fail('Inheritance is not supported for class type "${newParentEntity.classType.name}"');
       }
     }
 

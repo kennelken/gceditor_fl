@@ -65,7 +65,7 @@ class StyleState {
   ThemeData kInputThemeLight = ThemeData();
 
   // ignore: prefer_function_declarations_over_variables
-  Widget Function(Checkbox checkbox) wrapCheckbox = (_) => _; //for assigning it later
+  Widget Function(Checkbox checkbox) wrapCheckbox = (v) => v; //for assigning it later
 
   StyleState();
 
@@ -166,7 +166,7 @@ class StyleStateNotifier extends ChangeNotifier {
       scaffoldBackgroundColor: kColorBackground,
       inputDecorationTheme: InputDecorationTheme(
         hintStyle: state.kTextSmall.copyWith(color: kColorPrimaryLight),
-        labelStyle: state.kTextSmall,
+        labelStyle: state.kTextSmall.copyWith(color: kColorPrimaryLight),
         contentPadding: EdgeInsets.symmetric(horizontal: 10 * state.globalScale),
         border: const OutlineInputBorder(borderSide: BorderSide.none, borderRadius: kCardBorder),
         disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: kColorPrimaryDarker), borderRadius: kCardBorder),
@@ -184,7 +184,21 @@ class StyleStateNotifier extends ChangeNotifier {
         selectionHandleColor: Colors.red,
       ),
       textTheme: TextTheme(
+        titleSmall: state.kTextExtraSmallLightest,
         titleMedium: state.kTextExtraSmallLightest,
+        titleLarge: state.kTextExtraSmallLightest,
+        bodyLarge: state.kTextExtraSmallLightest,
+        bodyMedium: state.kTextExtraSmallLightest,
+        bodySmall: state.kTextExtraSmallLightest,
+        displayLarge: state.kTextExtraSmallLightest,
+        displayMedium: state.kTextExtraSmallLightest,
+        displaySmall: state.kTextExtraSmallLightest,
+        headlineLarge: state.kTextExtraSmallLightest,
+        headlineMedium: state.kTextExtraSmallLightest,
+        headlineSmall: state.kTextExtraSmallLightest,
+        labelLarge: state.kTextExtraSmallLightest,
+        labelMedium: state.kTextExtraSmallLightest,
+        labelSmall: state.kTextExtraSmallLightest,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -214,18 +228,18 @@ class StyleStateNotifier extends ChangeNotifier {
         ),
       ),
       scrollbarTheme: ScrollbarThemeData(
-        thickness: MaterialStateProperty.all(8.0 * state.globalScale),
-        thumbColor: MaterialStateProperty.resolveWith(scrollbarThumbColor),
+        thickness: WidgetStateProperty.all(8.0 * state.globalScale),
+        thumbColor: WidgetStateProperty.resolveWith(scrollbarThumbColor),
         //trackColor: MaterialStateProperty.all(kTextColorLightHalfTransparent),
-        thumbVisibility: MaterialStateProperty.all(true),
+        thumbVisibility: WidgetStateProperty.all(true),
         interactive: true,
-        trackVisibility: MaterialStateProperty.all(true),
+        trackVisibility: WidgetStateProperty.all(true),
       ),
       checkboxTheme: const CheckboxThemeData(
         side: BorderSide(color: kColorAccentBlue),
-        fillColor: MaterialStatePropertyAll(kColorAccentBlue),
+        fillColor: WidgetStatePropertyAll(kColorAccentBlue),
       ),
-      colorScheme: ColorScheme.fromSwatch(primarySwatch: kColorPrimary).copyWith(secondary: kColorSecondary, background: kColorBackground),
+      colorScheme: ColorScheme.fromSwatch(primarySwatch: kColorPrimary).copyWith(secondary: kColorSecondary, surface: kColorBackground),
     );
 
     state.kInputThemeLight = state.kAppTheme.copyWith(
@@ -275,7 +289,7 @@ class StyleStateNotifier extends ChangeNotifier {
 
     state.kReorderableListThemeInvisibleScrollbars = state.kReorderableListTheme.copyWith(
       scrollbarTheme: state.kAppTheme.scrollbarTheme.copyWith(
-        thumbVisibility: MaterialStateProperty.all(false),
+        thumbVisibility: WidgetStateProperty.all(false),
       ),
     );
 
@@ -344,10 +358,10 @@ class StyleStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  Color? scrollbarThumbColor(Set<MaterialState> states) {
-    if (states.contains(MaterialState.dragged)) //
+  Color? scrollbarThumbColor(Set<WidgetState> states) {
+    if (states.contains(WidgetState.dragged)) //
       return const Color.fromARGB(200, 0, 0, 0);
-    if (states.contains(MaterialState.hovered)) //
+    if (states.contains(WidgetState.hovered)) //
       return const Color.fromARGB(110, 0, 0, 0);
     return const Color.fromARGB(50, 0, 0, 0);
   }

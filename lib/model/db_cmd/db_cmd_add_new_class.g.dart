@@ -12,7 +12,7 @@ DbCmdAddNewClass _$DbCmdAddNewClassFromJson(Map<String, dynamic> json) =>
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..classMeta = ClassMeta.decode(json['classMeta'] as Map<String, dynamic>)
       ..parentId = json['parentId'] as String?
-      ..index = json['index'] as int?;
+      ..index = (json['index'] as num?)?.toInt();
 
 Map<String, dynamic> _$DbCmdAddNewClassToJson(DbCmdAddNewClass instance) {
   final val = <String, dynamic>{

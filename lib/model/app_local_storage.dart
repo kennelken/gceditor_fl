@@ -1,15 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/log_state.dart';
-import 'package:gceditor/utils/utils.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:mutex/mutex.dart';
-import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
 class AppLocalStorage {
@@ -22,41 +18,29 @@ class AppLocalStorage {
 
   // ignore: prefer_constructors_over_static_methods
   static AppLocalStorage get instance {
-    _instance ??= AppLocalStorage.constructor();
+    _instance ??= AppLocalStorage();
     return _instance!;
   }
 
-  AppLocalStorage.constructor() {
-    initStorage();
-  }
-
-  void initStorage() async {
-    String? documentsPath;
+  Future initStorage() async {
+    var documentsPath = '';
     if (!kIsWeb) {
       final directory = await getApplicationDocumentsDirectory();
-
       documentsPath = directory.path;
-      documentsPath = path.join(documentsPath, Config.appName);
-      await Directory(documentsPath).create(recursive: true);
     }
 
-    _storage = LocalStorage(
-      storageName,
-      documentsPath,
-    );
-    _ready = await _storage!.ready;
-    providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.debug, 'LocalStorage is ready at $documentsPath'));
-  }
+    await initLocalStorage();
 
-  Future<bool> isReady() async {
-    await Utils.waitWhile(() => _storage == null);
-    return _storage!.ready;
+    _storage = localStorage;
+    _ready = true;
+
+    providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.debug, 'LocalStorage is ready at $documentsPath'));
   }
 
   bool get isReadySync => _ready;
 
   String? get ipAddress {
-    return _storage?.getItem('ipAddress') as String?;
+    return _readProperty<String>('ipAddress');
   }
 
   set ipAddress(String? value) {
@@ -64,7 +48,7 @@ class AppLocalStorage {
   }
 
   int? get port {
-    return _storage?.getItem('port') as int?;
+    return _readProperty<int>('port');
   }
 
   set port(int? value) {
@@ -72,7 +56,7 @@ class AppLocalStorage {
   }
 
   String? get projectPath {
-    return _storage?.getItem('projectPath') as String?;
+    return _readProperty<String>('projectPath');
   }
 
   set projectPath(String? value) {
@@ -80,7 +64,7 @@ class AppLocalStorage {
   }
 
   String? get outputPath {
-    return _storage?.getItem('outputPath') as String?;
+    return _readProperty<String>('outputPath');
   }
 
   set outputPath(String? value) {
@@ -88,7 +72,7 @@ class AppLocalStorage {
   }
 
   String? get authListPath {
-    return _storage?.getItem('authListPath') as String?;
+    return _readProperty<String>('authListPath');
   }
 
   set authListPath(String? value) {
@@ -96,7 +80,7 @@ class AppLocalStorage {
   }
 
   String? get historyPath {
-    return _storage?.getItem('historyPath') as String?;
+    return _readProperty<String>('historyPath');
   }
 
   set historyPath(String? value) {
@@ -104,7 +88,7 @@ class AppLocalStorage {
   }
 
   String? get historyTag {
-    return _storage?.getItem('historyTag') as String?;
+    return _readProperty<String>('historyTag');
   }
 
   set historyTag(String? value) {
@@ -112,7 +96,7 @@ class AppLocalStorage {
   }
 
   String? get clientLogin {
-    return _storage?.getItem('clientLogin') as String?;
+    return _readProperty<String>('clientLogin');
   }
 
   set clientLogin(String? value) {
@@ -120,7 +104,7 @@ class AppLocalStorage {
   }
 
   String? get clientSecret {
-    return _storage?.getItem('clientSecret') as String?;
+    return _readProperty<String>('clientSecret');
   }
 
   set clientSecret(String? value) {
@@ -128,7 +112,7 @@ class AppLocalStorage {
   }
 
   String? get clientPassword {
-    return _storage?.getItem('clientPassword') as String?;
+    return _readProperty<String>('clientPassword');
   }
 
   set clientPassword(String? value) {
@@ -136,7 +120,7 @@ class AppLocalStorage {
   }
 
   bool? get rememberClientPassword {
-    return _storage?.getItem('rememberClientPassword') as bool?;
+    return _readProperty<bool>('rememberClientPassword');
   }
 
   set rememberClientPassword(bool? value) {
@@ -144,7 +128,7 @@ class AppLocalStorage {
   }
 
   String? get newLogin {
-    return _storage?.getItem('newLogin') as String?;
+    return _readProperty<String>('newLogin');
   }
 
   set newLogin(String? value) {
@@ -152,7 +136,7 @@ class AppLocalStorage {
   }
 
   String? get newSecret {
-    return _storage?.getItem('newSecret') as String?;
+    return _readProperty<String>('newSecret');
   }
 
   set newSecret(String? value) {
@@ -160,7 +144,7 @@ class AppLocalStorage {
   }
 
   double? get classesWidth {
-    return _storage?.getItem('classesWidth') as double?;
+    return _readProperty<double>('classesWidth');
   }
 
   set classesWidth(double? value) {
@@ -168,7 +152,7 @@ class AppLocalStorage {
   }
 
   double? get tablesHeight {
-    return _storage?.getItem('tablesHeight') as double?;
+    return _readProperty<double>('tablesHeight');
   }
 
   set tablesHeight(double? value) {
@@ -176,7 +160,7 @@ class AppLocalStorage {
   }
 
   double? get classesHeight {
-    return _storage?.getItem('classesHeight') as double?;
+    return _readProperty<double>('classesHeight');
   }
 
   set classesHeight(double? value) {
@@ -184,7 +168,7 @@ class AppLocalStorage {
   }
 
   double? get problemsHeight {
-    return _storage?.getItem('problemsHeight') as double?;
+    return _readProperty<double>('problemsHeight');
   }
 
   set problemsHeight(double? value) {
@@ -192,7 +176,7 @@ class AppLocalStorage {
   }
 
   double? get gitHeight {
-    return _storage?.getItem('gitHeight') as double?;
+    return _readProperty<double>('gitHeight');
   }
 
   set gitHeight(double? value) {
@@ -200,7 +184,7 @@ class AppLocalStorage {
   }
 
   double? get historyHeight {
-    return _storage?.getItem('historyHeight') as double?;
+    return _readProperty<double>('historyHeight');
   }
 
   set historyHeight(double? value) {
@@ -208,7 +192,7 @@ class AppLocalStorage {
   }
 
   bool? get tablesExpanded {
-    return _storage?.getItem('tablesExpanded') as bool?;
+    return _readProperty<bool>('tablesExpanded');
   }
 
   set tablesExpanded(bool? value) {
@@ -216,7 +200,7 @@ class AppLocalStorage {
   }
 
   bool? get classesExpanded {
-    return _storage?.getItem('classesExpanded') as bool?;
+    return _readProperty<bool>('classesExpanded');
   }
 
   set classesExpanded(bool? value) {
@@ -224,7 +208,7 @@ class AppLocalStorage {
   }
 
   bool? get problemsExpanded {
-    return _storage?.getItem('problemsExpanded') as bool?;
+    return _readProperty<bool>('problemsExpanded');
   }
 
   set problemsExpanded(bool? value) {
@@ -232,7 +216,7 @@ class AppLocalStorage {
   }
 
   bool? get gitExpanded {
-    return _storage?.getItem('gitExpanded') as bool?;
+    return _readProperty<bool>('gitExpanded');
   }
 
   set gitExpanded(bool? value) {
@@ -240,7 +224,7 @@ class AppLocalStorage {
   }
 
   bool? get historyExpanded {
-    return _storage?.getItem('historyExpanded') as bool?;
+    return _readProperty<bool>('historyExpanded');
   }
 
   set historyExpanded(bool? value) {
@@ -248,7 +232,7 @@ class AppLocalStorage {
   }
 
   double? get propertiesWidth {
-    return _storage?.getItem('propertiesWidth') as double?;
+    return _readProperty<double>('propertiesWidth');
   }
 
   set propertiesWidth(double? value) {
@@ -256,7 +240,7 @@ class AppLocalStorage {
   }
 
   double? get findHeight {
-    return _storage?.getItem('findHeight') as double?;
+    return _readProperty<double>('findHeight');
   }
 
   set findHeight(double? value) {
@@ -264,7 +248,7 @@ class AppLocalStorage {
   }
 
   double? get pinnedPanelHeight {
-    return _storage?.getItem('pinnedPanelHeight') as double?;
+    return _readProperty<double>('pinnedPanelHeight');
   }
 
   set pinnedPanelHeight(double? value) {
@@ -272,7 +256,7 @@ class AppLocalStorage {
   }
 
   bool? get expandedMode {
-    return _storage?.getItem('expandedMode') as bool?;
+    return _readProperty<bool>('expandedMode');
   }
 
   set expandedMode(bool? value) {
@@ -280,15 +264,34 @@ class AppLocalStorage {
   }
 
   double? get globalScale {
-    return _storage?.getItem('globalScale') as double?;
+    return _readProperty<double>('globalScale');
   }
 
   set globalScale(double? value) {
     saveProperty('globalScale', value);
   }
 
+  T? _readProperty<T>(String key) {
+    final result = _storage?.getItem(key);
+    if (result == null || result == 'null' || result.isEmpty) return null;
+
+    if (T == String) {
+      return result as T;
+    }
+    if (T == double) {
+      return double.parse(result) as T;
+    }
+    if (T == bool) {
+      return (result == 'true') as T;
+    }
+    if (T == int) {
+      return int.parse(result) as T;
+    }
+    return null;
+  }
+
   Rect? get windowRect {
-    final jsonText = _storage?.getItem('windowRect') as String?;
+    final jsonText = _readProperty<String>('windowRect');
     if (!(jsonText?.isEmpty ?? true)) {
       try {
         final ltrb = jsonDecode(jsonText!) as List<dynamic>;
@@ -309,7 +312,7 @@ class AppLocalStorage {
   void saveProperty(String name, dynamic value) {
     _mutex.protect(() async {
       try {
-        await _storage!.setItem(name, value);
+        _storage!.setItem(name, value?.toString() ?? '');
       } catch (e, callstack) {
         providerContainer
             .read(logStateProvider)

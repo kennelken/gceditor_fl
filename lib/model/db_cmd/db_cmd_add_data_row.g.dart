@@ -12,7 +12,7 @@ DbCmdAddDataRow _$DbCmdAddDataRowFromJson(Map<String, dynamic> json) =>
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..tableId = json['tableId'] as String
       ..rowId = json['rowId'] as String
-      ..index = json['index'] as int
+      ..index = (json['index'] as num).toInt()
       ..tableRowValues = json['tableRowValues'] == null
           ? null
           : DataTableRow.fromJson(

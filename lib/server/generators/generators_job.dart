@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:darq/darq.dart';
-import 'package:flutter/foundation.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/main.dart';
@@ -56,9 +55,9 @@ class GeneratorsJob {
             numErrors++;
             providerContainer
                 .read(logStateProvider)
-                .addMessage(LogEntry(LogLevel.error, 'Generator "${describeEnum(generatorType!)}" failed with error: "${result.error}"'));
+                .addMessage(LogEntry(LogLevel.error, 'Generator "${generatorType!.name}" failed with error: "${result.error}"'));
           } else {
-            providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.log, 'Generator "${describeEnum(generatorType!)}" finished'));
+            providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.log, 'Generator "${generatorType!.name}" finished'));
           }
         },
       );
@@ -89,7 +88,7 @@ Future<GeneratorResult> _executeGenerator(Tuple4<String, int, String, String> pa
   final generatorType = generatorData.$type!;
   switch (generatorType) {
     case GeneratorType.undefined:
-      return GeneratorResult.error('Unexpected generator type "${describeEnum(generatorData.$type!)}"');
+      return GeneratorResult.error('Unexpected generator type "${generatorData.$type!.name}"');
 
     case GeneratorType.json:
       return await GeneratorJsonRunner().execute(outputFolder, model, generatorData as GeneratorJson, additionalInfo);

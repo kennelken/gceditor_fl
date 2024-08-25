@@ -78,7 +78,7 @@ abstract class BaseDbCmd {
 
   static BaseDbCmd decode(dynamic element) {
     final type = element['\$type'];
-    final enumType = DbCmdType.values.firstWhereOrNull((e) => describeEnum(e) == type);
+    final enumType = DbCmdType.values.firstWhereOrNull((e) => e.name == type);
 
     switch (enumType) {
       case null:

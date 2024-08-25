@@ -13,7 +13,7 @@ DbCmdReorderMetaEntity _$DbCmdReorderMetaEntityFromJson(
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..entityId = json['entityId'] as String
       ..parentId = json['parentId'] as String?
-      ..index = json['index'] as int?;
+      ..index = (json['index'] as num?)?.toInt();
 
 Map<String, dynamic> _$DbCmdReorderMetaEntityToJson(
     DbCmdReorderMetaEntity instance) {

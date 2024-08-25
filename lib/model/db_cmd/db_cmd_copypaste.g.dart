@@ -12,10 +12,12 @@ DbCmdCopyPaste _$DbCmdCopyPasteFromJson(Map<String, dynamic> json) =>
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..fromTableId = json['fromTableId'] as String?
       ..toTableId = json['toTableId'] as String?
-      ..fromIndices =
-          (json['fromIndices'] as List<dynamic>?)?.map((e) => e as int).toList()
-      ..toIndices =
-          (json['toIndices'] as List<dynamic>?)?.map((e) => e as int).toList()
+      ..fromIndices = (json['fromIndices'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
+          .toList()
+      ..toIndices = (json['toIndices'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
+          .toList()
       ..fromValues = (json['fromValues'] as List<dynamic>?)
           ?.map((e) => e as List<dynamic>)
           .toList()
@@ -33,7 +35,7 @@ DbCmdCopyPaste _$DbCmdCopyPasteFromJson(Map<String, dynamic> json) =>
           .toList()
       ..restoreTableId = json['restoreTableId'] as String?
       ..restoreIndices = (json['restoreIndices'] as List<dynamic>?)
-          ?.map((e) => e as int)
+          ?.map((e) => (e as num).toInt())
           .toList()
       ..replace = json['replace'] as bool?
       ..delete = json['delete'] as bool?

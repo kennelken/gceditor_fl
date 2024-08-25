@@ -107,7 +107,7 @@ class TableView extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Container(height: kDividerLineWidth, color: kColorPrimary),
-                      const Expanded(child: TableTablesView()),
+                      Expanded(child: TableTablesView(key: const ValueKey('TableTablesView'))),
                       MouseRegion(
                         cursor: SystemMouseCursors.resizeRow,
                         child: GestureDetector(
@@ -149,7 +149,11 @@ class TableView extends ConsumerWidget {
                   child: Column(
                     children: [
                       Container(height: kDividerLineWidth, color: kColorPrimaryLighter),
-                      const Expanded(child: TableClassesView()),
+                      Expanded(
+                        child: TableClassesView(
+                          key: const ValueKey('TableClassesView'),
+                        ),
+                      ),
                       MouseRegion(
                         cursor: SystemMouseCursors.resizeRow,
                         child: GestureDetector(

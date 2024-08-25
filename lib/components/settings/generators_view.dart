@@ -1,5 +1,4 @@
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/global_shortcuts.dart';
@@ -82,7 +81,7 @@ class GeneratorsViewState extends State<GeneratorsView> {
                     child: ContextMenuButton(
                       buttons: GeneratorType.values
                           .where((e) => e != GeneratorType.undefined)
-                          .map((e) => ContextMenuChildButtonData(describeEnum(e), () => _handleAddNewGenerator(e)))
+                          .map((e) => ContextMenuChildButtonData(e.name, () => _handleAddNewGenerator(e)))
                           .toList(),
                       controller: _addNewGeneratorPopupController,
                     ),

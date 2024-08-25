@@ -541,7 +541,7 @@ void _computeAndAppendDuplicateUniqueValues(DbModel model, List<DbModelProblem> 
         try {
           final row = table.rows[j];
 
-          var value = row.values[i].simpleValue;
+          final value = row.values[i].simpleValue;
           if (allValues.get(field, value) == null) //
             allValues.set(field, value, []);
 

@@ -1,7 +1,6 @@
 // ignore_for_file: prefer_initializing_formals
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/consts/consts.dart';
@@ -463,7 +462,7 @@ class ClientFindStateNotifier extends ChangeNotifier {
       case ClassFieldType.listInline:
       case ClassFieldType.set:
       case ClassFieldType.dictionary:
-        throw Exception('Unexpected type "${describeEnum(type)}"');
+        throw Exception('Unexpected type "${type.name}"');
     }
   }
 

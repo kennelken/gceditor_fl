@@ -22,6 +22,7 @@ class LoggerPanel extends ConsumerWidget {
     final appState = ref.watch(appStateProvider).state;
     final logState = ref.watch(logStateProvider).state;
     final serverHistoryState = ref.watch(serverHistoryStateProvider).state;
+    ref.watch(styleStateProvider);
 
     return Material(
       color: kColorAccentOrange,

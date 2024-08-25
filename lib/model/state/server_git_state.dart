@@ -90,7 +90,7 @@ class ServerGitStateNotifier extends ChangeNotifier {
             final fileBranch = (await fileGit.currentBranch()).branchName;
             newState.items.add(GitItem(
               id: 'g${generator.hashCode}',
-              name: Loc.get.gitItemGenerator(describeEnum(generator.$type!), i),
+              name: Loc.get.gitItemGenerator(generator.$type!.name, i),
               gitDir: fileGit,
               relativePath: path.relative(filePath, from: fileGit.path),
               branchName: fileBranch,

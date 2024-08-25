@@ -1,7 +1,7 @@
 name: main
 
 env:
-  flutterVersion: "3.10.6"
+  flutterVersion: "3.24.1"
 
 on:
   push:
