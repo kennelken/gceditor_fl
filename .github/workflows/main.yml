@@ -56,7 +56,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: windows-build
-          path: build/windows/runner/Release
+          path: build/windows/x64/runner/Release
 
   build-web:
     runs-on: ubuntu-latest
