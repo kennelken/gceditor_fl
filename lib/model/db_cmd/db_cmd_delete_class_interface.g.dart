@@ -12,7 +12,7 @@ DbCmdDeleteClassInterface _$DbCmdDeleteClassInterfaceFromJson(
       ..id = json['id'] as String
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..entityId = json['entityId'] as String
-      ..index = json['index'] as int;
+      ..index = (json['index'] as num).toInt();
 
 Map<String, dynamic> _$DbCmdDeleteClassInterfaceToJson(
     DbCmdDeleteClassInterface instance) {

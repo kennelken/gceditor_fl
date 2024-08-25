@@ -11,7 +11,7 @@ DbCmdAddClassField _$DbCmdAddClassFieldFromJson(Map<String, dynamic> json) =>
       ..id = json['id'] as String
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..entityId = json['entityId'] as String
-      ..index = json['index'] as int
+      ..index = (json['index'] as num).toInt()
       ..field = ClassMetaFieldDescription.fromJson(
           json['field'] as Map<String, dynamic>)
       ..listInlineValuesByTableColumn =

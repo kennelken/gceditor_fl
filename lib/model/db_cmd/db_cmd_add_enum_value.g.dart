@@ -11,7 +11,7 @@ DbCmdAddEnumValue _$DbCmdAddEnumValueFromJson(Map<String, dynamic> json) =>
       ..id = json['id'] as String
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..entityId = json['entityId'] as String
-      ..index = json['index'] as int
+      ..index = (json['index'] as num).toInt()
       ..value = json['value'] as String
       ..description = json['description'] as String?;
 

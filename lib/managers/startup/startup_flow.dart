@@ -50,7 +50,7 @@ class StartupFlow {
       ..onEntry(
         () async {
           flutter.WidgetsFlutterBinding.ensureInitialized();
-          await AppLocalStorage.instance.isReady();
+          await AppLocalStorage.instance.initStorage();
           providerContainer.read(landingPageStateProvider).initialize();
           goToState(initializeSystemServices);
         },

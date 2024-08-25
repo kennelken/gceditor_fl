@@ -1,6 +1,5 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:gceditor/main.dart';
 import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/utils/utils.dart';
@@ -27,10 +26,11 @@ const Color kColorPrimaryLight = Color(0xFF979DAD);
 const Color kColorPrimaryLightTransparent = Color(0x66979DAD);
 const Color kColorPrimaryLightTransparent1_5 = Color(0x46979DAD);
 const Color kColorPrimaryLightTransparent2 = Color(0x28979DAD);
+const Color kColorPrimaryLightTransparent3 = Color.fromARGB(91, 29, 31, 33);
 const Color kColorSecondary = Color(0xffe2c08d);
 const Color kColorBackground = Color(0xff282c34);
 const Color kColorButtonActive = Color(0xFFBFC7D6);
-const Color kColorTransparent = Color(0x00000000);
+const Color kColorTransparent = Color.fromARGB(0, 0, 0, 0);
 const Color kColorDarken = Color(0x44000000);
 const Color kColorDataTableLine = Color(0xFF3E4452);
 const Color kColorDataTableBackground = Color(0x005E7F97);
@@ -108,12 +108,6 @@ const BorderRadius kCardBorder = BorderRadius.all(kCardRadius);
 
 final kTimeFormat = DateFormat('HH:mm:ss');
 final kDateTimeFormat = DateFormat('yyyy.MM.dd HH:mm:ss');
-
-var kTreeViewTheme = TreeViewTheme(
-  lineColor: kTextColorLight,
-  lineThickness: 1,
-  indent: 25 * kScale,
-);
 
 ScrollBehavior? _kScrollDraggable;
 ScrollBehavior get kScrollDraggable {

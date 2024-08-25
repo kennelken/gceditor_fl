@@ -166,7 +166,7 @@ class StyleStateNotifier extends ChangeNotifier {
       scaffoldBackgroundColor: kColorBackground,
       inputDecorationTheme: InputDecorationTheme(
         hintStyle: state.kTextSmall.copyWith(color: kColorPrimaryLight),
-        labelStyle: state.kTextSmall,
+        labelStyle: state.kTextSmall.copyWith(color: kColorPrimaryLight),
         contentPadding: EdgeInsets.symmetric(horizontal: 10 * state.globalScale),
         border: const OutlineInputBorder(borderSide: BorderSide.none, borderRadius: kCardBorder),
         disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: kColorPrimaryDarker), borderRadius: kCardBorder),
@@ -184,7 +184,21 @@ class StyleStateNotifier extends ChangeNotifier {
         selectionHandleColor: Colors.red,
       ),
       textTheme: TextTheme(
+        titleSmall: state.kTextExtraSmallLightest,
         titleMedium: state.kTextExtraSmallLightest,
+        titleLarge: state.kTextExtraSmallLightest,
+        bodyLarge: state.kTextExtraSmallLightest,
+        bodyMedium: state.kTextExtraSmallLightest,
+        bodySmall: state.kTextExtraSmallLightest,
+        displayLarge: state.kTextExtraSmallLightest,
+        displayMedium: state.kTextExtraSmallLightest,
+        displaySmall: state.kTextExtraSmallLightest,
+        headlineLarge: state.kTextExtraSmallLightest,
+        headlineMedium: state.kTextExtraSmallLightest,
+        headlineSmall: state.kTextExtraSmallLightest,
+        labelLarge: state.kTextExtraSmallLightest,
+        labelMedium: state.kTextExtraSmallLightest,
+        labelSmall: state.kTextExtraSmallLightest,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(

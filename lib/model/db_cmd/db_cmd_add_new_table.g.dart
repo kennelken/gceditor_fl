@@ -12,7 +12,7 @@ DbCmdAddNewTable _$DbCmdAddNewTableFromJson(Map<String, dynamic> json) =>
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..tableMeta = TableMeta.decode(json['tableMeta'] as Map<String, dynamic>)
       ..parentId = json['parentId'] as String?
-      ..index = json['index'] as int?;
+      ..index = (json['index'] as num?)?.toInt();
 
 Map<String, dynamic> _$DbCmdAddNewTableToJson(DbCmdAddNewTable instance) {
   final val = <String, dynamic>{
