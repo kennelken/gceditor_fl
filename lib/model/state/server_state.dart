@@ -6,7 +6,7 @@ import 'package:gceditor/model/db_cmd/base_db_cmd.dart';
 final serverStateProvider = ChangeNotifierProvider((_) => ServerStateNotifier(ServerState()));
 
 class ServerState {
-  bool isInited = false;
+  bool isInitialized = false;
   int version = 0;
   late DbModel model;
   BaseDbCmd? lastCommand;
@@ -18,7 +18,7 @@ class ServerStateNotifier extends ChangeNotifier {
 
   @mustCallSuper
   void setModel(DbModel model) {
-    state.isInited = true;
+    state.isInitialized = true;
     state.model = model;
     state.lastCommand = null;
     state.version++;

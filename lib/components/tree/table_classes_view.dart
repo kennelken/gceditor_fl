@@ -21,7 +21,7 @@ class TableClassesView extends ConsumerWidget {
 
   @override
   Widget build(context, ref) {
-    if (!ref.watch(clientStateProvider).state.isInited) //
+    if (!ref.watch(clientStateProvider).state.isInitialized) //
       return const SizedBox();
     ref.watch(styleStateProvider);
 
