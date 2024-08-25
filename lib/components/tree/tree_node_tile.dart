@@ -43,7 +43,7 @@ class TreeNodeTile extends ConsumerWidget {
     return TreeIndentation(
       entry: entry,
       guide: const IndentGuide.connectingLines(
-        indent: 20,
+        indent: 19,
         color: Colors.grey,
         thickness: 1.0,
         origin: 0.5,
@@ -73,6 +73,9 @@ class TreeNodeTile extends ConsumerWidget {
           }
 
           Widget content = TreeDraggable(
+            collapseOnDragStart: false,
+            expandOnDragEnd: false,
+            affinity: Axis.vertical,
             node: node,
             feedback: Material(
               type: MaterialType.transparency,
