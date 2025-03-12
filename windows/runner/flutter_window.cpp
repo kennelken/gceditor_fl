@@ -28,7 +28,7 @@ bool FlutterWindow::OnCreate() {
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
-    "" //delete this->Show() //change for the window_manager package
+    //delete this->Show() //change for the window_manager package
   });
 
   // Flutter can complete the first frame before the "show window" callback is
