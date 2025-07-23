@@ -38,6 +38,8 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
   late BaseGenerator _generatorCopy;
   late TextEditingController _fileNameController;
   late FocusNode _fileNameFocusNode;
+  late TextEditingController _fileExtensionController;
+  late FocusNode _fileExtensionFocusNode;
   late TextEditingController _indentationController;
   late FocusNode _indentationFocusNode;
   late TextEditingController _namespaceController;
@@ -56,6 +58,10 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
     _fileNameController = TextEditingController();
     _fileNameFocusNode = FocusNode();
     _fileNameFocusNode.addListener(_handleFileNameFocusChanged);
+
+    _fileExtensionController = TextEditingController();
+    _fileExtensionFocusNode = FocusNode();
+    _fileExtensionFocusNode.addListener(_handleFileExtensionFocusChanged);
 
     _indentationController = TextEditingController();
     _indentationFocusNode = FocusNode();
@@ -109,6 +115,7 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
   void _handleClientStateChange() {
     _generatorCopy = BaseGenerator.decode(BaseGenerator.encode(widget.generator).clone());
     _fileNameController.text = _generatorCopy.fileName;
+    _fileExtensionController.text = _generatorCopy.fileExtension;
 
     switch (_generatorCopy.$type!) {
       case GeneratorType.undefined:
@@ -176,12 +183,18 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
                 ),
               ),
               SizedBox(
-                width: 50 * kScale,
-                child: Text(
-                  '.${_generatorCopy.fileExtension}',
-                  style: kStyle.kTextExtraSmall.copyWith(color: kTextColorDark),
-                ),
-              ),
+                  width: 100 * kScale,
+                  child: TextField(
+                    textAlign: TextAlign.end,
+                    controller: _fileExtensionController,
+                    focusNode: _fileExtensionFocusNode,
+                    decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                      hintText: Loc.get.generatorFileExtensionLabel,
+                      hintStyle: kStyle.kTextExtraSmall.copyWith(
+                        color: kColorPrimaryLight,
+                      ),
+                    ),
+                  )),
               SizedBox(
                 width: 20 * kScale,
                 child: DeleteButton(
@@ -205,6 +218,17 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
       return;
 
     _generatorCopy.fileName = _fileNameController.text;
+    widget.onChange(_generatorCopy);
+  }
+
+  void _handleFileExtensionFocusChanged() {
+    if (_fileExtensionFocusNode.hasFocus) //
+      return;
+
+    if (_generatorCopy.fileExtension == _fileExtensionController.text) //
+      return;
+
+    _generatorCopy.fileExtension = _fileExtensionController.text;
     widget.onChange(_generatorCopy);
   }
 

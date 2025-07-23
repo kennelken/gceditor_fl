@@ -184,6 +184,10 @@
 	"@generatorFileNameLabel": {
 		"description": ""
 	},
+	"generatorFileExtensionLabel": "extension",
+	"@generatorFileExtensionLabel": {
+		"description": ""
+	},
 	"projectSettingsTimezoneTitle": "timezone",
 	"@projectSettingsTimezoneTitle": {
 		"description": ""
