@@ -1404,7 +1404,7 @@ using Rectangle = System.Drawing.RectangleF;
 
   final String _parserTemplate = //
       '''#region JSON
-    public static class {${_paramPrefix}}Root{${_paramPostfix}}Parser
+    public static partial class {${_paramPrefix}}Root{${_paramPostfix}}Parser
     {
         public static {${_paramPrefix}}Root{${_paramPostfix}} Parse(string jsonText, {${_paramPrefix}}Root{${_paramPostfix}} root = null, Action<ErrorData> onError = null)
         {
@@ -1414,7 +1414,7 @@ using Rectangle = System.Drawing.RectangleF;
             var valuesByIds = new Dictionary<string, JsonItem>();
 
 #if !UNITY_5_3_OR_NEWER
-            var jsonRoot = JsonSerializer.Deserialize<JsonRoot>(jsonText, new JsonSerializerOptions { IncludeFields = true });
+            var jsonRoot = JsonSerializer.Deserialize<JsonRoot>(jsonText, new JsonSerializerOptions { IncludeFields = true, TypeInfoResolver = JsonRootSourceGenerationContext.Default });
 #else
             var jsonRoot = JsonConvert.DeserializeObject<JsonRoot>(jsonText);
 #endif
@@ -1463,6 +1463,13 @@ using Rectangle = System.Drawing.RectangleF;
 
             return root;
         }
+
+#if !UNITY_5_3_OR_NEWER
+        [JsonSerializable(typeof(JsonRoot)), JsonSourceGenerationOptions(WriteIndented = true)]
+        internal partial class JsonRootSourceGenerationContext : JsonSerializerContext
+        {
+        }
+#endif
 
         public class JsonRoot
         {
@@ -1701,14 +1708,14 @@ using Rectangle = System.Drawing.RectangleF;
             return (T)Enum.Parse(typeof(T), id);
         }
 
-        private static Regex dateFormatRegex = new Regex(@"{${_paramRegexDate}}", RegexOptions.Compiled);
+        [GeneratedRegex(@"{${_paramRegexDate}}")] private static partial Regex dateFormatRegex();
         private static DateTime ParseDate(object value)
         {
             var date = ParseString(value);
             if (string.IsNullOrEmpty(date))
                 return default;
 
-            var match = dateFormatRegex.Match(date);
+            var match = dateFormatRegex().Match(date);
             if (!match.Success)
                 return default;
 
@@ -1732,14 +1739,14 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
-        private static Regex durationFormatRegex = new Regex(@"{${_paramRegexDuration}}", RegexOptions.Compiled);
+        [GeneratedRegex(@"{${_paramRegexDuration}}")] private static partial Regex durationFormatRegex();
         private static TimeSpan ParseDuration(object value)
         {
             var duration = ParseString(value);
             if (string.IsNullOrEmpty(duration))
                 return default;
 
-            var match = durationFormatRegex.Match(duration);
+            var match = durationFormatRegex().Match(duration);
             if (!match.Success)
                 return default;
 
@@ -1758,14 +1765,14 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
-        private static Regex vector2FormatRegex = new Regex(@"{${_paramRegexVector2}}", RegexOptions.Compiled);
+        [GeneratedRegex(@"{${_paramRegexVector2}}")] private static partial Regex vector2FormatRegex();
         private static Vector2 ParseVector2(object value)
         {
             var vector2 = ParseString(value);
             if (string.IsNullOrEmpty(vector2))
                 return default;
 
-            var match = vector2FormatRegex.Match(vector2);
+            var match = vector2FormatRegex().Match(vector2);
             if (!match.Success)
                 return default;
 
@@ -1778,14 +1785,14 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
-        private static Regex vector2IntFormatRegex = new Regex(@"{${_paramRegexVector2Int}}", RegexOptions.Compiled);
+        [GeneratedRegex(@"{${_paramRegexVector2Int}}")] private static partial Regex vector2IntFormatRegex();
         private static Vector2Int ParseVector2Int(object value)
         {
             var vector2Int = ParseString(value);
             if (string.IsNullOrEmpty(vector2Int))
                 return default;
 
-            var match = vector2IntFormatRegex.Match(vector2Int);
+            var match = vector2IntFormatRegex().Match(vector2Int);
             if (!match.Success)
                 return default;
 
@@ -1798,14 +1805,14 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
-        private static Regex vector3FormatRegex = new Regex(@"{${_paramRegexVector3}}", RegexOptions.Compiled);
+        [GeneratedRegex(@"{${_paramRegexVector3}}")] private static partial Regex vector3FormatRegex();
         private static Vector3 ParseVector3(object value)
         {
             var vector3 = ParseString(value);
             if (string.IsNullOrEmpty(vector3))
                 return default;
 
-            var match = vector3FormatRegex.Match(vector3);
+            var match = vector3FormatRegex().Match(vector3);
             if (!match.Success)
                 return default;
 
@@ -1820,14 +1827,14 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
-        private static Regex vector3IntFormatRegex = new Regex(@"{${_paramRegexVector3Int}}", RegexOptions.Compiled);
+        [GeneratedRegex(@"{${_paramRegexVector3Int}}")] private static partial Regex vector3IntFormatRegex();
         private static Vector3Int ParseVector3Int(object value)
         {
             var vector3Int = ParseString(value);
             if (string.IsNullOrEmpty(vector3Int))
                 return default;
 
-            var match = vector3IntFormatRegex.Match(vector3Int);
+            var match = vector3IntFormatRegex().Match(vector3Int);
             if (!match.Success)
                 return default;
 
@@ -1842,14 +1849,14 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
-        private static Regex vector4FormatRegex = new Regex(@"{${_paramRegexVector4}}", RegexOptions.Compiled);
+        [GeneratedRegex(@"{${_paramRegexVector4}}")] private static partial Regex vector4FormatRegex();
         private static Vector4 ParseVector4(object value)
         {
             var vector4 = ParseString(value);
             if (string.IsNullOrEmpty(vector4))
                 return default;
 
-            var match = vector4FormatRegex.Match(vector4);
+            var match = vector4FormatRegex().Match(vector4);
             if (!match.Success)
                 return default;
 
@@ -1866,14 +1873,14 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
-        private static Regex vector4IntFormatRegex = new Regex(@"{${_paramRegexVector4Int}}", RegexOptions.Compiled);
+        [GeneratedRegex(@"{${_paramRegexVector4Int}}")] private static partial Regex vector4IntFormatRegex();
         private static Vector4Int ParseVector4Int(object value)
         {
             var vector4Int = ParseString(value);
             if (string.IsNullOrEmpty(vector4Int))
                 return default;
 
-            var match = vector4IntFormatRegex.Match(vector4Int);
+            var match = vector4IntFormatRegex().Match(vector4Int);
             if (!match.Success)
                 return default;
 
@@ -1890,14 +1897,14 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
-        private static Regex rectangleFormatRegex = new Regex(@"{${_paramRegexRectangle}}", RegexOptions.Compiled);
+        [GeneratedRegex(@"{${_paramRegexRectangle}}")] private static partial Regex rectangleFormatRegex();
         private static Rectangle ParseRectangle(object value)
         {
             var rectangle = ParseString(value);
             if (string.IsNullOrEmpty(rectangle))
                 return default;
 
-            var match = rectangleFormatRegex.Match(rectangle);
+            var match = rectangleFormatRegex().Match(rectangle);
             if (!match.Success)
                 return default;
 
@@ -1914,14 +1921,14 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
-        private static Regex rectangleIntFormatRegex = new Regex(@"{${_paramRegexRectangleInt}}", RegexOptions.Compiled);
+        [GeneratedRegex(@"{${_paramRegexRectangleInt}}")] private static partial Regex rectangleIntFormatRegex();
         private static RectangleInt ParseRectangleInt(object value)
         {
             var rectangleInt = ParseString(value);
             if (string.IsNullOrEmpty(rectangleInt))
                 return default;
 
-            var match = rectangleIntFormatRegex.Match(rectangleInt);
+            var match = rectangleIntFormatRegex().Match(rectangleInt);
             if (!match.Success)
                 return default;
 
