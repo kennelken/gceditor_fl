@@ -35,7 +35,7 @@ dependencies:
     sdk: flutter
   flutter_riverpod: ^2.3.6
   font_awesome_flutter: ^10.5.0
-  intl: ^0.18.0
+  intl: ^0.20.2
   listenable_stream: ^2.0.1
   loading_overlay: ^0.3.0
   localstorage: ^5.0.0
@@ -63,9 +63,6 @@ dependencies:
   collection: ^1.17.1
   screen_retriever: ^0.1.9
   menu_bar: ^0.5.3
-
-dependency_overrides:
-  intl: ^0.18.0
 
 dev_dependencies:
   json_serializable: ^6.1.3
