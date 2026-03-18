@@ -1708,7 +1708,12 @@ using Rectangle = System.Drawing.RectangleF;
             return (T)Enum.Parse(typeof(T), id);
         }
 
+#if !UNITY_5_3_OR_NEWER
         [GeneratedRegex(@"{${_paramRegexDate}}")] private static partial Regex dateFormatRegex();
+#else
+        private static Regex _dateFormatRegex;
+        private static Regex dateFormatRegex() => _dateFormatRegex ??= new Regex(@"{${_paramRegexDate}}", RegexOptions.Compiled);
+#endif
         private static DateTime ParseDate(object value)
         {
             var date = ParseString(value);
@@ -1739,7 +1744,12 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
+#if !UNITY_5_3_OR_NEWER
         [GeneratedRegex(@"{${_paramRegexDuration}}")] private static partial Regex durationFormatRegex();
+#else
+        private static Regex _durationFormatRegex;
+        private static Regex durationFormatRegex() => _durationFormatRegex ??= new Regex(@"{${_paramRegexDuration}}", RegexOptions.Compiled);
+#endif
         private static TimeSpan ParseDuration(object value)
         {
             var duration = ParseString(value);
@@ -1765,7 +1775,12 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
+#if !UNITY_5_3_OR_NEWER
         [GeneratedRegex(@"{${_paramRegexVector2}}")] private static partial Regex vector2FormatRegex();
+#else
+        private static Regex _vector2FormatRegex;
+        private static Regex vector2FormatRegex() => _vector2FormatRegex ??= new Regex(@"{${_paramRegexVector2}}", RegexOptions.Compiled);
+#endif
         private static Vector2 ParseVector2(object value)
         {
             var vector2 = ParseString(value);
@@ -1785,7 +1800,12 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
+#if !UNITY_5_3_OR_NEWER
         [GeneratedRegex(@"{${_paramRegexVector2Int}}")] private static partial Regex vector2IntFormatRegex();
+#else
+        private static Regex _vector2IntFormatRegex;
+        private static Regex vector2IntFormatRegex() => _vector2IntFormatRegex ??= new Regex(@"{${_paramRegexVector2Int}}", RegexOptions.Compiled);
+#endif
         private static Vector2Int ParseVector2Int(object value)
         {
             var vector2Int = ParseString(value);
@@ -1805,7 +1825,12 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
+#if !UNITY_5_3_OR_NEWER
         [GeneratedRegex(@"{${_paramRegexVector3}}")] private static partial Regex vector3FormatRegex();
+#else
+        private static Regex _vector3FormatRegex;
+        private static Regex vector3FormatRegex() => _vector3FormatRegex ??= new Regex(@"{${_paramRegexVector3}}", RegexOptions.Compiled);
+#endif
         private static Vector3 ParseVector3(object value)
         {
             var vector3 = ParseString(value);
@@ -1827,7 +1852,12 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
+#if !UNITY_5_3_OR_NEWER
         [GeneratedRegex(@"{${_paramRegexVector3Int}}")] private static partial Regex vector3IntFormatRegex();
+#else
+        private static Regex _vector3IntFormatRegex;
+        private static Regex vector3IntFormatRegex() => _vector3IntFormatRegex ??= new Regex(@"{${_paramRegexVector3Int}}", RegexOptions.Compiled);
+#endif
         private static Vector3Int ParseVector3Int(object value)
         {
             var vector3Int = ParseString(value);
@@ -1849,7 +1879,12 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
+#if !UNITY_5_3_OR_NEWER
         [GeneratedRegex(@"{${_paramRegexVector4}}")] private static partial Regex vector4FormatRegex();
+#else
+        private static Regex _vector4FormatRegex;
+        private static Regex vector4FormatRegex() => _vector4FormatRegex ??= new Regex(@"{${_paramRegexVector4}}", RegexOptions.Compiled);
+#endif
         private static Vector4 ParseVector4(object value)
         {
             var vector4 = ParseString(value);
@@ -1873,7 +1908,12 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
+#if !UNITY_5_3_OR_NEWER
         [GeneratedRegex(@"{${_paramRegexVector4Int}}")] private static partial Regex vector4IntFormatRegex();
+#else
+        private static Regex _vector4IntFormatRegex;
+        private static Regex vector4IntFormatRegex() => _vector4IntFormatRegex ??= new Regex(@"{${_paramRegexVector4Int}}", RegexOptions.Compiled);
+#endif
         private static Vector4Int ParseVector4Int(object value)
         {
             var vector4Int = ParseString(value);
@@ -1897,7 +1937,12 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
+#if !UNITY_5_3_OR_NEWER
         [GeneratedRegex(@"{${_paramRegexRectangle}}")] private static partial Regex rectangleFormatRegex();
+#else
+        private static Regex _rectangleFormatRegex;
+        private static Regex rectangleFormatRegex() => _rectangleFormatRegex ??= new Regex(@"{${_paramRegexRectangle}}", RegexOptions.Compiled);
+#endif
         private static Rectangle ParseRectangle(object value)
         {
             var rectangle = ParseString(value);
@@ -1921,7 +1966,12 @@ using Rectangle = System.Drawing.RectangleF;
             );
         }
 
+#if !UNITY_5_3_OR_NEWER
         [GeneratedRegex(@"{${_paramRegexRectangleInt}}")] private static partial Regex rectangleIntFormatRegex();
+#else
+        private static Regex _rectangleIntFormatRegex;
+        private static Regex rectangleIntFormatRegex() => _rectangleIntFormatRegex ??= new Regex(@"{${_paramRegexRectangleInt}}", RegexOptions.Compiled);
+#endif
         private static RectangleInt ParseRectangleInt(object value)
         {
             var rectangleInt = ParseString(value);
