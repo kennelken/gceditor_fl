@@ -94,8 +94,8 @@ class Config {
   static const int flexRatioMultiplier = 100000;
   static const int intMinValue = -2147483648;
   static const int intMaxValue = 2147483647;
-  static final int colorMinValue = const Color.fromARGB(0, 0, 0, 0).value;
-  static final int colorMaxValue = const Color.fromARGB(255, 255, 255, 255).value;
+  static final int colorMinValue = const Color.fromARGB(0, 0, 0, 0).toARGB32();
+  static final int colorMaxValue = const Color.fromARGB(255, 255, 255, 255).toARGB32();
   static const double floatMinValue = -3.40282347E+38;
   static const double floatMaxValue = 3.40282347E+38;
 

@@ -41,7 +41,7 @@ class ScreenService {
       await windowManager.setMinimumSize(Config.minWidowSize);
 
       var savedWindowRect = AppLocalStorage.instance.windowRect;
-      if (savedWindowRect != null && (savedWindowRect!.width > 10000 || savedWindowRect!.height > 10000)) {
+      if (savedWindowRect != null && (savedWindowRect.width > 10000 || savedWindowRect.height > 10000)) {
         providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'incorrect savedWindowRect'));
         savedWindowRect = null;
       }

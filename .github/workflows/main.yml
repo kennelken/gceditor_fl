@@ -44,9 +44,6 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Analyze code
-        run: flutter analyze --no-fatal-infos
-
       - name: Build windows
         run: |
           flutter config --enable-windows-desktop

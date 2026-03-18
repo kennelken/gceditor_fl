@@ -53,9 +53,9 @@ class DataTableCellColorView extends ConsumerWidget {
   }
 
   void _handleColorChanged(Color color) {
-    if (color.value == value) //
+    if (color.toARGB32() == value) //
       return;
-    onValueChanged(color.value);
+    onValueChanged(color.toARGB32());
   }
 
   void _showColorPicker(Color initialColor) {
