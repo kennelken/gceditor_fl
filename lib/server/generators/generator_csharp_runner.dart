@@ -1123,8 +1123,8 @@ using Rectangle = System.Drawing.RectangleF;
 #region Classes definitions
     public abstract partial class Base{${_paramPrefix}}Item{${_paramPostfix}} : IIdentifiable
     {
-        public string Id { get; init; }
-        public bool IsGlobal { get; init; }
+        public string Id { get; set; }
+        public bool IsGlobal { get; set; }
 
         public virtual void OnParsed({${_paramPrefix}}Root{${_paramPostfix}} root, CacheRoot cache) {}
     }
