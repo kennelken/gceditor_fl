@@ -14,7 +14,7 @@ class Config {
   static const String projectFileExtension = 'json';
   static const String newProjectDefaultFolder = 'gceditorProject';
   static const String newProjectDefaultName = 'project.$projectFileExtension';
-  static const String newAuthListDefaultName = 'auth\\auth.$projectFileExtension';
+  static const String newAuthListDefaultName = 'auth.$projectFileExtension';
   static const String newOutputListDefaultName = 'output';
   static const String newHistoryListDefaultName = 'history';
   static const String newHistoryDefaultTag = 'main';
