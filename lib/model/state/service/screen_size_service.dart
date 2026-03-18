@@ -40,7 +40,11 @@ class ScreenService {
 
       await windowManager.setMinimumSize(Config.minWidowSize);
 
-      final savedWindowRect = AppLocalStorage.instance.windowRect;
+      var savedWindowRect = AppLocalStorage.instance.windowRect;
+      if (savedWindowRect != null && (savedWindowRect!.width > 10000 || savedWindowRect!.height > 10000)) {
+        providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'incorrect savedWindowRect'));
+        savedWindowRect = null;
+      }
       if (savedWindowRect == null) {
         _initialized = true;
         return;
@@ -49,7 +53,7 @@ class ScreenService {
       _initialized = true;
 
       final displayList = await screenRetriever.getAllDisplays();
-      final intersections = displayList.map((d) => ((d.visiblePosition ?? const Offset(0, 0)) & d.size).intersect(savedWindowRect));
+      final intersections = displayList.map((d) => ((d.visiblePosition ?? const Offset(0, 0)) & d.size).intersect(savedWindowRect!));
 
       if (intersections.any((e) => e.width > 50 && e.height > 50)) {
         windowManager.setBounds(savedWindowRect);
