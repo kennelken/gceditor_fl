@@ -64,9 +64,11 @@ class ServerHistoryAdminPanelState extends State<ServerHistoryAdminPanel> {
         final historyPath = ref.watch(landingPageStateProvider).state.historyPath;
 
         if (!_initialValuesSet) {
-          final historyTag = AppLocalStorage.instance.historyTag ?? Config.newHistoryDefaultTag;
+          final historyTag =
+              AppLocalStorage.instance.historyTag ?? (AppLocalStorage.instance.historyTagInitialized == true ? '' : Config.newHistoryDefaultTag);
           _tagNameTextController.text = historyTag;
           _initialValuesSet = true;
+          AppLocalStorage.instance.historyTagInitialized = true;
         }
 
         _historyPath = historyPath;

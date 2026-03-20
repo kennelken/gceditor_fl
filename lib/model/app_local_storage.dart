@@ -95,6 +95,14 @@ class AppLocalStorage {
     saveProperty('historyTag', value);
   }
 
+  bool? get historyTagInitialized {
+    return _readProperty<bool>('historyTagInitialized');
+  }
+
+  set historyTagInitialized(bool? value) {
+    saveProperty('historyTagInitialized', value);
+  }
+
   String? get clientLogin {
     return _readProperty<String>('clientLogin');
   }
