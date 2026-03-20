@@ -80,12 +80,12 @@ class Config {
   static double defaultFindHeight = 250;
   static double minRowHeightMultiplier = 0.7;
   static double maxRowHeightMultiplier = 20;
-  static String newEnumValueDefaultDescription = 'New value';
-  static String newEnumDescription = 'New Enum';
-  static String newFolderDescription = 'New Folder';
-  static String newClassDescription = 'New Class';
-  static String newTableDescription = 'New Table';
-  static String newFieldDescription = 'New Field';
+  static String newEnumValueDefaultDescription = '';
+  static String newEnumDescription = '';
+  static String newFolderDescription = '';
+  static String newClassDescription = '';
+  static String newTableDescription = '';
+  static String newFieldDescription = '';
 
   static final DateTime defaultDateTime = DateTime(2000);
   static const Duration pollWindowPositionPeriod = Duration(seconds: 1);
