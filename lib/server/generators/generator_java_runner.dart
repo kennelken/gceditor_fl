@@ -156,7 +156,7 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
           _paramPostfix: data.postfix,
           _paramClass: enumEntity.id,
           _paramEnumBody: _getEnumValues(enumEntity),
-          _paramClassDescription: _makeSummary(enumEntity.description.isNotEmpty ? enumEntity.description : 'No description', 1, true),
+          _paramClassDescription: _makeSummary(enumEntity.description.isNotEmpty ? enumEntity.description : '', 1, true),
         },
       );
 
@@ -174,7 +174,7 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
           _paramClass: classEntity.id,
           _paramParentClass: _getParentClass(classEntity, data),
           _paramParentInterfaces: _getParentInterfaces(classEntity, data),
-          _paramClassDescription: _makeSummary(classEntity.description.isNotEmpty ? classEntity.description : 'No description', 1, true),
+          _paramClassDescription: _makeSummary(classEntity.description.isNotEmpty ? classEntity.description : '', 1, true),
           _paramPropertiesBody: _getClassProperties(model, data, classEntity, false),
           _paramInterfacePropertiesBody: _getClassProperties(model, data, classEntity, true),
           _methodCloneBody: _getCloneProperties(model, classEntity),

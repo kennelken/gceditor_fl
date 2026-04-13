@@ -168,7 +168,7 @@ namespace ${data.namespace}
           _paramPostfix: data.postfix,
           _paramClass: enumEntity.id,
           _paramEnumBody: _getEnumValues(enumEntity),
-          _paramClassDescription: _makeSummary(enumEntity.description.isNotEmpty ? enumEntity.description : 'No description', 1),
+          _paramClassDescription: _makeSummary(enumEntity.description.isNotEmpty ? enumEntity.description : '', 1),
         },
       );
 
@@ -186,7 +186,7 @@ namespace ${data.namespace}
           _paramClass: classEntity.id,
           _paramParentClass: _getParentClass(classEntity, data),
           _paramParentInterfaces: _getParentInterfaces(classEntity, data),
-          _paramClassDescription: _makeSummary(classEntity.description.isNotEmpty ? classEntity.description : 'No description', 1),
+          _paramClassDescription: _makeSummary(classEntity.description.isNotEmpty ? classEntity.description : '', 1),
           _paramPropertiesBody: _getClassProperties(model, data, classEntity),
           _methodCloneBody: _getCloneProperties(model, classEntity),
           _paramListStructGetHashCode: _getListStructGetHashCode(model, classEntity),
@@ -1220,6 +1220,18 @@ using Rectangle = System.Drawing.RectangleF;
             Z = z;
         }
     }
+
+    public struct RectInt
+    {
+        public Vector2Int Position;
+        public Vector2Int Size;
+
+        public RectInt(Vector2Int position, Vector2Int size)
+        {
+            Position = position;
+            Size = size;
+        }
+    }
     #endif
 
     public struct Vector4Int
@@ -1235,18 +1247,6 @@ using Rectangle = System.Drawing.RectangleF;
             Y = y;
             Z = z;
             W = w;
-        }
-    }
-
-    public struct RectInt
-    {
-        public Vector2Int Position;
-        public Vector2Int Size;
-
-        public RectInt(Vector2Int position, Vector2Int size)
-        {
-            Position = position;
-            Size = size;
         }
     }
 #endif
