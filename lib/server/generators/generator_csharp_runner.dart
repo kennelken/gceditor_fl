@@ -1550,7 +1550,7 @@ using Rectangle = System.Drawing.RectangleF;
             }
 #else
             var array = values as JArray;
-            if (values == null || values == "" || array.Count <= 0)
+            if (values == null || (values as string) == "" || array.Count <= 0)
                 return emptyCollectionFactory.Dictionary<TKey, TValue>();
 
             var result = new Dictionary<TKey, TValue>();
@@ -1581,7 +1581,7 @@ using Rectangle = System.Drawing.RectangleF;
             }
 #else
             var array = values as JArray;
-            if (values == null || values == "" || array.Count <= 0)
+            if (values == null || (values as string) == "" || array.Count <= 0)
                 return emptyCollectionFactory.List<T>();
 
             var result = new List<T>();
@@ -1609,7 +1609,7 @@ using Rectangle = System.Drawing.RectangleF;
                 result.Add(getValue(element));
 #else
             var array = values as JArray;
-            if (values == null || values == "" || array.Count <= 0)
+            if (values == null || (values as string) == "" || array.Count <= 0)
                 return emptyCollectionFactory.List<T>();
 
             var result = new List<T>(array.Count);
@@ -1631,7 +1631,7 @@ using Rectangle = System.Drawing.RectangleF;
                 return emptyCollectionFactory.HashSet<T>();
 #else
             var array = values as JArray;
-            if (values == null || values == "" || array.Count <= 0)
+            if (values == null || (values as string) == "" || array.Count <= 0)
                 return emptyCollectionFactory.HashSet<T>();
 #endif
             return new HashSet<T>(ParseList<T>(values, getValue, emptyCollectionFactory));
