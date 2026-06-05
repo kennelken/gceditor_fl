@@ -63,6 +63,7 @@ dependencies:
   collection: ^1.17.1
   screen_retriever: ^0.2.0
   menu_bar: ^0.5.3
+  sort_json: ^1.0.2
 
 dev_dependencies:
   json_serializable: ^6.1.3

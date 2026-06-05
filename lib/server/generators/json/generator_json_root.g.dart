@@ -8,16 +8,19 @@ part of 'generator_json_root.dart';
 
 GeneratorJsonRoot _$GeneratorJsonRootFromJson(Map<String, dynamic> json) =>
     GeneratorJsonRoot()
-      ..date = json['date'] as String
-      ..user = json['user'] as String
-      ..classes = (json['classes'] as Map<String, dynamic>).map(
+      ..generationDate = json['generationDate'] as String
+      ..generationUser = json['generationUser'] as String
+      ..records = (json['records'] as Map<String, dynamic>).map(
         (k, e) => MapEntry(
-            k, GeneratorJsonItemList.fromJson(e as Map<String, dynamic>)),
+            k,
+            (e as List<dynamic>)
+                .map((e) => e as Map<String, dynamic>)
+                .toList()),
       );
 
 Map<String, dynamic> _$GeneratorJsonRootToJson(GeneratorJsonRoot instance) =>
     <String, dynamic>{
-      'date': instance.date,
-      'user': instance.user,
-      'classes': instance.classes.map((k, e) => MapEntry(k, e.toJson())),
+      'generationDate': instance.generationDate,
+      'generationUser': instance.generationUser,
+      'records': instance.records,
     };

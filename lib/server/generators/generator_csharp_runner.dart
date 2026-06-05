@@ -1381,7 +1381,7 @@ using Rectangle = System.Drawing.RectangleF;
   final _getNewInstanceRowTemplate = '''
 
                 case "{${_paramClassName}}":
-                    return new {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}} { Id = item?.id ?? GetInlineRowId(ownerId), IsGlobal = item?.id != null };
+                    return new {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}} { Id = item?.GetValueOrDefault("id") as string ?? GetInlineRowId(ownerId), IsGlobal = item?.ContainsKey("id") == true };
   ''';
 
   final String _assignValueCaseTemplate = '''
@@ -1411,19 +1411,19 @@ using Rectangle = System.Drawing.RectangleF;
             EmptyCollectionFactory emptyCollectionFactory = new EmptyCollectionFactory();
 
             var objectsByIds = new Dictionary<string, IIdentifiable>();
-            var valuesByIds = new Dictionary<string, JsonItem>();
+            var valuesByIds = new Dictionary<string, Dictionary<string, object>>();
 
 #if !UNITY_5_3_OR_NEWER
             var jsonRoot = JsonSerializer.Deserialize<JsonRoot>(jsonText, new JsonSerializerOptions { IncludeFields = true, TypeInfoResolver = JsonRootSourceGenerationContext.Default });
 #else
             var jsonRoot = JsonConvert.DeserializeObject<JsonRoot>(jsonText);
 #endif
-            foreach (var className in jsonRoot.classes.Keys)
+            foreach (var className in jsonRoot.records.Keys)
             {
-                var listItems = jsonRoot.classes[className];
-                for (var i = 0; i < listItems.items.Count; i++)
+                var listItems = jsonRoot.records[className];
+                for (var i = 0; i < listItems.Count; i++)
                 {
-                    var item = listItems.items[i];
+                    var item = listItems[i];
 
                     var instance = GetNewInstance(className, item);
                     objectsByIds[instance.Id] = instance;
@@ -1444,14 +1444,14 @@ using Rectangle = System.Drawing.RectangleF;
             for (var i = 0; i < maxStructDepth; i++)
             {
                 foreach (var objectId in allStructs)
-                    objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId].values, emptyCollectionFactory, onError);
+                    objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId], emptyCollectionFactory, onError);
             }
             foreach (var objectId in allClasses)
-                objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId].values, emptyCollectionFactory, onError);
+                objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId], emptyCollectionFactory, onError);
 
             root ??= new {${_paramPrefix}}Root{${_paramPostfix}}();
-            root.CreatedBy = jsonRoot.user;
-            root.CreationTime = jsonRoot.date;
+            root.CreatedBy = jsonRoot.generationUser;
+            root.CreationTime = jsonRoot.generationDate;
             root.Init(new List<IIdentifiable>(objectsByIds.Values));
 
             var cache = new CacheRoot();
@@ -1473,28 +1473,12 @@ using Rectangle = System.Drawing.RectangleF;
 
         public class JsonRoot
         {
-            public string date;
-            public string user;
-            public Dictionary<string, JsonItemList> classes;
+            public string generationDate;
+            public string generationUser;
+            public Dictionary<string, List<Dictionary<string, object>>> records;
         }
 
-        public class JsonItemList
-        {
-            public List<JsonItem> items;
-        }
-
-        public class JsonItem
-        {
-            public string id;
-            public Dictionary<string, object> values;
-        }
-
-        public class JsonDictionaryItem {
-            public object k;
-            public object v;
-        }
-
-        private static IIdentifiable GetNewInstance(string className, JsonItem item, string ownerId = null)
+        private static IIdentifiable GetNewInstance(string className, Dictionary<string, object> item, string ownerId = null)
         {
             switch (className)
             {{${_paramListInstantiate}}
@@ -1538,26 +1522,23 @@ using Rectangle = System.Drawing.RectangleF;
         )
         {
 #if !UNITY_5_3_OR_NEWER
-            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
+            if (values == null || ((JsonElement)values).ValueKind != JsonValueKind.Object)
                 return emptyCollectionFactory.Dictionary<TKey, TValue>();
 
             var result = new Dictionary<TKey, TValue>();
-            foreach (var element in ((JsonElement)values).EnumerateArray())
+            foreach (var element in ((JsonElement)values).EnumerateObject())
             {
-              var key = element.GetProperty("k");
-              var value = element.GetProperty("v");
-              result[getKey(key)] = getValue(value);
+              result[getKey(element.Name)] = getValue(element.Value);
             }
 #else
-            var array = values as JArray;
-            if (values == null || (values as string) == "" || array.Count <= 0)
+            var dictionary = values as JObject;
+            if (values == null || (values as string) == "" || dictionary == null)
                 return emptyCollectionFactory.Dictionary<TKey, TValue>();
 
             var result = new Dictionary<TKey, TValue>();
-            foreach (JToken jsonValue in array)
+            foreach (var property in dictionary.Properties())
             {
-                var value = jsonValue.ToObject<JsonDictionaryItem>();
-                result[getKey(value.k)] = getValue(value.v);
+                result[getKey(property.Name)] = getValue(property.Value);
             }
 #endif
             return result;

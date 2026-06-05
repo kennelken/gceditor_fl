@@ -1273,16 +1273,16 @@ class RectangleInt {
             var emptyCollectionFactory = new EmptyCollectionFactory();
 
             var objectsByIds = new HashMap<String, IIdentifiable>();
-            var valuesByIds = new HashMap<String, JsonItem>();
+            var valuesByIds = new HashMap<String, HashMap<String, Object>>();
 
             var objectMapper = new ObjectMapper();
             var jsonRoot = objectMapper.readValue(jsonText, {${_paramPrefix}}Root{${_paramPostfix}}.GceditorJsonParser.JsonRoot.class);
-            for (var className : jsonRoot.classes.keySet())
+            for (var className : jsonRoot.records.keySet())
             {
-                var listItems = jsonRoot.classes.get(className);
-                for (var i = 0; i < listItems.items.size(); i++)
+                var listItems = jsonRoot.records.get(className);
+                for (var i = 0; i < listItems.size(); i++)
                 {
-                    var item = listItems.items.get(i);
+                    var item = listItems.get(i);
 
                     var instance = GetNewInstance(className, item, null);
                     objectsByIds.put(instance.getId(), instance);
@@ -1292,12 +1292,12 @@ class RectangleInt {
 
             var allClasses = objectsByIds.keySet();
             for (var objectId : allClasses)
-                objectsByIds.put(objectId, AssignValues(objectsByIds.get(objectId), objectsByIds, valuesByIds.get(objectId).values, emptyCollectionFactory, onError));
+                objectsByIds.put(objectId, AssignValues(objectsByIds.get(objectId), objectsByIds, valuesByIds.get(objectId), emptyCollectionFactory, onError));
 
             if (root == null)
               root = new {${_paramPrefix}}Root{${_paramPostfix}}();
-            root.CreatedBy = jsonRoot.user;
-            root.CreationTime = jsonRoot.date;
+            root.CreatedBy = jsonRoot.generationUser;
+            root.CreationTime = jsonRoot.generationDate;
             root.Init(new ArrayList<IIdentifiable>(objectsByIds.values()));
 
             _inlineItemsCounter.clear();
@@ -1307,23 +1307,12 @@ class RectangleInt {
 
         public static class JsonRoot
         {
-            public String date;
-            public String user;
-            public HashMap<String, JsonItemList> classes;
+            public String generationDate;
+            public String generationUser;
+            public HashMap<String, ArrayList<HashMap<String, Object>>> records;
         }
 
-        public static class JsonItemList
-        {
-            public ArrayList<JsonItem> items;
-        }
-
-        public static class JsonItem
-        {
-            public String id;
-            public HashMap<String, Object> values;
-        }
-
-        private static IIdentifiable GetNewInstance(String className, JsonItem item, String ownerId) throws IllegalArgumentException
+        private static IIdentifiable GetNewInstance(String className, HashMap<String, Object> item, String ownerId) throws IllegalArgumentException
         {
             Base{${_paramPrefix}}Item{${_paramPostfix}} value;
 
@@ -1332,10 +1321,10 @@ class RectangleInt {
                 default:
                     throw new IllegalArgumentException(String.format("Can not create a new instance of an unexpected class '%s'", className));
             }
-            value.Id = item != null && item.id != null
-                ? item.id
+            value.Id = item != null && item.containsKey("id") && item.get("id") != null
+                ? item.get("id").toString()
                 : GetInlineRowId(ownerId);
-            value.IsGlobal = item != null && item.id != null;
+            value.IsGlobal = item != null && item.containsKey("id");
             return value;
         }
 
@@ -1377,14 +1366,14 @@ class RectangleInt {
             if (values == null)
                 return emptyCollectionFactory.HashMap(keyClass, valueClass);
 
-            var array = (ArrayList<LinkedHashMap>)values;
-            if (array.isEmpty())
+            var dictionary = (LinkedHashMap<String, Object>)values;
+            if (dictionary.isEmpty())
                 return emptyCollectionFactory.HashMap(keyClass, valueClass);
 
             var result = new HashMap<TKey, TValue>();
-            for (var jsonValue : array)
+            for (var entry : dictionary.entrySet())
             {
-                result.put(getKey.apply(jsonValue.get("k")), getValue.apply(jsonValue.get("v")));
+                result.put(getKey.apply(entry.getKey()), getValue.apply(entry.getValue()));
             }
 
             return result;
