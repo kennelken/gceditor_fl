@@ -1,7 +1,5 @@
 // ignore_for_file: unnecessary_brace_in_string_interps
 
-import 'dart:math';
-
 import 'package:darq/darq.dart';
 import 'package:gceditor/model/db/class_field_description_data_info.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
@@ -48,12 +46,10 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
   static const _paramPropertySummary = 'propertySummary';
   static const _paramCloneProperty = 'cloneProperty';
 
-  static const _paramListInstantiate = 'listInstantiate';
+  static const _paramJsonRootRecordsTypedListFields = 'jsonRootRecordsTypedListFields';
+  static const _paramJsonRootPopulateObjectsByIds = 'jsonRootPopulateObjectsByIds';
+  static const _paramTypeConverterRegistrations = 'typeConverterRegistrations';
   static const _paramClassName = 'className';
-  static const _paramAssignValueListProperties = 'assignValueListProperties';
-  static const _paramParseFunction = 'parseFunction';
-  static const _paramAssignValueCases = 'assignValueCases';
-  static const _paramMaxStructDepth = 'maxStructDepth';
 
   static const _paramItemsListPropertiesList = 'itemsListPropertiesBody';
   static const _paramItemsListConstructorList = 'itemsListConstructorBody';
@@ -81,9 +77,9 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
               _paramPrefix: data.prefix,
               _paramPrefixInterface: data.prefixInterface,
               _paramPostfix: data.postfix,
-              _paramListInstantiate: _getListInstantiate(model, data),
-              _paramAssignValueCases: _getAssignValuesCases(model, data),
-              _paramMaxStructDepth: _getMaxStructDepth(model, 3),
+              _paramJsonRootRecordsTypedListFields: _getJsonRootRecordsTypedListFields(model, data),
+              _paramJsonRootPopulateObjectsByIds: _getJsonRootPopulateObjectsByIds(model, data),
+              _paramTypeConverterRegistrations: _getTypeConverterRegistrations(model, data),
             },
           ),
           _paramListItemsListsAssignment: _getListItemsListAssignment(model, data),
@@ -342,13 +338,14 @@ namespace ${data.namespace}
     }
 
     final allFields = [...classEntity.fields, ...inheritedInterfaceFields];
+    final enumClassIds = model.cache.allEnums.map((e) => e.id).toSet();
 
     for (final field in allFields) {
       items.add(
         _classPropertyTemplate.format(
           {
             _paramPropertyAccessLevel: _getPropertyAccessLevel(classEntity, data),
-            _paramPropertyType: _getPropertyType(field, data),
+            _paramPropertyType: _getPropertyType(field, data, enumClassIds),
             _paramPropertyName: field.id,
             _paramPropertySummary: _makeWholeSummary(field.description, 2),
           },
@@ -438,8 +435,9 @@ namespace ${data.namespace}
     }
   }
 
-  String _getPropertyType(ClassMetaFieldDescription field, GeneratorCsharp data) {
+  String _getPropertyType(ClassMetaFieldDescription field, GeneratorCsharp data, Set<String> enumClassIds) {
     switch (field.typeInfo.type) {
+      case ClassFieldType.undefined:
       case ClassFieldType.bool:
       case ClassFieldType.int:
       case ClassFieldType.long:
@@ -447,10 +445,9 @@ namespace ${data.namespace}
       case ClassFieldType.double:
       case ClassFieldType.string:
       case ClassFieldType.text:
-      case ClassFieldType.undefined:
-      case ClassFieldType.reference:
       case ClassFieldType.date:
       case ClassFieldType.duration:
+      case ClassFieldType.reference:
       case ClassFieldType.color:
       case ClassFieldType.vector2:
       case ClassFieldType.vector2Int:
@@ -460,23 +457,23 @@ namespace ${data.namespace}
       case ClassFieldType.vector4Int:
       case ClassFieldType.rectangle:
       case ClassFieldType.rectangleInt:
-        return _getSimplePropertyType(field.typeInfo, data);
+        return _getSimplePropertyType(field.typeInfo, data, enumClassIds);
 
       case ClassFieldType.list:
-        return 'List<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
+        return 'List<${_getSimplePropertyType(field.valueTypeInfo!, data, enumClassIds)}>';
 
       case ClassFieldType.listInline:
-        return 'List<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
+        return 'List<${_getSimplePropertyType(field.valueTypeInfo!, data, enumClassIds)}>';
 
       case ClassFieldType.set:
-        return 'HashSet<${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
+        return 'HashSet<${_getSimplePropertyType(field.valueTypeInfo!, data, enumClassIds)}>';
 
       case ClassFieldType.dictionary:
-        return 'Dictionary<${_getSimplePropertyType(field.keyTypeInfo!, data)}, ${_getSimplePropertyType(field.valueTypeInfo!, data)}>';
+        return 'Dictionary<${_getSimplePropertyType(field.keyTypeInfo!, data, enumClassIds)}, ${_getSimplePropertyType(field.valueTypeInfo!, data, enumClassIds)}>';
     }
   }
 
-  String _getSimplePropertyType(ClassFieldDescriptionDataInfo type, GeneratorCsharp data) {
+  String _getSimplePropertyType(ClassFieldDescriptionDataInfo type, GeneratorCsharp data, Set<String> enumClassIds) {
     switch (type.type) {
       case ClassFieldType.bool:
         return 'bool';
@@ -499,7 +496,8 @@ namespace ${data.namespace}
         return 'string';
 
       case ClassFieldType.reference:
-        return '${data.prefix}${type.classId!}${data.postfix}';
+        if (enumClassIds.contains(type.classId)) return 'string';
+        return '${data.prefix}Item${data.postfix}Ref<${data.prefix}${type.classId!}${data.postfix}>';
 
       case ClassFieldType.list:
       case ClassFieldType.listInline:
@@ -557,193 +555,49 @@ ${_makeSummary(summary, indentDepth)}
 ${_makeSummary('</summary>', indentDepth)}''';
   }
 
-  String _getListInstantiate(DbModel model, GeneratorCsharp data) {
+  String _getJsonRootRecordsTypedListFields(DbModel model, GeneratorCsharp data) {
     final items = <String>[];
     for (final classEntity in model.cache.allClasses) {
       switch (classEntity.classType) {
         case ClassType.undefined:
         case ClassType.interface:
           break;
-
         case ClassType.referenceType:
         case ClassType.valueType:
-          items.add(
-            _getNewInstanceRowTemplate.format(
-              {
-                _paramClassName: classEntity.id,
-                _paramPrefix: data.prefix,
-                _paramPrefixInterface: data.prefixInterface,
-                _paramPostfix: data.postfix,
-              },
-            ),
-          );
+          items.add('            public List<${data.prefix}${classEntity.id}${data.postfix}> ${classEntity.id};');
           break;
       }
     }
-
-    return items.join();
-  }
-
-  String _getAssignValuesCases(DbModel model, GeneratorCsharp data) {
-    final items = <String>[];
-
-    final allClassesSortedByDepth = model.cache.allClasses.orderByDescending((e) => model.cache.getParentClasses(e).length).toList();
-    for (final classEntity in allClassesSortedByDepth) {
-      switch (classEntity.classType) {
-        case ClassType.undefined:
-        case ClassType.interface:
-          break;
-
-        case ClassType.referenceType:
-        case ClassType.valueType:
-          items.add(
-            _assignValueCaseTemplate.format(
-              {
-                _paramClassName: '${data.prefix}${classEntity.id}${data.postfix}',
-                _paramAssignValueListProperties: _getAssignValueListProperties(model, data, classEntity),
-              },
-            ),
-          );
-          break;
-      }
+    for (final tableEntity in model.cache.allDataTables) {
+      items.add('            public List<${data.prefix}${tableEntity.classId}${data.postfix}> ${tableEntity.id};');
     }
-
-    return items.join();
+    return items.join('\n');
   }
 
-  String _getAssignValueListProperties(DbModel model, GeneratorCsharp data, ClassMetaEntity classEntity) {
+  String _getJsonRootPopulateObjectsByIds(DbModel model, GeneratorCsharp data) {
     final items = <String>[];
-    for (final field in model.cache.getAllFields(classEntity)) {
+    final all = <String>[
+      ...model.cache.allClasses.where((e) => e.classType == ClassType.referenceType || e.classType == ClassType.valueType).map((e) => e.id),
+      ...model.cache.allDataTables.map((e) => e.id),
+    ];
+    for (final id in all) {
+      items.add(_jsonRootPopulateTemplate.format({
+        _paramClassName: id,
+      }));
+    }
+    return items.join('\n');
+  }
+
+  String _getTypeConverterRegistrations(DbModel model, GeneratorCsharp data) {
+    final items = <String>[];
+    for (final classEntity in model.cache.allClasses) {
+      if (classEntity.classType != ClassType.referenceType && classEntity.classType != ClassType.valueType) continue;
       items.add(
-        _assignValueRowTemplate.format(
-          {
-            _paramClassName: '${data.prefix}${classEntity.id}${data.postfix}',
-            _paramPropertyName: field.id,
-            _paramParseFunction: _getAssignValueFunction(model, data, classEntity, field).format({
-              _paramPrefix: data.prefix,
-              _paramPostfix: data.postfix,
-            }),
-          },
-        ),
-      );
+          '            TypeDescriptor.AddAttributes(typeof(${data.prefix}Item${data.postfix}Ref<${data.prefix}${classEntity.id}${data.postfix}>),');
+      items.add(
+          '                new TypeConverterAttribute(typeof(${data.prefix}Item${data.postfix}RefTypeConverter<${data.prefix}${classEntity.id}${data.postfix}>)));');
     }
-
-    return items.join();
-  }
-
-  String _getAssignValueFunction(DbModel model, GeneratorCsharp data, ClassMetaEntity classEntity, ClassMetaFieldDescription field) {
-    final value = 'valuesById["${field.id}"]';
-
-    switch (field.typeInfo.type) {
-      case ClassFieldType.bool:
-      case ClassFieldType.int:
-      case ClassFieldType.long:
-      case ClassFieldType.float:
-      case ClassFieldType.double:
-      case ClassFieldType.string:
-      case ClassFieldType.text:
-      case ClassFieldType.undefined:
-      case ClassFieldType.reference:
-      case ClassFieldType.date:
-      case ClassFieldType.duration:
-      case ClassFieldType.color:
-      case ClassFieldType.vector2:
-      case ClassFieldType.vector2Int:
-      case ClassFieldType.vector3:
-      case ClassFieldType.vector3Int:
-      case ClassFieldType.vector4:
-      case ClassFieldType.vector4Int:
-      case ClassFieldType.rectangle:
-      case ClassFieldType.rectangleInt:
-        return _getAssignSimpleValueFunction(model, data, field.typeInfo, value);
-
-      case ClassFieldType.list:
-        return 'ParseList(${value}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
-
-      case ClassFieldType.listInline:
-        return 'ParseListInline(${value}, vs => ({${_paramPrefix}}${field.valueTypeInfo!.classId}{${_paramPostfix}})AssignValues(GetNewInstance("${field.valueTypeInfo!.classId}", null, instance.Id), objectsByIds, vs, emptyCollectionFactory, onError), emptyCollectionFactory)';
-
-      case ClassFieldType.set:
-        return 'ParseHashSet(${value}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
-
-      case ClassFieldType.dictionary:
-        return 'ParseDictionary(${value}, k => ${_getAssignSimpleValueFunction(model, data, field.keyTypeInfo!, 'k')}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
-    }
-  }
-
-  String _getAssignSimpleValueFunction(
-    DbModel model,
-    GeneratorCsharp data,
-    ClassFieldDescriptionDataInfo type,
-    String value,
-  ) {
-    switch (type.type) {
-      case ClassFieldType.bool:
-        return 'ParseBool(${value})';
-
-      case ClassFieldType.int:
-        return 'ParseInt(${value})';
-
-      case ClassFieldType.long:
-        return 'ParseLong(${value})';
-
-      case ClassFieldType.float:
-        return 'ParseFloat(${value})';
-
-      case ClassFieldType.double:
-        return 'ParseDouble(${value})';
-
-      case ClassFieldType.string:
-      case ClassFieldType.text:
-      case ClassFieldType.undefined:
-        return 'ParseString(${value})';
-
-      case ClassFieldType.reference:
-        final classEntity = model.cache.getEntity(type.classId!);
-        final genericType = '${data.prefix}${type.classId}${data.postfix}';
-        if (classEntity is ClassMetaEntityEnum) //
-          return 'ParseEnum<${genericType}>(${value})';
-        return 'ParseReference<${genericType}>(${value}, objectsByIds)';
-
-      case ClassFieldType.date:
-        return 'ParseDate(${value})';
-
-      case ClassFieldType.duration:
-        return 'ParseDuration(${value})';
-
-      case ClassFieldType.color:
-        return 'ParseColor(${value})';
-
-      case ClassFieldType.vector2:
-        return 'ParseVector2(${value})';
-
-      case ClassFieldType.vector2Int:
-        return 'ParseVector2Int(${value})';
-
-      case ClassFieldType.vector3:
-        return 'ParseVector3(${value})';
-
-      case ClassFieldType.vector3Int:
-        return 'ParseVector3Int(${value})';
-
-      case ClassFieldType.vector4:
-        return 'ParseVector4(${value})';
-
-      case ClassFieldType.vector4Int:
-        return 'ParseVector4Int(${value})';
-
-      case ClassFieldType.rectangle:
-        return 'ParseRectangle(${value})';
-
-      case ClassFieldType.rectangleInt:
-        return 'ParseRectangleInt(${value})';
-
-      case ClassFieldType.list:
-      case ClassFieldType.listInline:
-      case ClassFieldType.set:
-      case ClassFieldType.dictionary:
-        throw Exception('Unexpected type "${type.type.name}"');
-    }
+    return items.join('\n');
   }
 
   String _getCloneProperty(ClassMetaFieldDescription field) {
@@ -819,37 +673,6 @@ ${_makeSummary('</summary>', indentDepth)}''';
     return '$result${result.isNotEmpty ? _defaultNewLine : ''}';
   }
 
-  int _getMaxStructDepth(DbModel model, int maxAllowedDepth) {
-    var depth = 0;
-    for (var classEntry in model.cache.allClasses) {
-      depth = max(depth, _getStructDepth(model, classEntry.id, 0, maxAllowedDepth));
-    }
-    return depth;
-  }
-
-  int _getStructDepth(DbModel model, String classId, int depth, int maxAllowedDepth) {
-    if (depth >= maxAllowedDepth) return depth;
-
-    final classEntity = model.cache.getEntity(classId);
-    if (classEntity is ClassMetaEntity && classEntity.classType == ClassType.valueType) {
-      depth++;
-      final allFields = model.cache.getAllFieldsByClassId(classEntity.id);
-      if (allFields != null) {
-        final thisDepth = depth;
-        for (final field in allFields) {
-          if (field.typeInfo.classId != null) //
-            depth = max(depth, _getStructDepth(model, field.typeInfo.classId!, thisDepth, maxAllowedDepth));
-          if (field.keyTypeInfo?.classId != null) //
-            depth = max(depth, _getStructDepth(model, field.keyTypeInfo!.classId!, thisDepth, maxAllowedDepth));
-          if (field.valueTypeInfo?.classId != null) //
-            depth = max(depth, _getStructDepth(model, field.valueTypeInfo!.classId!, thisDepth, maxAllowedDepth));
-        }
-      }
-    }
-
-    return depth;
-  }
-
   final String _rootTemplate = //
       '''// This file was autogenerated via gceditor https://github.com/kennelken/gceditor_fl
 // {${_paramDate}}
@@ -876,6 +699,7 @@ using System.Text.Json.Serialization;
 #else
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.ComponentModel;
 #endif
 
 #if UNITY_5_3_OR_NEWER
@@ -1354,21 +1178,10 @@ using Rectangle = System.Drawing.RectangleF;
   final String _enumRowTemplate = '''{${_paramPropertySummary}}
         {${_paramPropertyName}},''';
 
-  final _getNewInstanceRowTemplate = '''
-
-                case "{${_paramClassName}}":
-                    return new {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}} { Id = item?.GetValueOrDefault("id") as string ?? GetInlineRowId(ownerId), IsGlobal = item?.ContainsKey("id") == true };
-  ''';
-
-  final String _assignValueCaseTemplate = '''
-
-                    case {${_paramClassName}} {${_paramClassName}}:{${_paramAssignValueListProperties}}
-                        return {${_paramClassName}};
-''';
-
-  final String _assignValueRowTemplate = '''
-
-                        {${_paramClassName}}.{${_paramPropertyName}} = {${_paramParseFunction}};''';
+  final String _jsonRootPopulateTemplate = '''
+            if (jsonRoot.records.{${_paramClassName}} != null)
+                foreach (var item in jsonRoot.records.{${_paramClassName}})
+                    objectsByIds[item.Id] = item;''';
 
   final String _listItemsListAssignmentRowTemplate = '''
 
@@ -1384,47 +1197,55 @@ using Rectangle = System.Drawing.RectangleF;
     {
         public static {${_paramPrefix}}Root{${_paramPostfix}} Parse(string jsonText, {${_paramPrefix}}Root{${_paramPostfix}} root = null, Action<ErrorData> onError = null)
         {
-            EmptyCollectionFactory emptyCollectionFactory = new EmptyCollectionFactory();
-
-            var objectsByIds = new Dictionary<string, IIdentifiable>();
-            var valuesByIds = new Dictionary<string, Dictionary<string, object>>();
-
 #if !UNITY_5_3_OR_NEWER
-            var jsonRoot = JsonSerializer.Deserialize<JsonRoot>(jsonText, new JsonSerializerOptions { IncludeFields = true, TypeInfoResolver = JsonRootSourceGenerationContext.Default });
-#else
-            var jsonRoot = JsonConvert.DeserializeObject<JsonRoot>(jsonText);
-#endif
-            foreach (var className in jsonRoot.records.Keys)
+            var options = new JsonSerializerOptions
             {
-                var listItems = jsonRoot.records[className];
-                for (var i = 0; i < listItems.Count; i++)
+                IncludeFields = true,
+                Converters =
                 {
-                    var item = listItems[i];
-
-                    var instance = GetNewInstance(className, item);
-                    objectsByIds[instance.Id] = instance;
-                    valuesByIds[instance.Id] = item;
+                    new {${_paramPrefix}}Item{${_paramPostfix}}RefConverterFactory(),
+                    new BoolConverter(),
+                    new DateTimeConverter(),
+                    new TimeSpanConverter(),
+                    new ColorConverter(),
+                    new Vector2Converter(),
+                    new Vector2IntConverter(),
+                    new Vector3Converter(),
+                    new Vector3IntConverter(),
+                    new Vector4Converter(),
+                    new Vector4IntConverter(),
+                    new RectangleConverter(),
+                    new RectangleIntConverter(),
                 }
-            }
-
-            var allStructs = new List<string>();
-            var allClasses = new List<string>();
-            foreach (var kvp in objectsByIds)
+            };
+            var jsonRoot = JsonSerializer.Deserialize<JsonRoot>(jsonText, options);
+#else
+            var settings = new JsonSerializerSettings
             {
-                if (kvp.Value.GetType().IsValueType)
-                    allStructs.Add(kvp.Key);
-                else
-                    allClasses.Add(kvp.Key);
-            }
+                Converters =
+                {
+                    new {${_paramPrefix}}Item{${_paramPostfix}}RefConverter(),
+                    new BoolConverter(),
+                    new DateTimeConverter(),
+                    new TimeSpanConverter(),
+                    new ColorConverter(),
+                    new Vector2Converter(),
+                    new Vector2IntConverter(),
+                    new Vector3Converter(),
+                    new Vector3IntConverter(),
+                    new Vector4Converter(),
+                    new Vector4IntConverter(),
+                    new RectangleConverter(),
+                    new RectangleIntConverter(),
+                }
+            };
+            var jsonRoot = JsonConvert.DeserializeObject<JsonRoot>(jsonText, settings);
+#endif
+            var objectsByIds = new Dictionary<string, IIdentifiable>();
 
-            var maxStructDepth = {${_paramMaxStructDepth}};
-            for (var i = 0; i < maxStructDepth; i++)
-            {
-                foreach (var objectId in allStructs)
-                    objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId], emptyCollectionFactory, onError);
-            }
-            foreach (var objectId in allClasses)
-                objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId], emptyCollectionFactory, onError);
+            {${_paramPrefix}}Item{${_paramPostfix}}RefCache.Items = objectsByIds;
+
+{${_paramJsonRootPopulateObjectsByIds}}
 
             root ??= new {${_paramPrefix}}Root{${_paramPostfix}}();
             root.CreatedBy = jsonRoot.generationUser;
@@ -1433,425 +1254,661 @@ using Rectangle = System.Drawing.RectangleF;
 
             var cache = new CacheRoot();
 
-            foreach (var objectId in allClasses)
-                (objectsByIds[objectId] as Base{${_paramPrefix}}Item{${_paramPostfix}}).OnParsed(root, cache);
+            foreach (var item in objectsByIds.Values)
+            {
+                if (item is Base{${_paramPrefix}}Item{${_paramPostfix}} baseItem)
+                    baseItem.OnParsed(root, cache);
+            }
 
-            _inlineItemsCounter.Clear();
+            {${_paramPrefix}}Item{${_paramPostfix}}RefCache.Items = null;
 
             return root;
         }
-
-#if !UNITY_5_3_OR_NEWER
-        [JsonSerializable(typeof(JsonRoot)), JsonSourceGenerationOptions(WriteIndented = true)]
-        internal partial class JsonRootSourceGenerationContext : JsonSerializerContext
-        {
-        }
-#endif
 
         public class JsonRoot
         {
             public string generationDate;
             public string generationUser;
-            public Dictionary<string, List<Dictionary<string, object>>> records;
+            public JsonRootRecords records;
         }
 
-        private static IIdentifiable GetNewInstance(string className, Dictionary<string, object> item, string ownerId = null)
+        public class JsonRootRecords
         {
-            switch (className)
-            {{${_paramListInstantiate}}
-                default:
-                    throw new Exception(\$"Can not create a new instance of an unexpected class '{className}'");
+{${_paramJsonRootRecordsTypedListFields}}
+        }
+
+#region JsonConverters
+#if !UNITY_5_3_OR_NEWER
+        public class {${_paramPrefix}}Item{${_paramPostfix}}RefConverterFactory : JsonConverterFactory
+        {
+            public override bool CanConvert(Type typeToConvert) =>
+                typeToConvert.IsGenericType && typeToConvert.GetGenericTypeDefinition() == typeof({${_paramPrefix}}Item{${_paramPostfix}}Ref<>);
+
+            public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+            {
+                var elementType = typeToConvert.GetGenericArguments()[0];
+                return (JsonConverter)Activator.CreateInstance(typeof({${_paramPrefix}}Item{${_paramPostfix}}RefConverter<>).MakeGenericType(elementType));
             }
         }
 
-        private static Dictionary<string, int> _inlineItemsCounter = new();
-        private static string GetInlineRowId(string ownerId)
+        public class {${_paramPrefix}}Item{${_paramPostfix}}RefConverter<T> : JsonConverter<{${_paramPrefix}}Item{${_paramPostfix}}Ref<T>> where T : IIdentifiable
         {
-            _inlineItemsCounter.TryGetValue(ownerId, out var i);
-            _inlineItemsCounter[ownerId] = i + 1;
-            return \$"{ownerId}#{i:000}";
-        }
-
-        private static IIdentifiable AssignValues(IIdentifiable instance, Dictionary<string, IIdentifiable> objectsByIds, Dictionary<string, object> valuesById, EmptyCollectionFactory emptyCollectionFactory, Action<ErrorData> onError)
-        {
-            try
+            public override {${_paramPrefix}}Item{${_paramPostfix}}Ref<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
-                switch (instance)
-                {{${_paramAssignValueCases}}
-                    default:
-                        break;
+                if (reader.TokenType == JsonTokenType.String)
+                {
+                    var id = reader.GetString();
+                    return new {${_paramPrefix}}Item{${_paramPostfix}}Ref<T>(id, id != null);
                 }
-            }
-            catch (Exception e)
-            {
-                onError?.Invoke(new ErrorData(instance, e, \$"Could not assign values for {instance}"));
-            }
-
-            return instance;
-        }
-
-#region Parse
-        private static Dictionary<TKey, TValue> ParseDictionary<TKey, TValue>(
-            object values,
-            Func<object, TKey> getKey,
-            Func<object, TValue> getValue,
-            EmptyCollectionFactory emptyCollectionFactory
-        )
-        {
-#if !UNITY_5_3_OR_NEWER
-            if (values == null || ((JsonElement)values).ValueKind != JsonValueKind.Object)
-                return emptyCollectionFactory.Dictionary<TKey, TValue>();
-
-            var result = new Dictionary<TKey, TValue>();
-            foreach (var element in ((JsonElement)values).EnumerateObject())
-            {
-              result[getKey(element.Name)] = getValue(element.Value);
-            }
-#else
-            var dictionary = values as JObject;
-            if (values == null || (values as string) == "" || dictionary == null)
-                return emptyCollectionFactory.Dictionary<TKey, TValue>();
-
-            var result = new Dictionary<TKey, TValue>();
-            foreach (var property in dictionary.Properties())
-            {
-                result[getKey(property.Name)] = getValue(property.Value);
-            }
-#endif
-            return result;
-        }
-
-        private static List<T> ParseListInline<T>(
-            object values,
-            Func<Dictionary<string, object>, T> getValue,
-            EmptyCollectionFactory emptyCollectionFactory
-        )
-        {
-#if !UNITY_5_3_OR_NEWER
-            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
-                return emptyCollectionFactory.List<T>();
-
-            var result = new List<T>();
-            foreach (var element in ((JsonElement)values).EnumerateArray())
-            {
-                var inlineValues = new Dictionary<string, object>();
-                foreach (var prop in element.EnumerateObject())
-                    inlineValues[prop.Name] = prop.Value as object;
-                result.Add(getValue(inlineValues));
-            }
-#else
-            var array = values as JArray;
-            if (values == null || (values as string) == "" || array.Count <= 0)
-                return emptyCollectionFactory.List<T>();
-
-            var result = new List<T>();
-            foreach (JToken jsonValue in array)
-            {
-                var value = jsonValue.ToObject<Dictionary<string, object>>();
-                result.Add(getValue(value));
-            }
-#endif
-            return result;
-        }
-
-        private static List<T> ParseList<T>(
-            object values,
-            Func<object, T> getValue,
-            EmptyCollectionFactory emptyCollectionFactory
-        )
-        {
-#if !UNITY_5_3_OR_NEWER
-            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
-                return emptyCollectionFactory.List<T>();
-
-            var result = new List<T>();
-            foreach (var element in ((JsonElement)values).EnumerateArray())
-                result.Add(getValue(element));
-#else
-            var array = values as JArray;
-            if (values == null || (values as string) == "" || array.Count <= 0)
-                return emptyCollectionFactory.List<T>();
-
-            var result = new List<T>(array.Count);
-            foreach (var value in array)
-                result.Add(getValue(value.Value<string>()));
-
-#endif
-            return result;
-        }
-
-        private static HashSet<T> ParseHashSet<T>(
-            object values,
-            Func<object, T> getValue,
-            EmptyCollectionFactory emptyCollectionFactory
-        )
-        {
-#if !UNITY_5_3_OR_NEWER
-            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
-                return emptyCollectionFactory.HashSet<T>();
-#else
-            var array = values as JArray;
-            if (values == null || (values as string) == "" || array.Count <= 0)
-                return emptyCollectionFactory.HashSet<T>();
-#endif
-            return new HashSet<T>(ParseList<T>(values, getValue, emptyCollectionFactory));
-        }
-
-        private static bool ParseBool(object value)
-        {
-            return ParseInt(value) == 1;
-        }
-
-        private static int ParseInt(object value)
-        {
-#if !UNITY_5_3_OR_NEWER
-            return ((JsonElement)value).GetInt32();
-#else
-            return Convert.ToInt32(value, CultureInfo.InvariantCulture);
-#endif
-        }
-
-        private static long ParseLong(object value)
-        {
-#if !UNITY_5_3_OR_NEWER
-            return ((JsonElement)value).GetInt64();
-#else
-            return Convert.ToInt64(value, CultureInfo.InvariantCulture);
-#endif
-        }
-
-        private static float ParseFloat(object value)
-        {
-#if !UNITY_5_3_OR_NEWER
-            return ((JsonElement)value).GetSingle();
-#else
-            return Convert.ToSingle(value, CultureInfo.InvariantCulture);
-#endif
-        }
-
-        private static double ParseDouble(object value)
-        {
-#if !UNITY_5_3_OR_NEWER
-            return ((JsonElement)value).GetDouble();
-#else
-            return Convert.ToDouble(value, CultureInfo.InvariantCulture);
-#endif
-        }
-
-        private static string ParseString(object value)
-        {
-#if !UNITY_5_3_OR_NEWER
-            return ((JsonElement)value).GetString();
-#else
-            return Convert.ToString(value, CultureInfo.InvariantCulture);
-#endif
-        }
-
-        private static T ParseReference<T>(object value, Dictionary<string, IIdentifiable> objectsByIds) where T : IIdentifiable
-        {
-            var id = ParseString(value);
-            if (string.IsNullOrEmpty(id))
+                if (reader.TokenType == JsonTokenType.StartObject)
+                {
+                    var value = JsonSerializer.Deserialize<T>(ref reader, options);
+                    return new {${_paramPrefix}}Item{${_paramPostfix}}Ref<T>(value);
+                }
                 return default;
+            }
 
-            if (objectsByIds.TryGetValue(id, out var instance))
-                return (T)instance;
-
-            return default;
+            public override void Write(Utf8JsonWriter writer, {${_paramPrefix}}Item{${_paramPostfix}}Ref<T> value, JsonSerializerOptions options)
+            {
+                JsonSerializer.Serialize(writer, value.Value, options);
+            }
         }
 
-        private static T ParseEnum<T>(object value)
+        public class BoolConverter : JsonConverter<bool>
         {
-            var id = ParseString(value);
-            if (string.IsNullOrEmpty(id))
-                return default;
+            public override bool Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == JsonTokenType.Number)
+                    return reader.GetInt32() == 1;
+                if (reader.TokenType == JsonTokenType.True)
+                    return true;
+                if (reader.TokenType == JsonTokenType.False)
+                    return false;
+                return reader.GetString() == "1";
+            }
 
-            return (T)Enum.Parse(typeof(T), id);
+            public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options) =>
+                writer.WriteNumberValue(value ? 1 : 0);
         }
 
-        private static DateTime ParseDate(object value)
+        public class DateTimeConverter : JsonConverter<DateTime>
         {
-#if !UNITY_5_3_OR_NEWER
-            if (value is JsonElement je && je.ValueKind == JsonValueKind.Number)
-                return DateTimeOffset.FromUnixTimeMilliseconds(je.GetInt64()).UtcDateTime;
-#endif
-            var date = ParseString(value);
-            if (string.IsNullOrEmpty(date))
-                return default;
-
-            if (long.TryParse(date, out var ms))
+            public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == JsonTokenType.Number)
+                    return DateTimeOffset.FromUnixTimeMilliseconds(reader.GetInt64()).UtcDateTime;
+                var date = reader.GetString();
+                if (string.IsNullOrEmpty(date) || !long.TryParse(date, out var ms))
+                    return default;
                 return DateTimeOffset.FromUnixTimeMilliseconds(ms).UtcDateTime;
+            }
 
-            return default;
+            public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options) =>
+                writer.WriteNumberValue(new DateTimeOffset(value).ToUnixTimeMilliseconds());
         }
 
-        private static TimeSpan ParseDuration(object value)
+        public class TimeSpanConverter : JsonConverter<TimeSpan>
         {
-#if !UNITY_5_3_OR_NEWER
-            if (value is JsonElement je && je.ValueKind == JsonValueKind.Number)
-                return TimeSpan.FromMilliseconds(je.GetInt64());
-#endif
-            var duration = ParseString(value);
-            if (string.IsNullOrEmpty(duration))
-                return default;
-
-            if (long.TryParse(duration, out var ms))
+            public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == JsonTokenType.Number)
+                    return TimeSpan.FromMilliseconds(reader.GetInt64());
+                var duration = reader.GetString();
+                if (string.IsNullOrEmpty(duration) || !long.TryParse(duration, out var ms))
+                    return default;
                 return TimeSpan.FromMilliseconds(ms);
+            }
 
-            return default;
+            public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options) =>
+                writer.WriteNumberValue((long)value.TotalMilliseconds);
         }
 
-        private static Vector2 ParseVector2(object value)
+        public class ColorConverter : JsonConverter<Color>
         {
-            var vector2 = ParseString(value);
-            if (string.IsNullOrEmpty(vector2))
-                return default;
+            public override Color Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                var argb = reader.GetInt64();
+                return ArgbToColor(argb);
+            }
 
-            var parts = vector2.Split(';');
-            if (parts.Length < 2)
-                return default;
+            public override void Write(Utf8JsonWriter writer, Color value, JsonSerializerOptions options) =>
+                writer.WriteNumberValue(ColorToArgb(value));
 
-            return new Vector2(
-                float.Parse(parts[0], CultureInfo.InvariantCulture),
-                float.Parse(parts[1], CultureInfo.InvariantCulture)
-            );
-        }
-
-        private static Vector2Int ParseVector2Int(object value)
-        {
-            var vector2Int = ParseString(value);
-            if (string.IsNullOrEmpty(vector2Int))
-                return default;
-
-            var parts = vector2Int.Split(';');
-            if (parts.Length < 2)
-                return default;
-
-            return new Vector2Int(
-                int.Parse(parts[0], CultureInfo.InvariantCulture),
-                int.Parse(parts[1], CultureInfo.InvariantCulture)
-            );
-        }
-
-        private static Vector3 ParseVector3(object value)
-        {
-            var vector3 = ParseString(value);
-            if (string.IsNullOrEmpty(vector3))
-                return default;
-
-            var parts = vector3.Split(';');
-            if (parts.Length < 3)
-                return default;
-
-            return new Vector3(
-                float.Parse(parts[0], CultureInfo.InvariantCulture),
-                float.Parse(parts[1], CultureInfo.InvariantCulture),
-                float.Parse(parts[2], CultureInfo.InvariantCulture)
-            );
-        }
-
-        private static Vector3Int ParseVector3Int(object value)
-        {
-            var vector3Int = ParseString(value);
-            if (string.IsNullOrEmpty(vector3Int))
-                return default;
-
-            var parts = vector3Int.Split(';');
-            if (parts.Length < 3)
-                return default;
-
-            return new Vector3Int(
-                int.Parse(parts[0], CultureInfo.InvariantCulture),
-                int.Parse(parts[1], CultureInfo.InvariantCulture),
-                int.Parse(parts[2], CultureInfo.InvariantCulture)
-            );
-        }
-
-        private static Vector4 ParseVector4(object value)
-        {
-            var vector4 = ParseString(value);
-            if (string.IsNullOrEmpty(vector4))
-                return default;
-
-            var parts = vector4.Split(';');
-            if (parts.Length < 4)
-                return default;
-
-            return new Vector4(
-                float.Parse(parts[0], CultureInfo.InvariantCulture),
-                float.Parse(parts[1], CultureInfo.InvariantCulture),
-                float.Parse(parts[2], CultureInfo.InvariantCulture),
-                float.Parse(parts[3], CultureInfo.InvariantCulture)
-            );
-        }
-
-        private static Vector4Int ParseVector4Int(object value)
-        {
-            var vector4Int = ParseString(value);
-            if (string.IsNullOrEmpty(vector4Int))
-                return default;
-
-            var parts = vector4Int.Split(';');
-            if (parts.Length < 4)
-                return default;
-
-            return new Vector4Int(
-                int.Parse(parts[0], CultureInfo.InvariantCulture),
-                int.Parse(parts[1], CultureInfo.InvariantCulture),
-                int.Parse(parts[2], CultureInfo.InvariantCulture),
-                int.Parse(parts[3], CultureInfo.InvariantCulture)
-            );
-        }
-
-        private static Rectangle ParseRectangle(object value)
-        {
-            var rectangle = ParseString(value);
-            if (string.IsNullOrEmpty(rectangle))
-                return default;
-
-            var parts = rectangle.Split(';');
-            if (parts.Length < 4)
-                return default;
-
-            return new Rectangle(
-                float.Parse(parts[0], CultureInfo.InvariantCulture),
-                float.Parse(parts[1], CultureInfo.InvariantCulture),
-                float.Parse(parts[2], CultureInfo.InvariantCulture),
-                float.Parse(parts[3], CultureInfo.InvariantCulture)
-            );
-        }
-
-        private static RectangleInt ParseRectangleInt(object value)
-        {
-            var rectangleInt = ParseString(value);
-            if (string.IsNullOrEmpty(rectangleInt))
-                return default;
-
-            var parts = rectangleInt.Split(';');
-            if (parts.Length < 4)
-                return default;
-
-            return new RectangleInt(
-                int.Parse(parts[0], CultureInfo.InvariantCulture),
-                int.Parse(parts[1], CultureInfo.InvariantCulture),
-                int.Parse(parts[2], CultureInfo.InvariantCulture),
-                int.Parse(parts[3], CultureInfo.InvariantCulture)
-            );
-        }
-
-        private static Color ParseColor(object value)
-        {
-            var argb = ParseLong(value);
-            var alpha = (int)((argb >> 24) & 0xFF);
-            var red = (int)((argb >> 16) & 0xFF);
-            var green = (int)((argb >> 8) & 0xFF);
-            var blue = (int)(argb & 0xFF);
-#if UNITY_5_3_OR_NEWER || GODOT4_0_OR_GREATER
-            return new Color(red / 255f, green / 255f, blue / 255f, alpha / 255f);
+            private static Color ArgbToColor(long argb)
+            {
+                var alpha = (int)((argb >> 24) & 0xFF);
+                var red = (int)((argb >> 16) & 0xFF);
+                var green = (int)((argb >> 8) & 0xFF);
+                var blue = (int)(argb & 0xFF);
+#if GODOT4_0_OR_GREATER
+                return new Color(red / 255f, green / 255f, blue / 255f, alpha / 255f);
 #else
-            return Color.FromArgb(alpha, red, green, blue);
+                return Color.FromArgb(alpha, red, green, blue);
 #endif
+            }
+
+            private static long ColorToArgb(Color color)
+            {
+#if GODOT4_0_OR_GREATER
+                return (long)((int)(color.a * 255) << 24 | (int)(color.r * 255) << 16 | (int)(color.g * 255) << 8 | (int)(color.b * 255));
+#else
+                return (long)((int)color.A << 24 | (int)color.R << 16 | (int)color.G << 8 | (int)color.B);
+#endif
+            }
         }
+
+        public class Vector2Converter : JsonConverter<Vector2>
+        {
+            public override Vector2 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+                ParseVector2(reader.GetString());
+
+            public override void Write(Utf8JsonWriter writer, Vector2 value, JsonSerializerOptions options) =>
+                writer.WriteStringValue(\$"{value.X};{value.Y}");
+
+            private static Vector2 ParseVector2(string value)
+            {
+                if (string.IsNullOrEmpty(value)) return default;
+                var parts = value.Split(';');
+                if (parts.Length < 2) return default;
+                return new Vector2(
+                    float.Parse(parts[0], CultureInfo.InvariantCulture),
+                    float.Parse(parts[1], CultureInfo.InvariantCulture));
+            }
+        }
+
+        public class Vector2IntConverter : JsonConverter<Vector2Int>
+        {
+            public override Vector2Int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+                ParseVector2Int(reader.GetString());
+
+            public override void Write(Utf8JsonWriter writer, Vector2Int value, JsonSerializerOptions options) =>
+                writer.WriteStringValue(\$"{value.X};{value.Y}");
+
+            private static Vector2Int ParseVector2Int(string value)
+            {
+                if (string.IsNullOrEmpty(value)) return default;
+                var parts = value.Split(';');
+                if (parts.Length < 2) return default;
+                return new Vector2Int(
+                    int.Parse(parts[0], CultureInfo.InvariantCulture),
+                    int.Parse(parts[1], CultureInfo.InvariantCulture));
+            }
+        }
+
+        public class Vector3Converter : JsonConverter<Vector3>
+        {
+            public override Vector3 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+                ParseVector3(reader.GetString());
+
+            public override void Write(Utf8JsonWriter writer, Vector3 value, JsonSerializerOptions options) =>
+                writer.WriteStringValue(\$"{value.X};{value.Y};{value.Z}");
+
+            private static Vector3 ParseVector3(string value)
+            {
+                if (string.IsNullOrEmpty(value)) return default;
+                var parts = value.Split(';');
+                if (parts.Length < 3) return default;
+                return new Vector3(
+                    float.Parse(parts[0], CultureInfo.InvariantCulture),
+                    float.Parse(parts[1], CultureInfo.InvariantCulture),
+                    float.Parse(parts[2], CultureInfo.InvariantCulture));
+            }
+        }
+
+        public class Vector3IntConverter : JsonConverter<Vector3Int>
+        {
+            public override Vector3Int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+                ParseVector3Int(reader.GetString());
+
+            public override void Write(Utf8JsonWriter writer, Vector3Int value, JsonSerializerOptions options) =>
+                writer.WriteStringValue(\$"{value.X};{value.Y};{value.Z}");
+
+            private static Vector3Int ParseVector3Int(string value)
+            {
+                if (string.IsNullOrEmpty(value)) return default;
+                var parts = value.Split(';');
+                if (parts.Length < 3) return default;
+                return new Vector3Int(
+                    int.Parse(parts[0], CultureInfo.InvariantCulture),
+                    int.Parse(parts[1], CultureInfo.InvariantCulture),
+                    int.Parse(parts[2], CultureInfo.InvariantCulture));
+            }
+        }
+
+        public class Vector4Converter : JsonConverter<Vector4>
+        {
+            public override Vector4 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+                ParseVector4(reader.GetString());
+
+            public override void Write(Utf8JsonWriter writer, Vector4 value, JsonSerializerOptions options) =>
+                writer.WriteStringValue(\$"{value.X};{value.Y};{value.Z};{value.W}");
+
+            private static Vector4 ParseVector4(string value)
+            {
+                if (string.IsNullOrEmpty(value)) return default;
+                var parts = value.Split(';');
+                if (parts.Length < 4) return default;
+                return new Vector4(
+                    float.Parse(parts[0], CultureInfo.InvariantCulture),
+                    float.Parse(parts[1], CultureInfo.InvariantCulture),
+                    float.Parse(parts[2], CultureInfo.InvariantCulture),
+                    float.Parse(parts[3], CultureInfo.InvariantCulture));
+            }
+        }
+
+        public class Vector4IntConverter : JsonConverter<Vector4Int>
+        {
+            public override Vector4Int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+                ParseVector4Int(reader.GetString());
+
+            public override void Write(Utf8JsonWriter writer, Vector4Int value, JsonSerializerOptions options) =>
+                writer.WriteStringValue(\$"{value.X};{value.Y};{value.Z};{value.W}");
+
+            private static Vector4Int ParseVector4Int(string value)
+            {
+                if (string.IsNullOrEmpty(value)) return default;
+                var parts = value.Split(';');
+                if (parts.Length < 4) return default;
+                return new Vector4Int(
+                    int.Parse(parts[0], CultureInfo.InvariantCulture),
+                    int.Parse(parts[1], CultureInfo.InvariantCulture),
+                    int.Parse(parts[2], CultureInfo.InvariantCulture),
+                    int.Parse(parts[3], CultureInfo.InvariantCulture));
+            }
+        }
+
+        public class RectangleConverter : JsonConverter<Rectangle>
+        {
+            public override Rectangle Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+                ParseRectangle(reader.GetString());
+
+            public override void Write(Utf8JsonWriter writer, Rectangle value, JsonSerializerOptions options) =>
+                writer.WriteStringValue(\$"{value.X};{value.Y};{value.Width};{value.Height}");
+
+            private static Rectangle ParseRectangle(string value)
+            {
+                if (string.IsNullOrEmpty(value)) return default;
+                var parts = value.Split(';');
+                if (parts.Length < 4) return default;
+                return new Rectangle(
+                    float.Parse(parts[0], CultureInfo.InvariantCulture),
+                    float.Parse(parts[1], CultureInfo.InvariantCulture),
+                    float.Parse(parts[2], CultureInfo.InvariantCulture),
+                    float.Parse(parts[3], CultureInfo.InvariantCulture));
+            }
+        }
+
+        public class RectangleIntConverter : JsonConverter<RectangleInt>
+        {
+            public override RectangleInt Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+                ParseRectangleInt(reader.GetString());
+
+            public override void Write(Utf8JsonWriter writer, RectangleInt value, JsonSerializerOptions options) =>
+                writer.WriteStringValue(\$"{value.X};{value.Y};{value.Width};{value.Height}");
+
+            private static RectangleInt ParseRectangleInt(string value)
+            {
+                if (string.IsNullOrEmpty(value)) return default;
+                var parts = value.Split(';');
+                if (parts.Length < 4) return default;
+                return new RectangleInt(
+                    int.Parse(parts[0], CultureInfo.InvariantCulture),
+                    int.Parse(parts[1], CultureInfo.InvariantCulture),
+                    int.Parse(parts[2], CultureInfo.InvariantCulture),
+                    int.Parse(parts[3], CultureInfo.InvariantCulture));
+            }
+        }
+#else
+        public class {${_paramPrefix}}Item{${_paramPostfix}}RefConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType) =>
+                objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof({${_paramPrefix}}Item{${_paramPostfix}}Ref<>);
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                var elementType = objectType.GetGenericArguments()[0];
+                if (reader.TokenType == JsonToken.String)
+                {
+                    var id = (string)reader.Value;
+                    return Activator.CreateInstance(typeof({${_paramPrefix}}Item{${_paramPostfix}}Ref<>).MakeGenericType(elementType), id, id != null);
+                }
+                if (reader.TokenType == JsonToken.StartObject)
+                {
+                    var value = serializer.Deserialize(reader, elementType);
+                    return Activator.CreateInstance(typeof({${_paramPrefix}}Item{${_paramPostfix}}Ref<>).MakeGenericType(elementType), value);
+                }
+                return Activator.CreateInstance(typeof({${_paramPrefix}}Item{${_paramPostfix}}Ref<>).MakeGenericType(elementType), default(string), false);
+            }
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                var type = value.GetType();
+                var valueProp = type.GetProperty("Value");
+                var val = valueProp.GetValue(value);
+                serializer.Serialize(writer, val);
+            }
+        }
+
+        public class BoolConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType) => objectType == typeof(bool);
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                if (reader.TokenType == JsonToken.Integer)
+                    return Convert.ToInt32(reader.Value) == 1;
+                if (reader.TokenType == JsonToken.Boolean)
+                    return (bool)reader.Value;
+                return Convert.ToString(reader.Value) == "1";
+            }
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) =>
+                writer.WriteValue((bool)value ? 1 : 0);
+        }
+
+        public class DateTimeConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType) => objectType == typeof(DateTime);
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                if (reader.TokenType == JsonToken.Integer || reader.TokenType == JsonToken.Float)
+                    return DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(reader.Value)).UtcDateTime;
+                var date = Convert.ToString(reader.Value);
+                if (string.IsNullOrEmpty(date) || !long.TryParse(date, out var ms))
+                    return default(DateTime);
+                return DateTimeOffset.FromUnixTimeMilliseconds(ms).UtcDateTime;
+            }
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) =>
+                writer.WriteValue(new DateTimeOffset((DateTime)value).ToUnixTimeMilliseconds());
+        }
+
+        public class TimeSpanConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType) => objectType == typeof(TimeSpan);
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                if (reader.TokenType == JsonToken.Integer || reader.TokenType == JsonToken.Float)
+                    return TimeSpan.FromMilliseconds(Convert.ToInt64(reader.Value));
+                var duration = Convert.ToString(reader.Value);
+                if (string.IsNullOrEmpty(duration) || !long.TryParse(duration, out var ms))
+                    return default(TimeSpan);
+                return TimeSpan.FromMilliseconds(ms);
+            }
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) =>
+                writer.WriteValue((long)((TimeSpan)value).TotalMilliseconds);
+        }
+
+        public class ColorConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType) => objectType == typeof(Color);
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                var argb = Convert.ToInt64(reader.Value);
+                return ArgbToColor(argb);
+            }
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) =>
+                writer.WriteValue(ColorToArgb((Color)value));
+
+            private static Color ArgbToColor(long argb)
+            {
+                var alpha = (int)((argb >> 24) & 0xFF);
+                var red = (int)((argb >> 16) & 0xFF);
+                var green = (int)((argb >> 8) & 0xFF);
+                var blue = (int)(argb & 0xFF);
+#if UNITY_5_3_OR_NEWER || GODOT4_0_OR_GREATER
+                return new Color(red / 255f, green / 255f, blue / 255f, alpha / 255f);
+#else
+                return Color.FromArgb(alpha, red, green, blue);
+#endif
+            }
+
+            private static long ColorToArgb(Color color)
+            {
+#if UNITY_5_3_OR_NEWER || GODOT4_0_OR_GREATER
+                return (long)((int)(color.a * 255) << 24 | (int)(color.r * 255) << 16 | (int)(color.g * 255) << 8 | (int)(color.b * 255));
+#else
+                return (long)((int)color.A << 24 | (int)color.R << 16 | (int)color.G << 8 | (int)color.B);
+#endif
+            }
+        }
+
+        public class Vector2Converter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType) => objectType == typeof(Vector2);
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) =>
+                ParseVector2(Convert.ToString(reader.Value));
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                var v = (Vector2)value;
+                writer.WriteValue(\$"{v.x};{v.y}");
+            }
+
+            private static Vector2 ParseVector2(string value)
+            {
+                if (string.IsNullOrEmpty(value))
+                    return default;
+                var parts = value.Split(';');
+                if (parts.Length < 2) return default;
+                return new Vector2(
+                    float.Parse(parts[0], CultureInfo.InvariantCulture),
+                    float.Parse(parts[1], CultureInfo.InvariantCulture));
+            }
+        }
+
+        public class Vector2IntConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType) => objectType == typeof(Vector2Int);
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) =>
+                ParseVector2Int(Convert.ToString(reader.Value));
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                var v = (Vector2Int)value;
+                writer.WriteValue(\$"{v.x};{v.y}");
+            }
+
+            private static Vector2Int ParseVector2Int(string value)
+            {
+                if (string.IsNullOrEmpty(value))
+                    return default;
+                var parts = value.Split(';');
+                if (parts.Length < 2) return default;
+                return new Vector2Int(
+                    int.Parse(parts[0], CultureInfo.InvariantCulture),
+                    int.Parse(parts[1], CultureInfo.InvariantCulture));
+            }
+        }
+
+        public class Vector3Converter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType) => objectType == typeof(Vector3);
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) =>
+                ParseVector3(Convert.ToString(reader.Value));
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                var v = (Vector3)value;
+                writer.WriteValue(\$"{v.x};{v.y};{v.z}");
+            }
+
+            private static Vector3 ParseVector3(string value)
+            {
+                if (string.IsNullOrEmpty(value))
+                    return default;
+                var parts = value.Split(';');
+                if (parts.Length < 3) return default;
+                return new Vector3(
+                    float.Parse(parts[0], CultureInfo.InvariantCulture),
+                    float.Parse(parts[1], CultureInfo.InvariantCulture),
+                    float.Parse(parts[2], CultureInfo.InvariantCulture));
+            }
+        }
+
+        public class Vector3IntConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType) => objectType == typeof(Vector3Int);
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) =>
+                ParseVector3Int(Convert.ToString(reader.Value));
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                var v = (Vector3Int)value;
+                writer.WriteValue(\$"{v.x};{v.y};{v.z}");
+            }
+
+            private static Vector3Int ParseVector3Int(string value)
+            {
+                if (string.IsNullOrEmpty(value))
+                    return default;
+                var parts = value.Split(';');
+                if (parts.Length < 3) return default;
+                return new Vector3Int(
+                    int.Parse(parts[0], CultureInfo.InvariantCulture),
+                    int.Parse(parts[1], CultureInfo.InvariantCulture),
+                    int.Parse(parts[2], CultureInfo.InvariantCulture));
+            }
+        }
+
+        public class Vector4Converter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType) => objectType == typeof(Vector4);
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) =>
+                ParseVector4(Convert.ToString(reader.Value));
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                var v = (Vector4)value;
+                writer.WriteValue(\$"{v.x};{v.y};{v.z};{v.w}");
+            }
+
+            private static Vector4 ParseVector4(string value)
+            {
+                if (string.IsNullOrEmpty(value))
+                    return default;
+                var parts = value.Split(';');
+                if (parts.Length < 4) return default;
+                return new Vector4(
+                    float.Parse(parts[0], CultureInfo.InvariantCulture),
+                    float.Parse(parts[1], CultureInfo.InvariantCulture),
+                    float.Parse(parts[2], CultureInfo.InvariantCulture),
+                    float.Parse(parts[3], CultureInfo.InvariantCulture));
+            }
+        }
+
+        public class Vector4IntConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType) => objectType == typeof(Vector4Int);
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) =>
+                ParseVector4Int(Convert.ToString(reader.Value));
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                var v = (Vector4Int)value;
+                writer.WriteValue(\$"{v.X};{v.Y};{v.Z};{v.W}");
+            }
+
+            private static Vector4Int ParseVector4Int(string value)
+            {
+                if (string.IsNullOrEmpty(value))
+                    return default;
+                var parts = value.Split(';');
+                if (parts.Length < 4) return default;
+                return new Vector4Int(
+                    int.Parse(parts[0], CultureInfo.InvariantCulture),
+                    int.Parse(parts[1], CultureInfo.InvariantCulture),
+                    int.Parse(parts[2], CultureInfo.InvariantCulture),
+                    int.Parse(parts[3], CultureInfo.InvariantCulture));
+            }
+        }
+
+        public class RectangleConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType) => objectType == typeof(Rectangle);
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) =>
+                ParseRectangle(Convert.ToString(reader.Value));
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                var v = (Rectangle)value;
+                writer.WriteValue(\$"{v.x};{v.y};{v.width};{v.height}");
+            }
+
+            private static Rectangle ParseRectangle(string value)
+            {
+                if (string.IsNullOrEmpty(value))
+                    return default;
+                var parts = value.Split(';');
+                if (parts.Length < 4) return default;
+                return new Rectangle(
+                    float.Parse(parts[0], CultureInfo.InvariantCulture),
+                    float.Parse(parts[1], CultureInfo.InvariantCulture),
+                    float.Parse(parts[2], CultureInfo.InvariantCulture),
+                    float.Parse(parts[3], CultureInfo.InvariantCulture));
+            }
+        }
+
+        public class RectangleIntConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType) => objectType == typeof(RectangleInt);
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) =>
+                ParseRectangleInt(Convert.ToString(reader.Value));
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                var v = (RectangleInt)value;
+                writer.WriteValue(\$"{v.x};{v.y};{v.width};{v.height}");
+            }
+
+            private static RectangleInt ParseRectangleInt(string value)
+            {
+                if (string.IsNullOrEmpty(value))
+                    return default;
+                var parts = value.Split(';');
+                if (parts.Length < 4) return default;
+                return new RectangleInt(
+                    int.Parse(parts[0], CultureInfo.InvariantCulture),
+                    int.Parse(parts[1], CultureInfo.InvariantCulture),
+                    int.Parse(parts[2], CultureInfo.InvariantCulture),
+                    int.Parse(parts[3], CultureInfo.InvariantCulture));
+            }
+        }
+
+        public class {${_paramPrefix}}Item{${_paramPostfix}}RefTypeConverter<T> : TypeConverter where T : IIdentifiable
+        {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+                => sourceType == typeof(string);
+
+            public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+            {
+                if (value is string stringValue)
+                    return new {${_paramPrefix}}Item{${_paramPostfix}}Ref<T>(stringValue, false);
+                return base.ConvertFrom(context, culture, value);
+            }
+        }
+#endif
 #endregion
+
+#if UNITY_5_3_OR_NEWER
+        static {${_paramPrefix}}Root{${_paramPostfix}}Parser()
+        {
+{${_paramTypeConverterRegistrations}}
+        }
+#endif
     }
 
     public static class ListExtensions
@@ -1901,6 +1958,81 @@ using Rectangle = System.Drawing.RectangleF;
             Entity = entity;
             Exception = exception;
             Message = message;
+        }
+    }
+
+    internal static class {${_paramPrefix}}Item{${_paramPostfix}}RefCache
+    {
+        [ThreadStatic]
+        internal static Dictionary<string, IIdentifiable> Items;
+    }
+
+#if !UNITY_5_3_OR_NEWER
+    [JsonConverter(typeof({${_paramPrefix}}Root{${_paramPostfix}}Parser.{${_paramPrefix}}Item{${_paramPostfix}}RefConverterFactory))]
+#else
+    [JsonConverter(typeof({${_paramPrefix}}Root{${_paramPostfix}}Parser.{${_paramPrefix}}Item{${_paramPostfix}}RefConverter))]
+#endif
+    public struct {${_paramPrefix}}Item{${_paramPostfix}}Ref<T> : IEquatable<{${_paramPrefix}}Item{${_paramPostfix}}Ref<T>>, IIdentifiable
+    {
+        public string Id { get; }
+        public bool IsGlobal { get; }
+        private bool _valueSet;
+        private T _value;
+
+        public T Value
+        {
+            get
+            {
+                if (!_valueSet && {${_paramPrefix}}Item{${_paramPostfix}}RefCache.Items != null && Id != null)
+                    Value = (T){${_paramPrefix}}Item{${_paramPostfix}}RefCache.Items[Id];
+                return _value;
+            }
+            set
+            {
+                _valueSet = true;
+                _value = value;
+            }
+        }
+
+        public {${_paramPrefix}}Item{${_paramPostfix}}Ref(string id, bool isGlobal)
+        {
+            Id = id;
+            IsGlobal = isGlobal;
+            _valueSet = false;
+            _value = default;
+        }
+
+        public {${_paramPrefix}}Item{${_paramPostfix}}Ref(T value)
+        {
+            Id = default;
+            IsGlobal = false;
+            _valueSet = true;
+            _value = value;
+        }
+
+        public bool Equals({${_paramPrefix}}Item{${_paramPostfix}}Ref<T> other)
+        {
+            return Id == other.Id;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is {${_paramPrefix}}Item{${_paramPostfix}}Ref<T> other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
+        }
+
+        public static bool operator ==({${_paramPrefix}}Item{${_paramPostfix}}Ref<T> a, {${_paramPrefix}}Item{${_paramPostfix}}Ref<T> b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=({${_paramPrefix}}Item{${_paramPostfix}}Ref<T> a, {${_paramPrefix}}Item{${_paramPostfix}}Ref<T> b)
+        {
+            return !(a == b);
         }
     }
 
