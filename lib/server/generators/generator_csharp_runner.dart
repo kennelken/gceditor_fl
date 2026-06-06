@@ -871,12 +871,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq.Expressions;
 
-#if !UNITY_5_3_OR_NEWER
-using System.Text.Json;
-using System.Text.Json.Serialization;
-#else
+#if UNITY_5_3_OR_NEWER
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+#else
+using System.Text.Json;
+using System.Text.Json.Serialization;
 #endif
 
 #if UNITY_5_3_OR_NEWER
@@ -1191,7 +1191,8 @@ using Rectangle = System.Drawing.RectangleF;
 
 #region Geometry classes
 #if !GODOT4_0_OR_GREATER
-    #if !UNITY_5_3_OR_NEWER
+    #if UNITY_5_3_OR_NEWER
+    #else
     public struct Vector2Int
     {
         public int X;
@@ -1409,10 +1410,10 @@ using Rectangle = System.Drawing.RectangleF;
             var objectsByIds = new Dictionary<string, IIdentifiable>();
             var valuesByIds = new Dictionary<string, Dictionary<string, object>>();
 
-#if !UNITY_5_3_OR_NEWER
-            var jsonRoot = JsonSerializer.Deserialize<JsonRoot>(jsonText, new JsonSerializerOptions { IncludeFields = true, TypeInfoResolver = JsonRootSourceGenerationContext.Default });
-#else
+#if UNITY_5_3_OR_NEWER
             var jsonRoot = JsonConvert.DeserializeObject<JsonRoot>(jsonText);
+#else
+            var jsonRoot = JsonSerializer.Deserialize<JsonRoot>(jsonText, new JsonSerializerOptions { IncludeFields = true, TypeInfoResolver = JsonRootSourceGenerationContext.Default });
 #endif
             foreach (var className in jsonRoot.records.Keys)
             {
@@ -1462,7 +1463,8 @@ using Rectangle = System.Drawing.RectangleF;
             return root;
         }
 
-#if !UNITY_5_3_OR_NEWER
+#if UNITY_5_3_OR_NEWER
+#else
         [JsonSerializable(typeof(JsonRoot)), JsonSourceGenerationOptions(WriteIndented = true)]
         internal partial class JsonRootSourceGenerationContext : JsonSerializerContext
         {
@@ -1519,16 +1521,7 @@ using Rectangle = System.Drawing.RectangleF;
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
-#if !UNITY_5_3_OR_NEWER
-            if (values == null || ((JsonElement)values).ValueKind != JsonValueKind.Object)
-                return emptyCollectionFactory.Dictionary<TKey, TValue>();
-
-            var result = new Dictionary<TKey, TValue>();
-            foreach (var element in ((JsonElement)values).EnumerateObject())
-            {
-              result[getKey(element.Name)] = getValue(element.Value);
-            }
-#else
+#if UNITY_5_3_OR_NEWER
             var dictionary = values as JObject;
             if (values == null || (values as string) == "" || dictionary == null)
                 return emptyCollectionFactory.Dictionary<TKey, TValue>();
@@ -1537,6 +1530,15 @@ using Rectangle = System.Drawing.RectangleF;
             foreach (var property in dictionary.Properties())
             {
                 result[getKey(property.Name)] = getValue(property.Value);
+            }
+#else
+            if (values == null || ((JsonElement)values).ValueKind != JsonValueKind.Object)
+                return emptyCollectionFactory.Dictionary<TKey, TValue>();
+
+            var result = new Dictionary<TKey, TValue>();
+            foreach (var element in ((JsonElement)values).EnumerateObject())
+            {
+              result[getKey(element.Name)] = getValue(element.Value);
             }
 #endif
             return result;
@@ -1548,7 +1550,18 @@ using Rectangle = System.Drawing.RectangleF;
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
-#if !UNITY_5_3_OR_NEWER
+#if UNITY_5_3_OR_NEWER
+            var array = values as JArray;
+            if (values == null || (values as string) == "" || array.Count <= 0)
+                return emptyCollectionFactory.List<T>();
+
+            var result = new List<T>();
+            foreach (JToken jsonValue in array)
+            {
+                var value = jsonValue.ToObject<Dictionary<string, object>>();
+                result.Add(getValue(value));
+            }
+#else
             if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
                 return emptyCollectionFactory.List<T>();
 
@@ -1560,17 +1573,6 @@ using Rectangle = System.Drawing.RectangleF;
                     inlineValues[prop.Name] = prop.Value as object;
                 result.Add(getValue(inlineValues));
             }
-#else
-            var array = values as JArray;
-            if (values == null || (values as string) == "" || array.Count <= 0)
-                return emptyCollectionFactory.List<T>();
-
-            var result = new List<T>();
-            foreach (JToken jsonValue in array)
-            {
-                var value = jsonValue.ToObject<Dictionary<string, object>>();
-                result.Add(getValue(value));
-            }
 #endif
             return result;
         }
@@ -1581,14 +1583,7 @@ using Rectangle = System.Drawing.RectangleF;
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
-#if !UNITY_5_3_OR_NEWER
-            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
-                return emptyCollectionFactory.List<T>();
-
-            var result = new List<T>();
-            foreach (var element in ((JsonElement)values).EnumerateArray())
-                result.Add(getValue(element));
-#else
+#if UNITY_5_3_OR_NEWER
             var array = values as JArray;
             if (values == null || (values as string) == "" || array.Count <= 0)
                 return emptyCollectionFactory.List<T>();
@@ -1597,6 +1592,13 @@ using Rectangle = System.Drawing.RectangleF;
             foreach (var value in array)
                 result.Add(getValue(value.Value<string>()));
 
+#else
+            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
+                return emptyCollectionFactory.List<T>();
+
+            var result = new List<T>();
+            foreach (var element in ((JsonElement)values).EnumerateArray())
+                result.Add(getValue(element));
 #endif
             return result;
         }
@@ -1607,12 +1609,12 @@ using Rectangle = System.Drawing.RectangleF;
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
-#if !UNITY_5_3_OR_NEWER
-            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
-                return emptyCollectionFactory.HashSet<T>();
-#else
+#if UNITY_5_3_OR_NEWER
             var array = values as JArray;
             if (values == null || (values as string) == "" || array.Count <= 0)
+                return emptyCollectionFactory.HashSet<T>();
+#else
+            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
                 return emptyCollectionFactory.HashSet<T>();
 #endif
             return new HashSet<T>(ParseList<T>(values, getValue, emptyCollectionFactory));
@@ -1625,46 +1627,46 @@ using Rectangle = System.Drawing.RectangleF;
 
         private static int ParseInt(object value)
         {
-#if !UNITY_5_3_OR_NEWER
-            return ((JsonElement)value).GetInt32();
-#else
+#if UNITY_5_3_OR_NEWER
             return Convert.ToInt32(value, CultureInfo.InvariantCulture);
+#else
+            return ((JsonElement)value).GetInt32();
 #endif
         }
 
         private static long ParseLong(object value)
         {
-#if !UNITY_5_3_OR_NEWER
-            return ((JsonElement)value).GetInt64();
-#else
+#if UNITY_5_3_OR_NEWER
             return Convert.ToInt64(value, CultureInfo.InvariantCulture);
+#else
+            return ((JsonElement)value).GetInt64();
 #endif
         }
 
         private static float ParseFloat(object value)
         {
-#if !UNITY_5_3_OR_NEWER
-            return ((JsonElement)value).GetSingle();
-#else
+#if UNITY_5_3_OR_NEWER
             return Convert.ToSingle(value, CultureInfo.InvariantCulture);
+#else
+            return ((JsonElement)value).GetSingle();
 #endif
         }
 
         private static double ParseDouble(object value)
         {
-#if !UNITY_5_3_OR_NEWER
-            return ((JsonElement)value).GetDouble();
-#else
+#if UNITY_5_3_OR_NEWER
             return Convert.ToDouble(value, CultureInfo.InvariantCulture);
+#else
+            return ((JsonElement)value).GetDouble();
 #endif
         }
 
         private static string ParseString(object value)
         {
-#if !UNITY_5_3_OR_NEWER
-            return ((JsonElement)value).GetString();
-#else
+#if UNITY_5_3_OR_NEWER
             return Convert.ToString(value, CultureInfo.InvariantCulture);
+#else
+            return ((JsonElement)value).GetString();
 #endif
         }
 
@@ -1691,7 +1693,8 @@ using Rectangle = System.Drawing.RectangleF;
 
         private static DateTime ParseDate(object value)
         {
-#if !UNITY_5_3_OR_NEWER
+#if UNITY_5_3_OR_NEWER
+#else
             if (value is JsonElement je && je.ValueKind == JsonValueKind.Number)
                 return DateTimeOffset.FromUnixTimeMilliseconds(je.GetInt64()).UtcDateTime;
 #endif
@@ -1707,7 +1710,8 @@ using Rectangle = System.Drawing.RectangleF;
 
         private static TimeSpan ParseDuration(object value)
         {
-#if !UNITY_5_3_OR_NEWER
+#if UNITY_5_3_OR_NEWER
+#else
             if (value is JsonElement je && je.ValueKind == JsonValueKind.Number)
                 return TimeSpan.FromMilliseconds(je.GetInt64());
 #endif
