@@ -869,6 +869,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq.Expressions;
 
 #if !UNITY_5_3_OR_NEWER
 using System.Text.Json;
@@ -1060,7 +1061,7 @@ using Rectangle = System.Drawing.RectangleF;
 
                     if (!AllItemsByType.TryGetValue(type, out var listItemsByType))
                     {
-                        listItemsByType = Activator.CreateInstance(typeof(List<>).MakeGenericType(type));
+                        listItemsByType = FastActivator.CreateInstance(typeof(List<>).MakeGenericType(type));
                         AllItemsByType.Add(type, listItemsByType);
                     }
                     (listItemsByType as IList).Add(item);
@@ -1134,7 +1135,7 @@ using Rectangle = System.Drawing.RectangleF;
                 var genericListType = typeof(List<>);
                 var concreteListType = genericListType.MakeGenericType(type);
 
-                list = Activator.CreateInstance(concreteListType, Array.Empty<object>());
+                list = FastActivator.CreateInstance(concreteListType);
                 _lists[type] = list;
             }
             return list as IList;
@@ -1168,6 +1169,25 @@ using Rectangle = System.Drawing.RectangleF;
         }
     }
 #endregion
+
+    internal static class FastActivator
+    {
+        private static readonly Dictionary<Type, Func<object>> _cache = new Dictionary<Type, Func<object>>();
+
+        public static object CreateInstance(Type type)
+        {
+            if (!_cache.TryGetValue(type, out var factory))
+            {
+                var newExpr = Expression.New(type);
+                var lambda = Expression.Lambda<Func<object>>(Expression.Convert(newExpr, typeof(object)));
+                factory = lambda.Compile();
+                _cache[type] = factory;
+            }
+            return factory();
+        }
+
+        public static void Clear() => _cache.Clear();
+    }
 
 #region Geometry classes
 #if !GODOT4_0_OR_GREATER
@@ -1437,6 +1457,7 @@ using Rectangle = System.Drawing.RectangleF;
                 (objectsByIds[objectId] as Base{${_paramPrefix}}Item{${_paramPostfix}}).OnParsed(root, cache);
 
             _inlineItemsCounter.Clear();
+            FastActivator.Clear();
 
             return root;
         }
