@@ -859,6 +859,7 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
     public interface IIdentifiable
     {
         String getId();
+        Boolean getIsGlobal();
     }
 
     public String CreatedBy;
@@ -1001,6 +1002,7 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
         public String getId() { return Id; }
 
         protected Boolean IsGlobal;
+        public Boolean getIsGlobal() { return IsGlobal; }
     }
 
 {${_paramClasses}}

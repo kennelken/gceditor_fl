@@ -42,8 +42,6 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
 
   static const _paramListStructEquals = 'llistStructEquals';
   static const _paramListStructGetHashCode = 'listStructGetHashCode';
-  static const _paramListStructEqEq = 'listStructEqEq';
-
   static const _paramPropertyAccessLevel = 'propertyAccessLevel';
   static const _paramPropertyType = 'propertyType';
   static const _paramPropertyName = 'propertyName';
@@ -170,7 +168,6 @@ namespace ${data.namespace}
           _methodCloneBody: _getCloneProperties(model, classEntity),
           _paramListStructGetHashCode: _getListStructGetHashCode(model, classEntity),
           _paramListStructEquals: _getListStructEquals(model, classEntity),
-          _paramListStructEqEq: _getListStructEqEq(model, classEntity),
         },
       );
 
@@ -290,15 +287,29 @@ namespace ${data.namespace}
   }
 
   String _getParentInterfaces(ClassMetaEntity classEntity, GeneratorCsharp data) {
-    final interfaces = classEntity.interfaces //
-        .where((e) => e != null)
-        .map((e) => '${data.prefixInterface}$e${data.postfix}')
-        .followedBy(classEntity.classType == ClassType.valueType ? [] : ['IIdentifiable'])
-        .join(', ');
+    final additionalInterfaces = <String>[
+      ...classEntity.interfaces //
+          .where((e) => e != null)
+          .map((e) => '${data.prefixInterface}$e${data.postfix}'),
+    ];
 
-    if (interfaces.isEmpty) {
-      return '';
+    switch (classEntity.classType) {
+      case ClassType.referenceType:
+        additionalInterfaces.add('IIdentifiable');
+        break;
+
+      case ClassType.valueType:
+        additionalInterfaces.add('IEquatable<${data.prefix}${classEntity.id}${data.postfix}>');
+        break;
+
+      case ClassType.undefined:
+      case ClassType.interface:
+        additionalInterfaces.add('IIdentifiable');
+        break;
     }
+
+    final interfaces = additionalInterfaces.join(', ');
+    if (interfaces.isEmpty) return '';
 
     switch (classEntity.classType) {
       case ClassType.referenceType:
@@ -389,13 +400,7 @@ namespace ${data.namespace}
 
     final items = <String>[];
     for (final field in allFields) {
-      items.add(
-        _structGetHashCodeTemplate.format(
-          {
-            _paramPropertyName: field.id,
-          },
-        ),
-      );
+      items.add(',${_defaultNewLine}${_indent * 4}${field.id}');
     }
 
     return items.join();
@@ -404,27 +409,13 @@ namespace ${data.namespace}
   String _getListStructEquals(DbModel model, ClassMetaEntity classEntity) {
     final allFields = model.cache.getAllFields(classEntity);
 
-    final items = <String>[];
+    final items = <String>[
+      _structEqualsTemplate.format({_paramPropertyName: 'Id'}),
+      _structEqualsTemplate.format({_paramPropertyName: 'IsGlobal'}),
+    ];
     for (final field in allFields) {
       items.add(
         _structEqualsTemplate.format(
-          {
-            _paramPropertyName: field.id,
-          },
-        ),
-      );
-    }
-
-    return items.join();
-  }
-
-  String _getListStructEqEq(DbModel model, ClassMetaEntity classEntity) {
-    final allFields = model.cache.getAllFields(classEntity);
-
-    final items = <String>[];
-    for (final field in allFields) {
-      items.add(
-        _structGetEqEqTemplate.format(
           {
             _paramPropertyName: field.id,
           },
@@ -670,7 +661,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
         return 'ParseList(${value}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
       case ClassFieldType.listInline:
-        return 'ParseListInline(${value}, vs => AssignValues(GetNewInstance("${field.valueTypeInfo!.classId}", null, instance.Id), objectsByIds, vs, emptyCollectionFactory, onError) as {${_paramPrefix}}${field.valueTypeInfo!.classId}{${_paramPostfix}}, emptyCollectionFactory)';
+        return 'ParseListInline(${value}, vs => ({${_paramPrefix}}${field.valueTypeInfo!.classId}{${_paramPostfix}})AssignValues(GetNewInstance("${field.valueTypeInfo!.classId}", null, instance.Id), objectsByIds, vs, emptyCollectionFactory, onError), emptyCollectionFactory)';
 
       case ClassFieldType.set:
         return 'ParseHashSet(${value}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
@@ -937,6 +928,7 @@ using Rectangle = System.Drawing.RectangleF;
     public interface IIdentifiable
     {
         string Id { get; }
+        bool IsGlobal { get; }
     }
 #endregion
 
@@ -1310,7 +1302,8 @@ using Rectangle = System.Drawing.RectangleF;
     /// </summary>
     public partial struct {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} : IIdentifiable, ICloneable<{${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}>{${_paramParentInterfaces}}
     {
-        public string Id { get; set; }{${_paramPropertiesBody}}
+        public string Id { get; set; }
+        public bool IsGlobal { get; set; }{${_paramPropertiesBody}}
 
         /// <summary>
         /// Deep clone of the item
@@ -1320,19 +1313,24 @@ using Rectangle = System.Drawing.RectangleF;
             return this;
         }
 
+        public bool Equals({${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} other)
+        {
+            return true{${_paramListStructEquals}};
+        }
+
         public override bool Equals(object obj)
         {
-            return obj is {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} other{${_paramListStructEquals}};
+            return obj is {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} other && Equals(other);
         }
 
         public override int GetHashCode()
         {
-            return 0{${_paramListStructGetHashCode}};
+            return HashCode.Combine(Id, IsGlobal{${_paramListStructGetHashCode}});
         }
 
         public static bool operator ==({${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} a, {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} b)
         {
-            return true{${_paramListStructEqEq}};
+            return a.Equals(b);
         }
 
         public static bool operator !=({${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} a, {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} b)
@@ -1349,13 +1347,6 @@ using Rectangle = System.Drawing.RectangleF;
   final String _structEqualsTemplate = '''
 
                    && {${_paramPropertyName}} == other.{${_paramPropertyName}}''';
-  final String _structGetHashCodeTemplate = '''
-
-                   ^ {${_paramPropertyName}}.GetHashCode()''';
-  final String _structGetEqEqTemplate = '''
-
-                   && a.{${_paramPropertyName}} == b.{${_paramPropertyName}}''';
-
   final String _classPropertyTemplate = '''{${_paramPropertySummary}}
         {${_paramPropertyAccessLevel}}{${_paramPropertyType}} {${_paramPropertyName}} { get; set; }''';
 
