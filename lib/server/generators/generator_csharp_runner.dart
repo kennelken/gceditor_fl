@@ -896,7 +896,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using System.Linq;
 
 #if !UNITY_5_3_OR_NEWER
 using System.Text.Json;
@@ -933,19 +932,23 @@ using Rectangle = System.Drawing.RectangleF;
 
     public static class IClonableExtensions
     {
-        public static IEnumerable<T> Clone<T>(this IEnumerable<ICloneable<T>> source)
+        public static List<T> Clone<T>(this IEnumerable<ICloneable<T>> source)
         {
-            return source.Select(i => i.Clone());
+            var result = new List<T>();
+            foreach (var i in source)
+                result.Add(i.Clone());
+            return result;
         }
-        public static IEnumerable<T> Clone<T>(this IEnumerable<ICloneable<T>> source, Action<T> modify)
+        public static List<T> Clone<T>(this IEnumerable<ICloneable<T>> source, Action<T> modify)
         {
-            return source.Select(i =>
-                {
-                    var item = i.Clone();
-                    modify(item);
-                    return item;
-                }
-            );
+            var result = new List<T>();
+            foreach (var i in source)
+            {
+                var item = i.Clone();
+                modify(item);
+                result.Add(item);
+            }
+            return result;
         }
     }
 
@@ -1097,7 +1100,7 @@ using Rectangle = System.Drawing.RectangleF;
         {
             if (!cache.TryGetValue(type, out var result))
             {
-                result = type.GetInterfaces().ToList();
+                result = new List<Type>(type.GetInterfaces());
 
                 var parent = type;
                 while (parent != null)
@@ -1431,14 +1434,15 @@ using Rectangle = System.Drawing.RectangleF;
                 }
             }
 
-            var allStructs = objectsByIds
-                .Where(kvp => kvp.Value.GetType().IsValueType)
-                .Select(kvp => kvp.Key)
-                .ToList();
-
-            var allClasses = objectsByIds.Where(kvp => !kvp.Value.GetType().IsValueType)
-                .Select(kvp => kvp.Key)
-                .ToList();
+            var allStructs = new List<string>();
+            var allClasses = new List<string>();
+            foreach (var kvp in objectsByIds)
+            {
+                if (kvp.Value.GetType().IsValueType)
+                    allStructs.Add(kvp.Key);
+                else
+                    allClasses.Add(kvp.Key);
+            }
 
             var maxStructDepth = {${_paramMaxStructDepth}};
             for (var i = 0; i < maxStructDepth; i++)
@@ -1557,7 +1561,9 @@ using Rectangle = System.Drawing.RectangleF;
             var result = new List<T>();
             foreach (var element in ((JsonElement)values).EnumerateArray())
             {
-                var inlineValues = element.EnumerateObject().ToDictionary(o => o.Name, o => o.Value as object);
+                var inlineValues = new Dictionary<string, object>();
+                foreach (var prop in element.EnumerateObject())
+                    inlineValues[prop.Name] = prop.Value as object;
                 result.Add(getValue(inlineValues));
             }
 #else
