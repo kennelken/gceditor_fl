@@ -3,7 +3,6 @@
 import 'dart:math';
 
 import 'package:darq/darq.dart';
-import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db/class_field_description_data_info.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/class_meta_entity_enum.dart';
@@ -53,16 +52,6 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
 
   static const _paramListInstantiate = 'listInstantiate';
   static const _paramClassName = 'className';
-  static const _paramRegexDate = 'regexDate';
-  static const _paramRegexDuration = 'regexDuration';
-  static const _paramRegexVector2 = 'regexVector2';
-  static const _paramRegexVector2Int = 'regexVector2Int';
-  static const _paramRegexVector3 = 'regexVector3';
-  static const _paramRegexVector3Int = 'regexVector3Int';
-  static const _paramRegexVector4 = 'regexVector4';
-  static const _paramRegexVector4Int = 'regexVector4Int';
-  static const _paramRegexRectangle = 'regexRectangle';
-  static const _paramRegexRectangleInt = 'regexRectangleInt';
   static const _paramAssignValueListProperties = 'assignValueListProperties';
   static const _paramParseFunction = 'parseFunction';
   static const _paramAssignValueCases = 'assignValueCases';
@@ -95,16 +84,6 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
               _paramPrefixInterface: data.prefixInterface,
               _paramPostfix: data.postfix,
               _paramListInstantiate: _getListInstantiate(model, data),
-              _paramRegexDate: Config.dateFormatRegex.pattern,
-              _paramRegexDuration: Config.durationFormatRegex.pattern,
-              _paramRegexVector2: Config.vector2FormatRegex.pattern,
-              _paramRegexVector2Int: Config.vector2IntFormatRegex.pattern,
-              _paramRegexVector3: Config.vector3FormatRegex.pattern,
-              _paramRegexVector3Int: Config.vector3IntFormatRegex.pattern,
-              _paramRegexVector4: Config.vector4FormatRegex.pattern,
-              _paramRegexVector4Int: Config.vector4IntFormatRegex.pattern,
-              _paramRegexRectangle: Config.rectangleFormatRegex.pattern,
-              _paramRegexRectangleInt: Config.rectangleIntFormatRegex.pattern,
               _paramAssignValueCases: _getAssignValuesCases(model, data),
               _paramMaxStructDepth: _getMaxStructDepth(model, 3),
             },
@@ -895,7 +874,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text.RegularExpressions;
 
 #if !UNITY_5_3_OR_NEWER
 using System.Text.Json;
@@ -1695,290 +1673,173 @@ using Rectangle = System.Drawing.RectangleF;
             return (T)Enum.Parse(typeof(T), id);
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexDate}}")] private static partial Regex dateFormatRegex();
-#else
-        private static Regex _dateFormatRegex;
-        private static Regex dateFormatRegex() => _dateFormatRegex ??= new Regex(@"{${_paramRegexDate}}", RegexOptions.Compiled);
-#endif
         private static DateTime ParseDate(object value)
         {
+#if !UNITY_5_3_OR_NEWER
+            if (value is JsonElement je && je.ValueKind == JsonValueKind.Number)
+                return DateTimeOffset.FromUnixTimeMilliseconds(je.GetInt64()).UtcDateTime;
+#endif
             var date = ParseString(value);
             if (string.IsNullOrEmpty(date))
                 return default;
 
-            var match = dateFormatRegex().Match(date);
-            if (!match.Success)
-                return default;
+            if (long.TryParse(date, out var ms))
+                return DateTimeOffset.FromUnixTimeMilliseconds(ms).UtcDateTime;
 
-            var year = match.Groups["y"];
-            var month = match.Groups["m"];
-            var day = match.Groups["d"];
-            var hour = match.Groups["hh"];
-            var minute = match.Groups["mm"];
-            var second = match.Groups["ss"];
-
-            return DateTime.SpecifyKind(
-                new DateTime(
-                    year?.Success ?? false ? Convert.ToInt32(year.Value) : 0,
-                    month?.Success ?? false ? Convert.ToInt32(month.Value) : 0,
-                    day?.Success ?? false ? Convert.ToInt32(day.Value) : 0,
-                    hour?.Success ?? false ? Convert.ToInt32(hour.Value) : 0,
-                    minute?.Success ?? false ? Convert.ToInt32(minute.Value) : 0,
-                    second?.Success ?? false ? Convert.ToInt32(second.Value) : 0
-                ),
-                DateTimeKind.Utc
-            );
+            return default;
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexDuration}}")] private static partial Regex durationFormatRegex();
-#else
-        private static Regex _durationFormatRegex;
-        private static Regex durationFormatRegex() => _durationFormatRegex ??= new Regex(@"{${_paramRegexDuration}}", RegexOptions.Compiled);
-#endif
         private static TimeSpan ParseDuration(object value)
         {
+#if !UNITY_5_3_OR_NEWER
+            if (value is JsonElement je && je.ValueKind == JsonValueKind.Number)
+                return TimeSpan.FromMilliseconds(je.GetInt64());
+#endif
             var duration = ParseString(value);
             if (string.IsNullOrEmpty(duration))
                 return default;
 
-            var match = durationFormatRegex().Match(duration);
-            if (!match.Success)
-                return default;
+            if (long.TryParse(duration, out var ms))
+                return TimeSpan.FromMilliseconds(ms);
 
-            var days = match.Groups["d"];
-            var hours = match.Groups["h"];
-            var minutes = match.Groups["m"];
-            var seconds = match.Groups["s"];
-            var milliSeconds = match.Groups["ms"];
-
-            return new TimeSpan(
-                days?.Success ?? false ? Convert.ToInt32(days.Value) : 0,
-                hours?.Success ?? false ? Convert.ToInt32(hours.Value) : 0,
-                minutes?.Success ?? false ? Convert.ToInt32(minutes.Value) : 0,
-                seconds?.Success ?? false ? Convert.ToInt32(seconds.Value) : 0,
-                milliSeconds?.Success ?? false ? Convert.ToInt32(milliSeconds.Value) : 0
-            );
+            return default;
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexVector2}}")] private static partial Regex vector2FormatRegex();
-#else
-        private static Regex _vector2FormatRegex;
-        private static Regex vector2FormatRegex() => _vector2FormatRegex ??= new Regex(@"{${_paramRegexVector2}}", RegexOptions.Compiled);
-#endif
         private static Vector2 ParseVector2(object value)
         {
             var vector2 = ParseString(value);
             if (string.IsNullOrEmpty(vector2))
                 return default;
 
-            var match = vector2FormatRegex().Match(vector2);
-            if (!match.Success)
+            var parts = vector2.Split(';');
+            if (parts.Length < 2)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-
             return new Vector2(
-                x?.Success ?? false ? Convert.ToSingle(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToSingle(y.Value) : 0
+                float.Parse(parts[0], CultureInfo.InvariantCulture),
+                float.Parse(parts[1], CultureInfo.InvariantCulture)
             );
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexVector2Int}}")] private static partial Regex vector2IntFormatRegex();
-#else
-        private static Regex _vector2IntFormatRegex;
-        private static Regex vector2IntFormatRegex() => _vector2IntFormatRegex ??= new Regex(@"{${_paramRegexVector2Int}}", RegexOptions.Compiled);
-#endif
         private static Vector2Int ParseVector2Int(object value)
         {
             var vector2Int = ParseString(value);
             if (string.IsNullOrEmpty(vector2Int))
                 return default;
 
-            var match = vector2IntFormatRegex().Match(vector2Int);
-            if (!match.Success)
+            var parts = vector2Int.Split(';');
+            if (parts.Length < 2)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-
             return new Vector2Int(
-                x?.Success ?? false ? Convert.ToInt32(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToInt32(y.Value) : 0
+                int.Parse(parts[0], CultureInfo.InvariantCulture),
+                int.Parse(parts[1], CultureInfo.InvariantCulture)
             );
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexVector3}}")] private static partial Regex vector3FormatRegex();
-#else
-        private static Regex _vector3FormatRegex;
-        private static Regex vector3FormatRegex() => _vector3FormatRegex ??= new Regex(@"{${_paramRegexVector3}}", RegexOptions.Compiled);
-#endif
         private static Vector3 ParseVector3(object value)
         {
             var vector3 = ParseString(value);
             if (string.IsNullOrEmpty(vector3))
                 return default;
 
-            var match = vector3FormatRegex().Match(vector3);
-            if (!match.Success)
+            var parts = vector3.Split(';');
+            if (parts.Length < 3)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-            var z = match.Groups["z"];
-
             return new Vector3(
-                x?.Success ?? false ? Convert.ToSingle(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToSingle(y.Value) : 0,
-                z?.Success ?? false ? Convert.ToSingle(z.Value) : 0
+                float.Parse(parts[0], CultureInfo.InvariantCulture),
+                float.Parse(parts[1], CultureInfo.InvariantCulture),
+                float.Parse(parts[2], CultureInfo.InvariantCulture)
             );
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexVector3Int}}")] private static partial Regex vector3IntFormatRegex();
-#else
-        private static Regex _vector3IntFormatRegex;
-        private static Regex vector3IntFormatRegex() => _vector3IntFormatRegex ??= new Regex(@"{${_paramRegexVector3Int}}", RegexOptions.Compiled);
-#endif
         private static Vector3Int ParseVector3Int(object value)
         {
             var vector3Int = ParseString(value);
             if (string.IsNullOrEmpty(vector3Int))
                 return default;
 
-            var match = vector3IntFormatRegex().Match(vector3Int);
-            if (!match.Success)
+            var parts = vector3Int.Split(';');
+            if (parts.Length < 3)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-            var z = match.Groups["z"];
-
             return new Vector3Int(
-                x?.Success ?? false ? Convert.ToInt32(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToInt32(y.Value) : 0,
-                z?.Success ?? false ? Convert.ToInt32(z.Value) : 0
+                int.Parse(parts[0], CultureInfo.InvariantCulture),
+                int.Parse(parts[1], CultureInfo.InvariantCulture),
+                int.Parse(parts[2], CultureInfo.InvariantCulture)
             );
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexVector4}}")] private static partial Regex vector4FormatRegex();
-#else
-        private static Regex _vector4FormatRegex;
-        private static Regex vector4FormatRegex() => _vector4FormatRegex ??= new Regex(@"{${_paramRegexVector4}}", RegexOptions.Compiled);
-#endif
         private static Vector4 ParseVector4(object value)
         {
             var vector4 = ParseString(value);
             if (string.IsNullOrEmpty(vector4))
                 return default;
 
-            var match = vector4FormatRegex().Match(vector4);
-            if (!match.Success)
+            var parts = vector4.Split(';');
+            if (parts.Length < 4)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-            var z = match.Groups["z"];
-            var w = match.Groups["w"];
-
             return new Vector4(
-                x?.Success ?? false ? Convert.ToSingle(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToSingle(y.Value) : 0,
-                z?.Success ?? false ? Convert.ToSingle(z.Value) : 0,
-                w?.Success ?? false ? Convert.ToSingle(w.Value) : 0
+                float.Parse(parts[0], CultureInfo.InvariantCulture),
+                float.Parse(parts[1], CultureInfo.InvariantCulture),
+                float.Parse(parts[2], CultureInfo.InvariantCulture),
+                float.Parse(parts[3], CultureInfo.InvariantCulture)
             );
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexVector4Int}}")] private static partial Regex vector4IntFormatRegex();
-#else
-        private static Regex _vector4IntFormatRegex;
-        private static Regex vector4IntFormatRegex() => _vector4IntFormatRegex ??= new Regex(@"{${_paramRegexVector4Int}}", RegexOptions.Compiled);
-#endif
         private static Vector4Int ParseVector4Int(object value)
         {
             var vector4Int = ParseString(value);
             if (string.IsNullOrEmpty(vector4Int))
                 return default;
 
-            var match = vector4IntFormatRegex().Match(vector4Int);
-            if (!match.Success)
+            var parts = vector4Int.Split(';');
+            if (parts.Length < 4)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-            var z = match.Groups["z"];
-            var w = match.Groups["w"];
-
             return new Vector4Int(
-                x?.Success ?? false ? Convert.ToInt32(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToInt32(y.Value) : 0,
-                z?.Success ?? false ? Convert.ToInt32(z.Value) : 0,
-                w?.Success ?? false ? Convert.ToInt32(w.Value) : 0
+                int.Parse(parts[0], CultureInfo.InvariantCulture),
+                int.Parse(parts[1], CultureInfo.InvariantCulture),
+                int.Parse(parts[2], CultureInfo.InvariantCulture),
+                int.Parse(parts[3], CultureInfo.InvariantCulture)
             );
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexRectangle}}")] private static partial Regex rectangleFormatRegex();
-#else
-        private static Regex _rectangleFormatRegex;
-        private static Regex rectangleFormatRegex() => _rectangleFormatRegex ??= new Regex(@"{${_paramRegexRectangle}}", RegexOptions.Compiled);
-#endif
         private static Rectangle ParseRectangle(object value)
         {
             var rectangle = ParseString(value);
             if (string.IsNullOrEmpty(rectangle))
                 return default;
 
-            var match = rectangleFormatRegex().Match(rectangle);
-            if (!match.Success)
+            var parts = rectangle.Split(';');
+            if (parts.Length < 4)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-            var w = match.Groups["w"];
-            var h = match.Groups["h"];
-
             return new Rectangle(
-                x?.Success ?? false ? Convert.ToSingle(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToSingle(y.Value) : 0,
-                w?.Success ?? false ? Convert.ToSingle(w.Value) : 0,
-                h?.Success ?? false ? Convert.ToSingle(h.Value) : 0
+                float.Parse(parts[0], CultureInfo.InvariantCulture),
+                float.Parse(parts[1], CultureInfo.InvariantCulture),
+                float.Parse(parts[2], CultureInfo.InvariantCulture),
+                float.Parse(parts[3], CultureInfo.InvariantCulture)
             );
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexRectangleInt}}")] private static partial Regex rectangleIntFormatRegex();
-#else
-        private static Regex _rectangleIntFormatRegex;
-        private static Regex rectangleIntFormatRegex() => _rectangleIntFormatRegex ??= new Regex(@"{${_paramRegexRectangleInt}}", RegexOptions.Compiled);
-#endif
         private static RectangleInt ParseRectangleInt(object value)
         {
             var rectangleInt = ParseString(value);
             if (string.IsNullOrEmpty(rectangleInt))
                 return default;
 
-            var match = rectangleIntFormatRegex().Match(rectangleInt);
-            if (!match.Success)
+            var parts = rectangleInt.Split(';');
+            if (parts.Length < 4)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-            var w = match.Groups["w"];
-            var h = match.Groups["h"];
-
             return new RectangleInt(
-                x?.Success ?? false ? Convert.ToInt32(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToInt32(y.Value) : 0,
-                w?.Success ?? false ? Convert.ToInt32(w.Value) : 0,
-                h?.Success ?? false ? Convert.ToInt32(h.Value) : 0
+                int.Parse(parts[0], CultureInfo.InvariantCulture),
+                int.Parse(parts[1], CultureInfo.InvariantCulture),
+                int.Parse(parts[2], CultureInfo.InvariantCulture),
+                int.Parse(parts[3], CultureInfo.InvariantCulture)
             );
         }
 
