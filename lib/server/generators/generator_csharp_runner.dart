@@ -293,8 +293,12 @@ namespace ${data.namespace}
     final interfaces = classEntity.interfaces //
         .where((e) => e != null)
         .map((e) => '${data.prefixInterface}$e${data.postfix}')
-        .concat(<String>{'IIdentifiable'}) //
+        .followedBy(classEntity.classType == ClassType.valueType ? [] : ['IIdentifiable'])
         .join(', ');
+
+    if (interfaces.isEmpty) {
+      return '';
+    }
 
     switch (classEntity.classType) {
       case ClassType.referenceType:
