@@ -60,6 +60,7 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
   static const _paramMetaEntityType = 'metaEntityType';
   static const _paramListItemsListsAssignment = 'listItemsListsAssignment';
   static const _paramListItemsListsDeclarations = 'listItemsListsDeclarations';
+  static const _paramTableClassMap = 'tableClassMap';
 
   @override
   Future<GeneratorResult> execute(String outputFolder, DbModel model, GeneratorCsharp data, GeneratorAdditionalInformation additionalInfo) async {
@@ -82,6 +83,7 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
               _paramListInstantiate: _getListInstantiate(model, data),
               _paramAssignValueCases: _getAssignValuesCases(model, data),
               _paramMaxStructDepth: _getMaxStructDepth(model, 3),
+              _paramTableClassMap: _getTableClassMap(model, data),
             },
           ),
           _paramListItemsListsAssignment: _getListItemsListAssignment(model, data),
@@ -760,6 +762,14 @@ ${_makeSummary(' */', indentDepth, false)}''';
     return '$result${result.isNotEmpty ? _defaultNewLine : ''}';
   }
 
+  String _getTableClassMap(DbModel model, GeneratorCsharp data) {
+    final items = <String>[];
+    for (final table in model.cache.allDataTables) {
+      items.add('                case "${table.id}":\n                    return "${table.classId}";\n');
+    }
+    return items.join();
+  }
+
   int _getMaxStructDepth(DbModel model, int maxAllowedDepth) {
     var depth = 0;
     for (var classEntry in model.cache.allClasses) {
@@ -1256,9 +1266,10 @@ class RectangleInt {
 
             var objectMapper = new ObjectMapper();
             var jsonRoot = objectMapper.readValue(jsonText, {${_paramPrefix}}Root{${_paramPostfix}}.GceditorJsonParser.JsonRoot.class);
-            for (var className : jsonRoot.records.keySet())
+            for (var tableEntry : jsonRoot.tables.entrySet())
             {
-                var listItems = jsonRoot.records.get(className);
+                var className = GetTableClass(tableEntry.getKey());
+                var listItems = tableEntry.getValue();
                 for (var i = 0; i < listItems.size(); i++)
                 {
                     var item = listItems.get(i);
@@ -1288,7 +1299,17 @@ class RectangleInt {
         {
             public String generationDate;
             public String generationUser;
-            public HashMap<String, ArrayList<HashMap<String, Object>>> records;
+            public HashMap<String, ArrayList<HashMap<String, Object>>> tables;
+        }
+
+        private static String GetTableClass(String tableId)
+        {
+            switch (tableId)
+            {
+{${_paramTableClassMap}}
+                default:
+                    throw new RuntimeException(String.format("Unknown table '%s'", tableId));
+            }
         }
 
         private static IIdentifiable GetNewInstance(String className, HashMap<String, Object> item, String ownerId) throws IllegalArgumentException

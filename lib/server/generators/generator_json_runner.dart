@@ -18,11 +18,7 @@ class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with Output
 
     try {
       for (final table in model.cache.allDataTables) {
-        var listEntries = result.records[table.classId];
-        if (listEntries == null) {
-          listEntries = [];
-          result.records[table.classId] = listEntries;
-        }
+        final items = <Map<String, dynamic>>[];
 
         for (final row in table.rows) {
           final rowData = <String, dynamic>{};
@@ -65,8 +61,10 @@ class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with Output
             }
           }
 
-          listEntries.add({'id': row.id, ...rowData});
+          items.add({'id': row.id, ...rowData});
         }
+
+        result.tables[table.id] = items;
       }
 
       final prioritizedKeys = ['id'];
@@ -81,7 +79,7 @@ class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with Output
         fileExtension: data.fileExtension,
       );
 
-      if (!resultChanged(resultJson, previousResult, '"records": {')) //
+      if (!resultChanged(resultJson, previousResult, '"tables": {')) //
         return GeneratorResult.success();
 
       final saveError = await saveToFile(

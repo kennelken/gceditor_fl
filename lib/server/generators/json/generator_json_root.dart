@@ -6,7 +6,7 @@ part 'generator_json_root.g.dart';
 class GeneratorJsonRoot {
   late String generationDate = '';
   late String generationUser = '';
-  late Map<String, List<Map<String, dynamic>>> records = {};
+  late Map<String, List<Map<String, dynamic>>> tables = {};
 
   GeneratorJsonRoot();
 

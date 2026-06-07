@@ -62,6 +62,7 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
   static const _paramListItemsListsAssignment = 'listItemsListsAssignment';
   static const _paramListItemsListsDeclarations = 'listItemsListsDeclarations';
   static const _paramFastListActivatorCases = 'fastListActivatorCases';
+  static const _paramTableClassMap = 'tableClassMap';
 
   @override
   Future<GeneratorResult> execute(String outputFolder, DbModel model, GeneratorCsharp data, GeneratorAdditionalInformation additionalInfo) async {
@@ -85,6 +86,7 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
               _paramListInstantiate: _getListInstantiate(model, data),
               _paramAssignValueCases: _getAssignValuesCases(model, data),
               _paramMaxStructDepth: _getMaxStructDepth(model, 3),
+              _paramTableClassMap: _getTableClassMap(model, data),
             },
           ),
           _paramListItemsListsAssignment: _getListItemsListAssignment(model, data),
@@ -821,6 +823,14 @@ ${_makeSummary('</summary>', indentDepth)}''';
     return '$result${result.isNotEmpty ? _defaultNewLine : ''}';
   }
 
+  String _getTableClassMap(DbModel model, GeneratorCsharp data) {
+    final items = <String>[];
+    for (final table in model.cache.allDataTables) {
+      items.add('                "${table.id}" => "${table.classId}",\n');
+    }
+    return items.join();
+  }
+
   String _getFastListActivatorCases(DbModel model, GeneratorCsharp data) {
     final items = <String>[];
 
@@ -1455,9 +1465,10 @@ using Rectangle = System.Drawing.RectangleF;
 #else
             var jsonRoot = JsonSerializer.Deserialize<JsonRoot>(jsonText, new JsonSerializerOptions { IncludeFields = true, TypeInfoResolver = JsonRootSourceGenerationContext.Default });
 #endif
-            foreach (var className in jsonRoot.records.Keys)
+            foreach (var tableEntry in jsonRoot.tables)
             {
-                var listItems = jsonRoot.records[className];
+                var className = GetTableClass(tableEntry.Key);
+                var listItems = tableEntry.Value;
                 for (var i = 0; i < listItems.Count; i++)
                 {
                     var item = listItems[i];
@@ -1514,7 +1525,7 @@ using Rectangle = System.Drawing.RectangleF;
         {
             public string generationDate;
             public string generationUser;
-            public Dictionary<string, List<Dictionary<string, object>>> records;
+            public Dictionary<string, List<Dictionary<string, object>>> tables;
         }
 
         private static IIdentifiable GetNewInstance(string className, Dictionary<string, object> item, string ownerId = null)
@@ -1524,6 +1535,15 @@ using Rectangle = System.Drawing.RectangleF;
                 default:
                     throw new Exception(\$"Can not create a new instance of an unexpected class '{className}'");
             }
+        }
+
+        private static string GetTableClass(string tableId)
+        {
+            return tableId switch
+            {
+{${_paramTableClassMap}}
+                _ => throw new Exception(\$"Unknown table '{tableId}'")
+            };
         }
 
         private static Dictionary<string, int> _inlineItemsCounter = new();

@@ -10,7 +10,7 @@ GeneratorJsonRoot _$GeneratorJsonRootFromJson(Map<String, dynamic> json) =>
     GeneratorJsonRoot()
       ..generationDate = json['generationDate'] as String
       ..generationUser = json['generationUser'] as String
-      ..records = (json['records'] as Map<String, dynamic>).map(
+      ..tables = (json['tables'] as Map<String, dynamic>).map(
         (k, e) => MapEntry(
             k,
             (e as List<dynamic>)
@@ -22,5 +22,5 @@ Map<String, dynamic> _$GeneratorJsonRootToJson(GeneratorJsonRoot instance) =>
     <String, dynamic>{
       'generationDate': instance.generationDate,
       'generationUser': instance.generationUser,
-      'records': instance.records,
+      'tables': instance.tables,
     };
