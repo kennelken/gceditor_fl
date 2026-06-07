@@ -60,6 +60,8 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
   static const _paramMetaEntityType = 'metaEntityType';
   static const _paramListItemsListsAssignment = 'listItemsListsAssignment';
   static const _paramListItemsListsDeclarations = 'listItemsListsDeclarations';
+  static const _paramTablesListDeclarations = 'tablesListDeclarations';
+  static const _paramTablesListAssignment = 'tablesListAssignment';
   static const _paramTableClassMap = 'tableClassMap';
 
   @override
@@ -88,6 +90,8 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
           ),
           _paramListItemsListsAssignment: _getListItemsListAssignment(model, data),
           _paramListItemsListsDeclarations: _getListItemsListsDeclarations(model, data),
+          _paramTablesListDeclarations: _getTablesListDeclarations(model, data),
+          _paramTablesListAssignment: _getTablesListAssignment(model, data),
         },
       );
 
@@ -762,6 +766,25 @@ ${_makeSummary(' */', indentDepth, false)}''';
     return '$result${result.isNotEmpty ? _defaultNewLine : ''}';
   }
 
+  String _getTablesListDeclarations(DbModel model, GeneratorCsharp data) {
+    final result = model.cache.allDataTables.map((e) => _tablesListDeclarationRowTemplate.format({
+          _paramPrefix: data.prefix,
+          _paramPostfix: data.postfix,
+          _paramClassName: e.classId,
+          _paramEntryName: e.id,
+        })).join();
+    return '$result${result.isNotEmpty ? _defaultNewLine : ''}';
+  }
+
+  String _getTablesListAssignment(DbModel model, GeneratorCsharp data) {
+    return model.cache.allDataTables.map((e) => _tablesListAssignmentRowTemplate.format({
+          _paramPrefix: data.prefix,
+          _paramPostfix: data.postfix,
+          _paramClassName: e.classId,
+          _paramEntryName: e.id,
+        })).join();
+  }
+
   String _getTableClassMap(DbModel model, GeneratorCsharp data) {
     final items = <String>[];
     for (final table in model.cache.allDataTables) {
@@ -885,8 +908,8 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
 
     private ItemsLists Lists;
     public ItemsLists getLists() { return Lists; }
-    public HashMap<String, ArrayList<IIdentifiable>> Tables;
-    public HashMap<String, ArrayList<IIdentifiable>> getTables() { return Tables; }
+    public TablesList Tables;
+    public TablesList getTables() { return Tables; }
 
     public <T extends IIdentifiable> T Get(Class<T> itemClass, String id) throws Exception
     {
@@ -1005,6 +1028,13 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
     {{${_paramListItemsListsDeclarations}}
         public ItemsLists(HashMap<String, IIdentifiable> allItems)
         {{${_paramListItemsListsAssignment}}
+        }
+    }
+
+    public static class TablesList
+    {{${_paramTablesListDeclarations}}
+        public TablesList(HashMap<String, ArrayList<IIdentifiable>> tables)
+        {{${_paramTablesListAssignment}}
         }
     }
 
@@ -1255,6 +1285,17 @@ class RectangleInt {
         public {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}{${_paramMetaEntityType}}${_itemsListSuffix} get{${_paramClassName}}() { return {${_paramClassName}}; }
         private {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}{${_paramMetaEntityType}}${_itemsListSuffix} {${_paramClassName}};''';
 
+  final String _tablesListDeclarationRowTemplate = '''
+
+        private ArrayList<{${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}> {${_paramEntryName}};
+        public ArrayList<{${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}> get{${_paramEntryName}}() { return {${_paramEntryName}}; }''';
+  final String _tablesListAssignmentRowTemplate = '''
+
+            var {${_paramEntryName}}List = tables.get("{${_paramEntryName}}");
+            {${_paramEntryName}} = new ArrayList<{${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}>({${_paramEntryName}}List.size());
+            for (var item : {${_paramEntryName}}List)
+                {${_paramEntryName}}.add(({${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}})item);''';
+
   final String _parserTemplate = //
       '''
     public static class GceditorJsonParser
@@ -1295,7 +1336,7 @@ class RectangleInt {
             root.CreatedBy = jsonRoot.generationUser;
             root.CreationTime = jsonRoot.generationDate;
             root.Initialize(new ArrayList<IIdentifiable>(objectsByIds.values()));
-            root.Tables = tables;
+            root.Tables = new TablesList(tables);
 
             _inlineItemsCounter.clear();
 

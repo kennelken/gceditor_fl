@@ -13,4 +13,3 @@
 
 
 - move history and output paths into project setiings
-- write tables into json, not classes

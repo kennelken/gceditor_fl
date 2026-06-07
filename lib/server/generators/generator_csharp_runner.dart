@@ -61,6 +61,8 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
   static const _paramMetaEntityType = 'metaEntityType';
   static const _paramListItemsListsAssignment = 'listItemsListsAssignment';
   static const _paramListItemsListsDeclarations = 'listItemsListsDeclarations';
+  static const _paramTablesListDeclarations = 'tablesListDeclarations';
+  static const _paramTablesListAssignment = 'tablesListAssignment';
   static const _paramFastListActivatorCases = 'fastListActivatorCases';
   static const _paramTableClassMap = 'tableClassMap';
 
@@ -91,6 +93,8 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
           ),
           _paramListItemsListsAssignment: _getListItemsListAssignment(model, data),
           _paramListItemsListsDeclarations: _getListItemsListsDeclarations(model, data),
+          _paramTablesListDeclarations: _getTablesListDeclarations(model, data),
+          _paramTablesListAssignment: _getTablesListAssignment(model, data),
           _paramFastListActivatorCases: _getFastListActivatorCases(model, data),
         },
       );
@@ -823,6 +827,29 @@ ${_makeSummary('</summary>', indentDepth)}''';
     return '$result${result.isNotEmpty ? _defaultNewLine : ''}';
   }
 
+  String _getTablesListDeclarations(DbModel model, GeneratorCsharp data) {
+    final result = model.cache.allDataTables
+        .map((e) => _tablesListDeclarationRowTemplate.format({
+              _paramPrefix: data.prefix,
+              _paramPostfix: data.postfix,
+              _paramClassName: e.classId,
+              _paramEntryName: e.id,
+            }))
+        .join();
+    return '$result${result.isNotEmpty ? _defaultNewLine : ''}';
+  }
+
+  String _getTablesListAssignment(DbModel model, GeneratorCsharp data) {
+    return model.cache.allDataTables
+        .map((e) => _tablesListAssignmentRowTemplate.format({
+              _paramPrefix: data.prefix,
+              _paramPostfix: data.postfix,
+              _paramClassName: e.classId,
+              _paramEntryName: e.id,
+            }))
+        .join();
+  }
+
   String _getTableClassMap(DbModel model, GeneratorCsharp data) {
     final items = <String>[];
     for (final table in model.cache.allDataTables) {
@@ -999,7 +1026,7 @@ using Rectangle = System.Drawing.RectangleF;
         public Dictionary<Type, object> AllItemsByType { get; internal set; }
 
         public ItemsLists Lists { get; internal set; }
-        public Dictionary<string, List<IIdentifiable>> Tables { get; internal set; }
+        public TablesList Tables { get; internal set; }
 
         public T Get<T>(string id) where T : IIdentifiable
         {
@@ -1161,6 +1188,13 @@ using Rectangle = System.Drawing.RectangleF;
     {{${_paramListItemsListsDeclarations}}
         public ItemsLists(Dictionary<string, IIdentifiable> allItems)
         {{${_paramListItemsListsAssignment}}
+        }
+    }
+
+    public class TablesList
+    {{${_paramTablesListDeclarations}}
+        public TablesList(Dictionary<string, List<IIdentifiable>> tables)
+        {{${_paramTablesListAssignment}}
         }
     }
 #endregion
@@ -1446,6 +1480,16 @@ using Rectangle = System.Drawing.RectangleF;
 
         public {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}{${_paramMetaEntityType}}${_itemsListSuffix} {${_paramClassName}} { get; }''';
 
+  final String _tablesListDeclarationRowTemplate = '''
+
+        public List<{${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}> {${_paramEntryName}} { get; }''';
+  final String _tablesListAssignmentRowTemplate = '''
+
+            var {${_paramEntryName}}List = tables["{${_paramEntryName}}"];
+            {${_paramEntryName}} = new List<{${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}>({${_paramEntryName}}List.Count);
+            foreach (var item in {${_paramEntryName}}List)
+                {${_paramEntryName}}.Add(({${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}})item);''';
+
   final String _listActivatorCaseTemplate = '''
                 "{${_paramClassName}}" => (object)new List<{${_paramClassName}}>(),
 ''';
@@ -1510,7 +1554,7 @@ using Rectangle = System.Drawing.RectangleF;
             root.CreatedBy = jsonRoot.generationUser;
             root.CreationTime = jsonRoot.generationDate;
             root.Initialize(new List<IIdentifiable>(objectsByIds.Values));
-            root.Tables = tables;
+            root.Tables = new TablesList(tables);
 
             var cache = new CacheRoot();
 
