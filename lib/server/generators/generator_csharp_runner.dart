@@ -3,7 +3,6 @@
 import 'dart:math';
 
 import 'package:darq/darq.dart';
-import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db/class_field_description_data_info.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/class_meta_entity_enum.dart';
@@ -43,8 +42,6 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
 
   static const _paramListStructEquals = 'llistStructEquals';
   static const _paramListStructGetHashCode = 'listStructGetHashCode';
-  static const _paramListStructEqEq = 'listStructEqEq';
-
   static const _paramPropertyAccessLevel = 'propertyAccessLevel';
   static const _paramPropertyType = 'propertyType';
   static const _paramPropertyName = 'propertyName';
@@ -53,16 +50,6 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
 
   static const _paramListInstantiate = 'listInstantiate';
   static const _paramClassName = 'className';
-  static const _paramRegexDate = 'regexDate';
-  static const _paramRegexDuration = 'regexDuration';
-  static const _paramRegexVector2 = 'regexVector2';
-  static const _paramRegexVector2Int = 'regexVector2Int';
-  static const _paramRegexVector3 = 'regexVector3';
-  static const _paramRegexVector3Int = 'regexVector3Int';
-  static const _paramRegexVector4 = 'regexVector4';
-  static const _paramRegexVector4Int = 'regexVector4Int';
-  static const _paramRegexRectangle = 'regexRectangle';
-  static const _paramRegexRectangleInt = 'regexRectangleInt';
   static const _paramAssignValueListProperties = 'assignValueListProperties';
   static const _paramParseFunction = 'parseFunction';
   static const _paramAssignValueCases = 'assignValueCases';
@@ -74,6 +61,10 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
   static const _paramMetaEntityType = 'metaEntityType';
   static const _paramListItemsListsAssignment = 'listItemsListsAssignment';
   static const _paramListItemsListsDeclarations = 'listItemsListsDeclarations';
+  static const _paramTablesListDeclarations = 'tablesListDeclarations';
+  static const _paramTablesListAssignment = 'tablesListAssignment';
+  static const _paramFastListActivatorCases = 'fastListActivatorCases';
+  static const _paramTableClassMap = 'tableClassMap';
 
   @override
   Future<GeneratorResult> execute(String outputFolder, DbModel model, GeneratorCsharp data, GeneratorAdditionalInformation additionalInfo) async {
@@ -95,22 +86,16 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
               _paramPrefixInterface: data.prefixInterface,
               _paramPostfix: data.postfix,
               _paramListInstantiate: _getListInstantiate(model, data),
-              _paramRegexDate: Config.dateFormatRegex.pattern,
-              _paramRegexDuration: Config.durationFormatRegex.pattern,
-              _paramRegexVector2: Config.vector2FormatRegex.pattern,
-              _paramRegexVector2Int: Config.vector2IntFormatRegex.pattern,
-              _paramRegexVector3: Config.vector3FormatRegex.pattern,
-              _paramRegexVector3Int: Config.vector3IntFormatRegex.pattern,
-              _paramRegexVector4: Config.vector4FormatRegex.pattern,
-              _paramRegexVector4Int: Config.vector4IntFormatRegex.pattern,
-              _paramRegexRectangle: Config.rectangleFormatRegex.pattern,
-              _paramRegexRectangleInt: Config.rectangleIntFormatRegex.pattern,
               _paramAssignValueCases: _getAssignValuesCases(model, data),
               _paramMaxStructDepth: _getMaxStructDepth(model, 3),
+              _paramTableClassMap: _getTableClassMap(model, data),
             },
           ),
           _paramListItemsListsAssignment: _getListItemsListAssignment(model, data),
           _paramListItemsListsDeclarations: _getListItemsListsDeclarations(model, data),
+          _paramTablesListDeclarations: _getTablesListDeclarations(model, data),
+          _paramTablesListAssignment: _getTablesListAssignment(model, data),
+          _paramFastListActivatorCases: _getFastListActivatorCases(model, data),
         },
       );
 
@@ -191,7 +176,6 @@ namespace ${data.namespace}
           _methodCloneBody: _getCloneProperties(model, classEntity),
           _paramListStructGetHashCode: _getListStructGetHashCode(model, classEntity),
           _paramListStructEquals: _getListStructEquals(model, classEntity),
-          _paramListStructEqEq: _getListStructEqEq(model, classEntity),
         },
       );
 
@@ -311,11 +295,29 @@ namespace ${data.namespace}
   }
 
   String _getParentInterfaces(ClassMetaEntity classEntity, GeneratorCsharp data) {
-    final interfaces = classEntity.interfaces //
-        .where((e) => e != null)
-        .map((e) => '${data.prefixInterface}$e${data.postfix}')
-        .concat(<String>{'IIdentifiable'}) //
-        .join(', ');
+    final additionalInterfaces = <String>[
+      ...classEntity.interfaces //
+          .where((e) => e != null)
+          .map((e) => '${data.prefixInterface}$e${data.postfix}'),
+    ];
+
+    switch (classEntity.classType) {
+      case ClassType.referenceType:
+        additionalInterfaces.add('IIdentifiable');
+        break;
+
+      case ClassType.valueType:
+        additionalInterfaces.add('IEquatable<${data.prefix}${classEntity.id}${data.postfix}>');
+        break;
+
+      case ClassType.undefined:
+      case ClassType.interface:
+        additionalInterfaces.add('IIdentifiable');
+        break;
+    }
+
+    final interfaces = additionalInterfaces.join(', ');
+    if (interfaces.isEmpty) return '';
 
     switch (classEntity.classType) {
       case ClassType.referenceType:
@@ -406,13 +408,7 @@ namespace ${data.namespace}
 
     final items = <String>[];
     for (final field in allFields) {
-      items.add(
-        _structGetHashCodeTemplate.format(
-          {
-            _paramPropertyName: field.id,
-          },
-        ),
-      );
+      items.add(',${_defaultNewLine}${_indent * 4}${field.id}');
     }
 
     return items.join();
@@ -421,27 +417,13 @@ namespace ${data.namespace}
   String _getListStructEquals(DbModel model, ClassMetaEntity classEntity) {
     final allFields = model.cache.getAllFields(classEntity);
 
-    final items = <String>[];
+    final items = <String>[
+      _structEqualsTemplate.format({_paramPropertyName: 'Id'}),
+      _structEqualsTemplate.format({_paramPropertyName: 'IsGlobal'}),
+    ];
     for (final field in allFields) {
       items.add(
         _structEqualsTemplate.format(
-          {
-            _paramPropertyName: field.id,
-          },
-        ),
-      );
-    }
-
-    return items.join();
-  }
-
-  String _getListStructEqEq(DbModel model, ClassMetaEntity classEntity) {
-    final allFields = model.cache.getAllFields(classEntity);
-
-    final items = <String>[];
-    for (final field in allFields) {
-      items.add(
-        _structGetEqEqTemplate.format(
           {
             _paramPropertyName: field.id,
           },
@@ -687,7 +669,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
         return 'ParseList(${value}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
       case ClassFieldType.listInline:
-        return 'ParseListInline(${value}, vs => AssignValues(GetNewInstance("${field.valueTypeInfo!.classId}", null, instance.Id), objectsByIds, vs, emptyCollectionFactory, onError) as {${_paramPrefix}}${field.valueTypeInfo!.classId}{${_paramPostfix}}, emptyCollectionFactory)';
+        return 'ParseListInline(${value}, vs => ({${_paramPrefix}}${field.valueTypeInfo!.classId}{${_paramPostfix}})AssignValues(GetNewInstance("${field.valueTypeInfo!.classId}", null, instance.Id), objectsByIds, vs, emptyCollectionFactory, onError), emptyCollectionFactory)';
 
       case ClassFieldType.set:
         return 'ParseHashSet(${value}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
@@ -845,6 +827,77 @@ ${_makeSummary('</summary>', indentDepth)}''';
     return '$result${result.isNotEmpty ? _defaultNewLine : ''}';
   }
 
+  String _getTablesListDeclarations(DbModel model, GeneratorCsharp data) {
+    final result = model.cache.allDataTables
+        .map((e) => _tablesListDeclarationRowTemplate.format({
+              _paramPrefix: data.prefix,
+              _paramPostfix: data.postfix,
+              _paramClassName: e.classId,
+              _paramEntryName: e.id,
+            }))
+        .join();
+    return '$result${result.isNotEmpty ? _defaultNewLine : ''}';
+  }
+
+  String _getTablesListAssignment(DbModel model, GeneratorCsharp data) {
+    return model.cache.allDataTables
+        .map((e) => _tablesListAssignmentRowTemplate.format({
+              _paramPrefix: data.prefix,
+              _paramPostfix: data.postfix,
+              _paramClassName: e.classId,
+              _paramEntryName: e.id,
+            }))
+        .join();
+  }
+
+  String _getTableClassMap(DbModel model, GeneratorCsharp data) {
+    final items = <String>[];
+    for (final table in model.cache.allDataTables) {
+      items.add('                "${table.id}" => "${table.classId}",\n');
+    }
+    return items.join();
+  }
+
+  String _getFastListActivatorCases(DbModel model, GeneratorCsharp data) {
+    final items = <String>[];
+
+    for (final classEntity in model.cache.allClasses) {
+      switch (classEntity.classType) {
+        case ClassType.undefined:
+        case ClassType.interface:
+          items.add(
+            _listActivatorCaseTemplate.format({
+              _paramClassName: '${data.prefixInterface}${classEntity.id}${data.postfix}',
+            }),
+          );
+          break;
+
+        case ClassType.referenceType:
+        case ClassType.valueType:
+          items.add(
+            _listActivatorCaseTemplate.format({
+              _paramClassName: '${data.prefix}${classEntity.id}${data.postfix}',
+            }),
+          );
+          break;
+      }
+    }
+
+    items.add(
+      _listActivatorCaseTemplate.format({
+        _paramClassName: 'Base${data.prefix}Item${data.postfix}',
+      }),
+    );
+
+    items.add(
+      _listActivatorCaseTemplate.format({
+        _paramClassName: 'IIdentifiable',
+      }),
+    );
+
+    return items.join();
+  }
+
   int _getMaxStructDepth(DbModel model, int maxAllowedDepth) {
     var depth = 0;
     for (var classEntry in model.cache.allClasses) {
@@ -895,15 +948,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text.RegularExpressions;
-using System.Linq;
 
-#if !UNITY_5_3_OR_NEWER
-using System.Text.Json;
-using System.Text.Json.Serialization;
-#else
+#if UNITY_5_3_OR_NEWER
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+#else
+using System.Text.Json;
+using System.Text.Json.Serialization;
 #endif
 
 #if UNITY_5_3_OR_NEWER
@@ -933,25 +984,30 @@ using Rectangle = System.Drawing.RectangleF;
 
     public static class IClonableExtensions
     {
-        public static IEnumerable<T> Clone<T>(this IEnumerable<ICloneable<T>> source)
+        public static List<T> Clone<T>(this IEnumerable<ICloneable<T>> source)
         {
-            return source.Select(i => i.Clone());
+            var result = new List<T>();
+            foreach (var i in source)
+                result.Add(i.Clone());
+            return result;
         }
-        public static IEnumerable<T> Clone<T>(this IEnumerable<ICloneable<T>> source, Action<T> modify)
+        public static List<T> Clone<T>(this IEnumerable<ICloneable<T>> source, Action<T> modify)
         {
-            return source.Select(i =>
-                {
-                    var item = i.Clone();
-                    modify(item);
-                    return item;
-                }
-            );
+            var result = new List<T>();
+            foreach (var i in source)
+            {
+                var item = i.Clone();
+                modify(item);
+                result.Add(item);
+            }
+            return result;
         }
     }
 
     public interface IIdentifiable
     {
         string Id { get; }
+        bool IsGlobal { get; }
     }
 #endregion
 
@@ -966,10 +1022,11 @@ using Rectangle = System.Drawing.RectangleF;
 
         private EmptyCollectionFactory _emptyCollectionFactory;
 
-        public Dictionary<string, IIdentifiable> AllItems { get; private set; }
-        public Dictionary<Type, object> AllItemsByType { get; private set; }
+        public Dictionary<string, IIdentifiable> AllItems { get; internal set; }
+        public Dictionary<Type, object> AllItemsByType { get; internal set; }
 
-        public ItemsLists Lists { get; private set; }
+        public ItemsLists Lists { get; internal set; }
+        public TablesList Tables { get; internal set; }
 
         public T Get<T>(string id) where T : IIdentifiable
         {
@@ -1049,21 +1106,15 @@ using Rectangle = System.Drawing.RectangleF;
             return items as List<T>;
         }
 
-
-        public IList GetAll(Type type)
+        public IReadOnlyList<IIdentifiable> GetAll(Type type)
         {
-            if (!AllItemsByType.TryGetValue(type, out var items))
-            {
-                items = _emptyCollectionFactory.List(type);
-                AllItemsByType[type] = items;
-            }
-            return items as IList;
+            return GetAll<IIdentifiable>();
         }
 
         /// <summary>
         /// Supposed to be called only once when the model is parsed
         /// </summary>
-        public void Init(List<IIdentifiable> items)
+        internal void Initialize(List<IIdentifiable> items)
         {
             _emptyCollectionFactory = new EmptyCollectionFactory();
 
@@ -1083,7 +1134,7 @@ using Rectangle = System.Drawing.RectangleF;
 
                     if (!AllItemsByType.TryGetValue(type, out var listItemsByType))
                     {
-                        listItemsByType = Activator.CreateInstance(typeof(List<>).MakeGenericType(type));
+                        listItemsByType = FastListActivator.CreateInstance(type);
                         AllItemsByType.Add(type, listItemsByType);
                     }
                     (listItemsByType as IList).Add(item);
@@ -1091,13 +1142,34 @@ using Rectangle = System.Drawing.RectangleF;
             }
 
             Lists = new ItemsLists(AllItems);
+
+            AllItems.TrimExcess();
+            AllItemsByType.TrimExcess();
+            foreach (var list in AllItemsByType.Values)
+            {
+                if (list is IList { Count: > 0 })
+                {
+                    var method = list.GetType().GetMethod("TrimExcess", Type.EmptyTypes);
+                    method?.Invoke(list, null);
+                }
+            }
         }
 
         private List<Type> GetParentTypesIncludingCurrent(Type type, Dictionary<Type, List<Type>> cache)
         {
             if (!cache.TryGetValue(type, out var result))
             {
-                result = type.GetInterfaces().ToList();
+                result = new List<Type>();
+                foreach (var interfaceType in type.GetInterfaces())
+                {
+                    if (interfaceType.IsGenericType)
+                    {
+                        var genericDef = interfaceType.GetGenericTypeDefinition();
+                        if (genericDef == typeof(ICloneable<>) || genericDef == typeof(IEquatable<>))
+                            continue;
+                    }
+                    result.Add(interfaceType);
+                }
 
                 var parent = type;
                 while (parent != null)
@@ -1116,6 +1188,13 @@ using Rectangle = System.Drawing.RectangleF;
     {{${_paramListItemsListsDeclarations}}
         public ItemsLists(Dictionary<string, IIdentifiable> allItems)
         {{${_paramListItemsListsAssignment}}
+        }
+    }
+
+    public class TablesList
+    {{${_paramTablesListDeclarations}}
+        public TablesList(Dictionary<string, List<IIdentifiable>> tables)
+        {{${_paramTablesListAssignment}}
         }
     }
 #endregion
@@ -1150,19 +1229,6 @@ using Rectangle = System.Drawing.RectangleF;
             return list as List<T>;
         }
 
-        public IList List(Type type)
-        {
-            if (!_lists.TryGetValue(type, out var list))
-            {
-                var genericListType = typeof(List<>);
-                var concreteListType = genericListType.MakeGenericType(type);
-
-                list = Activator.CreateInstance(concreteListType, Array.Empty<object>());
-                _lists[type] = list;
-            }
-            return list as IList;
-        }
-
         private Dictionary<Type, object> _hashsets = new Dictionary<Type, object>();
         public HashSet<T> HashSet<T>()
         {
@@ -1192,9 +1258,22 @@ using Rectangle = System.Drawing.RectangleF;
     }
 #endregion
 
+    internal static class FastListActivator
+    {
+        public static object CreateInstance(Type type)
+        {
+            return type.Name switch
+            {
+{${_paramFastListActivatorCases}}
+                _ => Activator.CreateInstance(typeof(List<>).MakeGenericType(type))
+            };
+        }
+    }
+
 #region Geometry classes
 #if !GODOT4_0_OR_GREATER
-    #if !UNITY_5_3_OR_NEWER
+    #if UNITY_5_3_OR_NEWER
+    #else
     public struct Vector2Int
     {
         public int X;
@@ -1325,7 +1404,8 @@ using Rectangle = System.Drawing.RectangleF;
     /// </summary>
     public partial struct {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} : IIdentifiable, ICloneable<{${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}>{${_paramParentInterfaces}}
     {
-        public string Id { get; set; }{${_paramPropertiesBody}}
+        public string Id { get; set; }
+        public bool IsGlobal { get; set; }{${_paramPropertiesBody}}
 
         /// <summary>
         /// Deep clone of the item
@@ -1335,19 +1415,24 @@ using Rectangle = System.Drawing.RectangleF;
             return this;
         }
 
+        public bool Equals({${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} other)
+        {
+            return true{${_paramListStructEquals}};
+        }
+
         public override bool Equals(object obj)
         {
-            return obj is {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} other{${_paramListStructEquals}};
+            return obj is {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} other && Equals(other);
         }
 
         public override int GetHashCode()
         {
-            return 0{${_paramListStructGetHashCode}};
+            return HashCode.Combine(Id, IsGlobal{${_paramListStructGetHashCode}});
         }
 
         public static bool operator ==({${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} a, {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} b)
         {
-            return true{${_paramListStructEqEq}};
+            return a.Equals(b);
         }
 
         public static bool operator !=({${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} a, {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} b)
@@ -1364,13 +1449,6 @@ using Rectangle = System.Drawing.RectangleF;
   final String _structEqualsTemplate = '''
 
                    && {${_paramPropertyName}} == other.{${_paramPropertyName}}''';
-  final String _structGetHashCodeTemplate = '''
-
-                   ^ {${_paramPropertyName}}.GetHashCode()''';
-  final String _structGetEqEqTemplate = '''
-
-                   && a.{${_paramPropertyName}} == b.{${_paramPropertyName}}''';
-
   final String _classPropertyTemplate = '''{${_paramPropertySummary}}
         {${_paramPropertyAccessLevel}}{${_paramPropertyType}} {${_paramPropertyName}} { get; set; }''';
 
@@ -1381,7 +1459,7 @@ using Rectangle = System.Drawing.RectangleF;
   final _getNewInstanceRowTemplate = '''
 
                 case "{${_paramClassName}}":
-                    return new {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}} { Id = item?.id ?? GetInlineRowId(ownerId), IsGlobal = item?.id != null };
+                    return new {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}} { Id = id, IsGlobal = isGlobal };
   ''';
 
   final String _assignValueCaseTemplate = '''
@@ -1402,6 +1480,20 @@ using Rectangle = System.Drawing.RectangleF;
 
         public {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}{${_paramMetaEntityType}}${_itemsListSuffix} {${_paramClassName}} { get; }''';
 
+  final String _tablesListDeclarationRowTemplate = '''
+
+        public List<{${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}> {${_paramEntryName}} { get; }''';
+  final String _tablesListAssignmentRowTemplate = '''
+
+            var {${_paramEntryName}}List = tables["{${_paramEntryName}}"];
+            {${_paramEntryName}} = new List<{${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}>({${_paramEntryName}}List.Count);
+            foreach (var item in {${_paramEntryName}}List)
+                {${_paramEntryName}}.Add(({${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}})item);''';
+
+  final String _listActivatorCaseTemplate = '''
+                "{${_paramClassName}}" => (object)new List<{${_paramClassName}}>(),
+''';
+
   final String _parserTemplate = //
       '''#region JSON
     public static partial class {${_paramPrefix}}Root{${_paramPostfix}}Parser
@@ -1411,48 +1503,58 @@ using Rectangle = System.Drawing.RectangleF;
             EmptyCollectionFactory emptyCollectionFactory = new EmptyCollectionFactory();
 
             var objectsByIds = new Dictionary<string, IIdentifiable>();
-            var valuesByIds = new Dictionary<string, JsonItem>();
+            var valuesByIds = new Dictionary<string, Dictionary<string, object>>();
+            var tables = new Dictionary<string, List<IIdentifiable>>();
 
-#if !UNITY_5_3_OR_NEWER
-            var jsonRoot = JsonSerializer.Deserialize<JsonRoot>(jsonText, new JsonSerializerOptions { IncludeFields = true, TypeInfoResolver = JsonRootSourceGenerationContext.Default });
-#else
+#if UNITY_5_3_OR_NEWER
             var jsonRoot = JsonConvert.DeserializeObject<JsonRoot>(jsonText);
+#else
+            var jsonRoot = JsonSerializer.Deserialize<JsonRoot>(jsonText, new JsonSerializerOptions { IncludeFields = true, TypeInfoResolver = JsonRootSourceGenerationContext.Default });
 #endif
-            foreach (var className in jsonRoot.classes.Keys)
+
+            foreach (var tableEntry in jsonRoot.tables)
             {
-                var listItems = jsonRoot.classes[className];
-                for (var i = 0; i < listItems.items.Count; i++)
+                var className = GetTableClass(tableEntry.Key);
+                var listItems = tableEntry.Value;
+                var tableItems = new List<IIdentifiable>(listItems.Count);
+                for (var i = 0; i < listItems.Count; i++)
                 {
-                    var item = listItems.items[i];
+                    var item = listItems[i];
 
                     var instance = GetNewInstance(className, item);
                     objectsByIds[instance.Id] = instance;
                     valuesByIds[instance.Id] = item;
+                    tableItems.Add(instance);
                 }
+                tableItems.TrimExcess();
+                tables[tableEntry.Key] = tableItems;
             }
+            tables.TrimExcess();
 
-            var allStructs = objectsByIds
-                .Where(kvp => kvp.Value.GetType().IsValueType)
-                .Select(kvp => kvp.Key)
-                .ToList();
-
-            var allClasses = objectsByIds.Where(kvp => !kvp.Value.GetType().IsValueType)
-                .Select(kvp => kvp.Key)
-                .ToList();
+            var allStructs = new List<string>();
+            var allClasses = new List<string>();
+            foreach (var kvp in objectsByIds)
+            {
+                if (kvp.Value.GetType().IsValueType)
+                    allStructs.Add(kvp.Key);
+                else
+                    allClasses.Add(kvp.Key);
+            }
 
             var maxStructDepth = {${_paramMaxStructDepth}};
             for (var i = 0; i < maxStructDepth; i++)
             {
                 foreach (var objectId in allStructs)
-                    objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId].values, emptyCollectionFactory, onError);
+                    objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId], emptyCollectionFactory, onError);
             }
             foreach (var objectId in allClasses)
-                objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId].values, emptyCollectionFactory, onError);
+                objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId], emptyCollectionFactory, onError);
 
             root ??= new {${_paramPrefix}}Root{${_paramPostfix}}();
-            root.CreatedBy = jsonRoot.user;
-            root.CreationTime = jsonRoot.date;
-            root.Init(new List<IIdentifiable>(objectsByIds.Values));
+            root.CreatedBy = jsonRoot.generationUser;
+            root.CreationTime = jsonRoot.generationDate;
+            root.Initialize(new List<IIdentifiable>(objectsByIds.Values));
+            root.Tables = new TablesList(tables);
 
             var cache = new CacheRoot();
 
@@ -1464,7 +1566,8 @@ using Rectangle = System.Drawing.RectangleF;
             return root;
         }
 
-#if !UNITY_5_3_OR_NEWER
+#if UNITY_5_3_OR_NEWER
+#else
         [JsonSerializable(typeof(JsonRoot)), JsonSourceGenerationOptions(WriteIndented = true)]
         internal partial class JsonRootSourceGenerationContext : JsonSerializerContext
         {
@@ -1473,34 +1576,34 @@ using Rectangle = System.Drawing.RectangleF;
 
         public class JsonRoot
         {
-            public string date;
-            public string user;
-            public Dictionary<string, JsonItemList> classes;
+            public string generationDate;
+            public string generationUser;
+            public Dictionary<string, List<Dictionary<string, object>>> tables;
         }
 
-        public class JsonItemList
+        private static IIdentifiable GetNewInstance(string className, Dictionary<string, object> item, string ownerId = null)
         {
-            public List<JsonItem> items;
-        }
+#if UNITY_5_3_OR_NEWER
+            var id = item?.GetValueOrDefault("id") as string ?? GetInlineRowId(ownerId);
+#else
+            var id = item != null && item.TryGetValue("id", out var idValue) && ((JsonElement)idValue).ValueKind == JsonValueKind.String ? ((JsonElement)idValue).GetString() : GetInlineRowId(ownerId);
+#endif
+            var isGlobal = item?.ContainsKey("id") == true;
 
-        public class JsonItem
-        {
-            public string id;
-            public Dictionary<string, object> values;
-        }
-
-        public class JsonDictionaryItem {
-            public object k;
-            public object v;
-        }
-
-        private static IIdentifiable GetNewInstance(string className, JsonItem item, string ownerId = null)
-        {
             switch (className)
             {{${_paramListInstantiate}}
                 default:
                     throw new Exception(\$"Can not create a new instance of an unexpected class '{className}'");
             }
+        }
+
+        private static string GetTableClass(string tableId)
+        {
+            return tableId switch
+            {
+{${_paramTableClassMap}}
+                _ => throw new Exception(\$"Unknown table '{tableId}'")
+            };
         }
 
         private static Dictionary<string, int> _inlineItemsCounter = new();
@@ -1537,27 +1640,24 @@ using Rectangle = System.Drawing.RectangleF;
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
-#if !UNITY_5_3_OR_NEWER
-            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
+#if UNITY_5_3_OR_NEWER
+            var dictionary = values as JObject;
+            if (values == null || (values as string) == "" || dictionary == null)
                 return emptyCollectionFactory.Dictionary<TKey, TValue>();
 
             var result = new Dictionary<TKey, TValue>();
-            foreach (var element in ((JsonElement)values).EnumerateArray())
+            foreach (var property in dictionary.Properties())
             {
-              var key = element.GetProperty("k");
-              var value = element.GetProperty("v");
-              result[getKey(key)] = getValue(value);
+                result[getKey(property.Name)] = getValue(property.Value);
             }
 #else
-            var array = values as JArray;
-            if (values == null || (values as string) == "" || array.Count <= 0)
+            if (values == null || ((JsonElement)values).ValueKind != JsonValueKind.Object)
                 return emptyCollectionFactory.Dictionary<TKey, TValue>();
 
             var result = new Dictionary<TKey, TValue>();
-            foreach (JToken jsonValue in array)
+            foreach (var element in ((JsonElement)values).EnumerateObject())
             {
-                var value = jsonValue.ToObject<JsonDictionaryItem>();
-                result[getKey(value.k)] = getValue(value.v);
+              result[getKey(element.Name)] = getValue(element.Value);
             }
 #endif
             return result;
@@ -1569,17 +1669,7 @@ using Rectangle = System.Drawing.RectangleF;
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
-#if !UNITY_5_3_OR_NEWER
-            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
-                return emptyCollectionFactory.List<T>();
-
-            var result = new List<T>();
-            foreach (var element in ((JsonElement)values).EnumerateArray())
-            {
-                var inlineValues = element.EnumerateObject().ToDictionary(o => o.Name, o => o.Value as object);
-                result.Add(getValue(inlineValues));
-            }
-#else
+#if UNITY_5_3_OR_NEWER
             var array = values as JArray;
             if (values == null || (values as string) == "" || array.Count <= 0)
                 return emptyCollectionFactory.List<T>();
@@ -1589,6 +1679,18 @@ using Rectangle = System.Drawing.RectangleF;
             {
                 var value = jsonValue.ToObject<Dictionary<string, object>>();
                 result.Add(getValue(value));
+            }
+#else
+            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
+                return emptyCollectionFactory.List<T>();
+
+            var result = new List<T>();
+            foreach (var element in ((JsonElement)values).EnumerateArray())
+            {
+                var inlineValues = new Dictionary<string, object>();
+                foreach (var prop in element.EnumerateObject())
+                    inlineValues[prop.Name] = prop.Value as object;
+                result.Add(getValue(inlineValues));
             }
 #endif
             return result;
@@ -1600,14 +1702,7 @@ using Rectangle = System.Drawing.RectangleF;
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
-#if !UNITY_5_3_OR_NEWER
-            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
-                return emptyCollectionFactory.List<T>();
-
-            var result = new List<T>();
-            foreach (var element in ((JsonElement)values).EnumerateArray())
-                result.Add(getValue(element));
-#else
+#if UNITY_5_3_OR_NEWER
             var array = values as JArray;
             if (values == null || (values as string) == "" || array.Count <= 0)
                 return emptyCollectionFactory.List<T>();
@@ -1616,6 +1711,13 @@ using Rectangle = System.Drawing.RectangleF;
             foreach (var value in array)
                 result.Add(getValue(value.Value<string>()));
 
+#else
+            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
+                return emptyCollectionFactory.List<T>();
+
+            var result = new List<T>();
+            foreach (var element in ((JsonElement)values).EnumerateArray())
+                result.Add(getValue(element));
 #endif
             return result;
         }
@@ -1626,12 +1728,12 @@ using Rectangle = System.Drawing.RectangleF;
             EmptyCollectionFactory emptyCollectionFactory
         )
         {
-#if !UNITY_5_3_OR_NEWER
-            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
-                return emptyCollectionFactory.HashSet<T>();
-#else
+#if UNITY_5_3_OR_NEWER
             var array = values as JArray;
             if (values == null || (values as string) == "" || array.Count <= 0)
+                return emptyCollectionFactory.HashSet<T>();
+#else
+            if (values == null || ((JsonElement)values).GetArrayLength() <= 0)
                 return emptyCollectionFactory.HashSet<T>();
 #endif
             return new HashSet<T>(ParseList<T>(values, getValue, emptyCollectionFactory));
@@ -1644,46 +1746,46 @@ using Rectangle = System.Drawing.RectangleF;
 
         private static int ParseInt(object value)
         {
-#if !UNITY_5_3_OR_NEWER
-            return ((JsonElement)value).GetInt32();
-#else
+#if UNITY_5_3_OR_NEWER
             return Convert.ToInt32(value, CultureInfo.InvariantCulture);
+#else
+            return ((JsonElement)value).GetInt32();
 #endif
         }
 
         private static long ParseLong(object value)
         {
-#if !UNITY_5_3_OR_NEWER
-            return ((JsonElement)value).GetInt64();
-#else
+#if UNITY_5_3_OR_NEWER
             return Convert.ToInt64(value, CultureInfo.InvariantCulture);
+#else
+            return ((JsonElement)value).GetInt64();
 #endif
         }
 
         private static float ParseFloat(object value)
         {
-#if !UNITY_5_3_OR_NEWER
-            return ((JsonElement)value).GetSingle();
-#else
+#if UNITY_5_3_OR_NEWER
             return Convert.ToSingle(value, CultureInfo.InvariantCulture);
+#else
+            return ((JsonElement)value).GetSingle();
 #endif
         }
 
         private static double ParseDouble(object value)
         {
-#if !UNITY_5_3_OR_NEWER
-            return ((JsonElement)value).GetDouble();
-#else
+#if UNITY_5_3_OR_NEWER
             return Convert.ToDouble(value, CultureInfo.InvariantCulture);
+#else
+            return ((JsonElement)value).GetDouble();
 #endif
         }
 
         private static string ParseString(object value)
         {
-#if !UNITY_5_3_OR_NEWER
-            return ((JsonElement)value).GetString();
-#else
+#if UNITY_5_3_OR_NEWER
             return Convert.ToString(value, CultureInfo.InvariantCulture);
+#else
+            return value as string ?? ((JsonElement)value).GetString();
 #endif
         }
 
@@ -1708,290 +1810,175 @@ using Rectangle = System.Drawing.RectangleF;
             return (T)Enum.Parse(typeof(T), id);
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexDate}}")] private static partial Regex dateFormatRegex();
-#else
-        private static Regex _dateFormatRegex;
-        private static Regex dateFormatRegex() => _dateFormatRegex ??= new Regex(@"{${_paramRegexDate}}", RegexOptions.Compiled);
-#endif
         private static DateTime ParseDate(object value)
         {
+#if UNITY_5_3_OR_NEWER
+#else
+            if (value is JsonElement je && je.ValueKind == JsonValueKind.Number)
+                return DateTimeOffset.FromUnixTimeMilliseconds(je.GetInt64()).UtcDateTime;
+#endif
             var date = ParseString(value);
             if (string.IsNullOrEmpty(date))
                 return default;
 
-            var match = dateFormatRegex().Match(date);
-            if (!match.Success)
-                return default;
+            if (long.TryParse(date, out var ms))
+                return DateTimeOffset.FromUnixTimeMilliseconds(ms).UtcDateTime;
 
-            var year = match.Groups["y"];
-            var month = match.Groups["m"];
-            var day = match.Groups["d"];
-            var hour = match.Groups["hh"];
-            var minute = match.Groups["mm"];
-            var second = match.Groups["ss"];
-
-            return DateTime.SpecifyKind(
-                new DateTime(
-                    year?.Success ?? false ? Convert.ToInt32(year.Value) : 0,
-                    month?.Success ?? false ? Convert.ToInt32(month.Value) : 0,
-                    day?.Success ?? false ? Convert.ToInt32(day.Value) : 0,
-                    hour?.Success ?? false ? Convert.ToInt32(hour.Value) : 0,
-                    minute?.Success ?? false ? Convert.ToInt32(minute.Value) : 0,
-                    second?.Success ?? false ? Convert.ToInt32(second.Value) : 0
-                ),
-                DateTimeKind.Utc
-            );
+            return default;
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexDuration}}")] private static partial Regex durationFormatRegex();
-#else
-        private static Regex _durationFormatRegex;
-        private static Regex durationFormatRegex() => _durationFormatRegex ??= new Regex(@"{${_paramRegexDuration}}", RegexOptions.Compiled);
-#endif
         private static TimeSpan ParseDuration(object value)
         {
+#if UNITY_5_3_OR_NEWER
+#else
+            if (value is JsonElement je && je.ValueKind == JsonValueKind.Number)
+                return TimeSpan.FromMilliseconds(je.GetInt64());
+#endif
             var duration = ParseString(value);
             if (string.IsNullOrEmpty(duration))
                 return default;
 
-            var match = durationFormatRegex().Match(duration);
-            if (!match.Success)
-                return default;
+            if (long.TryParse(duration, out var ms))
+                return TimeSpan.FromMilliseconds(ms);
 
-            var days = match.Groups["d"];
-            var hours = match.Groups["h"];
-            var minutes = match.Groups["m"];
-            var seconds = match.Groups["s"];
-            var milliSeconds = match.Groups["ms"];
-
-            return new TimeSpan(
-                days?.Success ?? false ? Convert.ToInt32(days.Value) : 0,
-                hours?.Success ?? false ? Convert.ToInt32(hours.Value) : 0,
-                minutes?.Success ?? false ? Convert.ToInt32(minutes.Value) : 0,
-                seconds?.Success ?? false ? Convert.ToInt32(seconds.Value) : 0,
-                milliSeconds?.Success ?? false ? Convert.ToInt32(milliSeconds.Value) : 0
-            );
+            return default;
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexVector2}}")] private static partial Regex vector2FormatRegex();
-#else
-        private static Regex _vector2FormatRegex;
-        private static Regex vector2FormatRegex() => _vector2FormatRegex ??= new Regex(@"{${_paramRegexVector2}}", RegexOptions.Compiled);
-#endif
         private static Vector2 ParseVector2(object value)
         {
             var vector2 = ParseString(value);
             if (string.IsNullOrEmpty(vector2))
                 return default;
 
-            var match = vector2FormatRegex().Match(vector2);
-            if (!match.Success)
+            var parts = vector2.Split(';');
+            if (parts.Length < 2)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-
             return new Vector2(
-                x?.Success ?? false ? Convert.ToSingle(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToSingle(y.Value) : 0
+                float.Parse(parts[0], CultureInfo.InvariantCulture),
+                float.Parse(parts[1], CultureInfo.InvariantCulture)
             );
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexVector2Int}}")] private static partial Regex vector2IntFormatRegex();
-#else
-        private static Regex _vector2IntFormatRegex;
-        private static Regex vector2IntFormatRegex() => _vector2IntFormatRegex ??= new Regex(@"{${_paramRegexVector2Int}}", RegexOptions.Compiled);
-#endif
         private static Vector2Int ParseVector2Int(object value)
         {
             var vector2Int = ParseString(value);
             if (string.IsNullOrEmpty(vector2Int))
                 return default;
 
-            var match = vector2IntFormatRegex().Match(vector2Int);
-            if (!match.Success)
+            var parts = vector2Int.Split(';');
+            if (parts.Length < 2)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-
             return new Vector2Int(
-                x?.Success ?? false ? Convert.ToInt32(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToInt32(y.Value) : 0
+                int.Parse(parts[0], CultureInfo.InvariantCulture),
+                int.Parse(parts[1], CultureInfo.InvariantCulture)
             );
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexVector3}}")] private static partial Regex vector3FormatRegex();
-#else
-        private static Regex _vector3FormatRegex;
-        private static Regex vector3FormatRegex() => _vector3FormatRegex ??= new Regex(@"{${_paramRegexVector3}}", RegexOptions.Compiled);
-#endif
         private static Vector3 ParseVector3(object value)
         {
             var vector3 = ParseString(value);
             if (string.IsNullOrEmpty(vector3))
                 return default;
 
-            var match = vector3FormatRegex().Match(vector3);
-            if (!match.Success)
+            var parts = vector3.Split(';');
+            if (parts.Length < 3)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-            var z = match.Groups["z"];
-
             return new Vector3(
-                x?.Success ?? false ? Convert.ToSingle(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToSingle(y.Value) : 0,
-                z?.Success ?? false ? Convert.ToSingle(z.Value) : 0
+                float.Parse(parts[0], CultureInfo.InvariantCulture),
+                float.Parse(parts[1], CultureInfo.InvariantCulture),
+                float.Parse(parts[2], CultureInfo.InvariantCulture)
             );
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexVector3Int}}")] private static partial Regex vector3IntFormatRegex();
-#else
-        private static Regex _vector3IntFormatRegex;
-        private static Regex vector3IntFormatRegex() => _vector3IntFormatRegex ??= new Regex(@"{${_paramRegexVector3Int}}", RegexOptions.Compiled);
-#endif
         private static Vector3Int ParseVector3Int(object value)
         {
             var vector3Int = ParseString(value);
             if (string.IsNullOrEmpty(vector3Int))
                 return default;
 
-            var match = vector3IntFormatRegex().Match(vector3Int);
-            if (!match.Success)
+            var parts = vector3Int.Split(';');
+            if (parts.Length < 3)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-            var z = match.Groups["z"];
-
             return new Vector3Int(
-                x?.Success ?? false ? Convert.ToInt32(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToInt32(y.Value) : 0,
-                z?.Success ?? false ? Convert.ToInt32(z.Value) : 0
+                int.Parse(parts[0], CultureInfo.InvariantCulture),
+                int.Parse(parts[1], CultureInfo.InvariantCulture),
+                int.Parse(parts[2], CultureInfo.InvariantCulture)
             );
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexVector4}}")] private static partial Regex vector4FormatRegex();
-#else
-        private static Regex _vector4FormatRegex;
-        private static Regex vector4FormatRegex() => _vector4FormatRegex ??= new Regex(@"{${_paramRegexVector4}}", RegexOptions.Compiled);
-#endif
         private static Vector4 ParseVector4(object value)
         {
             var vector4 = ParseString(value);
             if (string.IsNullOrEmpty(vector4))
                 return default;
 
-            var match = vector4FormatRegex().Match(vector4);
-            if (!match.Success)
+            var parts = vector4.Split(';');
+            if (parts.Length < 4)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-            var z = match.Groups["z"];
-            var w = match.Groups["w"];
-
             return new Vector4(
-                x?.Success ?? false ? Convert.ToSingle(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToSingle(y.Value) : 0,
-                z?.Success ?? false ? Convert.ToSingle(z.Value) : 0,
-                w?.Success ?? false ? Convert.ToSingle(w.Value) : 0
+                float.Parse(parts[0], CultureInfo.InvariantCulture),
+                float.Parse(parts[1], CultureInfo.InvariantCulture),
+                float.Parse(parts[2], CultureInfo.InvariantCulture),
+                float.Parse(parts[3], CultureInfo.InvariantCulture)
             );
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexVector4Int}}")] private static partial Regex vector4IntFormatRegex();
-#else
-        private static Regex _vector4IntFormatRegex;
-        private static Regex vector4IntFormatRegex() => _vector4IntFormatRegex ??= new Regex(@"{${_paramRegexVector4Int}}", RegexOptions.Compiled);
-#endif
         private static Vector4Int ParseVector4Int(object value)
         {
             var vector4Int = ParseString(value);
             if (string.IsNullOrEmpty(vector4Int))
                 return default;
 
-            var match = vector4IntFormatRegex().Match(vector4Int);
-            if (!match.Success)
+            var parts = vector4Int.Split(';');
+            if (parts.Length < 4)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-            var z = match.Groups["z"];
-            var w = match.Groups["w"];
-
             return new Vector4Int(
-                x?.Success ?? false ? Convert.ToInt32(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToInt32(y.Value) : 0,
-                z?.Success ?? false ? Convert.ToInt32(z.Value) : 0,
-                w?.Success ?? false ? Convert.ToInt32(w.Value) : 0
+                int.Parse(parts[0], CultureInfo.InvariantCulture),
+                int.Parse(parts[1], CultureInfo.InvariantCulture),
+                int.Parse(parts[2], CultureInfo.InvariantCulture),
+                int.Parse(parts[3], CultureInfo.InvariantCulture)
             );
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexRectangle}}")] private static partial Regex rectangleFormatRegex();
-#else
-        private static Regex _rectangleFormatRegex;
-        private static Regex rectangleFormatRegex() => _rectangleFormatRegex ??= new Regex(@"{${_paramRegexRectangle}}", RegexOptions.Compiled);
-#endif
         private static Rectangle ParseRectangle(object value)
         {
             var rectangle = ParseString(value);
             if (string.IsNullOrEmpty(rectangle))
                 return default;
 
-            var match = rectangleFormatRegex().Match(rectangle);
-            if (!match.Success)
+            var parts = rectangle.Split(';');
+            if (parts.Length < 4)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-            var w = match.Groups["w"];
-            var h = match.Groups["h"];
-
             return new Rectangle(
-                x?.Success ?? false ? Convert.ToSingle(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToSingle(y.Value) : 0,
-                w?.Success ?? false ? Convert.ToSingle(w.Value) : 0,
-                h?.Success ?? false ? Convert.ToSingle(h.Value) : 0
+                float.Parse(parts[0], CultureInfo.InvariantCulture),
+                float.Parse(parts[1], CultureInfo.InvariantCulture),
+                float.Parse(parts[2], CultureInfo.InvariantCulture),
+                float.Parse(parts[3], CultureInfo.InvariantCulture)
             );
         }
 
-#if !UNITY_5_3_OR_NEWER
-        [GeneratedRegex(@"{${_paramRegexRectangleInt}}")] private static partial Regex rectangleIntFormatRegex();
-#else
-        private static Regex _rectangleIntFormatRegex;
-        private static Regex rectangleIntFormatRegex() => _rectangleIntFormatRegex ??= new Regex(@"{${_paramRegexRectangleInt}}", RegexOptions.Compiled);
-#endif
         private static RectangleInt ParseRectangleInt(object value)
         {
             var rectangleInt = ParseString(value);
             if (string.IsNullOrEmpty(rectangleInt))
                 return default;
 
-            var match = rectangleIntFormatRegex().Match(rectangleInt);
-            if (!match.Success)
+            var parts = rectangleInt.Split(';');
+            if (parts.Length < 4)
                 return default;
 
-            var x = match.Groups["x"];
-            var y = match.Groups["y"];
-            var w = match.Groups["w"];
-            var h = match.Groups["h"];
-
             return new RectangleInt(
-                x?.Success ?? false ? Convert.ToInt32(x.Value) : 0,
-                y?.Success ?? false ? Convert.ToInt32(y.Value) : 0,
-                w?.Success ?? false ? Convert.ToInt32(w.Value) : 0,
-                h?.Success ?? false ? Convert.ToInt32(h.Value) : 0
+                int.Parse(parts[0], CultureInfo.InvariantCulture),
+                int.Parse(parts[1], CultureInfo.InvariantCulture),
+                int.Parse(parts[2], CultureInfo.InvariantCulture),
+                int.Parse(parts[3], CultureInfo.InvariantCulture)
             );
         }
 

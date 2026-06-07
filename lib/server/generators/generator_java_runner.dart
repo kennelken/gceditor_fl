@@ -3,7 +3,6 @@
 import 'dart:math';
 
 import 'package:darq/darq.dart';
-import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db/class_field_description_data_info.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/class_meta_entity_enum.dart';
@@ -50,16 +49,6 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
 
   static const _paramListInstantiate = 'listInstantiate';
   static const _paramClassName = 'className';
-  static const _paramRegexDate = 'regexDate';
-  static const _paramRegexDuration = 'regexDuration';
-  static const _paramRegexVector2 = 'regexVector2';
-  static const _paramRegexVector2Int = 'regexVector2Int';
-  static const _paramRegexVector3 = 'regexVector3';
-  static const _paramRegexVector3Int = 'regexVector3Int';
-  static const _paramRegexVector4 = 'regexVector4';
-  static const _paramRegexVector4Int = 'regexVector4Int';
-  static const _paramRegexRectangle = 'regexRectangle';
-  static const _paramRegexRectangleInt = 'regexRectangleInt';
   static const _paramAssignValueListProperties = 'assignValueListProperties';
   static const _paramParseFunction = 'parseFunction';
   static const _paramAssignValueCases = 'assignValueCases';
@@ -71,6 +60,9 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
   static const _paramMetaEntityType = 'metaEntityType';
   static const _paramListItemsListsAssignment = 'listItemsListsAssignment';
   static const _paramListItemsListsDeclarations = 'listItemsListsDeclarations';
+  static const _paramTablesListDeclarations = 'tablesListDeclarations';
+  static const _paramTablesListAssignment = 'tablesListAssignment';
+  static const _paramTableClassMap = 'tableClassMap';
 
   @override
   Future<GeneratorResult> execute(String outputFolder, DbModel model, GeneratorCsharp data, GeneratorAdditionalInformation additionalInfo) async {
@@ -91,22 +83,15 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
               _paramPrefixInterface: data.prefixInterface,
               _paramPostfix: data.postfix,
               _paramListInstantiate: _getListInstantiate(model, data),
-              _paramRegexDate: Config.dateFormatRegex.pattern.replaceAll('\\', '\\\\'),
-              _paramRegexDuration: Config.durationFormatRegex.pattern.replaceAll('\\', '\\\\'),
-              _paramRegexVector2: Config.vector2FormatRegex.pattern.replaceAll('\\', '\\\\'),
-              _paramRegexVector2Int: Config.vector2IntFormatRegex.pattern.replaceAll('\\', '\\\\'),
-              _paramRegexVector3: Config.vector3FormatRegex.pattern.replaceAll('\\', '\\\\'),
-              _paramRegexVector3Int: Config.vector3IntFormatRegex.pattern.replaceAll('\\', '\\\\'),
-              _paramRegexVector4: Config.vector4FormatRegex.pattern.replaceAll('\\', '\\\\'),
-              _paramRegexVector4Int: Config.vector4IntFormatRegex.pattern.replaceAll('\\', '\\\\'),
-              _paramRegexRectangle: Config.rectangleFormatRegex.pattern.replaceAll('\\', '\\\\'),
-              _paramRegexRectangleInt: Config.rectangleIntFormatRegex.pattern.replaceAll('\\', '\\\\'),
               _paramAssignValueCases: _getAssignValuesCases(model, data),
               _paramMaxStructDepth: _getMaxStructDepth(model, 3),
+              _paramTableClassMap: _getTableClassMap(model, data),
             },
           ),
           _paramListItemsListsAssignment: _getListItemsListAssignment(model, data),
           _paramListItemsListsDeclarations: _getListItemsListsDeclarations(model, data),
+          _paramTablesListDeclarations: _getTablesListDeclarations(model, data),
+          _paramTablesListAssignment: _getTablesListAssignment(model, data),
         },
       );
 
@@ -781,6 +766,33 @@ ${_makeSummary(' */', indentDepth, false)}''';
     return '$result${result.isNotEmpty ? _defaultNewLine : ''}';
   }
 
+  String _getTablesListDeclarations(DbModel model, GeneratorCsharp data) {
+    final result = model.cache.allDataTables.map((e) => _tablesListDeclarationRowTemplate.format({
+          _paramPrefix: data.prefix,
+          _paramPostfix: data.postfix,
+          _paramClassName: e.classId,
+          _paramEntryName: e.id,
+        })).join();
+    return '$result${result.isNotEmpty ? _defaultNewLine : ''}';
+  }
+
+  String _getTablesListAssignment(DbModel model, GeneratorCsharp data) {
+    return model.cache.allDataTables.map((e) => _tablesListAssignmentRowTemplate.format({
+          _paramPrefix: data.prefix,
+          _paramPostfix: data.postfix,
+          _paramClassName: e.classId,
+          _paramEntryName: e.id,
+        })).join();
+  }
+
+  String _getTableClassMap(DbModel model, GeneratorCsharp data) {
+    final items = <String>[];
+    for (final table in model.cache.allDataTables) {
+      items.add('                case "${table.id}":\n                    return "${table.classId}";\n');
+    }
+    return items.join();
+  }
+
   int _getMaxStructDepth(DbModel model, int maxAllowedDepth) {
     var depth = 0;
     for (var classEntry in model.cache.allClasses) {
@@ -837,8 +849,6 @@ import java.time.ZoneOffset;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.regex.Pattern;
-
 /**
  * Autogenerated via gceditor
  */
@@ -882,6 +892,7 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
     public interface IIdentifiable
     {
         String getId();
+        Boolean getIsGlobal();
     }
 
     public String CreatedBy;
@@ -897,6 +908,8 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
 
     private ItemsLists Lists;
     public ItemsLists getLists() { return Lists; }
+    public TablesList Tables;
+    public TablesList getTables() { return Tables; }
 
     public <T extends IIdentifiable> T Get(Class<T> itemClass, String id) throws Exception
     {
@@ -938,7 +951,7 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
     /**
      * Supposed to be called only once when the model is parsed
      */
-    public void Init(ArrayList<IIdentifiable> items) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException
+    public void Initialize(ArrayList<IIdentifiable> items) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException
     {
         _emptyCollectionFactory = new EmptyCollectionFactory();
 
@@ -1018,12 +1031,20 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
         }
     }
 
+    public static class TablesList
+    {{${_paramTablesListDeclarations}}
+        public TablesList(HashMap<String, ArrayList<IIdentifiable>> tables)
+        {{${_paramTablesListAssignment}}
+        }
+    }
+
     public abstract static class Base{${_paramPrefix}}Item{${_paramPostfix}} implements IIdentifiable, ICloneable
     {
         protected String Id;
         public String getId() { return Id; }
 
         protected Boolean IsGlobal;
+        public Boolean getIsGlobal() { return IsGlobal; }
     }
 
 {${_paramClasses}}
@@ -1264,6 +1285,17 @@ class RectangleInt {
         public {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}{${_paramMetaEntityType}}${_itemsListSuffix} get{${_paramClassName}}() { return {${_paramClassName}}; }
         private {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}{${_paramMetaEntityType}}${_itemsListSuffix} {${_paramClassName}};''';
 
+  final String _tablesListDeclarationRowTemplate = '''
+
+        private ArrayList<{${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}> {${_paramEntryName}};
+        public ArrayList<{${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}> get{${_paramEntryName}}() { return {${_paramEntryName}}; }''';
+  final String _tablesListAssignmentRowTemplate = '''
+
+            var {${_paramEntryName}}List = tables.get("{${_paramEntryName}}");
+            {${_paramEntryName}} = new ArrayList<{${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}>({${_paramEntryName}}List.size());
+            for (var item : {${_paramEntryName}}List)
+                {${_paramEntryName}}.add(({${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}})item);''';
+
   final String _parserTemplate = //
       '''
     public static class GceditorJsonParser
@@ -1273,32 +1305,38 @@ class RectangleInt {
             var emptyCollectionFactory = new EmptyCollectionFactory();
 
             var objectsByIds = new HashMap<String, IIdentifiable>();
-            var valuesByIds = new HashMap<String, JsonItem>();
+            var valuesByIds = new HashMap<String, HashMap<String, Object>>();
+            var tables = new HashMap<String, ArrayList<IIdentifiable>>();
 
             var objectMapper = new ObjectMapper();
             var jsonRoot = objectMapper.readValue(jsonText, {${_paramPrefix}}Root{${_paramPostfix}}.GceditorJsonParser.JsonRoot.class);
-            for (var className : jsonRoot.classes.keySet())
+            for (var tableEntry : jsonRoot.tables.entrySet())
             {
-                var listItems = jsonRoot.classes.get(className);
-                for (var i = 0; i < listItems.items.size(); i++)
+                var className = GetTableClass(tableEntry.getKey());
+                var listItems = tableEntry.getValue();
+                var tableItems = new ArrayList<IIdentifiable>(listItems.size());
+                for (var i = 0; i < listItems.size(); i++)
                 {
-                    var item = listItems.items.get(i);
+                    var item = listItems.get(i);
 
                     var instance = GetNewInstance(className, item, null);
                     objectsByIds.put(instance.getId(), instance);
                     valuesByIds.put(instance.getId(), item);
+                    tableItems.add(instance);
                 }
+                tables.put(tableEntry.getKey(), tableItems);
             }
 
             var allClasses = objectsByIds.keySet();
             for (var objectId : allClasses)
-                objectsByIds.put(objectId, AssignValues(objectsByIds.get(objectId), objectsByIds, valuesByIds.get(objectId).values, emptyCollectionFactory, onError));
+                objectsByIds.put(objectId, AssignValues(objectsByIds.get(objectId), objectsByIds, valuesByIds.get(objectId), emptyCollectionFactory, onError));
 
             if (root == null)
               root = new {${_paramPrefix}}Root{${_paramPostfix}}();
-            root.CreatedBy = jsonRoot.user;
-            root.CreationTime = jsonRoot.date;
-            root.Init(new ArrayList<IIdentifiable>(objectsByIds.values()));
+            root.CreatedBy = jsonRoot.generationUser;
+            root.CreationTime = jsonRoot.generationDate;
+            root.Initialize(new ArrayList<IIdentifiable>(objectsByIds.values()));
+            root.Tables = new TablesList(tables);
 
             _inlineItemsCounter.clear();
 
@@ -1307,23 +1345,22 @@ class RectangleInt {
 
         public static class JsonRoot
         {
-            public String date;
-            public String user;
-            public HashMap<String, JsonItemList> classes;
+            public String generationDate;
+            public String generationUser;
+            public HashMap<String, ArrayList<HashMap<String, Object>>> tables;
         }
 
-        public static class JsonItemList
+        private static String GetTableClass(String tableId)
         {
-            public ArrayList<JsonItem> items;
+            switch (tableId)
+            {
+{${_paramTableClassMap}}
+                default:
+                    throw new RuntimeException(String.format("Unknown table '%s'", tableId));
+            }
         }
 
-        public static class JsonItem
-        {
-            public String id;
-            public HashMap<String, Object> values;
-        }
-
-        private static IIdentifiable GetNewInstance(String className, JsonItem item, String ownerId) throws IllegalArgumentException
+        private static IIdentifiable GetNewInstance(String className, HashMap<String, Object> item, String ownerId) throws IllegalArgumentException
         {
             Base{${_paramPrefix}}Item{${_paramPostfix}} value;
 
@@ -1332,10 +1369,10 @@ class RectangleInt {
                 default:
                     throw new IllegalArgumentException(String.format("Can not create a new instance of an unexpected class '%s'", className));
             }
-            value.Id = item != null && item.id != null
-                ? item.id
+            value.Id = item != null && item.containsKey("id") && item.get("id") != null
+                ? item.get("id").toString()
                 : GetInlineRowId(ownerId);
-            value.IsGlobal = item != null && item.id != null;
+            value.IsGlobal = item != null && item.containsKey("id");
             return value;
         }
 
@@ -1377,14 +1414,14 @@ class RectangleInt {
             if (values == null)
                 return emptyCollectionFactory.HashMap(keyClass, valueClass);
 
-            var array = (ArrayList<LinkedHashMap>)values;
-            if (array.isEmpty())
+            var dictionary = (LinkedHashMap<String, Object>)values;
+            if (dictionary.isEmpty())
                 return emptyCollectionFactory.HashMap(keyClass, valueClass);
 
             var result = new HashMap<TKey, TValue>();
-            for (var jsonValue : array)
+            for (var entry : dictionary.entrySet())
             {
-                result.put(getKey.apply(jsonValue.get("k")), getValue.apply(jsonValue.get("v")));
+                result.put(getKey.apply(entry.getKey()), getValue.apply(entry.getValue()));
             }
 
             return result;
@@ -1498,256 +1535,140 @@ class RectangleInt {
             return (T)Enum.valueOf(enumClass, id);
         }
 
-        private static final Pattern _dateFormatRegex = Pattern.compile("{${_paramRegexDate}}");
         private static Instant ParseDate(Object value)
         {
+            if (value instanceof Number)
+                return Instant.ofEpochMilli(((Number)value).longValue());
+
             var date = value.toString();
             if (date == null || date.isEmpty())
                 return null;
 
-            var matcher = _dateFormatRegex.matcher(date);
-            if (matcher.matches()) {
-                var y = matcher.group("y");
-                var m = matcher.group("m");
-                var d = matcher.group("d");
-                var hh = matcher.group("hh");
-                var mm = matcher.group("mm");
-                var ss = matcher.group("ss");
-
-                var year = y == null ? 0 : Integer.parseInt(y);
-                var month = m == null ? 0 : Integer.parseInt(m);
-                var day = d == null ? 0 : Integer.parseInt(d);
-                var hour = hh == null ? 0 : Integer.parseInt(hh);
-                var minute = mm == null ? 0 : Integer.parseInt(mm);
-                var second = ss == null ? 0 : Integer.parseInt(ss);
-
-                return Instant.ofEpochMilli(0)
-                    .atZone(ZoneOffset.UTC)
-                    .withYear(year)
-                    .withMonth(month)
-                    .withDayOfMonth(day)
-                    .withHour(hour)
-                    .withMinute(minute)
-                    .withSecond(second)
-                    .toInstant();
+            try {
+                return Instant.ofEpochMilli(Long.parseLong(date));
+            } catch (NumberFormatException e) {
+                return null;
             }
-
-            return null;
         }
 
-        private static final Pattern _durationFormatRegex = Pattern.compile("{${_paramRegexDuration}}");
         private static Duration ParseDuration(Object value)
         {
+            if (value instanceof Number)
+                return Duration.ofMillis(((Number)value).longValue());
+
             var duration = value.toString();
             if (duration == null || duration.isEmpty())
                 return null;
 
-            var matcher = _durationFormatRegex.matcher(duration);
-            if (matcher.matches()) {
-                var d = matcher.group("d");
-                var h = matcher.group("h");
-                var m = matcher.group("m");
-                var s = matcher.group("s");
-                var ms = matcher.group("ms");
-
-                var days = d == null ? 0 : Integer.parseInt(d);
-                var hours = h == null ? 0 : Integer.parseInt(h);
-                var minutes = m == null ? 0 : Integer.parseInt(m);
-                var seconds = s == null ? 0 : Integer.parseInt(s);
-                var milliSeconds = ms == null ? 0 : Integer.parseInt(ms);
-
-                return Duration.ofDays(days).plusHours(hours).plusMinutes(minutes).plusSeconds(seconds).plusMillis(milliSeconds);
+            try {
+                return Duration.ofMillis(Long.parseLong(duration));
+            } catch (NumberFormatException e) {
+                return null;
             }
-
-            return null;
         }
 
-        private static final Pattern _vector2FormatRegex = Pattern.compile("{${_paramRegexVector2}}");
         private static Vector2 ParseVector2(Object value)
         {
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = _vector2FormatRegex.matcher(valueString);
-            if (matcher.matches()) {
-                var x = matcher.group("x");
-                var y = matcher.group("y");
+            var parts = valueString.split(";");
+            if (parts.length < 2)
+                return null;
 
-                var xx = x == null ? 0 : Float.parseFloat(x);
-                var yy = y == null ? 0 : Float.parseFloat(y);
-
-                return new Vector2(xx, yy);
-            }
-
-            return null;
+            return new Vector2(Float.parseFloat(parts[0]), Float.parseFloat(parts[1]));
         }
 
-        private static final Pattern _vector2IntFormatRegex = Pattern.compile("{${_paramRegexVector2Int}}");
         private static Vector2Int ParseVector2Int(Object value)
         {
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = _vector2IntFormatRegex.matcher(valueString);
-            if (matcher.matches()) {
-                var x = matcher.group("x");
-                var y = matcher.group("y");
+            var parts = valueString.split(";");
+            if (parts.length < 2)
+                return null;
 
-                var xx = x == null ? 0 : Integer.parseInt(x);
-                var yy = y == null ? 0 : Integer.parseInt(y);
-
-                return new Vector2Int(xx, yy);
-            }
-
-            return null;
+            return new Vector2Int(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
         }
 
-        private static final Pattern _vector3FormatRegex = Pattern.compile("{${_paramRegexVector3}}");
         private static Vector3 ParseVector3(Object value)
         {
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = _vector3FormatRegex.matcher(valueString);
-            if (matcher.matches()) {
-                var x = matcher.group("x");
-                var y = matcher.group("y");
-                var z = matcher.group("z");
+            var parts = valueString.split(";");
+            if (parts.length < 3)
+                return null;
 
-                var xx = x == null ? 0 : Float.parseFloat(x);
-                var yy = y == null ? 0 : Float.parseFloat(y);
-                var zz = z == null ? 0 : Float.parseFloat(z);
-
-                return new Vector3(xx, yy, zz);
-            }
-
-            return null;
+            return new Vector3(Float.parseFloat(parts[0]), Float.parseFloat(parts[1]), Float.parseFloat(parts[2]));
         }
 
-        private static final Pattern _vector3IntFormatRegex = Pattern.compile("{${_paramRegexVector3Int}}");
         private static Vector3Int ParseVector3Int(Object value)
         {
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = _vector3IntFormatRegex.matcher(valueString);
-            if (matcher.matches()) {
-                var x = matcher.group("x");
-                var y = matcher.group("y");
-                var z = matcher.group("z");
+            var parts = valueString.split(";");
+            if (parts.length < 3)
+                return null;
 
-                var xx = x == null ? 0 : Integer.parseInt(x);
-                var yy = y == null ? 0 : Integer.parseInt(y);
-                var zz = z == null ? 0 : Integer.parseInt(z);
-
-                return new Vector3Int(xx, yy, zz);
-            }
-
-            return null;
+            return new Vector3Int(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
         }
 
-        private static final Pattern _vector4FormatRegex = Pattern.compile("{${_paramRegexVector4}}");
         private static Vector4 ParseVector4(Object value)
         {
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = _vector4FormatRegex.matcher(valueString);
-            if (matcher.matches()) {
-                var x = matcher.group("x");
-                var y = matcher.group("y");
-                var z = matcher.group("z");
-                var w = matcher.group("w");
+            var parts = valueString.split(";");
+            if (parts.length < 4)
+                return null;
 
-                var xx = x == null ? 0 : Float.parseFloat(x);
-                var yy = y == null ? 0 : Float.parseFloat(y);
-                var zz = z == null ? 0 : Float.parseFloat(z);
-                var ww = w == null ? 0 : Float.parseFloat(w);
-
-                return new Vector4(xx, yy, zz, ww);
-            }
-
-            return null;
+            return new Vector4(Float.parseFloat(parts[0]), Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3]));
         }
 
-        private static final Pattern _vector4IntFormatRegex = Pattern.compile("{${_paramRegexVector4Int}}");
         private static Vector4Int ParseVector4Int(Object value)
         {
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = _vector4IntFormatRegex.matcher(valueString);
-            if (matcher.matches()) {
-                var x = matcher.group("x");
-                var y = matcher.group("y");
-                var z = matcher.group("z");
-                var w = matcher.group("w");
+            var parts = valueString.split(";");
+            if (parts.length < 4)
+                return null;
 
-                var xx = x == null ? 0 : Integer.parseInt(x);
-                var yy = y == null ? 0 : Integer.parseInt(y);
-                var zz = z == null ? 0 : Integer.parseInt(z);
-                var ww = w == null ? 0 : Integer.parseInt(w);
-
-                return new Vector4Int(xx, yy, zz, ww);
-            }
-
-            return null;
+            return new Vector4Int(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Integer.parseInt(parts[3]));
         }
 
-        private static final Pattern _rectangleFormatRegex = Pattern.compile("{${_paramRegexRectangle}}");
         private static Rectangle ParseRectangle(Object value)
         {
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = _rectangleFormatRegex.matcher(valueString);
-            if (matcher.matches()) {
-                var x = matcher.group("x");
-                var y = matcher.group("y");
-                var w = matcher.group("w");
-                var h = matcher.group("h");
+            var parts = valueString.split(";");
+            if (parts.length < 4)
+                return null;
 
-                var xx = x == null ? 0 : Float.parseFloat(x);
-                var yy = y == null ? 0 : Float.parseFloat(y);
-                var ww = w == null ? 0 : Float.parseFloat(w);
-                var hh = h == null ? 0 : Float.parseFloat(h);
-
-                return new Rectangle(new Vector2(xx, yy), new Vector2(ww, hh));
-            }
-
-            return null;
+            return new Rectangle(new Vector2(Float.parseFloat(parts[0]), Float.parseFloat(parts[1])), new Vector2(Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
         }
 
-        private static final Pattern _rectangleIntFormatRegex = Pattern.compile("{${_paramRegexRectangleInt}}");
         private static RectangleInt ParseRectangleInt(Object value)
         {
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
-            var matcher = _rectangleIntFormatRegex.matcher(valueString);
-            if (matcher.matches()) {
-                var x = matcher.group("x");
-                var y = matcher.group("y");
-                var w = matcher.group("w");
-                var h = matcher.group("h");
+            var parts = valueString.split(";");
+            if (parts.length < 4)
+                return null;
 
-                var xx = x == null ? 0 : Integer.parseInt(x);
-                var yy = y == null ? 0 : Integer.parseInt(y);
-                var ww = w == null ? 0 : Integer.parseInt(w);
-                var hh = h == null ? 0 : Integer.parseInt(h);
-
-                return new RectangleInt(new Vector2Int(xx, yy), new Vector2Int(ww, hh));
-            }
-
-            return null;
+            return new RectangleInt(new Vector2Int(Integer.parseInt(parts[0]), Integer.parseInt(parts[1])), new Vector2Int(Integer.parseInt(parts[2]), Integer.parseInt(parts[3])));
         }
 
         private static Long ParseColor(Object value)

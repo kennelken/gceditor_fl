@@ -10,3 +10,6 @@
 -------- Cell: {"x": "10", "y":"SomeTableRowId.SomeColumnName"}
 - replace MenuBar with PlatformMenuBar when there are implementations for windows and linux
 - remore false positive changes when it converts 0->0.0->0 in the model.json file
+
+
+- move history and output paths into project setiings

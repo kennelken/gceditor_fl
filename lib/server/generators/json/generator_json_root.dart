@@ -1,14 +1,12 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import 'generator_json_item_list.dart';
-
 part 'generator_json_root.g.dart';
 
 @JsonSerializable()
 class GeneratorJsonRoot {
-  late String date = '';
-  late String user = '';
-  late Map<String, GeneratorJsonItemList> classes = {};
+  late String generationDate = '';
+  late String generationUser = '';
+  late Map<String, List<Map<String, dynamic>>> tables = {};
 
   GeneratorJsonRoot();
 
