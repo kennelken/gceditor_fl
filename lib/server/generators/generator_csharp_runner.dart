@@ -1459,7 +1459,7 @@ using Rectangle = System.Drawing.RectangleF;
   final _getNewInstanceRowTemplate = '''
 
                 case "{${_paramClassName}}":
-                    return new {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}} { Id = item?.GetValueOrDefault("id") as string ?? GetInlineRowId(ownerId), IsGlobal = item?.ContainsKey("id") == true };
+                    return new {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}} { Id = id, IsGlobal = isGlobal };
   ''';
 
   final String _assignValueCaseTemplate = '''
@@ -1583,6 +1583,13 @@ using Rectangle = System.Drawing.RectangleF;
 
         private static IIdentifiable GetNewInstance(string className, Dictionary<string, object> item, string ownerId = null)
         {
+#if UNITY_5_3_OR_NEWER
+            var id = item?.GetValueOrDefault("id") as string ?? GetInlineRowId(ownerId);
+#else
+            var id = item != null && item.TryGetValue("id", out var idValue) && ((JsonElement)idValue).ValueKind == JsonValueKind.String ? ((JsonElement)idValue).GetString() : GetInlineRowId(ownerId);
+#endif
+            var isGlobal = item?.ContainsKey("id") == true;
+
             switch (className)
             {{${_paramListInstantiate}}
                 default:
@@ -1778,7 +1785,7 @@ using Rectangle = System.Drawing.RectangleF;
 #if UNITY_5_3_OR_NEWER
             return Convert.ToString(value, CultureInfo.InvariantCulture);
 #else
-            return ((JsonElement)value).GetString();
+            return value as string ?? ((JsonElement)value).GetString();
 #endif
         }
 
