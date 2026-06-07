@@ -885,6 +885,8 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
 
     private ItemsLists Lists;
     public ItemsLists getLists() { return Lists; }
+    public HashMap<String, ArrayList<IIdentifiable>> Tables;
+    public HashMap<String, ArrayList<IIdentifiable>> getTables() { return Tables; }
 
     public <T extends IIdentifiable> T Get(Class<T> itemClass, String id) throws Exception
     {
@@ -1263,6 +1265,7 @@ class RectangleInt {
 
             var objectsByIds = new HashMap<String, IIdentifiable>();
             var valuesByIds = new HashMap<String, HashMap<String, Object>>();
+            var tables = new HashMap<String, ArrayList<IIdentifiable>>();
 
             var objectMapper = new ObjectMapper();
             var jsonRoot = objectMapper.readValue(jsonText, {${_paramPrefix}}Root{${_paramPostfix}}.GceditorJsonParser.JsonRoot.class);
@@ -1270,6 +1273,7 @@ class RectangleInt {
             {
                 var className = GetTableClass(tableEntry.getKey());
                 var listItems = tableEntry.getValue();
+                var tableItems = new ArrayList<IIdentifiable>(listItems.size());
                 for (var i = 0; i < listItems.size(); i++)
                 {
                     var item = listItems.get(i);
@@ -1277,7 +1281,9 @@ class RectangleInt {
                     var instance = GetNewInstance(className, item, null);
                     objectsByIds.put(instance.getId(), instance);
                     valuesByIds.put(instance.getId(), item);
+                    tableItems.add(instance);
                 }
+                tables.put(tableEntry.getKey(), tableItems);
             }
 
             var allClasses = objectsByIds.keySet();
@@ -1289,6 +1295,7 @@ class RectangleInt {
             root.CreatedBy = jsonRoot.generationUser;
             root.CreationTime = jsonRoot.generationDate;
             root.Initialize(new ArrayList<IIdentifiable>(objectsByIds.values()));
+            root.Tables = tables;
 
             _inlineItemsCounter.clear();
 

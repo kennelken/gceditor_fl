@@ -995,10 +995,11 @@ using Rectangle = System.Drawing.RectangleF;
 
         private EmptyCollectionFactory _emptyCollectionFactory;
 
-        public Dictionary<string, IIdentifiable> AllItems { get; private set; }
-        public Dictionary<Type, object> AllItemsByType { get; private set; }
+        public Dictionary<string, IIdentifiable> AllItems { get; internal set; }
+        public Dictionary<Type, object> AllItemsByType { get; internal set; }
 
-        public ItemsLists Lists { get; private set; }
+        public ItemsLists Lists { get; internal set; }
+        public Dictionary<string, List<IIdentifiable>> Tables { get; internal set; }
 
         public T Get<T>(string id) where T : IIdentifiable
         {
@@ -1459,16 +1460,19 @@ using Rectangle = System.Drawing.RectangleF;
 
             var objectsByIds = new Dictionary<string, IIdentifiable>();
             var valuesByIds = new Dictionary<string, Dictionary<string, object>>();
+            var tables = new Dictionary<string, List<IIdentifiable>>();
 
 #if UNITY_5_3_OR_NEWER
             var jsonRoot = JsonConvert.DeserializeObject<JsonRoot>(jsonText);
 #else
             var jsonRoot = JsonSerializer.Deserialize<JsonRoot>(jsonText, new JsonSerializerOptions { IncludeFields = true, TypeInfoResolver = JsonRootSourceGenerationContext.Default });
 #endif
+
             foreach (var tableEntry in jsonRoot.tables)
             {
                 var className = GetTableClass(tableEntry.Key);
                 var listItems = tableEntry.Value;
+                var tableItems = new List<IIdentifiable>(listItems.Count);
                 for (var i = 0; i < listItems.Count; i++)
                 {
                     var item = listItems[i];
@@ -1476,8 +1480,12 @@ using Rectangle = System.Drawing.RectangleF;
                     var instance = GetNewInstance(className, item);
                     objectsByIds[instance.Id] = instance;
                     valuesByIds[instance.Id] = item;
+                    tableItems.Add(instance);
                 }
+                tableItems.TrimExcess();
+                tables[tableEntry.Key] = tableItems;
             }
+            tables.TrimExcess();
 
             var allStructs = new List<string>();
             var allClasses = new List<string>();
@@ -1502,6 +1510,7 @@ using Rectangle = System.Drawing.RectangleF;
             root.CreatedBy = jsonRoot.generationUser;
             root.CreationTime = jsonRoot.generationDate;
             root.Initialize(new List<IIdentifiable>(objectsByIds.Values));
+            root.Tables = tables;
 
             var cache = new CacheRoot();
 
