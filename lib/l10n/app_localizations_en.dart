@@ -518,7 +518,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rememberPassword => 'remember password';
 
   @override
-  String get historyTagLabel => 'tag';
+  String get historyTagLabel => 'history tag';
 
   @override
   String get historyTagHint => 'file to store commands history';

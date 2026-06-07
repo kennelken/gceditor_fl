@@ -4,9 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/assets.dart';
-import 'package:gceditor/components/landing/client_auth_panel.dart';
 import 'package:gceditor/components/landing/project_path_view.dart';
 import 'package:gceditor/components/landing/server_auth_admin_panel.dart';
+import 'package:gceditor/components/landing/client_auth_panel.dart';
 import 'package:gceditor/components/landing/server_history_admin_panel.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
@@ -21,6 +21,7 @@ import 'package:gceditor/model/state/server_history_state.dart';
 import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/screens/loading_screen.dart';
 import 'package:gceditor/server/net_commands.dart';
+import 'package:path/path.dart' as path;
 
 import '../model/state/landing_page_state.dart';
 
@@ -35,10 +36,8 @@ class LandingScreenState extends State<LandingScreen> {
   late final TextEditingController _clientIpTextController = TextEditingController();
   late final TextEditingController _portTextController = TextEditingController();
   late final TextEditingController _projectPathTextController = TextEditingController();
-  late final TextEditingController _outputPathTextController = TextEditingController();
 
   String? _projectPath = '';
-  String? _outputPath = '';
 
   bool _initialValuesSet = false;
 
@@ -57,7 +56,6 @@ class LandingScreenState extends State<LandingScreen> {
     return Consumer(
       builder: (context, ref, child) {
         final projectPath = ref.watch(landingPageStateProvider).state.projectPath;
-        final outputPath = ref.watch(landingPageStateProvider).state.outputPath;
         final openPort = ref.watch(networkStateProvider.notifier).state.openPort?.toString() ?? Config.portMin.toString();
         ref.watch(styleStateProvider);
 
@@ -78,7 +76,6 @@ class LandingScreenState extends State<LandingScreen> {
         }
 
         _projectPath = projectPath;
-        _outputPath = outputPath;
 
         const isServerAvailable = !kIsWeb;
 
@@ -208,17 +205,6 @@ class LandingScreenState extends State<LandingScreen> {
                                     canBeReset: true,
                                     onChange: (path) => ref.read(landingPageStateProvider).setProjectPath(path),
                                   ),
-                                  SizedBox(height: 10 * kScale),
-                                  ProjectPathView(
-                                    defaultPath: ref.read(landingPageStateProvider).getVisibleOutputPath(),
-                                    targetPath: _outputPath,
-                                    targetPathTextController: _outputPathTextController,
-                                    labelText: Loc.get.outputPath,
-                                    defaultName: Config.newOutputListDefaultName,
-                                    isFile: false,
-                                    canBeReset: true,
-                                    onChange: (path) => ref.read(landingPageStateProvider).setOutputPath(path),
-                                  ),
                                   SizedBox(height: 60 * kScale),
                                   const Flexible(
                                     child: ServerHistoryAdminPanel(),
@@ -296,13 +282,16 @@ class LandingScreenState extends State<LandingScreen> {
     _onBackendCommon();
 
     final port = int.parse(_portTextController.text);
+    final projectFile = File(landingPageStateNotifier.getVisibleProjectPath());
+    final projectDir = path.dirname(projectFile.path);
+    final outputDir = Directory(path.join(projectDir, Config.newOutputListDefaultName));
 
     providerContainer.read(authListStateProvider).resetPasswordOrRegister(_clientLogin!, _clientSecret!);
 
     appStateNotifier.setStandaloneParams(
       port,
-      File(landingPageStateNotifier.getVisibleProjectPath()),
-      Directory(landingPageStateNotifier.getVisibleOutputPath()),
+      projectFile,
+      outputDir,
       AuthenticationData.values(
         login: _clientLogin!,
         secret: _clientSecret!,
@@ -322,10 +311,14 @@ class LandingScreenState extends State<LandingScreen> {
     _onBackendCommon();
 
     final port = int.parse(_portTextController.text);
+    final projectFile = File(landingPageStateNotifier.getVisibleProjectPath());
+    final projectDir = path.dirname(projectFile.path);
+    final outputDir = Directory(path.join(projectDir, Config.newOutputListDefaultName));
+
     appStateNotifier.setServerParams(
       port,
-      File(landingPageStateNotifier.getVisibleProjectPath()),
-      Directory(landingPageStateNotifier.getVisibleOutputPath()),
+      projectFile,
+      outputDir,
     );
 
     _saveLocalsStorageData();
@@ -338,23 +331,22 @@ class LandingScreenState extends State<LandingScreen> {
     final authListStateNotifier = providerContainer.read(authListStateProvider.notifier);
     final historyStateNotifier = providerContainer.read(serverHistoryStateProvider.notifier);
 
-    authListStateNotifier.setPath(landingPageStateNotifier.getVisibleAuthPath());
-    historyStateNotifier.setPath(landingPageStateNotifier.getVisibleHistoryPath());
+    final projectDir = path.dirname(landingPageStateNotifier.getVisibleProjectPath());
+
+    authListStateNotifier.setPath(path.join(projectDir, Config.newAuthListDefaultName));
+    historyStateNotifier.setPath(path.join(projectDir, Config.newHistoryListDefaultName));
   }
 
   void _saveLocalsStorageData() {
     AppLocalStorage.instance.ipAddress = _clientIpTextController.text;
     AppLocalStorage.instance.port = int.parse(_portTextController.text);
     AppLocalStorage.instance.projectPath = providerContainer.read(landingPageStateProvider).state.projectPath;
-    AppLocalStorage.instance.outputPath = providerContainer.read(landingPageStateProvider).state.outputPath;
-    AppLocalStorage.instance.authListPath = providerContainer.read(landingPageStateProvider).state.authPath;
 
     AppLocalStorage.instance.clientLogin = _clientLogin;
     AppLocalStorage.instance.clientSecret = _clientSecret;
     AppLocalStorage.instance.clientPassword = _rememberClientPassword! ? _clientPassword : '';
     AppLocalStorage.instance.rememberClientPassword = _rememberClientPassword;
 
-    AppLocalStorage.instance.historyPath = providerContainer.read(landingPageStateProvider).state.historyPath;
     AppLocalStorage.instance.historyTag = providerContainer.read(serverHistoryStateProvider).state.currentTag;
   }
 

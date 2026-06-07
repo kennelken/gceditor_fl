@@ -27,11 +27,23 @@ class SettingsView extends ConsumerWidget {
     final saveDelayFocusNode = FocusNode();
     saveDelayFocusNode.addListener(() => _handleSaveDelayFocus(saveDelayFocusNode, saveDelayController));
 
+    final outputPathController = TextEditingController(text: model.settings.outputPath ?? './${Config.newOutputListDefaultName}');
+    final outputPathFocusNode = FocusNode();
+    outputPathFocusNode.addListener(() => _handleOutputPathFocus(outputPathFocusNode, outputPathController));
+
+    final historyPathController = TextEditingController(text: model.settings.historyPath ?? './${Config.newHistoryListDefaultName}');
+    final historyPathFocusNode = FocusNode();
+    historyPathFocusNode.addListener(() => _handleHistoryPathFocus(historyPathFocusNode, historyPathController));
+
+    final authPathController = TextEditingController(text: model.settings.authPath ?? './${Config.newAuthListDefaultName}');
+    final authPathFocusNode = FocusNode();
+    authPathFocusNode.addListener(() => _handleAuthPathFocus(authPathFocusNode, authPathController));
+
     ref.watch(styleStateProvider);
 
     return Container(
       width: 1100 * kScale,
-      height: 352 * kScale,
+      height: 460 * kScale,
       color: kTextColorLightest,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -87,6 +99,66 @@ class SettingsView extends ConsumerWidget {
                           decoration: kStyle.kInputTextStyleSettingsProperties,
                           inputFormatters: Config.filterTimeZone,
                           focusNode: timezoneFocusNode,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10 * kScale),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 4,
+                        child: Text(
+                          Loc.get.outputPath,
+                          style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                        ),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: outputPathController,
+                          decoration: kStyle.kInputTextStyleSettingsProperties,
+                          focusNode: outputPathFocusNode,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 5 * kScale),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 4,
+                        child: Text(
+                          Loc.get.historyPath,
+                          style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                        ),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: historyPathController,
+                          decoration: kStyle.kInputTextStyleSettingsProperties,
+                          focusNode: historyPathFocusNode,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 5 * kScale),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 4,
+                        child: Text(
+                          Loc.get.authListPath,
+                          style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                        ),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: authPathController,
+                          decoration: kStyle.kInputTextStyleSettingsProperties,
+                          focusNode: authPathFocusNode,
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -149,6 +221,60 @@ class SettingsView extends ConsumerWidget {
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(
           DbCmdEditProjectSettings.values(
             saveDelay: newSaveDelay,
+          ),
+        );
+  }
+
+  void _handleOutputPathFocus(FocusNode focus, TextEditingController textComponent) {
+    if (focus.hasFocus) //
+      return;
+
+    final value = textComponent.text;
+    const defaultValue = './${Config.newOutputListDefaultName}';
+    final newValue = value == defaultValue ? null : value;
+
+    if (newValue == clientModel.settings.outputPath) //
+      return;
+
+    providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+          DbCmdEditProjectSettings.values(
+            outputPath: newValue,
+          ),
+        );
+  }
+
+  void _handleHistoryPathFocus(FocusNode focus, TextEditingController textComponent) {
+    if (focus.hasFocus) //
+      return;
+
+    final value = textComponent.text;
+    const defaultValue = './${Config.newHistoryListDefaultName}';
+    final newValue = value == defaultValue ? null : value;
+
+    if (newValue == clientModel.settings.historyPath) //
+      return;
+
+    providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+          DbCmdEditProjectSettings.values(
+            historyPath: newValue,
+          ),
+        );
+  }
+
+  void _handleAuthPathFocus(FocusNode focus, TextEditingController textComponent) {
+    if (focus.hasFocus) //
+      return;
+
+    final value = textComponent.text;
+    const defaultValue = './${Config.newAuthListDefaultName}';
+    final newValue = value == defaultValue ? null : value;
+
+    if (newValue == clientModel.settings.authPath) //
+      return;
+
+    providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+          DbCmdEditProjectSettings.values(
+            authPath: newValue,
           ),
         );
   }

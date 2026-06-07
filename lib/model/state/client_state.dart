@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/consts/config.dart';
@@ -5,13 +7,16 @@ import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db_cmd/base_db_cmd.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
+import 'package:gceditor/model/state/auth_list_state.dart';
 import 'package:gceditor/model/state/client_find_state.dart';
 import 'package:gceditor/model/state/log_state.dart';
 import 'package:gceditor/model/state/menubar_state.dart';
+import 'package:gceditor/model/state/server_history_state.dart';
 import 'package:gceditor/model/state/server_state.dart';
 import 'package:gceditor/model/state/service/client_data_selection_state.dart';
 import 'package:gceditor/server/net_commands.dart';
 import 'package:gceditor/utils/event_notifier.dart';
+import 'package:path/path.dart' as path;
 
 DbModel get clientModel => providerContainer.read(clientStateProvider).state.model;
 BaseDbCmd? get lastClientCommand => providerContainer.read(clientStateProvider).state.lastCommand;
@@ -64,7 +69,6 @@ class ClientStateNotifier extends ServerStateNotifier {
       case DbCmdType.editTable:
       case DbCmdType.editTableRowId:
       case DbCmdType.editTableCellValue:
-      case DbCmdType.editProjectSettings:
       case DbCmdType.reorderMetaEntity:
       case DbCmdType.reorderEnum:
       case DbCmdType.reorderClassField:
@@ -72,6 +76,10 @@ class ClientStateNotifier extends ServerStateNotifier {
       case DbCmdType.resizeColumn:
       case DbCmdType.resizeInnerCell:
       case DbCmdType.fillColumn:
+        break;
+
+      case DbCmdType.editProjectSettings:
+        _applyPathSettings();
         break;
 
       case DbCmdType.addDataRow:
@@ -85,6 +93,27 @@ class ClientStateNotifier extends ServerStateNotifier {
 
     providerContainer.read(clientFindStateProvider).refreshIfVisible();
     super.onCommandExecuted(command);
+  }
+
+  void _applyPathSettings() {
+    final projectFile = providerContainer.read(appStateProvider).state.projectFile;
+    if (projectFile == null) //
+      return;
+
+    final settings = state.model.settings;
+    final projectDir = path.dirname(projectFile.path);
+
+    final appStateNotifier = providerContainer.read(appStateProvider.notifier);
+
+    final outputRel = settings.outputPath ?? Config.newOutputListDefaultName;
+    appStateNotifier.state.output = Directory(path.join(projectDir, outputRel));
+    appStateNotifier.notifyListeners();
+
+    final historyRel = settings.historyPath ?? Config.newHistoryListDefaultName;
+    providerContainer.read(serverHistoryStateProvider).setPath(path.join(projectDir, historyRel));
+
+    final authRel = settings.authPath ?? Config.newAuthListDefaultName;
+    providerContainer.read(authListStateProvider).setPath(path.join(projectDir, authRel));
   }
 }
 

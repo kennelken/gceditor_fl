@@ -667,7 +667,7 @@
 	"@rememberPassword": {
 		"description": ""
 	},
-	"historyTagLabel": "tag",
+	"historyTagLabel": "history tag",
 	"@historyTagLabel": {
 		"description": ""
 	},

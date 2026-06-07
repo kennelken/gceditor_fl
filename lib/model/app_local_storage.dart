@@ -63,30 +63,6 @@ class AppLocalStorage {
     saveProperty('projectPath', value);
   }
 
-  String? get outputPath {
-    return _readProperty<String>('outputPath');
-  }
-
-  set outputPath(String? value) {
-    saveProperty('outputPath', value);
-  }
-
-  String? get authListPath {
-    return _readProperty<String>('authListPath');
-  }
-
-  set authListPath(String? value) {
-    saveProperty('authListPath', value);
-  }
-
-  String? get historyPath {
-    return _readProperty<String>('historyPath');
-  }
-
-  set historyPath(String? value) {
-    saveProperty('historyPath', value);
-  }
-
   String? get historyTag {
     return _readProperty<String>('historyTag');
   }
