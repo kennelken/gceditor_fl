@@ -47,14 +47,26 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
 
     if (generators != null) dbModel.settings.generators = generators!;
 
-    if (outputPath != null) //
-      dbModel.settings.outputPath = outputPath;
+    if (outputPath != null) {
+      if (outputPath!.isEmpty)
+        dbModel.settings.outputPath = null;
+      else
+        dbModel.settings.outputPath = outputPath;
+    }
 
-    if (historyPath != null) //
-      dbModel.settings.historyPath = historyPath;
+    if (historyPath != null) {
+      if (historyPath!.isEmpty)
+        dbModel.settings.historyPath = null;
+      else
+        dbModel.settings.historyPath = historyPath;
+    }
 
-    if (authPath != null) //
-      dbModel.settings.authPath = authPath;
+    if (authPath != null) {
+      if (authPath!.isEmpty)
+        dbModel.settings.authPath = null;
+      else
+        dbModel.settings.authPath = authPath;
+    }
 
     return DbCmdResult.success();
   }

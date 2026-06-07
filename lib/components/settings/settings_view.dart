@@ -1,22 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gceditor/components/properties/primitives/icon_button_transparent.dart';
 import 'package:gceditor/components/settings/generators_view.dart';
+import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
+import 'package:gceditor/model/app_local_storage.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_project_settings.dart';
 import 'package:gceditor/model/model_root.dart';
+import 'package:gceditor/model/state/app_state.dart';
+import 'package:gceditor/model/state/auth_list_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/log_state.dart';
 import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/utils/utils.dart';
+import 'package:path/path.dart' as path;
 
-class SettingsView extends ConsumerWidget {
+class SettingsView extends ConsumerStatefulWidget {
   const SettingsView({super.key});
 
   @override
-  Widget build(context, ref) {
+  SettingsViewState createState() => SettingsViewState();
+}
+
+class SettingsViewState extends ConsumerState<SettingsView> {
+  late final TextEditingController _loginTextController;
+  late final TextEditingController _secretTextController;
+  TextEditingController? _authPathController;
+  TextEditingController? _outputPathController;
+  TextEditingController? _historyPathController;
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loginTextController = TextEditingController();
+    _secretTextController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _loginTextController.dispose();
+    _secretTextController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final model = ref.watch(clientStateProvider).state.model;
+    final authListState = ref.watch(authListStateProvider).state;
+    ref.watch(styleStateProvider);
+
+    if (!_initialized) {
+      _initialized = true;
+      providerContainer.read(authListStateProvider).readFromFile();
+    }
 
     final tz = model.settings.timeZone;
     final timezoneController = TextEditingController(text: Utils.floatWithSign(tz));
@@ -28,22 +68,22 @@ class SettingsView extends ConsumerWidget {
     saveDelayFocusNode.addListener(() => _handleSaveDelayFocus(saveDelayFocusNode, saveDelayController));
 
     final outputPathController = TextEditingController(text: model.settings.outputPath ?? './${Config.newOutputListDefaultName}');
-    final outputPathFocusNode = FocusNode();
-    outputPathFocusNode.addListener(() => _handleOutputPathFocus(outputPathFocusNode, outputPathController));
+    _outputPathController = outputPathController;
 
     final historyPathController = TextEditingController(text: model.settings.historyPath ?? './${Config.newHistoryListDefaultName}');
-    final historyPathFocusNode = FocusNode();
-    historyPathFocusNode.addListener(() => _handleHistoryPathFocus(historyPathFocusNode, historyPathController));
+    _historyPathController = historyPathController;
 
     final authPathController = TextEditingController(text: model.settings.authPath ?? './${Config.newAuthListDefaultName}');
-    final authPathFocusNode = FocusNode();
-    authPathFocusNode.addListener(() => _handleAuthPathFocus(authPathFocusNode, authPathController));
+    _authPathController = authPathController;
 
-    ref.watch(styleStateProvider);
+    final users = authListState.loginListData?.users.entries.toList() ?? [];
+
+    _loginTextController.text = AppLocalStorage.instance.newLogin ?? Config.defaultNewLogin;
+    _secretTextController.text = AppLocalStorage.instance.newSecret ?? Config.defaultNewSecret;
 
     return Container(
       width: 1100 * kScale,
-      height: 460 * kScale,
+      height: 717 * kScale,
       color: kTextColorLightest,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -61,120 +101,290 @@ class SettingsView extends ConsumerWidget {
           Expanded(
             child: Padding(
               padding: EdgeInsets.all(20 * kScale),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 4,
-                        child: Text(
-                          Loc.get.projectSettingsSaveDelay,
-                          style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Text(
+                            Loc.get.projectSettingsSaveDelay,
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                          ),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: saveDelayController,
+                            decoration: kStyle.kInputTextStyleSettingsProperties,
+                            inputFormatters: Config.filterCellTypeFloat,
+                            focusNode: saveDelayFocusNode,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Text(
+                            Loc.get.projectSettingsTimezoneTitle,
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                          ),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: timezoneController,
+                            decoration: kStyle.kInputTextStyleSettingsProperties,
+                            inputFormatters: Config.filterTimeZone,
+                            focusNode: timezoneFocusNode,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10 * kScale),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Text(
+                            Loc.get.outputPath,
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: TextField(
+                            controller: outputPathController,
+                            decoration: kStyle.kInputTextStyleSettingsProperties,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        TooltipWrapper(
+                          message: 'save',
+                          child: IconButtonTransparent(
+                            size: 30 * kScale,
+                            icon: Icon(
+                              FontAwesomeIcons.floppyDisk,
+                              size: 12 * kScale,
+                              color: kColorAccentBlue,
+                            ),
+                            onClick: _handleOutputPathSave,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5 * kScale),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Text(
+                            Loc.get.historyPath,
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: TextField(
+                            controller: historyPathController,
+                            decoration: kStyle.kInputTextStyleSettingsProperties,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        TooltipWrapper(
+                          message: 'save',
+                          child: IconButtonTransparent(
+                            size: 30 * kScale,
+                            icon: Icon(
+                              FontAwesomeIcons.floppyDisk,
+                              size: 12 * kScale,
+                              color: kColorAccentBlue,
+                            ),
+                            onClick: _handleHistoryPathSave,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5 * kScale),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Text(
+                            Loc.get.authListPath,
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: TextField(
+                            controller: authPathController,
+                            decoration: kStyle.kInputTextStyleSettingsProperties,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        TooltipWrapper(
+                          message: 'save',
+                          child: IconButtonTransparent(
+                            size: 30 * kScale,
+                            icon: Icon(
+                              FontAwesomeIcons.floppyDisk,
+                              size: 12 * kScale,
+                              color: kColorAccentBlue,
+                            ),
+                            onClick: _handleAuthPathSave,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10 * kScale),
+                    const Divider(height: 1),
+                    SizedBox(height: 10 * kScale),
+                    Container(
+                      color: kTextColorLight,
+                      width: 9999,
+                      height: 229 * kScale,
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0 * kScale),
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 30 * kScale,
+                              child: Row(
+                                children: [
+                                  Text(
+                                    'Registered users',
+                                    style: kStyle.kTextRegular.copyWith(color: kColorTextButton),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: TextField(
+                                    controller: _loginTextController,
+                                    decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                                      hintText: Loc.get.newLoginHint,
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 7 * kScale, vertical: 13 * kScale),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 10 * kScale),
+                                Expanded(
+                                  flex: 2,
+                                  child: TextField(
+                                    controller: _secretTextController,
+                                    decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                                      hintText: Loc.get.newSecretHint,
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 7 * kScale, vertical: 13 * kScale),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 10 * kScale),
+                                TooltipWrapper(
+                                  message: Loc.get.buttonRegisterNewLogin,
+                                  child: IconButtonTransparent(
+                                    size: 35 * kScale,
+                                    icon: Icon(
+                                      FontAwesomeIcons.plus,
+                                      size: 14 * kScale,
+                                      color: kColorAccentBlue,
+                                    ),
+                                    onClick: _handleRegisterLoginClick,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (users.isNotEmpty) ...[
+                              SizedBox(height: 8 * kScale),
+                              Expanded(
+                                child: ScrollConfiguration(
+                                  behavior: kScrollDraggable,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.vertical,
+                                    itemCount: users.length,
+                                    itemBuilder: (context, index) {
+                                      final user = users[index];
+                                      return Padding(
+                                        padding: EdgeInsets.only(bottom: 4 * kScale),
+                                        child: Container(
+                                          height: 30 * kScale,
+                                          color: kTextColorLightest,
+                                          child: Padding(
+                                            padding: EdgeInsets.only(left: 5 * kScale, right: 8 * kScale),
+                                            child: Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    user.key,
+                                                    style: kStyle.kTextExtraSmall.copyWith(color: kTextColorDark),
+                                                  ),
+                                                ),
+                                                TooltipWrapper(
+                                                  message: Loc.get.buttonUnregisterLogin,
+                                                  child: IconButtonTransparent(
+                                                    size: 28 * kScale,
+                                                    icon: Icon(
+                                                      FontAwesomeIcons.trashCan,
+                                                      size: 12 * kScale,
+                                                      color: kColorAccentRed,
+                                                    ),
+                                                    onClick: () => _handleRemoveUser(user.key),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
-                      Expanded(
-                        child: TextField(
-                          controller: saveDelayController,
-                          decoration: kStyle.kInputTextStyleSettingsProperties,
-                          inputFormatters: Config.filterCellTypeFloat,
-                          focusNode: saveDelayFocusNode,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 4,
-                        child: Text(
-                          Loc.get.projectSettingsTimezoneTitle,
-                          style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
-                        ),
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: timezoneController,
-                          decoration: kStyle.kInputTextStyleSettingsProperties,
-                          inputFormatters: Config.filterTimeZone,
-                          focusNode: timezoneFocusNode,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10 * kScale),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 4,
-                        child: Text(
-                          Loc.get.outputPath,
-                          style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
-                        ),
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: outputPathController,
-                          decoration: kStyle.kInputTextStyleSettingsProperties,
-                          focusNode: outputPathFocusNode,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 5 * kScale),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 4,
-                        child: Text(
-                          Loc.get.historyPath,
-                          style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
-                        ),
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: historyPathController,
-                          decoration: kStyle.kInputTextStyleSettingsProperties,
-                          focusNode: historyPathFocusNode,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 5 * kScale),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 4,
-                        child: Text(
-                          Loc.get.authListPath,
-                          style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
-                        ),
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: authPathController,
-                          decoration: kStyle.kInputTextStyleSettingsProperties,
-                          focusNode: authPathFocusNode,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10 * kScale),
-                  GeneratorsView(
-                    key: ValueKey(ref.watch(clientStateProvider).state.version),
-                  ),
-                ],
+                    ),
+                    SizedBox(height: 10 * kScale),
+                    GeneratorsView(
+                      key: ValueKey(ref.watch(clientStateProvider).state.version),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  void _handleRegisterLoginClick() {
+    final authPathString = _authPathController?.text;
+    if (authPathString != null) {
+      final projectFile = providerContainer.read(appStateProvider).state.projectFile;
+      if (projectFile != null) {
+        final projectDir = path.dirname(projectFile.path);
+        const defaultPath = './${Config.newAuthListDefaultName}';
+        final resolved = authPathString == defaultPath ? path.join(projectDir, Config.newAuthListDefaultName) : path.join(projectDir, authPathString);
+        providerContainer.read(authListStateProvider).setPath(resolved);
+      }
+    }
+
+    providerContainer.read(authListStateProvider).registerNewLogin(_loginTextController.text, _secretTextController.text);
+    AppLocalStorage.instance.newLogin = _loginTextController.text;
+    AppLocalStorage.instance.newSecret = _secretTextController.text;
+  }
+
+  void _handleRemoveUser(String login) {
+    providerContainer.read(authListStateProvider).removeLogin(login);
   }
 
   void _handleTimezoneFocus(FocusNode focus, TextEditingController textComponent) {
@@ -225,56 +435,73 @@ class SettingsView extends ConsumerWidget {
         );
   }
 
-  void _handleOutputPathFocus(FocusNode focus, TextEditingController textComponent) {
-    if (focus.hasFocus) //
+  void _handleOutputPathSave() {
+    final rawValue = _outputPathController?.text;
+    if (rawValue == null) //
       return;
 
-    final value = textComponent.text;
     const defaultValue = './${Config.newOutputListDefaultName}';
-    final newValue = value == defaultValue ? null : value;
+    final value = rawValue.trim().isEmpty ? defaultValue : rawValue;
+    final modelValue = value == defaultValue ? '' : value;
 
-    if (newValue == clientModel.settings.outputPath) //
+    if (modelValue.isEmpty && clientModel.settings.outputPath == null) //
+      return;
+    if (modelValue.isNotEmpty && modelValue == clientModel.settings.outputPath) //
       return;
 
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(
           DbCmdEditProjectSettings.values(
-            outputPath: newValue,
+            outputPath: modelValue,
           ),
         );
   }
 
-  void _handleHistoryPathFocus(FocusNode focus, TextEditingController textComponent) {
-    if (focus.hasFocus) //
+  void _handleHistoryPathSave() {
+    final rawValue = _historyPathController?.text;
+    if (rawValue == null) //
       return;
 
-    final value = textComponent.text;
     const defaultValue = './${Config.newHistoryListDefaultName}';
-    final newValue = value == defaultValue ? null : value;
+    final value = rawValue.trim().isEmpty ? defaultValue : rawValue;
+    final modelValue = value == defaultValue ? '' : value;
 
-    if (newValue == clientModel.settings.historyPath) //
+    if (modelValue.isEmpty && clientModel.settings.historyPath == null) //
+      return;
+    if (modelValue.isNotEmpty && modelValue == clientModel.settings.historyPath) //
       return;
 
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(
           DbCmdEditProjectSettings.values(
-            historyPath: newValue,
+            historyPath: modelValue,
           ),
         );
   }
 
-  void _handleAuthPathFocus(FocusNode focus, TextEditingController textComponent) {
-    if (focus.hasFocus) //
+  void _handleAuthPathSave() {
+    final projectFile = providerContainer.read(appStateProvider).state.projectFile;
+    if (projectFile == null) //
       return;
 
-    final value = textComponent.text;
+    final projectDir = path.dirname(projectFile.path);
+    final rawValue = _authPathController?.text;
+    if (rawValue == null) //
+      return;
+
     const defaultValue = './${Config.newAuthListDefaultName}';
-    final newValue = value == defaultValue ? null : value;
+    final value = rawValue.trim().isEmpty ? defaultValue : rawValue;
+    final relPath = value == defaultValue ? Config.newAuthListDefaultName : value;
+    final newPath = path.join(projectDir, relPath);
 
-    if (newValue == clientModel.settings.authPath) //
-      return;
+    final currentPath = providerContainer.read(authListStateProvider).state.filePath;
+    if (currentPath != newPath) {
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Auth file path changed to "$newPath"'));
+      providerContainer.read(authListStateProvider).renameFile(newPath);
+    }
 
+    final modelValue = value == defaultValue ? '' : value;
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(
           DbCmdEditProjectSettings.values(
-            authPath: newValue,
+            authPath: modelValue,
           ),
         );
   }

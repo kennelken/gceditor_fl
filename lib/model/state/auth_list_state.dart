@@ -29,9 +29,32 @@ class AuthListStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future renameFile(String newPath) async {
+    final oldPath = state.filePath;
+    if (oldPath == null || oldPath == newPath) //
+      return;
+
+    final oldFile = File(oldPath);
+    if (!await oldFile.exists()) //
+      return;
+
+    final newFile = File(newPath);
+    if (await newFile.exists()) {
+      await newFile.delete();
+    }
+
+    await newFile.create(recursive: true);
+    await oldFile.rename(newPath);
+    state.filePath = newPath;
+    notifyListeners();
+
+    providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Auth file renamed to "$newPath"'));
+  }
+
   Future readFromFile() async {
     if (state.filePath == null) {
       providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Auth list file is not specified'));
+      return;
     }
     if (state.loginListData != null) //
       return;
@@ -121,6 +144,7 @@ class AuthListStateNotifier extends ChangeNotifier {
     state.loginListData!.users[login] = AuthListEntry.newUser(login: login, secret: secret);
     await saveToFile();
     providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'User "$login" has been registered'));
+    notifyListeners();
   }
 
   Future resetPasswordOrRegister(String login, String secret) async {
@@ -144,6 +168,7 @@ class AuthListStateNotifier extends ChangeNotifier {
       state.loginListData!.users.remove(login);
       await saveToFile();
       providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'User "$login" has been removed'));
+      notifyListeners();
     } else {
       providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'User "$login" does not exist'));
     }

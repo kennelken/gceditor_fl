@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -5,13 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/assets.dart';
 import 'package:gceditor/components/landing/project_path_view.dart';
-import 'package:gceditor/components/landing/server_auth_admin_panel.dart';
 import 'package:gceditor/components/landing/client_auth_panel.dart';
 import 'package:gceditor/components/landing/server_history_admin_panel.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/app_local_storage.dart';
+import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db_network/authentication_data.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
@@ -210,9 +211,6 @@ class LandingScreenState extends State<LandingScreen> {
                                     child: ServerHistoryAdminPanel(),
                                   ),
                                   SizedBox(height: 60 * kScale),
-                                  const Flexible(
-                                    child: ServerAuthAdminPanel(),
-                                  ),
                                 ],
                               ),
                             ),
@@ -331,10 +329,24 @@ class LandingScreenState extends State<LandingScreen> {
     final authListStateNotifier = providerContainer.read(authListStateProvider.notifier);
     final historyStateNotifier = providerContainer.read(serverHistoryStateProvider.notifier);
 
-    final projectDir = path.dirname(landingPageStateNotifier.getVisibleProjectPath());
+    final projectFile = File(landingPageStateNotifier.getVisibleProjectPath());
+    final projectDir = path.dirname(projectFile.path);
 
-    authListStateNotifier.setPath(path.join(projectDir, Config.newAuthListDefaultName));
-    historyStateNotifier.setPath(path.join(projectDir, Config.newHistoryListDefaultName));
+    var authRel = Config.newAuthListDefaultName;
+    var historyRel = Config.newHistoryListDefaultName;
+    try {
+      if (projectFile.existsSync()) {
+        final jsonText = projectFile.readAsStringSync();
+        if (jsonText.isNotEmpty) {
+          final dbModel = DbModel.fromJson(jsonDecode(jsonText));
+          authRel = dbModel.settings.authPath ?? Config.newAuthListDefaultName;
+          historyRel = dbModel.settings.historyPath ?? Config.newHistoryListDefaultName;
+        }
+      }
+    } catch (_) {}
+
+    authListStateNotifier.setPath(path.join(projectDir, authRel));
+    historyStateNotifier.setPath(path.join(projectDir, historyRel));
   }
 
   void _saveLocalsStorageData() {

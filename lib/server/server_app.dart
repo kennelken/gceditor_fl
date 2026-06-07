@@ -21,6 +21,7 @@ import 'package:gceditor/model/state/server_history_state.dart';
 import 'package:gceditor/model/state/server_state.dart';
 import 'package:gceditor/server/generators/generators_job.dart';
 import 'package:gceditor/server/net_commands.dart';
+import 'package:path/path.dart' as path;
 import 'package:socket_io/socket_io.dart';
 
 import 'commands_processor.dart';
@@ -138,6 +139,19 @@ class ServerApp {
     }
 
     providerContainer.read(serverStateProvider).setModel(dbModel);
+
+    final projectDir = projectFile.parent.path;
+    final settings = dbModel.settings;
+
+    final outputRel = settings.outputPath ?? Config.newOutputListDefaultName;
+    providerContainer.read(appStateProvider.notifier).state.output = Directory(path.join(projectDir, outputRel));
+
+    final historyRel = settings.historyPath ?? Config.newHistoryListDefaultName;
+    providerContainer.read(serverHistoryStateProvider).setPath(path.join(projectDir, historyRel));
+
+    final authRel = settings.authPath ?? Config.newAuthListDefaultName;
+    providerContainer.read(authListStateProvider).setPath(path.join(projectDir, authRel));
+
     return null;
   }
 

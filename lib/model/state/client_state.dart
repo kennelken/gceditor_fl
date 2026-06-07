@@ -34,6 +34,7 @@ class ClientStateNotifier extends ServerStateNotifier {
   @override
   void setModel(DbModel model) {
     super.setModel(model);
+    _applyPathSettings();
     providerContainer.read(clientRestoredProvider).dispatchEvent();
   }
 
