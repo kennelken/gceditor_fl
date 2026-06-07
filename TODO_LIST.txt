@@ -12,6 +12,6 @@
 - remore false positive changes when it converts 0->0.0->0 in the model.json file
 
 
-- reuse the objects that json parser creates (collections) instead of creaing new ones
-- reimplement c# parsing to rely on built-in Json parsing mostly replace reference values with Ref<T> (consider implementing custom equals and hashcode to delegate it to an actual instance. Probably not possible when added as keys to dictionaries. Consider wrapping all objects to Ref<> and using id as a hascode).
-- only add final lists in the end of normal json parsing
+- move history and output paths into project setiings
+- make sure to cut collections trails
+- write tables into json, not classes

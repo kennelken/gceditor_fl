@@ -61,6 +61,7 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
   static const _paramMetaEntityType = 'metaEntityType';
   static const _paramListItemsListsAssignment = 'listItemsListsAssignment';
   static const _paramListItemsListsDeclarations = 'listItemsListsDeclarations';
+  static const _paramFastListActivatorCases = 'fastListActivatorCases';
 
   @override
   Future<GeneratorResult> execute(String outputFolder, DbModel model, GeneratorCsharp data, GeneratorAdditionalInformation additionalInfo) async {
@@ -88,6 +89,7 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
           ),
           _paramListItemsListsAssignment: _getListItemsListAssignment(model, data),
           _paramListItemsListsDeclarations: _getListItemsListsDeclarations(model, data),
+          _paramFastListActivatorCases: _getFastListActivatorCases(model, data),
         },
       );
 
@@ -819,6 +821,46 @@ ${_makeSummary('</summary>', indentDepth)}''';
     return '$result${result.isNotEmpty ? _defaultNewLine : ''}';
   }
 
+  String _getFastListActivatorCases(DbModel model, GeneratorCsharp data) {
+    final items = <String>[];
+
+    for (final classEntity in model.cache.allClasses) {
+      switch (classEntity.classType) {
+        case ClassType.undefined:
+        case ClassType.interface:
+          items.add(
+            _listActivatorCaseTemplate.format({
+              _paramClassName: '${data.prefixInterface}${classEntity.id}${data.postfix}',
+            }),
+          );
+          break;
+
+        case ClassType.referenceType:
+        case ClassType.valueType:
+          items.add(
+            _listActivatorCaseTemplate.format({
+              _paramClassName: '${data.prefix}${classEntity.id}${data.postfix}',
+            }),
+          );
+          break;
+      }
+    }
+
+    items.add(
+      _listActivatorCaseTemplate.format({
+        _paramClassName: 'Base${data.prefix}Item${data.postfix}',
+      }),
+    );
+
+    items.add(
+      _listActivatorCaseTemplate.format({
+        _paramClassName: 'IIdentifiable',
+      }),
+    );
+
+    return items.join();
+  }
+
   int _getMaxStructDepth(DbModel model, int maxAllowedDepth) {
     var depth = 0;
     for (var classEntry in model.cache.allClasses) {
@@ -869,7 +911,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq.Expressions;
+
 
 #if UNITY_5_3_OR_NEWER
 using Newtonsoft.Json;
@@ -1027,21 +1069,15 @@ using Rectangle = System.Drawing.RectangleF;
             return items as List<T>;
         }
 
-
-        public IList GetAll(Type type)
+        public IReadOnlyList<IIdentifiable> GetAll(Type type)
         {
-            if (!AllItemsByType.TryGetValue(type, out var items))
-            {
-                items = _emptyCollectionFactory.List(type);
-                AllItemsByType[type] = items;
-            }
-            return items as IList;
+            return GetAll<IIdentifiable>();
         }
 
         /// <summary>
         /// Supposed to be called only once when the model is parsed
         /// </summary>
-        public void Init(List<IIdentifiable> items)
+        internal void Initialize(List<IIdentifiable> items)
         {
             _emptyCollectionFactory = new EmptyCollectionFactory();
 
@@ -1061,7 +1097,7 @@ using Rectangle = System.Drawing.RectangleF;
 
                     if (!AllItemsByType.TryGetValue(type, out var listItemsByType))
                     {
-                        listItemsByType = FastActivator.CreateInstance(typeof(List<>).MakeGenericType(type));
+                        listItemsByType = FastListActivator.CreateInstance(type);
                         AllItemsByType.Add(type, listItemsByType);
                     }
                     (listItemsByType as IList).Add(item);
@@ -1075,7 +1111,17 @@ using Rectangle = System.Drawing.RectangleF;
         {
             if (!cache.TryGetValue(type, out var result))
             {
-                result = new List<Type>(type.GetInterfaces());
+                result = new List<Type>();
+                foreach (var interfaceType in type.GetInterfaces())
+                {
+                    if (interfaceType.IsGenericType)
+                    {
+                        var genericDef = interfaceType.GetGenericTypeDefinition();
+                        if (genericDef == typeof(ICloneable<>) || genericDef == typeof(IEquatable<>))
+                            continue;
+                    }
+                    result.Add(interfaceType);
+                }
 
                 var parent = type;
                 while (parent != null)
@@ -1128,19 +1174,6 @@ using Rectangle = System.Drawing.RectangleF;
             return list as List<T>;
         }
 
-        public IList List(Type type)
-        {
-            if (!_lists.TryGetValue(type, out var list))
-            {
-                var genericListType = typeof(List<>);
-                var concreteListType = genericListType.MakeGenericType(type);
-
-                list = FastActivator.CreateInstance(concreteListType);
-                _lists[type] = list;
-            }
-            return list as IList;
-        }
-
         private Dictionary<Type, object> _hashsets = new Dictionary<Type, object>();
         public HashSet<T> HashSet<T>()
         {
@@ -1170,23 +1203,16 @@ using Rectangle = System.Drawing.RectangleF;
     }
 #endregion
 
-    internal static class FastActivator
+    internal static class FastListActivator
     {
-        private static readonly Dictionary<Type, Func<object>> _cache = new Dictionary<Type, Func<object>>();
-
         public static object CreateInstance(Type type)
         {
-            if (!_cache.TryGetValue(type, out var factory))
+            return type.Name switch
             {
-                var newExpr = Expression.New(type);
-                var lambda = Expression.Lambda<Func<object>>(Expression.Convert(newExpr, typeof(object)));
-                factory = lambda.Compile();
-                _cache[type] = factory;
-            }
-            return factory();
+{${_paramFastListActivatorCases}}
+                _ => Activator.CreateInstance(typeof(List<>).MakeGenericType(type))
+            };
         }
-
-        public static void Clear() => _cache.Clear();
     }
 
 #region Geometry classes
@@ -1399,6 +1425,10 @@ using Rectangle = System.Drawing.RectangleF;
 
         public {${_paramPrefix}}{${_paramClassName}}{${_paramPostfix}}{${_paramMetaEntityType}}${_itemsListSuffix} {${_paramClassName}} { get; }''';
 
+  final String _listActivatorCaseTemplate = '''
+                "{${_paramClassName}}" => (object)new List<{${_paramClassName}}>(),
+''';
+
   final String _parserTemplate = //
       '''#region JSON
     public static partial class {${_paramPrefix}}Root{${_paramPostfix}}Parser
@@ -1450,7 +1480,7 @@ using Rectangle = System.Drawing.RectangleF;
             root ??= new {${_paramPrefix}}Root{${_paramPostfix}}();
             root.CreatedBy = jsonRoot.generationUser;
             root.CreationTime = jsonRoot.generationDate;
-            root.Init(new List<IIdentifiable>(objectsByIds.Values));
+            root.Initialize(new List<IIdentifiable>(objectsByIds.Values));
 
             var cache = new CacheRoot();
 
@@ -1458,7 +1488,6 @@ using Rectangle = System.Drawing.RectangleF;
                 (objectsByIds[objectId] as Base{${_paramPrefix}}Item{${_paramPostfix}}).OnParsed(root, cache);
 
             _inlineItemsCounter.Clear();
-            FastActivator.Clear();
 
             return root;
         }

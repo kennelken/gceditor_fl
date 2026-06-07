@@ -916,7 +916,7 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
     /**
      * Supposed to be called only once when the model is parsed
      */
-    public void Init(ArrayList<IIdentifiable> items) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException
+    public void Initialize(ArrayList<IIdentifiable> items) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException
     {
         _emptyCollectionFactory = new EmptyCollectionFactory();
 
@@ -1277,7 +1277,7 @@ class RectangleInt {
               root = new {${_paramPrefix}}Root{${_paramPostfix}}();
             root.CreatedBy = jsonRoot.generationUser;
             root.CreationTime = jsonRoot.generationDate;
-            root.Init(new ArrayList<IIdentifiable>(objectsByIds.values()));
+            root.Initialize(new ArrayList<IIdentifiable>(objectsByIds.values()));
 
             _inlineItemsCounter.clear();
 
