@@ -912,7 +912,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 
-
 #if UNITY_5_3_OR_NEWER
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -1105,6 +1104,17 @@ using Rectangle = System.Drawing.RectangleF;
             }
 
             Lists = new ItemsLists(AllItems);
+
+            AllItems.TrimExcess();
+            AllItemsByType.TrimExcess();
+            foreach (var list in AllItemsByType.Values)
+            {
+                if (list is IList { Count: > 0 })
+                {
+                    var method = list.GetType().GetMethod("TrimExcess", Type.EmptyTypes);
+                    method?.Invoke(list, null);
+                }
+            }
         }
 
         private List<Type> GetParentTypesIncludingCurrent(Type type, Dictionary<Type, List<Type>> cache)

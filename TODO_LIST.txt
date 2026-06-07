@@ -13,5 +13,4 @@
 
 
 - move history and output paths into project setiings
-- make sure to cut collections trails
 - write tables into json, not classes
