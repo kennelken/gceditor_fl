@@ -26,12 +26,12 @@ class Config {
   static const String defaultGeneratorJsonFileExtension = 'json';
   static const String defaultGeneratorJsonIndentation = '\t';
   static const String defaultGeneratorCsharpFileExtension = 'cs';
-  static const String defaultGeneratorCsharpNamespace = 'Fairfun.Gceditor.Model';
+  static const String defaultGeneratorCsharpNamespace = 'Gceditor.Model';
   static const String defaultGeneratorCsharpPrefix = 'Model';
   static const String defaultGeneratorCsharpPrefixInterface = 'IModel';
   static const String defaultGeneratorCsharpPostfix = '';
   static const String defaultGeneratorJavaFileExtension = 'java';
-  static const String defaultGeneratorJavaNamespace = 'fairfun.gceditor.model';
+  static const String defaultGeneratorJavaNamespace = 'gceditor.model';
   static const String defaultGeneratorJavaPrefix = 'Model';
   static const String defaultGeneratorJavaPrefixInterface = 'IModel';
   static const String defaultGeneratorJavaPostfix = '';
