@@ -157,10 +157,13 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                         ),
                         Expanded(
                           flex: 3,
-                          child: TextField(
-                            controller: outputPathController,
-                            decoration: kStyle.kInputTextStyleSettingsProperties,
-                            textAlign: TextAlign.center,
+                          child: ClipRRect(
+                            borderRadius: kCardBorder,
+                            child: TextField(
+                              controller: outputPathController,
+                              decoration: kStyle.kInputTextStyleSettingsProperties,
+                              textAlign: TextAlign.left,
+                            ),
                           ),
                         ),
                         TooltipWrapper(
@@ -189,10 +192,13 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                         ),
                         Expanded(
                           flex: 3,
-                          child: TextField(
-                            controller: historyPathController,
-                            decoration: kStyle.kInputTextStyleSettingsProperties,
-                            textAlign: TextAlign.center,
+                          child: ClipRRect(
+                            borderRadius: kCardBorder,
+                            child: TextField(
+                              controller: historyPathController,
+                              decoration: kStyle.kInputTextStyleSettingsProperties,
+                              textAlign: TextAlign.left,
+                            ),
                           ),
                         ),
                         TooltipWrapper(
@@ -221,10 +227,13 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                         ),
                         Expanded(
                           flex: 3,
-                          child: TextField(
-                            controller: authPathController,
-                            decoration: kStyle.kInputTextStyleSettingsProperties,
-                            textAlign: TextAlign.center,
+                          child: ClipRRect(
+                            borderRadius: kCardBorder,
+                            child: TextField(
+                              controller: authPathController,
+                              decoration: kStyle.kInputTextStyleSettingsProperties,
+                              textAlign: TextAlign.left,
+                            ),
                           ),
                         ),
                         TooltipWrapper(

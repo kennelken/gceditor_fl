@@ -299,7 +299,6 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
             child: SizedBox(
               width: 100 * kScale,
               child: TextField(
-                clipBehavior: Clip.none,
                 controller: _indentationController,
                 focusNode: _indentationFocusNode,
                 inputFormatters: Config.filterIndentationForJson,
@@ -323,7 +322,6 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
             child: SizedBox(
               width: 100 * kScale,
               child: TextField(
-                clipBehavior: Clip.none,
                 controller: _namespaceController,
                 focusNode: _namespaceFocusNode,
                 inputFormatters: Config.filterNamespace,
@@ -342,7 +340,6 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
             child: SizedBox(
               width: 100 * kScale,
               child: TextField(
-                clipBehavior: Clip.none,
                 controller: _prefixController,
                 focusNode: _prefixFocusNode,
                 inputFormatters: Config.filterId,
@@ -361,7 +358,6 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
             child: SizedBox(
               width: 100 * kScale,
               child: TextField(
-                clipBehavior: Clip.none,
                 controller: _prefixInterfaceController,
                 focusNode: _prefixInterfaceFocusNode,
                 inputFormatters: Config.filterId,
@@ -380,7 +376,6 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
             child: SizedBox(
               width: 100 * kScale,
               child: TextField(
-                clipBehavior: Clip.none,
                 controller: _postfixController,
                 focusNode: _postfixFocusNode,
                 inputFormatters: Config.filterId,
