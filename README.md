@@ -15,7 +15,7 @@ It does not require to setup any complex environment because it stores data in j
 ## Features
 * <b>Json</b>, <b>C#</b>, <b>Java</b> generators produce files that can be imported and parsed in c# environment as simple as
 ```
-	var config = GceditorJsonParser.Parse(_getConfigText());
+	var config = ModelRootParser.Parse(<json file content as string>);
 ```
 * All vital data types are supported, including <b>simple types</b>, <b>reference types</b>, <b>enums</b>, <b>lists</b>, <b>sets</b>, <b>dictionaries</b>
 * A lot of useful helpers: <b>Find</b> with advanced settings, <b>pin</b> items, <b>problems</b> view.
