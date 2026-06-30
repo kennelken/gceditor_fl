@@ -4,10 +4,13 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/assets.dart';
 import 'package:gceditor/components/landing/project_path_view.dart';
 import 'package:gceditor/components/landing/client_auth_panel.dart';
 import 'package:gceditor/components/landing/server_history_admin_panel.dart';
+import 'package:gceditor/components/properties/primitives/icon_button_transparent.dart';
+import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
@@ -39,6 +42,7 @@ class LandingScreenState extends State<LandingScreen> {
   late final TextEditingController _projectPathTextController = TextEditingController();
 
   String? _projectPath = '';
+  List<String> _recentProjects = [];
 
   bool _initialValuesSet = false;
 
@@ -77,6 +81,7 @@ class LandingScreenState extends State<LandingScreen> {
         }
 
         _projectPath = projectPath;
+        _recentProjects = AppLocalStorage.instance.recentProjects;
 
         const isServerAvailable = !kIsWeb;
 
@@ -206,11 +211,71 @@ class LandingScreenState extends State<LandingScreen> {
                                     canBeReset: true,
                                     onChange: (path) => ref.read(landingPageStateProvider).setProjectPath(path),
                                   ),
+                                  if (_recentProjects.isNotEmpty) ...[
+                                    SizedBox(height: 10 * kScale),
+                                    InputDecorator(
+                                      decoration: kStyle.kLandingInputTextStyle.copyWith(
+                                        labelText: 'Recent projects',
+                                      ),
+                                      child: Padding(
+                                        padding: EdgeInsets.only(top: 8 * kScale),
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          physics: const NeverScrollableScrollPhysics(),
+                                          itemCount: _recentProjects.length,
+                                          itemBuilder: (context, index) {
+                                            final p = _recentProjects[index];
+                                            final isSelected = p == _projectPath;
+                                            final isMissing = !File(p).existsSync();
+                                            return Padding(
+                                              padding: EdgeInsets.only(bottom: 2 * kScale),
+                                              child: InkWell(
+                                                onTap: () => _handleRecentProjectTap(p),
+                                                child: Container(
+                                                  height: 22 * kScale,
+                                                  color: isSelected 
+                                                      ? kColorPrimaryLightTransparent
+                                                      : kColorTransparent,
+                                                  child: Padding(
+                                                    padding: EdgeInsets.only(left: 5 * kScale, right: 10 * kScale),
+                                                    child: Row(
+                                                      children: [
+                                                        Expanded(
+                                                          child: Text(
+                                                            p,
+                                                            style: isSelected 
+                                                                ? kStyle.kTextExtraSmallSelected 
+                                                                : (isMissing ? kStyle.kTextExtraSmallInactive : kStyle.kTextExtraSmall),
+                                                            overflow: TextOverflow.ellipsis,
+                                                          ),
+                                                        ),
+                                                        TooltipWrapper(
+                                                          message: 'Remove',
+                                                          child: IconButtonTransparent(
+                                                            size: 20 * kScale,
+                                                            icon: Icon(
+                                                              FontAwesomeIcons.trashCan,
+                                                              size: 10 * kScale,
+                                                              color: kColorAccentRed,
+                                                            ),
+                                                            onClick: () => _handleRemoveRecentProject(p),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                   SizedBox(height: 60 * kScale),
                                   const Flexible(
                                     child: ServerHistoryAdminPanel(),
                                   ),
-                                  SizedBox(height: 60 * kScale),
                                 ],
                               ),
                             ),
@@ -281,6 +346,7 @@ class LandingScreenState extends State<LandingScreen> {
 
     final port = int.parse(_portTextController.text);
     final projectFile = File(landingPageStateNotifier.getVisibleProjectPath());
+    AppLocalStorage.instance.addRecentProject(projectFile.path);
     final projectDir = path.dirname(projectFile.path);
     final outputDir = Directory(path.join(projectDir, Config.newOutputListDefaultName));
 
@@ -310,6 +376,7 @@ class LandingScreenState extends State<LandingScreen> {
 
     final port = int.parse(_portTextController.text);
     final projectFile = File(landingPageStateNotifier.getVisibleProjectPath());
+    AppLocalStorage.instance.addRecentProject(projectFile.path);
     final projectDir = path.dirname(projectFile.path);
     final outputDir = Directory(path.join(projectDir, Config.newOutputListDefaultName));
 
@@ -322,6 +389,17 @@ class LandingScreenState extends State<LandingScreen> {
     _saveLocalsStorageData();
 
     appStateNotifier.launchApp(AppMode.server);
+  }
+
+  void _handleRecentProjectTap(String path) {
+    providerContainer.read(landingPageStateProvider.notifier).setProjectPath(path);
+  }
+
+  void _handleRemoveRecentProject(String path) {
+    AppLocalStorage.instance.removeRecentProject(path);
+    setState(() {
+      _recentProjects = AppLocalStorage.instance.recentProjects;
+    });
   }
 
   void _onBackendCommon() {

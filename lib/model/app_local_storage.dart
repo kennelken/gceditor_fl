@@ -293,6 +293,34 @@ class AppLocalStorage {
     saveProperty('windowRect', jsonText);
   }
 
+  List<String> get recentProjects {
+    final jsonText = _readProperty<String>('recentProjects');
+    if (jsonText != null && jsonText.isNotEmpty) {
+      try {
+        return (jsonDecode(jsonText) as List<dynamic>).cast<String>();
+      } catch (_) {}
+    }
+    return [];
+  }
+
+  set recentProjects(List<String> value) {
+    saveProperty('recentProjects', jsonEncode(value));
+  }
+
+  void addRecentProject(String projectPath) {
+    final list = recentProjects;
+    list.remove(projectPath);
+    list.insert(0, projectPath);
+    if (list.length > 10) list.removeRange(10, list.length);
+    recentProjects = list;
+  }
+
+  void removeRecentProject(String projectPath) {
+    final list = recentProjects;
+    list.remove(projectPath);
+    recentProjects = list;
+  }
+
   void saveProperty(String name, dynamic value) {
     _mutex.protect(() async {
       try {

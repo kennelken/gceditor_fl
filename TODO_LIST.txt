@@ -13,3 +13,4 @@
 
 
 - move history and output paths into project setiings
+- add a list of recently opened project (with a button to delete from the recent list)
