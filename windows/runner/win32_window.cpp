@@ -136,8 +136,8 @@ bool Win32Window::Create(const std::wstring& title,
 
   HWND window = CreateWindow(
       //window_class, title.c_str(), WS_OVERLAPPEDWINDOW, //change for the window_manager package
-+     window_class, title.c_str(),
-+     WS_OVERLAPPEDWINDOW, // do not add WS_VISIBLE since the window will be shown later
+      window_class, title.c_str(),
+      WS_OVERLAPPEDWINDOW, // do not add WS_VISIBLE since the window will be shown later
       Scale(origin.x, scale_factor), Scale(origin.y, scale_factor),
       Scale(size.width, scale_factor), Scale(size.height, scale_factor),
       nullptr, nullptr, GetModuleHandle(nullptr), this);
