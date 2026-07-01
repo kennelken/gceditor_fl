@@ -22,6 +22,10 @@ final menubarStateProvider = ChangeNotifierProvider((ref) {
     notifier.refresh();
   });
 
+  ref.read(clientViewModeStateProvider).addListener(() {
+    notifier.refresh();
+  });
+
   ref.read(tableSelectionStateProvider).addListener(() {
     notifier.refresh();
   });

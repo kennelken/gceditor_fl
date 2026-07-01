@@ -242,6 +242,20 @@ class StyleStateNotifier extends ChangeNotifier {
         fillColor: WidgetStatePropertyAll(kColorAccentBlue),
       ),
       colorScheme: ColorScheme.fromSwatch(primarySwatch: kColorPrimary).copyWith(secondary: kColorSecondary, surface: kColorBackground),
+      menuTheme: const MenuThemeData(
+        style: MenuStyle(
+          backgroundColor: WidgetStatePropertyAll(kColorPrimaryDarker2),
+          shape: WidgetStatePropertyAll(RoundedRectangleBorder()),
+          padding: WidgetStatePropertyAll(EdgeInsets.zero),
+        ),
+      ),
+      menuBarTheme: const MenuBarThemeData(
+        style: MenuStyle(
+          backgroundColor: WidgetStatePropertyAll(kColorPrimaryDarker2),
+          shape: WidgetStatePropertyAll(RoundedRectangleBorder()),
+          padding: WidgetStatePropertyAll(EdgeInsets.zero),
+        ),
+      ),
     );
 
     state.kInputThemeLight = state.kAppTheme.copyWith(
