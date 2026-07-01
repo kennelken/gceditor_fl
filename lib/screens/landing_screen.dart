@@ -1,17 +1,21 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/assets.dart';
-import 'package:gceditor/components/landing/client_auth_panel.dart';
 import 'package:gceditor/components/landing/project_path_view.dart';
-import 'package:gceditor/components/landing/server_auth_admin_panel.dart';
+import 'package:gceditor/components/landing/client_auth_panel.dart';
 import 'package:gceditor/components/landing/server_history_admin_panel.dart';
+import 'package:gceditor/components/properties/primitives/icon_button_transparent.dart';
+import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/app_local_storage.dart';
+import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db_network/authentication_data.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
@@ -21,6 +25,7 @@ import 'package:gceditor/model/state/server_history_state.dart';
 import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/screens/loading_screen.dart';
 import 'package:gceditor/server/net_commands.dart';
+import 'package:path/path.dart' as path;
 
 import '../model/state/landing_page_state.dart';
 
@@ -35,10 +40,9 @@ class LandingScreenState extends State<LandingScreen> {
   late final TextEditingController _clientIpTextController = TextEditingController();
   late final TextEditingController _portTextController = TextEditingController();
   late final TextEditingController _projectPathTextController = TextEditingController();
-  late final TextEditingController _outputPathTextController = TextEditingController();
 
   String? _projectPath = '';
-  String? _outputPath = '';
+  List<String> _recentProjects = [];
 
   bool _initialValuesSet = false;
 
@@ -57,7 +61,6 @@ class LandingScreenState extends State<LandingScreen> {
     return Consumer(
       builder: (context, ref, child) {
         final projectPath = ref.watch(landingPageStateProvider).state.projectPath;
-        final outputPath = ref.watch(landingPageStateProvider).state.outputPath;
         final openPort = ref.watch(networkStateProvider.notifier).state.openPort?.toString() ?? Config.portMin.toString();
         ref.watch(styleStateProvider);
 
@@ -78,7 +81,7 @@ class LandingScreenState extends State<LandingScreen> {
         }
 
         _projectPath = projectPath;
-        _outputPath = outputPath;
+        _recentProjects = AppLocalStorage.instance.recentProjects;
 
         const isServerAvailable = !kIsWeb;
 
@@ -208,24 +211,70 @@ class LandingScreenState extends State<LandingScreen> {
                                     canBeReset: true,
                                     onChange: (path) => ref.read(landingPageStateProvider).setProjectPath(path),
                                   ),
-                                  SizedBox(height: 10 * kScale),
-                                  ProjectPathView(
-                                    defaultPath: ref.read(landingPageStateProvider).getVisibleOutputPath(),
-                                    targetPath: _outputPath,
-                                    targetPathTextController: _outputPathTextController,
-                                    labelText: Loc.get.outputPath,
-                                    defaultName: Config.newOutputListDefaultName,
-                                    isFile: false,
-                                    canBeReset: true,
-                                    onChange: (path) => ref.read(landingPageStateProvider).setOutputPath(path),
-                                  ),
+                                  if (_recentProjects.isNotEmpty) ...[
+                                    SizedBox(height: 10 * kScale),
+                                    InputDecorator(
+                                      decoration: kStyle.kLandingInputTextStyle.copyWith(
+                                        labelText: 'Recent projects',
+                                      ),
+                                      child: Padding(
+                                        padding: EdgeInsets.only(top: 8 * kScale),
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          physics: const NeverScrollableScrollPhysics(),
+                                          itemCount: _recentProjects.length,
+                                          itemBuilder: (context, index) {
+                                            final p = _recentProjects[index];
+                                            final isSelected = p == _projectPath;
+                                            final isMissing = !File(p).existsSync();
+                                            return Padding(
+                                              padding: EdgeInsets.only(bottom: 2 * kScale),
+                                              child: InkWell(
+                                                onTap: () => _handleRecentProjectTap(p),
+                                                child: Container(
+                                                  height: 22 * kScale,
+                                                  color: isSelected 
+                                                      ? kColorPrimaryLightTransparent
+                                                      : kColorTransparent,
+                                                  child: Padding(
+                                                    padding: EdgeInsets.only(left: 5 * kScale, right: 10 * kScale),
+                                                    child: Row(
+                                                      children: [
+                                                        Expanded(
+                                                          child: Text(
+                                                            p,
+                                                            style: isSelected 
+                                                                ? kStyle.kTextExtraSmallSelected 
+                                                                : (isMissing ? kStyle.kTextExtraSmallInactive : kStyle.kTextExtraSmall),
+                                                            overflow: TextOverflow.ellipsis,
+                                                          ),
+                                                        ),
+                                                        TooltipWrapper(
+                                                          message: 'Remove',
+                                                          child: IconButtonTransparent(
+                                                            size: 20 * kScale,
+                                                            icon: Icon(
+                                                              FontAwesomeIcons.trashCan,
+                                                              size: 10 * kScale,
+                                                              color: kColorAccentRed,
+                                                            ),
+                                                            onClick: () => _handleRemoveRecentProject(p),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                   SizedBox(height: 60 * kScale),
                                   const Flexible(
                                     child: ServerHistoryAdminPanel(),
-                                  ),
-                                  SizedBox(height: 60 * kScale),
-                                  const Flexible(
-                                    child: ServerAuthAdminPanel(),
                                   ),
                                 ],
                               ),
@@ -296,13 +345,17 @@ class LandingScreenState extends State<LandingScreen> {
     _onBackendCommon();
 
     final port = int.parse(_portTextController.text);
+    final projectFile = File(landingPageStateNotifier.getVisibleProjectPath());
+    AppLocalStorage.instance.addRecentProject(projectFile.path);
+    final projectDir = path.dirname(projectFile.path);
+    final outputDir = Directory(path.join(projectDir, Config.newOutputListDefaultName));
 
     providerContainer.read(authListStateProvider).resetPasswordOrRegister(_clientLogin!, _clientSecret!);
 
     appStateNotifier.setStandaloneParams(
       port,
-      File(landingPageStateNotifier.getVisibleProjectPath()),
-      Directory(landingPageStateNotifier.getVisibleOutputPath()),
+      projectFile,
+      outputDir,
       AuthenticationData.values(
         login: _clientLogin!,
         secret: _clientSecret!,
@@ -322,10 +375,15 @@ class LandingScreenState extends State<LandingScreen> {
     _onBackendCommon();
 
     final port = int.parse(_portTextController.text);
+    final projectFile = File(landingPageStateNotifier.getVisibleProjectPath());
+    AppLocalStorage.instance.addRecentProject(projectFile.path);
+    final projectDir = path.dirname(projectFile.path);
+    final outputDir = Directory(path.join(projectDir, Config.newOutputListDefaultName));
+
     appStateNotifier.setServerParams(
       port,
-      File(landingPageStateNotifier.getVisibleProjectPath()),
-      Directory(landingPageStateNotifier.getVisibleOutputPath()),
+      projectFile,
+      outputDir,
     );
 
     _saveLocalsStorageData();
@@ -333,28 +391,52 @@ class LandingScreenState extends State<LandingScreen> {
     appStateNotifier.launchApp(AppMode.server);
   }
 
+  void _handleRecentProjectTap(String path) {
+    providerContainer.read(landingPageStateProvider.notifier).setProjectPath(path);
+  }
+
+  void _handleRemoveRecentProject(String path) {
+    AppLocalStorage.instance.removeRecentProject(path);
+    setState(() {
+      _recentProjects = AppLocalStorage.instance.recentProjects;
+    });
+  }
+
   void _onBackendCommon() {
     final landingPageStateNotifier = providerContainer.read(landingPageStateProvider.notifier);
     final authListStateNotifier = providerContainer.read(authListStateProvider.notifier);
     final historyStateNotifier = providerContainer.read(serverHistoryStateProvider.notifier);
 
-    authListStateNotifier.setPath(landingPageStateNotifier.getVisibleAuthPath());
-    historyStateNotifier.setPath(landingPageStateNotifier.getVisibleHistoryPath());
+    final projectFile = File(landingPageStateNotifier.getVisibleProjectPath());
+    final projectDir = path.dirname(projectFile.path);
+
+    var authRel = Config.newAuthListDefaultName;
+    var historyRel = Config.newHistoryListDefaultName;
+    try {
+      if (projectFile.existsSync()) {
+        final jsonText = projectFile.readAsStringSync();
+        if (jsonText.isNotEmpty) {
+          final dbModel = DbModel.fromJson(jsonDecode(jsonText));
+          authRel = dbModel.settings.authPath ?? Config.newAuthListDefaultName;
+          historyRel = dbModel.settings.historyPath ?? Config.newHistoryListDefaultName;
+        }
+      }
+    } catch (_) {}
+
+    authListStateNotifier.setPath(path.join(projectDir, authRel));
+    historyStateNotifier.setPath(path.join(projectDir, historyRel));
   }
 
   void _saveLocalsStorageData() {
     AppLocalStorage.instance.ipAddress = _clientIpTextController.text;
     AppLocalStorage.instance.port = int.parse(_portTextController.text);
     AppLocalStorage.instance.projectPath = providerContainer.read(landingPageStateProvider).state.projectPath;
-    AppLocalStorage.instance.outputPath = providerContainer.read(landingPageStateProvider).state.outputPath;
-    AppLocalStorage.instance.authListPath = providerContainer.read(landingPageStateProvider).state.authPath;
 
     AppLocalStorage.instance.clientLogin = _clientLogin;
     AppLocalStorage.instance.clientSecret = _clientSecret;
     AppLocalStorage.instance.clientPassword = _rememberClientPassword! ? _clientPassword : '';
     AppLocalStorage.instance.rememberClientPassword = _rememberClientPassword;
 
-    AppLocalStorage.instance.historyPath = providerContainer.read(landingPageStateProvider).state.historyPath;
     AppLocalStorage.instance.historyTag = providerContainer.read(serverHistoryStateProvider).state.currentTag;
   }
 

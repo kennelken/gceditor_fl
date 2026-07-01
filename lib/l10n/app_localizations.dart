@@ -955,7 +955,7 @@ abstract class AppLocalizations {
   ///
   ///
   /// In en, this message translates to:
-  /// **'tag'**
+  /// **'history tag'**
   String get historyTagLabel;
 
   ///

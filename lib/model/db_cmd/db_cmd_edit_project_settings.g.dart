@@ -13,8 +13,10 @@ DbCmdEditProjectSettings _$DbCmdEditProjectSettingsFromJson(
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..timezone = (json['timezone'] as num?)?.toDouble()
       ..saveDelay = (json['saveDelay'] as num?)?.toDouble()
-      ..generators =
-          BaseGenerator.decodeGenerators(json['generators'] as List?);
+      ..generators = BaseGenerator.decodeGenerators(json['generators'] as List?)
+      ..outputPath = json['outputPath'] as String?
+      ..historyPath = json['historyPath'] as String?
+      ..authPath = json['authPath'] as String?;
 
 Map<String, dynamic> _$DbCmdEditProjectSettingsToJson(
     DbCmdEditProjectSettings instance) {
@@ -33,6 +35,9 @@ Map<String, dynamic> _$DbCmdEditProjectSettingsToJson(
   writeNotNull('saveDelay', instance.saveDelay);
   writeNotNull(
       'generators', BaseGenerator.encodeGenerators(instance.generators));
+  writeNotNull('outputPath', instance.outputPath);
+  writeNotNull('historyPath', instance.historyPath);
+  writeNotNull('authPath', instance.authPath);
   return val;
 }
 

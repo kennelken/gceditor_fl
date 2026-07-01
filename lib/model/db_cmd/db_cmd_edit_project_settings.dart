@@ -15,12 +15,18 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
   double? saveDelay;
   @JsonKey(toJson: BaseGenerator.encodeGenerators, fromJson: BaseGenerator.decodeGenerators)
   List<BaseGenerator>? generators;
+  String? outputPath;
+  String? historyPath;
+  String? authPath;
 
   DbCmdEditProjectSettings.values({
     String? id,
     this.timezone,
     this.saveDelay,
     this.generators,
+    this.outputPath,
+    this.historyPath,
+    this.authPath,
   }) : super.withId(id) {
     $type = DbCmdType.editProjectSettings;
   }
@@ -40,6 +46,27 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
       dbModel.settings.saveDelay = saveDelay!;
 
     if (generators != null) dbModel.settings.generators = generators!;
+
+    if (outputPath != null) {
+      if (outputPath!.isEmpty)
+        dbModel.settings.outputPath = null;
+      else
+        dbModel.settings.outputPath = outputPath;
+    }
+
+    if (historyPath != null) {
+      if (historyPath!.isEmpty)
+        dbModel.settings.historyPath = null;
+      else
+        dbModel.settings.historyPath = historyPath;
+    }
+
+    if (authPath != null) {
+      if (authPath!.isEmpty)
+        dbModel.settings.authPath = null;
+      else
+        dbModel.settings.authPath = authPath;
+    }
 
     return DbCmdResult.success();
   }
@@ -79,6 +106,9 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
     return DbCmdEditProjectSettings.values(
       timezone: timezone != null ? dbModel.settings.timeZone : null,
       generators: generators != null ? BaseGenerator.decodeGenerators(BaseGenerator.encodeGenerators(dbModel.settings.generators)) : null,
+      outputPath: outputPath != null ? dbModel.settings.outputPath : null,
+      historyPath: historyPath != null ? dbModel.settings.historyPath : null,
+      authPath: authPath != null ? dbModel.settings.authPath : null,
     );
   }
 }

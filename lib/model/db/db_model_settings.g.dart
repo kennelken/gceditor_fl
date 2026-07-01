@@ -10,8 +10,10 @@ DbModelSettings _$DbModelSettingsFromJson(Map<String, dynamic> json) =>
     DbModelSettings()
       ..timeZone = (json['timeZone'] as num).toDouble()
       ..saveDelay = (json['saveDelay'] as num?)?.toDouble() ?? 2.0
-      ..generators =
-          BaseGenerator.decodeGenerators(json['generators'] as List?);
+      ..generators = BaseGenerator.decodeGenerators(json['generators'] as List?)
+      ..outputPath = json['outputPath'] as String?
+      ..historyPath = json['historyPath'] as String?
+      ..authPath = json['authPath'] as String?;
 
 Map<String, dynamic> _$DbModelSettingsToJson(DbModelSettings instance) {
   final val = <String, dynamic>{
@@ -27,5 +29,8 @@ Map<String, dynamic> _$DbModelSettingsToJson(DbModelSettings instance) {
 
   writeNotNull(
       'generators', BaseGenerator.encodeGenerators(instance.generators));
+  writeNotNull('outputPath', instance.outputPath);
+  writeNotNull('historyPath', instance.historyPath);
+  writeNotNull('authPath', instance.authPath);
   return val;
 }

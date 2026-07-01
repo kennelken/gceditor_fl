@@ -11,6 +11,9 @@ class DbModelSettings {
   double saveDelay = Config.defaultSaveDelay;
   @JsonKey(toJson: BaseGenerator.encodeGenerators, fromJson: BaseGenerator.decodeGenerators)
   List<BaseGenerator>? generators = [];
+  String? outputPath;
+  String? historyPath;
+  String? authPath;
 
   DbModelSettings();
 
