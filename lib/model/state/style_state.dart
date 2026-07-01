@@ -156,6 +156,8 @@ class StyleStateNotifier extends ChangeNotifier {
     state.kLandingInputTextStyle = InputDecoration(
       isDense: true,
       contentPadding: EdgeInsets.symmetric(horizontal: 11 * kScale, vertical: 15 * kScale),
+      filled: true,
+      fillColor: kColorPrimaryLighter1_5,
     );
 
     state.kPropertiesVerticalDivider = SizedBox(height: 12 * state.globalScale);

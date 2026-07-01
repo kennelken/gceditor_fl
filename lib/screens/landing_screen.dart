@@ -90,7 +90,8 @@ class LandingScreenState extends State<LandingScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
+              SizedBox(
+                width: 400 * kScale,
                 child: Container(
                   color: kColorPrimaryLighter,
                   child: Padding(
@@ -136,43 +137,143 @@ class LandingScreenState extends State<LandingScreen> {
                 ),
               ),
               Expanded(
-                flex: 2,
+                flex: 4,
                 child: Container(
                   color: kColorPrimaryLightToDark,
                   child: Padding(
-                    padding: EdgeInsets.only(left: 20 * kScale, right: 20 * kScale, top: 20 * kScale, bottom: 20 * kScale),
+                    padding: EdgeInsets.only(top: 40 * kScale, bottom: 40 * kScale),
                     child: Column(
                       children: [
                         Expanded(
-                          child: SingleChildScrollView(
-                            controller: ScrollController(),
-                            scrollDirection: Axis.vertical,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                TextField(
-                                  controller: _clientIpTextController,
-                                  decoration: kStyle.kLandingInputTextStyle.copyWith(
-                                    hintText: _clientIpTextController.text,
-                                    labelText: Loc.get.ipAddressInputTitle,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Spacer(flex: 1),
+                              Expanded(
+                                flex: 4,
+                                child: ScrollConfiguration(
+                                  behavior: getScrollDraggable(context),
+                                  child: SingleChildScrollView(
+                                    controller: ScrollController(),
+                                    scrollDirection: Axis.vertical,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(bottom: 15 * kScale),
+                                          child: Text(Loc.get.clientSettingsHeader, style: kStyle.kTextBig, textAlign: TextAlign.center),
+                                        ),
+                                        TextField(
+                                          controller: _clientIpTextController,
+                                          decoration: kStyle.kLandingInputTextStyle.copyWith(
+                                            hintText: _clientIpTextController.text,
+                                            labelText: Loc.get.ipAddressInputTitle,
+                                          ),
+                                        ),
+                                        SizedBox(height: 10 * kScale),
+                                        TextField(
+                                          controller: _portTextController,
+                                          decoration: kStyle.kLandingInputTextStyle.copyWith(
+                                            hintText: openPort,
+                                            labelText: Loc.get.portInputTitle,
+                                          ),
+                                        ),
+                                        SizedBox(height: 60 * kScale),
+                                        ClientAuthPanel(
+                                          authData:
+                                              PartialAuthenticationData.values(login: _clientLogin, secret: _clientSecret, password: _clientPassword),
+                                          onCredentialsChanged: _handleClientCredentialsChanged,
+                                        ),
+                                        if (isServerAvailable) ...[
+                                          SizedBox(height: 30 * kScale),
+                                          const Divider(height: 1, color: kColorPrimaryLighter),
+                                          SizedBox(height: 30 * kScale),
+                                          Padding(
+                                            padding: EdgeInsets.only(bottom: 15 * kScale),
+                                            child: Text(Loc.get.serverSettingsHeader, style: kStyle.kTextBig, textAlign: TextAlign.center),
+                                          ),
+                                          ProjectPathView(
+                                            defaultPath: ref.read(landingPageStateProvider).getVisibleProjectPath(),
+                                            targetPath: _projectPath,
+                                            targetPathTextController: _projectPathTextController,
+                                            labelText: Loc.get.projectPath,
+                                            defaultName: Config.newProjectDefaultName,
+                                            isFile: true,
+                                            canBeReset: true,
+                                            onChange: (path) => ref.read(landingPageStateProvider).setProjectPath(path),
+                                          ),
+                                          if (_recentProjects.isNotEmpty) ...[
+                                            SizedBox(height: 10 * kScale),
+                                            InputDecorator(
+                                              decoration: kStyle.kLandingInputTextStyle.copyWith(
+                                                labelText: 'Recent projects',
+                                              ),
+                                              child: Padding(
+                                                padding: EdgeInsets.only(top: 8 * kScale),
+                                                child: ListView.builder(
+                                                  shrinkWrap: true,
+                                                  physics: const NeverScrollableScrollPhysics(),
+                                                  itemCount: _recentProjects.length,
+                                                  itemBuilder: (context, index) {
+                                                    final p = _recentProjects[index];
+                                                    final isSelected = p == _projectPath;
+                                                    final isMissing = !File(p).existsSync();
+                                                    return Padding(
+                                                      padding: EdgeInsets.only(bottom: 2 * kScale),
+                                                      child: InkWell(
+                                                        onTap: () => _handleRecentProjectTap(p),
+                                                        child: Container(
+                                                          height: 22 * kScale,
+                                                          color: isSelected ? kColorPrimaryLightTransparent : kColorTransparent,
+                                                          child: Padding(
+                                                            padding: EdgeInsets.only(left: 5 * kScale, right: 10 * kScale),
+                                                            child: Row(
+                                                              children: [
+                                                                Expanded(
+                                                                  child: Text(
+                                                                    p,
+                                                                    style: isSelected
+                                                                        ? kStyle.kTextExtraSmallSelected
+                                                                        : (isMissing ? kStyle.kTextExtraSmallInactive : kStyle.kTextExtraSmall),
+                                                                    overflow: TextOverflow.ellipsis,
+                                                                  ),
+                                                                ),
+                                                                TooltipWrapper(
+                                                                  message: 'Remove',
+                                                                  child: IconButtonTransparent(
+                                                                    size: 20 * kScale,
+                                                                    icon: Icon(
+                                                                      FontAwesomeIcons.trashCan,
+                                                                      size: 10 * kScale,
+                                                                      color: kColorAccentRed,
+                                                                    ),
+                                                                    onClick: () => _handleRemoveRecentProject(p),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                          SizedBox(height: 60 * kScale),
+                                          const Flexible(
+                                            child: ServerHistoryAdminPanel(),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                                SizedBox(height: 10 * kScale),
-                                TextField(
-                                  controller: _portTextController,
-                                  decoration: kStyle.kLandingInputTextStyle.copyWith(
-                                    hintText: openPort,
-                                    labelText: Loc.get.portInputTitle,
-                                  ),
-                                ),
-                                SizedBox(height: 60 * kScale),
-                                ClientAuthPanel(
-                                  authData: PartialAuthenticationData.values(login: _clientLogin, secret: _clientSecret, password: _clientPassword),
-                                  onCredentialsChanged: _handleClientCredentialsChanged,
-                                ),
-                              ],
-                            ),
+                              ),
+                              const Spacer(flex: 1),
+                            ],
                           ),
                         ),
                       ],
@@ -180,115 +281,6 @@ class LandingScreenState extends State<LandingScreen> {
                   ),
                 ),
               ),
-              if (isServerAvailable) ...[
-                getDivider(),
-                Expanded(
-                  flex: 2,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 20 * kScale, right: 20 * kScale, top: 20 * kScale, bottom: 20 * kScale),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: ScrollConfiguration(
-                            behavior: getScrollDraggable(context),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.vertical,
-                              controller: ScrollController(),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  TextField(
-                                    controller: _portTextController,
-                                    decoration: kStyle.kLandingInputTextStyle.copyWith(
-                                      hintText: openPort,
-                                      labelText: Loc.get.portInputTitle,
-                                    ),
-                                  ),
-                                  SizedBox(height: 10 * kScale),
-                                  ProjectPathView(
-                                    defaultPath: ref.read(landingPageStateProvider).getVisibleProjectPath(),
-                                    targetPath: _projectPath,
-                                    targetPathTextController: _projectPathTextController,
-                                    labelText: Loc.get.projectPath,
-                                    defaultName: Config.newProjectDefaultName,
-                                    isFile: true,
-                                    canBeReset: true,
-                                    onChange: (path) => ref.read(landingPageStateProvider).setProjectPath(path),
-                                  ),
-                                  if (_recentProjects.isNotEmpty) ...[
-                                    SizedBox(height: 10 * kScale),
-                                    InputDecorator(
-                                      decoration: kStyle.kLandingInputTextStyle.copyWith(
-                                        labelText: 'Recent projects',
-                                      ),
-                                      child: Padding(
-                                        padding: EdgeInsets.only(top: 8 * kScale),
-                                        child: ListView.builder(
-                                          shrinkWrap: true,
-                                          physics: const NeverScrollableScrollPhysics(),
-                                          itemCount: _recentProjects.length,
-                                          itemBuilder: (context, index) {
-                                            final p = _recentProjects[index];
-                                            final isSelected = p == _projectPath;
-                                            final isMissing = !File(p).existsSync();
-                                            return Padding(
-                                              padding: EdgeInsets.only(bottom: 2 * kScale),
-                                              child: InkWell(
-                                                onTap: () => _handleRecentProjectTap(p),
-                                                child: Container(
-                                                  height: 22 * kScale,
-                                                  color: isSelected ? kColorPrimaryLightTransparent : kColorTransparent,
-                                                  child: Padding(
-                                                    padding: EdgeInsets.only(left: 5 * kScale, right: 10 * kScale),
-                                                    child: Row(
-                                                      children: [
-                                                        Expanded(
-                                                          child: Text(
-                                                            p,
-                                                            style: isSelected
-                                                                ? kStyle.kTextExtraSmallSelected
-                                                                : (isMissing ? kStyle.kTextExtraSmallInactive : kStyle.kTextExtraSmall),
-                                                            overflow: TextOverflow.ellipsis,
-                                                          ),
-                                                        ),
-                                                        TooltipWrapper(
-                                                          message: 'Remove',
-                                                          child: IconButtonTransparent(
-                                                            size: 20 * kScale,
-                                                            icon: Icon(
-                                                              FontAwesomeIcons.trashCan,
-                                                              size: 10 * kScale,
-                                                              color: kColorAccentRed,
-                                                            ),
-                                                            onClick: () => _handleRemoveRecentProject(p),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                  SizedBox(height: 60 * kScale),
-                                  const Flexible(
-                                    child: ServerHistoryAdminPanel(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
             ],
           ),
         );

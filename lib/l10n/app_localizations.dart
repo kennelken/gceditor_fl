@@ -877,6 +877,18 @@ abstract class AppLocalizations {
   ///
   ///
   /// In en, this message translates to:
+  /// **'Client Settings'**
+  String get clientSettingsHeader;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Server Settings'**
+  String get serverSettingsHeader;
+
+  ///
+  ///
+  /// In en, this message translates to:
   /// **'Could not start the server: \'\'{error}\'\''**
   String errorStartServer(Object error);
 

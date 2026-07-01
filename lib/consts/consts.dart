@@ -21,6 +21,7 @@ const Color kColorPrimaryDarker2 = Color(0xFF1D2025);
 const Color kColorPrimaryDarker = Color(0xff21252b);
 const Color kColorPrimaryLightToDark = Color.fromARGB(255, 43, 47, 55);
 const Color kColorPrimaryLighter = Color(0xFF2E323B);
+const Color kColorPrimaryLighter1_5 = Color.fromARGB(255, 50, 55, 64);
 const Color kColorPrimaryLighter2 = Color(0xFF3E4452);
 const Color kColorPrimaryLight = Color(0xFF979DAD);
 const Color kColorPrimaryLightTransparent = Color(0x66979DAD);

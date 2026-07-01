@@ -475,6 +475,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get portInputTitle => 'server port';
 
   @override
+  String get clientSettingsHeader => 'Client Settings';
+
+  @override
+  String get serverSettingsHeader => 'Server Settings';
+
+  @override
   String errorStartServer(Object error) {
     return 'Could not start the server: \'$error\'';
   }

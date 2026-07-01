@@ -613,6 +613,14 @@
 	"@portInputTitle": {
 		"description": ""
 	},
+	"clientSettingsHeader": "Client Settings",
+	"@clientSettingsHeader": {
+		"description": ""
+	},
+	"serverSettingsHeader": "Server Settings",
+	"@serverSettingsHeader": {
+		"description": ""
+	},
 	"errorStartServer": "Could not start the server: ''{error}''",
 	"@errorStartServer": {
 		"description": "",
