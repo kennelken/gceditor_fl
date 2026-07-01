@@ -844,13 +844,13 @@ abstract class AppLocalizations {
   /// **'Select project directory'**
   String get selectProjectDirectory;
 
-  ///
+  /// Client mode button
   ///
   /// In en, this message translates to:
-  /// **'Client'**
+  /// **'Client only'**
   String get clientModeButton;
 
-  ///
+  /// Standalone mode button
   ///
   /// In en, this message translates to:
   /// **'Standalone'**
@@ -859,7 +859,7 @@ abstract class AppLocalizations {
   ///
   ///
   /// In en, this message translates to:
-  /// **'Server'**
+  /// **'Server only'**
   String get serverModeButton;
 
   ///

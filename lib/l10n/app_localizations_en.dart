@@ -460,13 +460,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectProjectDirectory => 'Select project directory';
 
   @override
-  String get clientModeButton => 'Client';
+  String get clientModeButton => 'Client only';
 
   @override
   String get standaloneModeButton => 'Standalone';
 
   @override
-  String get serverModeButton => 'Server';
+  String get serverModeButton => 'Server only';
 
   @override
   String get ipAddressInputTitle => 'ip address';

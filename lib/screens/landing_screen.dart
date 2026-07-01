@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/assets.dart';
-import 'package:gceditor/components/landing/project_path_view.dart';
 import 'package:gceditor/components/landing/client_auth_panel.dart';
+import 'package:gceditor/components/landing/project_path_view.dart';
 import 'package:gceditor/components/landing/server_history_admin_panel.dart';
 import 'package:gceditor/components/properties/primitives/icon_button_transparent.dart';
 import 'package:gceditor/components/tooltip_wrapper.dart';
@@ -121,7 +121,14 @@ class LandingScreenState extends State<LandingScreen> {
                           ),
                         ),
                         if (isServerAvailable) ...[
-                          getModeButton(Loc.get.standaloneModeButton, _onStandalonePressed),
+                          SizedBox(height: 10 * kScale),
+                          getModeButton(Loc.get.standaloneModeButton, _onStandalonePressed, bold: true),
+                        ],
+                        SizedBox(height: 10 * kScale),
+                        getModeButton(Loc.get.clientModeButton, _onClientPressed),
+                        if (isServerAvailable) ...[
+                          SizedBox(height: 10 * kScale),
+                          getModeButton(Loc.get.serverModeButton, _onServerPressed),
                         ],
                       ],
                     ),
@@ -168,8 +175,6 @@ class LandingScreenState extends State<LandingScreen> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 10 * kScale),
-                        getModeButton(Loc.get.clientModeButton, _onClientPressed),
                       ],
                     ),
                   ),
@@ -233,9 +238,7 @@ class LandingScreenState extends State<LandingScreen> {
                                                 onTap: () => _handleRecentProjectTap(p),
                                                 child: Container(
                                                   height: 22 * kScale,
-                                                  color: isSelected 
-                                                      ? kColorPrimaryLightTransparent
-                                                      : kColorTransparent,
+                                                  color: isSelected ? kColorPrimaryLightTransparent : kColorTransparent,
                                                   child: Padding(
                                                     padding: EdgeInsets.only(left: 5 * kScale, right: 10 * kScale),
                                                     child: Row(
@@ -243,8 +246,8 @@ class LandingScreenState extends State<LandingScreen> {
                                                         Expanded(
                                                           child: Text(
                                                             p,
-                                                            style: isSelected 
-                                                                ? kStyle.kTextExtraSmallSelected 
+                                                            style: isSelected
+                                                                ? kStyle.kTextExtraSmallSelected
                                                                 : (isMissing ? kStyle.kTextExtraSmallInactive : kStyle.kTextExtraSmall),
                                                             overflow: TextOverflow.ellipsis,
                                                           ),
@@ -281,8 +284,6 @@ class LandingScreenState extends State<LandingScreen> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 10 * kScale),
-                        getModeButton(Loc.get.serverModeButton, _onServerPressed),
                       ],
                     ),
                   ),
@@ -295,7 +296,7 @@ class LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  Widget getModeButton(String label, VoidCallback onPressed) {
+  Widget getModeButton(String label, VoidCallback onPressed, {bool bold = false}) {
     return SizedBox(
       height: 50 * kScale,
       width: 9999,
@@ -305,7 +306,7 @@ class LandingScreenState extends State<LandingScreen> {
         child: FittedBox(
             child: Text(
           label,
-          style: kStyle.kTextBig.copyWith(color: kColorPrimaryLighter2, fontWeight: FontWeight.bold),
+          style: kStyle.kTextBig.copyWith(color: kColorPrimaryLighter2, fontWeight: bold ? FontWeight.w900 : FontWeight.bold),
         )),
       ),
     );
