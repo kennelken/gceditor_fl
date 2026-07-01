@@ -589,15 +589,19 @@
 	"@selectProjectDirectory": {
 		"description": "title in the file explorer"
 	},
-	"clientModeButton": "Client",
+	"clientModeButton": "Client only",
+
 	"@clientModeButton": {
-		"description": ""
+
+		"description": "Client mode button"
 	},
 	"standaloneModeButton": "Standalone",
+
 	"@standaloneModeButton": {
-		"description": ""
+
+		"description": "Standalone mode button"
 	},
-	"serverModeButton": "Server",
+	"serverModeButton": "Server only",
 	"@serverModeButton": {
 		"description": ""
 	},
@@ -607,6 +611,14 @@
 	},
 	"portInputTitle": "server port",
 	"@portInputTitle": {
+		"description": ""
+	},
+	"clientSettingsHeader": "Client Settings",
+	"@clientSettingsHeader": {
+		"description": ""
+	},
+	"serverSettingsHeader": "Server Settings",
+	"@serverSettingsHeader": {
 		"description": ""
 	},
 	"errorStartServer": "Could not start the server: ''{error}''",
