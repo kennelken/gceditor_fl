@@ -210,7 +210,7 @@ class LandingScreenState extends State<LandingScreen> {
                                                 labelText: 'Recent projects',
                                               ),
                                               child: Padding(
-                                                padding: EdgeInsets.only(top: 8 * kScale),
+                                                padding: EdgeInsets.only(top: 14 * kScale),
                                                 child: ListView.builder(
                                                   shrinkWrap: true,
                                                   physics: const NeverScrollableScrollPhysics(),
@@ -220,7 +220,7 @@ class LandingScreenState extends State<LandingScreen> {
                                                     final isSelected = p == _projectPath;
                                                     final isMissing = !File(p).existsSync();
                                                     return Padding(
-                                                      padding: EdgeInsets.only(bottom: 2 * kScale),
+                                                      padding: EdgeInsets.only(bottom: 14 * kScale),
                                                       child: InkWell(
                                                         onTap: () => _handleRecentProjectTap(p),
                                                         child: Container(
