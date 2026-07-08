@@ -85,7 +85,10 @@ class _EnumValueViewState extends State<EnumValueView> {
                 controller: _idController,
                 focusNode: _idFocusNode,
                 inputFormatters: Config.filterId,
-                decoration: idInputDecoration,
+                readOnly: widget.entity.autoByFile,
+                decoration: idInputDecoration.copyWith(
+                  enabled: !widget.entity.autoByFile,
+                ),
               ),
             ),
             GestureDetector(
@@ -103,7 +106,11 @@ class _EnumValueViewState extends State<EnumValueView> {
               child: TextField(
                 controller: _descriptionController,
                 focusNode: _descriptionFocusNode,
-                decoration: kStyle.kInputTextStyleProperties.copyWith(labelText: Loc.get.classMetaPropertyDescription),
+                readOnly: widget.entity.autoByFile,
+                decoration: kStyle.kInputTextStyleProperties.copyWith(
+                  labelText: Loc.get.classMetaPropertyDescription,
+                  enabled: !widget.entity.autoByFile,
+                ),
               ),
             ),
             if (ref.watch(clientViewModeStateProvider).state.actionsMode) ...[
@@ -119,12 +126,13 @@ class _EnumValueViewState extends State<EnumValueView> {
                   onClick: _handleFindClick,
                 ),
               ),
-              DeleteButton(
-                onAction: _handleDelete,
-                size: 14 * kScale,
-                width: 25 * kScale,
-                tooltipText: Loc.get.delete,
-              ),
+              if (!widget.entity.autoByFile)
+                DeleteButton(
+                  onAction: _handleDelete,
+                  size: 14 * kScale,
+                  width: 25 * kScale,
+                  tooltipText: Loc.get.delete,
+                ),
             ],
             SizedBox(width: 30 * kScale),
           ],
@@ -134,6 +142,7 @@ class _EnumValueViewState extends State<EnumValueView> {
   }
 
   void _handleIdChanged() {
+    if (widget.entity.autoByFile) return;
     if (_idFocusNode.hasFocus) {
       DbModelUtils.selectAllIfDefaultId(_idController);
       return;
@@ -150,6 +159,7 @@ class _EnumValueViewState extends State<EnumValueView> {
   }
 
   void _handleDescriptionFocusChanged() {
+    if (widget.entity.autoByFile) return;
     if (_descriptionFocusNode.hasFocus) {
       DbModelUtils.selectAllIfDefault(_descriptionController, Config.newEnumValueDefaultDescription);
       return;

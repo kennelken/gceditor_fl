@@ -590,15 +590,11 @@
 		"description": "title in the file explorer"
 	},
 	"clientModeButton": "Client only",
-
 	"@clientModeButton": {
-
 		"description": "Client mode button"
 	},
 	"standaloneModeButton": "Standalone",
-
 	"@standaloneModeButton": {
-
 		"description": "Standalone mode button"
 	},
 	"serverModeButton": "Server only",
@@ -902,5 +898,81 @@
 				"type": "String"
 			}
 		}
+	},
+	"autoByFile": "enabled",
+	"@autoByFile": {
+		"description": ""
+	},
+	"filePathRegex": "file path regex",
+	"@filePathRegex": {
+		"description": ""
+	},
+	"enumNameFromRegex": "enum name from regex",
+	"@enumNameFromRegex": {
+		"description": ""
+	},
+	"pathValueFromRegex": "path value from regex",
+	"@pathValueFromRegex": {
+		"description": ""
+	},
+	"run": "Run",
+	"@run": {
+		"description": ""
+	},
+	"auto": "auto",
+	"@auto": {
+		"description": ""
+	},
+	"filePathRegexExclude": "file path regex exclude",
+	"@filePathRegexExclude": {
+		"description": ""
+	},
+	"autoByFileTooltip": "Enable/disable enum auto-generation based on file system lookup",
+	"@autoByFileTooltip": {
+		"description": ""
+	},
+	"filePathRegexTooltip": "RegExp to match file relative paths (e.g. .*\\.prefab)",
+	"@filePathRegexTooltip": {
+		"description": ""
+	},
+	"filePathRegexExcludeTooltip": "RegExp to exclude matched file relative paths",
+	"@filePathRegexExcludeTooltip": {
+		"description": ""
+	},
+	"fileContentRegexInclude": "file content regex include",
+	"@fileContentRegexInclude": {
+		"description": ""
+	},
+	"fileContentRegexIncludeTooltip": "RegExp that file contents must match to be included",
+	"@fileContentRegexIncludeTooltip": {
+		"description": ""
+	},
+	"fileContentRegexExclude": "file content regex exclude",
+	"@fileContentRegexExclude": {
+		"description": ""
+	},
+	"fileContentRegexExcludeTooltip": "RegExp that file contents must NOT match to be included",
+	"@fileContentRegexExcludeTooltip": {
+		"description": ""
+	},
+	"enumNameFromRegexTooltip": "Template to generate the enum value ID from regex match groups (e.g. using group 1)",
+	"@enumNameFromRegexTooltip": {
+		"description": ""
+	},
+	"pathValueFromRegexTooltip": "Template to generate the path stored in the description field (e.g. using whole match or group 0)",
+	"@pathValueFromRegexTooltip": {
+		"description": ""
+	},
+	"runTooltip": "Execute file system lookup and generate enum values on demand",
+	"@runTooltip": {
+		"description": ""
+	},
+	"autoTooltip": "Automatically run the file lookup every time the project is opened",
+	"@autoTooltip": {
+		"description": ""
+	},
+	"autoByFileSettings": "auto by files",
+	"@autoByFileSettings": {
+		"description": ""
 	}
 }

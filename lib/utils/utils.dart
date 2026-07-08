@@ -121,7 +121,8 @@ abstract class Utils {
     final matches = parametersRegExp.allMatches(input).toList();
     for (var i = matches.length - 1; i >= 0; i--) {
       final match = matches[i];
-      result = result.replaceRange(match.start, match.end, params[match.group(1)]?.toString() ?? match.group(0)!);
+      final key = match.group(1);
+      result = result.replaceRange(match.start, match.end, params[key]?.toString() ?? match.group(0)!);
     }
 
     return result;

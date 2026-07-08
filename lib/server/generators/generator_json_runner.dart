@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:gceditor/model/db/db_model.dart';
+import 'package:gceditor/model/db/class_meta_entity_enum.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/db/generator_json.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
@@ -15,6 +16,20 @@ class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with Output
     final result = GeneratorJsonRoot();
     result.generationDate = additionalInfo.date;
     result.generationUser = additionalInfo.user;
+
+    final pathByEnumMap = <String, Map<String, String>>{};
+    for (final enumEntity in model.cache.allEnums) {
+      if (enumEntity.autoByFile) {
+        final enumValuesMap = <String, String>{};
+        for (final value in enumEntity.values) {
+          enumValuesMap[value.id] = value.description;
+        }
+        pathByEnumMap[enumEntity.id] = enumValuesMap;
+      }
+    }
+    if (pathByEnumMap.isNotEmpty) {
+      result.pathByEnum = pathByEnumMap;
+    }
 
     try {
       for (final table in model.cache.allDataTables) {

@@ -7,6 +7,8 @@ class GeneratorJsonRoot {
   late String generationDate = '';
   late String generationUser = '';
   late Map<String, List<Map<String, dynamic>>> tables = {};
+  @JsonKey(includeIfNull: false)
+  Map<String, Map<String, String>>? pathByEnum;
 
   GeneratorJsonRoot();
 

@@ -77,6 +77,8 @@ class ClientStateNotifier extends ServerStateNotifier {
       case DbCmdType.resizeColumn:
       case DbCmdType.resizeInnerCell:
       case DbCmdType.fillColumn:
+      case DbCmdType.editEnumFileSettings:
+      case DbCmdType.generateEnumValuesFromFiles:
         break;
 
       case DbCmdType.editProjectSettings:

@@ -4,8 +4,11 @@ import 'dart:typed_data';
 
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db/db_model.dart';
+import 'package:gceditor/model/db/class_meta_entity_enum.dart';
+import 'package:gceditor/model/db/enum_value.dart';
 import 'package:gceditor/model/db_cmd/base_db_cmd.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_result.dart';
+import 'package:gceditor/model/db_cmd/db_cmd_generate_enum_values_from_files.dart';
 import 'package:gceditor/model/db_network/command_request_git_response_payload.dart';
 import 'package:gceditor/model/db_network/command_request_history_execute_response_payload.dart';
 import 'package:gceditor/model/db_network/command_request_history_response_payload.dart';
@@ -140,6 +143,22 @@ class ServerApp {
 
     providerContainer.read(serverStateProvider).setModel(dbModel);
 
+    // Auto-generate enum values from files if configured
+    var modelChanged = false;
+    for (final classMeta in dbModel.classes) {
+      if (classMeta is ClassMetaEntityEnum && classMeta.autoByFile && classMeta.autoByFileAutoRefresh) {
+        final newValues = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, classMeta);
+        if (!_areEnumValuesEqual(classMeta.values, newValues)) {
+          classMeta.values = newValues;
+          modelChanged = true;
+        }
+      }
+    }
+    if (modelChanged) {
+      final jsonText = Config.fileJsonOptions.convert(dbModel.toJson());
+      await projectFile.writeAsString(jsonText);
+    }
+
     final projectDir = projectFile.parent.path;
     final settings = dbModel.settings;
 
@@ -153,6 +172,16 @@ class ServerApp {
     providerContainer.read(authListStateProvider).setPath(path.join(projectDir, authRel));
 
     return null;
+  }
+
+  bool _areEnumValuesEqual(List<EnumValue> a, List<EnumValue> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i].id != b[i].id || a[i].description != b[i].description) {
+        return false;
+      }
+    }
+    return true;
   }
 
   void _handleClientRequest(Socket client, BaseCommand command) async {

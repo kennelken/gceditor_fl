@@ -1,0 +1,169 @@
+import 'dart:io';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:gceditor/model/db/class_meta_entity_enum.dart';
+import 'package:gceditor/model/db/enum_value.dart';
+import 'package:gceditor/model/db/db_model.dart';
+import 'package:gceditor/model/db/generator_csharp.dart';
+import 'package:gceditor/model/db_cmd/db_cmd_generate_enum_values_from_files.dart';
+import 'package:gceditor/model/model_root.dart';
+import 'package:gceditor/model/state/app_state.dart';
+import 'package:gceditor/server/generators/generator_csharp_runner.dart';
+import 'package:gceditor/server/generators/generators_job.dart';
+
+void main() {
+  test('Enum auto generation from files works correctly', () {
+    final tempDir = Directory.systemTemp.createTempSync('gceditor_test');
+    File('${tempDir.path}/Assets/Prefabs/Player.prefab').createSync(recursive: true);
+    File('${tempDir.path}/Assets/Prefabs/Monster.prefab').createSync(recursive: true);
+    File('${tempDir.path}/Assets/Prefabs/Items/Sword.prefab').createSync(recursive: true);
+    File('${tempDir.path}/Assets/Prefabs/ignore_me.txt').createSync(recursive: true);
+
+    try {
+      final projectFile = File('${tempDir.path}/project.json');
+      providerContainer.read(appStateProvider).state.projectFile = projectFile;
+
+      final dbModel = DbModel();
+      final entity = ClassMetaEntityEnum()
+        ..id = 'BuildingPresentationType'
+        ..filePathRegex = r'Assets/Prefabs/(.*)\.prefab'
+        ..enumNameFromRegex = '{1}'
+        ..pathValueFromRegex = '{0}';
+
+      final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
+
+      expect(results.length, 3);
+      
+      final playerVal = results.firstWhere((e) => e.id == 'Player');
+      expect(playerVal.description, 'Assets/Prefabs/Player.prefab');
+
+      final monsterVal = results.firstWhere((e) => e.id == 'Monster');
+      expect(monsterVal.description, 'Assets/Prefabs/Monster.prefab');
+
+      final swordVal = results.firstWhere((e) => e.id == 'Items_Sword');
+      expect(swordVal.description, 'Assets/Prefabs/Items/Sword.prefab');
+    } finally {
+      tempDir.deleteSync(recursive: true);
+    }
+  });
+
+  test('Enum auto generation from files respects exclusion regex', () {
+    final tempDir = Directory.systemTemp.createTempSync('gceditor_test');
+    File('${tempDir.path}/Assets/Prefabs/Player.prefab').createSync(recursive: true);
+    File('${tempDir.path}/Assets/Prefabs/Monster.prefab').createSync(recursive: true);
+    File('${tempDir.path}/Assets/Prefabs/Items/Sword.prefab').createSync(recursive: true);
+
+    try {
+      final projectFile = File('${tempDir.path}/project.json');
+      providerContainer.read(appStateProvider).state.projectFile = projectFile;
+
+      final dbModel = DbModel();
+      final entity = ClassMetaEntityEnum()
+        ..id = 'BuildingPresentationType'
+        ..filePathRegex = r'Assets/Prefabs/(.*)\.prefab'
+        ..filePathRegexExclude = r'Items/.*'
+        ..enumNameFromRegex = '{1}'
+        ..pathValueFromRegex = '{0}';
+
+      final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
+
+      expect(results.length, 2);
+      expect(results.any((e) => e.id == 'Player'), isTrue);
+      expect(results.any((e) => e.id == 'Monster'), isTrue);
+      expect(results.any((e) => e.id == 'Items_Sword'), isFalse);
+    } finally {
+      tempDir.deleteSync(recursive: true);
+    }
+  });
+
+  test('Enum auto generation from files respects content regex matching and keyword/digit sanitization', () {
+    final tempDir = Directory.systemTemp.createTempSync('gceditor_test');
+    final file1 = File('${tempDir.path}/Assets/Prefabs/123Player.prefab')..createSync(recursive: true);
+    file1.writeAsStringSync('Type: Hero\nStatus: Active');
+
+    final file2 = File('${tempDir.path}/Assets/Prefabs/class.prefab')..createSync(recursive: true);
+    file2.writeAsStringSync('Type: Hero\nStatus: Deprecated');
+
+    final file3 = File('${tempDir.path}/Assets/Prefabs/Monster.prefab')..createSync(recursive: true);
+    file3.writeAsStringSync('Type: Enemy\nStatus: Active');
+
+    try {
+      final projectFile = File('${tempDir.path}/project.json');
+      providerContainer.read(appStateProvider).state.projectFile = projectFile;
+
+      final dbModel = DbModel();
+      final entity = ClassMetaEntityEnum()
+        ..id = 'BuildingPresentationType'
+        ..filePathRegex = r'Assets/Prefabs/(.*)\.prefab'
+        ..fileContentRegexInclude = r'Status: Active'
+        ..fileContentRegexExclude = r'Type: Enemy'
+        ..enumNameFromRegex = '{1}'
+        ..pathValueFromRegex = '{0}';
+
+      final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
+
+      // Should only include 123Player (since class has Status: Deprecated, Monster is Type: Enemy).
+      expect(results.length, 1);
+      
+      // 123Player starts with a digit, so it should be prefixed with an underscore -> _123Player
+      expect(results[0].id, '_123Player');
+      expect(results[0].description, 'Assets/Prefabs/123Player.prefab');
+
+      // Test manual keyword prefixing logic directly
+      expect(DbCmdGenerateEnumValuesFromFiles.sanitizeIdentifier('class'), '_class');
+      expect(DbCmdGenerateEnumValuesFromFiles.sanitizeIdentifier('A'), 'A_');
+    } finally {
+      tempDir.deleteSync(recursive: true);
+    }
+  });
+
+  test('C# generator generates correct static path overloads and extension class', () async {
+    final tempDir = Directory.systemTemp.createTempSync('gceditor_test');
+    try {
+      final dbModel = DbModel();
+      
+      final entity = ClassMetaEntityEnum()
+        ..id = 'BuildingPresentationType'
+        ..autoByFile = true
+        ..filePathRegex = r'Assets/Prefabs/(.*)\.prefab'
+        ..enumNameFromRegex = '{1}'
+        ..pathValueFromRegex = '{0}';
+      entity.values = [
+        EnumValue()..id = 'Player'..description = 'Assets/Prefabs/Player.prefab',
+        EnumValue()..id = 'Monster'..description = 'Assets/Prefabs/Monster.prefab',
+      ];
+      dbModel.classes.add(entity);
+      dbModel.cache.invalidate();
+
+      final generator = GeneratorCsharp()
+        ..prefix = 'MyPrefix'
+        ..postfix = 'MyPostfix'
+        ..namespace = 'MyNamespace'
+        ..fileName = 'MyPrefixRootMyPostfix'
+        ..fileExtension = 'cs';
+
+      final runner = GeneratorCsharpRunner();
+      final genResult = await runner.execute(
+        tempDir.path,
+        dbModel,
+        generator,
+        GeneratorAdditionalInformation(date: '2026-07-08', user: 'TestUser'),
+      );
+      expect(genResult.success, isTrue, reason: genResult.error);
+
+      final file = File('${tempDir.path}/MyPrefixRootMyPostfix.cs');
+      expect(file.existsSync(), isTrue);
+      final generatedCode = file.readAsStringSync();
+
+      expect(generatedCode.contains('public static string GetPathByEnum(MyPrefixBuildingPresentationTypeMyPostfix value)'), isTrue);
+      expect(generatedCode.contains('public static string GetEnumPath(MyPrefixBuildingPresentationTypeMyPostfix value) => GetPathByEnum(value);'), isTrue);
+
+      expect(generatedCode.contains('public static class MyPrefixExtensionsMyPostfix'), isTrue);
+      expect(generatedCode.contains('public static string Path(this MyPrefixBuildingPresentationTypeMyPostfix value)'), isTrue);
+      expect(generatedCode.contains('return MyPrefixRootMyPostfix.GetEnumPath(value);'), isTrue);
+      expect(generatedCode.contains('public static class ListExtensions'), isFalse);
+      expect(generatedCode.contains('public static class IClonableExtensions'), isFalse);
+    } finally {
+      tempDir.deleteSync(recursive: true);
+    }
+  });
+}

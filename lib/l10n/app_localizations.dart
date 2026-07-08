@@ -1275,6 +1275,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fill column \'\'{column}\'\' with'**
   String fillColumnLabel(String column);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'enabled'**
+  String get autoByFile;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'file path regex'**
+  String get filePathRegex;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'enum name from regex'**
+  String get enumNameFromRegex;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'path value from regex'**
+  String get pathValueFromRegex;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Run'**
+  String get run;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'auto'**
+  String get auto;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'file path regex exclude'**
+  String get filePathRegexExclude;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Enable/disable enum auto-generation based on file system lookup'**
+  String get autoByFileTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'RegExp to match file relative paths (e.g. .*\\.prefab)'**
+  String get filePathRegexTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'RegExp to exclude matched file relative paths'**
+  String get filePathRegexExcludeTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'file content regex include'**
+  String get fileContentRegexInclude;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'RegExp that file contents must match to be included'**
+  String get fileContentRegexIncludeTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'file content regex exclude'**
+  String get fileContentRegexExclude;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'RegExp that file contents must NOT match to be included'**
+  String get fileContentRegexExcludeTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Template to generate the enum value ID from regex match groups (e.g. using group 1)'**
+  String get enumNameFromRegexTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Template to generate the path stored in the description field (e.g. using whole match or group 0)'**
+  String get pathValueFromRegexTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Execute file system lookup and generate enum values on demand'**
+  String get runTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically run the file lookup every time the project is opened'**
+  String get autoTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'auto by files'**
+  String get autoByFileSettings;
 }
 
 class _AppLocalizationsDelegate

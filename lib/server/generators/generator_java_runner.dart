@@ -63,6 +63,7 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
   static const _paramTablesListDeclarations = 'tablesListDeclarations';
   static const _paramTablesListAssignment = 'tablesListAssignment';
   static const _paramTableClassMap = 'tableClassMap';
+  static const _paramGetPathByEnumOverloads = 'getPathByEnumOverloads';
 
   @override
   Future<GeneratorResult> execute(String outputFolder, DbModel model, GeneratorCsharp data, GeneratorAdditionalInformation additionalInfo) async {
@@ -92,6 +93,7 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
           _paramListItemsListsDeclarations: _getListItemsListsDeclarations(model, data),
           _paramTablesListDeclarations: _getTablesListDeclarations(model, data),
           _paramTablesListAssignment: _getTablesListAssignment(model, data),
+          _paramGetPathByEnumOverloads: _getPathByEnumOverloads(model, data),
         },
       );
 
@@ -368,6 +370,30 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
     }
 
     return items.join();
+  }
+
+  String _getPathByEnumOverloads(DbModel model, GeneratorCsharp data) {
+    final sb = StringBuffer();
+    for (final enumEntity in model.cache.allEnums) {
+      if (enumEntity.autoByFile) {
+        final typeName = '${data.prefix}${enumEntity.id}${data.postfix}';
+        sb.writeln('    public String GetPathByEnum($typeName value)');
+        sb.writeln('    {');
+        sb.writeln('        switch (value)');
+        sb.writeln('        {');
+        for (final val in enumEntity.values) {
+          final escapedPath = val.description.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+          sb.writeln('            case ${val.id}:');
+          sb.writeln('                return "$escapedPath";');
+        }
+        sb.writeln('            default:');
+        sb.writeln('                throw new IllegalArgumentException("Unexpected value: " + value);');
+        sb.writeln('        }');
+        sb.writeln('    }');
+        sb.writeln();
+      }
+    }
+    return sb.toString();
   }
 
   String _getPropertyAccessLevel(ClassMetaEntity classEntity, GeneratorCsharp data) {
@@ -1675,7 +1701,8 @@ class RectangleInt {
         {
             return ParseLong(value);
         }
-    }
+
+{${_paramGetPathByEnumOverloads}}    }
 ''';
 }
 

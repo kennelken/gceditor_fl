@@ -693,4 +693,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String fillColumnLabel(String column) {
     return 'Fill column \'$column\' with';
   }
+
+  @override
+  String get autoByFile => 'enabled';
+
+  @override
+  String get filePathRegex => 'file path regex';
+
+  @override
+  String get enumNameFromRegex => 'enum name from regex';
+
+  @override
+  String get pathValueFromRegex => 'path value from regex';
+
+  @override
+  String get run => 'Run';
+
+  @override
+  String get auto => 'auto';
+
+  @override
+  String get filePathRegexExclude => 'file path regex exclude';
+
+  @override
+  String get autoByFileTooltip =>
+      'Enable/disable enum auto-generation based on file system lookup';
+
+  @override
+  String get filePathRegexTooltip =>
+      'RegExp to match file relative paths (e.g. .*\\.prefab)';
+
+  @override
+  String get filePathRegexExcludeTooltip =>
+      'RegExp to exclude matched file relative paths';
+
+  @override
+  String get fileContentRegexInclude => 'file content regex include';
+
+  @override
+  String get fileContentRegexIncludeTooltip =>
+      'RegExp that file contents must match to be included';
+
+  @override
+  String get fileContentRegexExclude => 'file content regex exclude';
+
+  @override
+  String get fileContentRegexExcludeTooltip =>
+      'RegExp that file contents must NOT match to be included';
+
+  @override
+  String get enumNameFromRegexTooltip =>
+      'Template to generate the enum value ID from regex match groups (e.g. using group 1)';
+
+  @override
+  String get pathValueFromRegexTooltip =>
+      'Template to generate the path stored in the description field (e.g. using whole match or group 0)';
+
+  @override
+  String get runTooltip =>
+      'Execute file system lookup and generate enum values on demand';
+
+  @override
+  String get autoTooltip =>
+      'Automatically run the file lookup every time the project is opened';
+
+  @override
+  String get autoByFileSettings => 'auto by files';
 }
