@@ -89,16 +89,17 @@ class DbCmdEditEnumFileSettings extends BaseDbCmd {
 
   @override
   BaseDbCmd createUndoCmd(DbModel dbModel) {
+    final entity = dbModel.cache.getClass(entityId) as ClassMetaEntityEnum;
     return DbCmdEditEnumFileSettings.values(
       entityId: entityId,
-      autoByFile: oldAutoByFile,
-      filePathRegex: oldFilePathRegex,
-      filePathRegexExclude: oldFilePathRegexExclude,
-      fileContentRegexInclude: oldFileContentRegexInclude,
-      fileContentRegexExclude: oldFileContentRegexExclude,
-      enumNameFromRegex: oldEnumNameFromRegex,
-      pathValueFromRegex: oldPathValueFromRegex,
-      autoByFileAutoRefresh: oldAutoByFileAutoRefresh,
+      autoByFile: autoByFile != null ? entity.autoByFile : null,
+      filePathRegex: filePathRegex != null ? entity.filePathRegex : null,
+      filePathRegexExclude: filePathRegexExclude != null ? entity.filePathRegexExclude : null,
+      fileContentRegexInclude: fileContentRegexInclude != null ? entity.fileContentRegexInclude : null,
+      fileContentRegexExclude: fileContentRegexExclude != null ? entity.fileContentRegexExclude : null,
+      enumNameFromRegex: enumNameFromRegex != null ? entity.enumNameFromRegex : null,
+      pathValueFromRegex: pathValueFromRegex != null ? entity.pathValueFromRegex : null,
+      autoByFileAutoRefresh: autoByFileAutoRefresh != null ? entity.autoByFileAutoRefresh : null,
     );
   }
 }

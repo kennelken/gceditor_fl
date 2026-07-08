@@ -5,6 +5,7 @@ import 'package:gceditor/model/db/enum_value.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db/generator_csharp.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_generate_enum_values_from_files.dart';
+import 'package:gceditor/model/db_cmd/db_cmd_edit_enum_file_settings.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/server/generators/generator_csharp_runner.dart';
@@ -198,5 +199,72 @@ void main() {
     expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}'), isTrue);
     expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{0}'), isTrue);
     expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(\d+)/(\w+)\.prefab', 'Item_{2}'), isTrue);
+
+    // 3. Optional pathValueFromRegex validation
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '{2}'), isFalse); // path out of bounds
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '{1}'), isTrue); // path valid
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '{0}'), isTrue); // path valid
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', ''), isTrue); // path empty (optional)
+
+    // 4. Optional filePathRegexExclude validation
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', '[a-z'), isFalse); // invalid exclude regex syntax
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', 'Player'), isTrue); // valid exclude regex
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', ''), isTrue); // empty exclude regex (optional)
+  });
+
+  test('DbCmdEditEnumFileSettings execution and undo works correctly', () {
+    final dbModel = DbModel();
+    final entity = ClassMetaEntityEnum()
+      ..id = 'MyEnum'
+      ..filePathRegex = 'old_regex'
+      ..filePathRegexExclude = 'old_exclude'
+      ..enumNameFromRegex = 'old_name'
+      ..pathValueFromRegex = 'old_path'
+      ..autoByFileAutoRefresh = false;
+    dbModel.classes.add(entity);
+    dbModel.cache.invalidate();
+
+    final cmd = DbCmdEditEnumFileSettings.values(
+      entityId: 'MyEnum',
+      filePathRegex: 'new_regex',
+      filePathRegexExclude: 'new_exclude',
+      enumNameFromRegex: 'new_name',
+      pathValueFromRegex: 'new_path',
+      autoByFileAutoRefresh: true,
+    );
+
+    // Create undo command BEFORE executing the original command, as done in ClientOwnCommandsStateNotifier
+    final undoCmd = cmd.createUndoCmd(dbModel);
+
+    // Verify undo command contains the old values
+    expect(undoCmd, isA<DbCmdEditEnumFileSettings>());
+    final undoEdit = undoCmd as DbCmdEditEnumFileSettings;
+    expect(undoEdit.filePathRegex, equals('old_regex'));
+    expect(undoEdit.filePathRegexExclude, equals('old_exclude'));
+    expect(undoEdit.enumNameFromRegex, equals('old_name'));
+    expect(undoEdit.pathValueFromRegex, equals('old_path'));
+    expect(undoEdit.autoByFileAutoRefresh, equals(false));
+
+    // Execute the original command
+    final result = cmd.execute(dbModel);
+    expect(result.success, isTrue);
+
+    // Verify fields updated in db
+    expect(entity.filePathRegex, equals('new_regex'));
+    expect(entity.filePathRegexExclude, equals('new_exclude'));
+    expect(entity.enumNameFromRegex, equals('new_name'));
+    expect(entity.pathValueFromRegex, equals('new_path'));
+    expect(entity.autoByFileAutoRefresh, equals(true));
+
+    // Execute the undo command
+    final undoResult = undoCmd.execute(dbModel);
+    expect(undoResult.success, isTrue);
+
+    // Verify fields reverted
+    expect(entity.filePathRegex, equals('old_regex'));
+    expect(entity.filePathRegexExclude, equals('old_exclude'));
+    expect(entity.enumNameFromRegex, equals('old_name'));
+    expect(entity.pathValueFromRegex, equals('old_path'));
+    expect(entity.autoByFileAutoRefresh, equals(false));
   });
 }

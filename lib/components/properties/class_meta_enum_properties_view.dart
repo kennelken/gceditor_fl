@@ -70,7 +70,14 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
   @override
   void didUpdateWidget(ClassMetaEnumPropertiesViewProperties oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.data.id != widget.data.id) {
+    if (oldWidget.data.id != widget.data.id ||
+        oldWidget.data.filePathRegex != widget.data.filePathRegex ||
+        oldWidget.data.filePathRegexExclude != widget.data.filePathRegexExclude ||
+        oldWidget.data.fileContentRegexInclude != widget.data.fileContentRegexInclude ||
+        oldWidget.data.fileContentRegexExclude != widget.data.fileContentRegexExclude ||
+        oldWidget.data.enumNameFromRegex != widget.data.enumNameFromRegex ||
+        oldWidget.data.pathValueFromRegex != widget.data.pathValueFromRegex ||
+        oldWidget.data.autoByFileAutoRefresh != widget.data.autoByFileAutoRefresh) {
       _initControllers();
     }
   }
@@ -108,10 +115,62 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
     }
   }
 
+  bool _isFilePathRegexValid() {
+    final text = _filePathRegexController.text;
+    if (text.isEmpty) return false;
+    try {
+      RegExp(text);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  bool _isPlaceholderTemplateValid(String text, {required bool isMandatory}) {
+    if (text.isEmpty) return !isMandatory;
+    final filePathRegex = _filePathRegexController.text;
+    try {
+      RegExp(filePathRegex);
+      final groupCount = Utils.countCapturingGroups(filePathRegex);
+      final matches = RegExp(r'\{(\d+)\}').allMatches(text);
+      if (isMandatory && matches.isEmpty) return false;
+      for (final match in matches) {
+        final groupIndex = int.tryParse(match.group(1) ?? '');
+        if (groupIndex == null || groupIndex < 0 || groupIndex > groupCount) {
+          return false;
+        }
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  bool _isFilePathRegexExcludeValid() {
+    final text = _filePathRegexExcludeController.text;
+    if (text.isEmpty) return true;
+    try {
+      RegExp(text);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  bool _isEnumNameFromRegexValid() {
+    return _isPlaceholderTemplateValid(_enumNameFromRegexController.text, isMandatory: true);
+  }
+
+  bool _isPathValueFromRegexValid() {
+    return _isPlaceholderTemplateValid(_pathValueFromRegexController.text, isMandatory: false);
+  }
+
   bool _validateLocalSettings() {
     return Utils.validateAutoByFileSettings(
       _filePathRegexController.text,
       _enumNameFromRegexController.text,
+      _pathValueFromRegexController.text,
+      _filePathRegexExcludeController.text,
     );
   }
 
@@ -119,6 +178,8 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
     return Utils.validateAutoByFileSettings(
       widget.data.filePathRegex,
       widget.data.enumNameFromRegex,
+      widget.data.pathValueFromRegex,
+      widget.data.filePathRegexExclude,
     );
   }
 
@@ -267,7 +328,7 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                     ),
                   ),
                   if (widget.data.autoByFile) ...[
-                    kStyle.kPropertiesVerticalDivider,
+                    SizedBox(height: 2 * kScale),
                     Row(
                       children: [
                         TooltipWrapper(
@@ -320,7 +381,22 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                           Expanded(
                             child: TextField(
                               decoration: kStyle.kInputTextStyleProperties.copyWith(
-                                labelText: '${Loc.get.filePathRegex}*',
+                                fillColor: _isFilePathRegexValid() ? null : kColorAccentRed.withOpacity(0.15),
+                                focusColor: _isFilePathRegexValid() ? null : kColorAccentRed.withOpacity(0.15),
+                                hoverColor: _isFilePathRegexValid() ? null : kColorAccentRed.withOpacity(0.15),
+                                label: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      Loc.get.filePathRegex,
+                                      style: kStyle.kTextSmall,
+                                    ),
+                                    Text(
+                                      ' *',
+                                      style: kStyle.kTextSmall.copyWith(color: kColorAccentRed, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
                               ),
                               controller: _filePathRegexController,
                               onChanged: (_) => setState(() {}),
@@ -337,6 +413,9 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                           Expanded(
                             child: TextField(
                               decoration: kStyle.kInputTextStyleProperties.copyWith(
+                                fillColor: _isFilePathRegexExcludeValid() ? null : kColorAccentRed.withOpacity(0.15),
+                                focusColor: _isFilePathRegexExcludeValid() ? null : kColorAccentRed.withOpacity(0.15),
+                                hoverColor: _isFilePathRegexExcludeValid() ? null : kColorAccentRed.withOpacity(0.15),
                                 labelText: Loc.get.filePathRegexExclude,
                               ),
                               controller: _filePathRegexExcludeController,
@@ -388,7 +467,22 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                           Expanded(
                             child: TextField(
                               decoration: kStyle.kInputTextStyleProperties.copyWith(
-                                labelText: '${Loc.get.enumNameFromRegex}*',
+                                fillColor: _isEnumNameFromRegexValid() ? null : kColorAccentRed.withOpacity(0.15),
+                                focusColor: _isEnumNameFromRegexValid() ? null : kColorAccentRed.withOpacity(0.15),
+                                hoverColor: _isEnumNameFromRegexValid() ? null : kColorAccentRed.withOpacity(0.15),
+                                label: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      Loc.get.enumNameFromRegex,
+                                      style: kStyle.kTextSmall,
+                                    ),
+                                    Text(
+                                      ' *',
+                                      style: kStyle.kTextSmall.copyWith(color: kColorAccentRed, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
                               ),
                               controller: _enumNameFromRegexController,
                               onChanged: (_) => setState(() {}),
@@ -405,6 +499,9 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                           Expanded(
                             child: TextField(
                               decoration: kStyle.kInputTextStyleProperties.copyWith(
+                                fillColor: _isPathValueFromRegexValid() ? null : kColorAccentRed.withOpacity(0.15),
+                                focusColor: _isPathValueFromRegexValid() ? null : kColorAccentRed.withOpacity(0.15),
+                                hoverColor: _isPathValueFromRegexValid() ? null : kColorAccentRed.withOpacity(0.15),
                                 labelText: Loc.get.pathValueFromRegex,
                               ),
                               controller: _pathValueFromRegexController,

@@ -187,7 +187,7 @@ abstract class Utils {
     return count;
   }
 
-  static bool validateAutoByFileSettings(String filePathRegex, String enumNameFromRegex) {
+  static bool validateAutoByFileSettings(String filePathRegex, String enumNameFromRegex, [String? pathValueFromRegex, String? filePathRegexExclude]) {
     if (filePathRegex.isEmpty || enumNameFromRegex.isEmpty) {
       return false;
     }
@@ -200,6 +200,14 @@ abstract class Utils {
       return false;
     }
 
+    if (filePathRegexExclude != null && filePathRegexExclude.isNotEmpty) {
+      try {
+        RegExp(filePathRegexExclude);
+      } catch (_) {
+        return false;
+      }
+    }
+
     final matches = RegExp(r'\{(\d+)\}').allMatches(enumNameFromRegex);
     if (matches.isEmpty) {
       return false;
@@ -208,6 +216,16 @@ abstract class Utils {
       final groupIndex = int.tryParse(match.group(1) ?? '');
       if (groupIndex == null || groupIndex < 0 || groupIndex > groupCount) {
         return false;
+      }
+    }
+
+    if (pathValueFromRegex != null && pathValueFromRegex.isNotEmpty) {
+      final pathMatches = RegExp(r'\{(\d+)\}').allMatches(pathValueFromRegex);
+      for (final match in pathMatches) {
+        final groupIndex = int.tryParse(match.group(1) ?? '');
+        if (groupIndex == null || groupIndex < 0 || groupIndex > groupCount) {
+          return false;
+        }
       }
     }
 
