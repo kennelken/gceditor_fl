@@ -18,6 +18,7 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
   String? outputPath;
   String? historyPath;
   String? authPath;
+  String? appFilesPath;
 
   DbCmdEditProjectSettings.values({
     String? id,
@@ -27,6 +28,7 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
     this.outputPath,
     this.historyPath,
     this.authPath,
+    this.appFilesPath,
   }) : super.withId(id) {
     $type = DbCmdType.editProjectSettings;
   }
@@ -66,6 +68,13 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
         dbModel.settings.authPath = null;
       else
         dbModel.settings.authPath = authPath;
+    }
+
+    if (appFilesPath != null) {
+      if (appFilesPath!.isEmpty)
+        dbModel.settings.appFilesPath = '.';
+      else
+        dbModel.settings.appFilesPath = appFilesPath!;
     }
 
     return DbCmdResult.success();
@@ -109,6 +118,7 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
       outputPath: outputPath != null ? dbModel.settings.outputPath : null,
       historyPath: historyPath != null ? dbModel.settings.historyPath : null,
       authPath: authPath != null ? dbModel.settings.authPath : null,
+      appFilesPath: appFilesPath != null ? dbModel.settings.appFilesPath : null,
     );
   }
 }

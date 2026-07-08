@@ -978,5 +978,18 @@
 	"autoByFileSettingsTooltip": "Toggle auto by file settings panel",
 	"@autoByFileSettingsTooltip": {
 		"description": ""
+	},
+	"appFilesPath": "app files path",
+	"@appFilesPath": {
+		"description": ""
+	},
+	"appFilesPathTooltip": "This path is optional and is used as the base directory for auto-generating enums.\n\nResolved absolute path:\n{resolvedPath}",
+	"@appFilesPathTooltip": {
+		"description": "",
+		"placeholders": {
+			"resolvedPath": {
+				"type": "String"
+			}
+		}
 	}
 }

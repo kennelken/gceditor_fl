@@ -14,6 +14,8 @@ class DbModelSettings {
   String? outputPath;
   String? historyPath;
   String? authPath;
+  @JsonKey(defaultValue: '.')
+  String appFilesPath = '.';
 
   DbModelSettings();
 

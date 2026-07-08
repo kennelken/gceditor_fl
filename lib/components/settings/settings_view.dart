@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -31,6 +32,10 @@ class SettingsViewState extends ConsumerState<SettingsView> {
   TextEditingController? _authPathController;
   TextEditingController? _outputPathController;
   TextEditingController? _historyPathController;
+  TextEditingController? _appFilesPathController;
+  final FocusNode _appFilesPathFocusNode = FocusNode();
+  String _resolvedAppFilesPath = '';
+  bool _isAppFilesPathValid = true;
   bool _initialized = false;
 
   @override
@@ -44,6 +49,8 @@ class SettingsViewState extends ConsumerState<SettingsView> {
   void dispose() {
     _loginTextController.dispose();
     _secretTextController.dispose();
+    _appFilesPathController?.dispose();
+    _appFilesPathFocusNode.dispose();
     super.dispose();
   }
 
@@ -76,6 +83,17 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     final authPathController = TextEditingController(text: model.settings.authPath ?? './${Config.newAuthListDefaultName}');
     _authPathController = authPathController;
 
+    if (_appFilesPathController == null) {
+      _appFilesPathController = TextEditingController(text: model.settings.appFilesPath);
+      _computeAppFilesPathValidation(model.settings.appFilesPath);
+    } else {
+      final dbValue = model.settings.appFilesPath;
+      if (dbValue != _appFilesPathController!.text && !_appFilesPathFocusNode.hasFocus) {
+        _appFilesPathController!.text = dbValue;
+        _computeAppFilesPathValidation(dbValue);
+      }
+    }
+
     final users = authListState.loginListData?.users.entries.toList() ?? [];
 
     _loginTextController.text = AppLocalStorage.instance.newLogin ?? Config.defaultNewLogin;
@@ -83,7 +101,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
 
     return Container(
       width: 1100 * kScale,
-      height: 717 * kScale,
+      height: 860 * kScale,
       color: kTextColorLightest,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -249,6 +267,51 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           ),
                         ),
                       ],
+                    ),
+                    SizedBox(height: 5 * kScale),
+                    Row(
+                       children: [
+                         Expanded(
+                           flex: 4,
+                           child: Text(
+                             Loc.get.appFilesPath,
+                             style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                           ),
+                         ),
+                         Expanded(
+                           flex: 3,
+                           child: TooltipWrapper(
+                             message: Loc.get.appFilesPathTooltip(_resolvedAppFilesPath),
+                             child: ClipRRect(
+                               borderRadius: kCardBorder,
+                               child: TextField(
+                                 controller: _appFilesPathController,
+                                 focusNode: _appFilesPathFocusNode,
+                                 decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                                   fillColor: _isAppFilesPathValid ? null : kColorAccentRed.withOpacity(0.15),
+                                   focusColor: _isAppFilesPathValid ? null : kColorAccentRed.withOpacity(0.15),
+                                   hoverColor: _isAppFilesPathValid ? null : kColorAccentRed.withOpacity(0.15),
+                                 ),
+                                 textAlign: TextAlign.left,
+                                 onChanged: _handleAppFilesPathChanged,
+                               ),
+                             ),
+                           ),
+                         ),
+                         TooltipWrapper(
+                           message: 'save',
+                           child: IconButtonTransparent(
+                             size: 30 * kScale,
+                             enabled: _isAppFilesPathValid,
+                             icon: Icon(
+                               FontAwesomeIcons.floppyDisk,
+                               size: 12 * kScale,
+                               color: _isAppFilesPathValid ? kColorAccentBlue : kColorAccentBlue.withOpacity(0.3),
+                             ),
+                             onClick: _handleAppFilesPathSave,
+                           ),
+                         ),
+                       ],
                     ),
                     SizedBox(height: 10 * kScale),
                     const Divider(height: 1),
@@ -511,6 +574,40 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(
           DbCmdEditProjectSettings.values(
             authPath: modelValue,
+          ),
+        );
+  }
+
+  void _computeAppFilesPathValidation(String value) {
+    final projectFile = providerContainer.read(appStateProvider).state.projectFile;
+    if (projectFile == null) {
+      _resolvedAppFilesPath = '';
+      _isAppFilesPathValid = false;
+      return;
+    }
+    final projectDir = path.dirname(projectFile.path);
+    final resolvedPath = path.normalize(path.absolute(path.join(projectDir, value.trim().isEmpty ? '.' : value)));
+    final exists = Directory(resolvedPath).existsSync();
+    _resolvedAppFilesPath = resolvedPath;
+    _isAppFilesPathValid = exists;
+  }
+
+  void _handleAppFilesPathChanged(String value) {
+    setState(() {
+      _computeAppFilesPathValidation(value);
+    });
+  }
+
+  void _handleAppFilesPathSave() {
+    final rawValue = _appFilesPathController?.text;
+    if (rawValue == null) return;
+
+    final value = rawValue.trim().isEmpty ? '.' : rawValue;
+    if (value == clientModel.settings.appFilesPath) return;
+
+    providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+          DbCmdEditProjectSettings.values(
+            appFilesPath: value,
           ),
         );
   }

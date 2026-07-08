@@ -1395,6 +1395,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Toggle auto by file settings panel'**
   String get autoByFileSettingsTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'app files path'**
+  String get appFilesPath;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'This path is optional and is used as the base directory for auto-generating enums.\n\nResolved absolute path:\n{resolvedPath}'**
+  String appFilesPathTooltip(String resolvedPath);
 }
 
 class _AppLocalizationsDelegate

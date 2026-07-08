@@ -762,4 +762,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get autoByFileSettingsTooltip => 'Toggle auto by file settings panel';
+
+  @override
+  String get appFilesPath => 'app files path';
+
+  @override
+  String appFilesPathTooltip(String resolvedPath) {
+    return 'This path is optional and is used as the base directory for auto-generating enums.\n\nResolved absolute path:\n$resolvedPath';
+  }
 }

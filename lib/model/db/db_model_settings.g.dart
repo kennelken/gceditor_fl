@@ -13,7 +13,8 @@ DbModelSettings _$DbModelSettingsFromJson(Map<String, dynamic> json) =>
       ..generators = BaseGenerator.decodeGenerators(json['generators'] as List?)
       ..outputPath = json['outputPath'] as String?
       ..historyPath = json['historyPath'] as String?
-      ..authPath = json['authPath'] as String?;
+      ..authPath = json['authPath'] as String?
+      ..appFilesPath = json['appFilesPath'] as String? ?? '.';
 
 Map<String, dynamic> _$DbModelSettingsToJson(DbModelSettings instance) {
   final val = <String, dynamic>{
@@ -32,5 +33,6 @@ Map<String, dynamic> _$DbModelSettingsToJson(DbModelSettings instance) {
   writeNotNull('outputPath', instance.outputPath);
   writeNotNull('historyPath', instance.historyPath);
   writeNotNull('authPath', instance.authPath);
+  val['appFilesPath'] = instance.appFilesPath;
   return val;
 }

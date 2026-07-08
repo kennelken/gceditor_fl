@@ -267,4 +267,46 @@ void main() {
     expect(entity.pathValueFromRegex, equals('old_path'));
     expect(entity.autoByFileAutoRefresh, equals(false));
   });
+
+  test('Enum auto generation respects appFilesPath setting', () {
+    final tempDir = Directory.systemTemp.createTempSync('gceditor_test');
+    
+    // Create folders
+    final appFilesFolder = Directory('${tempDir.path}/Src/Prefabs')..createSync(recursive: true);
+    final outsideFolder = Directory('${tempDir.path}/Outside/Prefabs')..createSync(recursive: true);
+    
+    // Create files
+    File('${appFilesFolder.path}/Player.prefab').createSync();
+    File('${outsideFolder.path}/Monster.prefab').createSync();
+
+    try {
+      final projectFile = File('${tempDir.path}/project.json');
+      providerContainer.read(appStateProvider).state.projectFile = projectFile;
+
+      final dbModel = DbModel();
+      dbModel.settings.appFilesPath = './Src'; // Restrict to Src
+
+      final entity = ClassMetaEntityEnum()
+        ..id = 'Prefabs'
+        ..autoByFile = true
+        ..filePathRegex = r'Src/Prefabs/(.*)\.prefab'
+        ..enumNameFromRegex = '{1}';
+      
+      dbModel.classes.add(entity);
+      dbModel.cache.invalidate();
+
+      // 1. Scan with valid App files path
+      final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
+      expect(results.length, equals(1));
+      expect(results[0].id, equals('Player'));
+      expect(results[0].description, equals('Src/Prefabs/Player.prefab')); // relative path computed from project root
+
+      // 2. Scan with invalid App files path (non-existent)
+      dbModel.settings.appFilesPath = './NonExistentDir';
+      final emptyResults = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
+      expect(emptyResults, isEmpty);
+    } finally {
+      tempDir.deleteSync(recursive: true);
+    }
+  });
 }

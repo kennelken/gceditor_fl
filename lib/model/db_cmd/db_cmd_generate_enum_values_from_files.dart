@@ -74,6 +74,11 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
     final projectDir = projectFile.parent;
     if (!projectDir.existsSync()) return [];
 
+    final appFilesPath = dbModel.settings.appFilesPath;
+    final scanDirPath = path.normalize(path.absolute(path.join(projectDir.path, appFilesPath)));
+    final scanDir = Directory(scanDirPath);
+    if (!scanDir.existsSync()) return [];
+
     final regexText = entity.filePathRegex;
     if (regexText.isEmpty) return [];
 
@@ -114,7 +119,7 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
       }
     }
 
-    final files = _getAllFiles(projectDir);
+    final files = _getAllFiles(scanDir);
     final results = <EnumValue>[];
     final seen = <String>{};
 
