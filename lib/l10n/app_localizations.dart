@@ -1389,6 +1389,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'auto by files'**
   String get autoByFileSettings;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle auto by file settings panel'**
+  String get autoByFileSettingsTooltip;
 }
 
 class _AppLocalizationsDelegate

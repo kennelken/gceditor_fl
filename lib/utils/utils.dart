@@ -154,6 +154,65 @@ abstract class Utils {
 
     (context as Element).visitChildren(rebuild);
   }
+
+  static int countCapturingGroups(String pattern) {
+    int count = 0;
+    bool inCharacterClass = false;
+    for (int i = 0; i < pattern.length; i++) {
+      final char = pattern[i];
+      if (char == '\\') {
+        i++; // skip next char
+        continue;
+      }
+      if (inCharacterClass) {
+        if (char == ']') {
+          inCharacterClass = false;
+        }
+        continue;
+      }
+      if (char == '[') {
+        inCharacterClass = true;
+        continue;
+      }
+      if (char == '(') {
+        if (i + 1 < pattern.length && pattern[i + 1] == '?') {
+          if (i + 2 < pattern.length && pattern[i + 2] == '<') {
+            count++;
+          }
+        } else {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+
+  static bool validateAutoByFileSettings(String filePathRegex, String enumNameFromRegex) {
+    if (filePathRegex.isEmpty || enumNameFromRegex.isEmpty) {
+      return false;
+    }
+
+    int groupCount = 0;
+    try {
+      RegExp(filePathRegex);
+      groupCount = countCapturingGroups(filePathRegex);
+    } catch (_) {
+      return false;
+    }
+
+    final matches = RegExp(r'\{(\d+)\}').allMatches(enumNameFromRegex);
+    if (matches.isEmpty) {
+      return false;
+    }
+    for (final match in matches) {
+      final groupIndex = int.tryParse(match.group(1) ?? '');
+      if (groupIndex == null || groupIndex < 0 || groupIndex > groupCount) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
 
 class ValueChange<T> {

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/properties/primitives/add_new_enum_value_button.dart';
 import 'package:gceditor/components/properties/primitives/class_meta_properties_container.dart';
 import 'package:gceditor/components/properties/primitives/enum_value_view.dart';
+import 'package:gceditor/components/properties/primitives/icon_button_transparent.dart';
 import 'package:gceditor/components/properties/primitives/property_string_view.dart';
 import 'package:gceditor/components/properties/primitives/property_title.dart';
 import 'package:gceditor/components/tooltip_wrapper.dart';
@@ -40,6 +42,15 @@ class ClassMetaEnumPropertiesViewProperties extends StatefulWidget {
 
 class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPropertiesViewProperties> {
   late List<EnumValue> values;
+  bool _showSettings = false;
+
+  late final TextEditingController _filePathRegexController = TextEditingController();
+  late final TextEditingController _filePathRegexExcludeController = TextEditingController();
+  late final TextEditingController _fileContentRegexIncludeController = TextEditingController();
+  late final TextEditingController _fileContentRegexExcludeController = TextEditingController();
+  late final TextEditingController _enumNameFromRegexController = TextEditingController();
+  late final TextEditingController _pathValueFromRegexController = TextEditingController();
+  bool _autoByFileAutoRefresh = false;
 
   @override
   void initState() {
@@ -56,12 +67,86 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
     providerContainer.read(clientStateProvider).removeListener(_handleClientStateChanges);
   }
 
+  @override
+  void didUpdateWidget(ClassMetaEnumPropertiesViewProperties oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.data.id != widget.data.id) {
+      _initControllers();
+    }
+  }
+
+  @override
+  void dispose() {
+    _filePathRegexController.dispose();
+    _filePathRegexExcludeController.dispose();
+    _fileContentRegexIncludeController.dispose();
+    _fileContentRegexExcludeController.dispose();
+    _enumNameFromRegexController.dispose();
+    _pathValueFromRegexController.dispose();
+    super.dispose();
+  }
+
+  void _initControllers() {
+    _filePathRegexController.text = widget.data.filePathRegex;
+    _filePathRegexExcludeController.text = widget.data.filePathRegexExclude;
+    _fileContentRegexIncludeController.text = widget.data.fileContentRegexInclude;
+    _fileContentRegexExcludeController.text = widget.data.fileContentRegexExclude;
+    _enumNameFromRegexController.text = widget.data.enumNameFromRegex;
+    _pathValueFromRegexController.text = widget.data.pathValueFromRegex;
+    _autoByFileAutoRefresh = widget.data.autoByFileAutoRefresh;
+  }
+
   void _handleClientStateChanges([bool toSetState = true]) {
     values = widget.data.values.toList();
-    if (toSetState)
-      setState(
-        () => providerContainer.read(enumValueWidthRatioProvider).setValue(widget.data.valueColumnWidth, true),
-      );
+    if (toSetState) {
+      setState(() {
+        _initControllers();
+        providerContainer.read(enumValueWidthRatioProvider).setValue(widget.data.valueColumnWidth, true);
+      });
+    } else {
+      _initControllers();
+    }
+  }
+
+  bool _validateLocalSettings() {
+    return Utils.validateAutoByFileSettings(
+      _filePathRegexController.text,
+      _enumNameFromRegexController.text,
+    );
+  }
+
+  bool _validateDbSettings() {
+    return Utils.validateAutoByFileSettings(
+      widget.data.filePathRegex,
+      widget.data.enumNameFromRegex,
+    );
+  }
+
+  bool _hasAnyChanges() {
+    return _filePathRegexController.text != widget.data.filePathRegex ||
+        _filePathRegexExcludeController.text != widget.data.filePathRegexExclude ||
+        _fileContentRegexIncludeController.text != widget.data.fileContentRegexInclude ||
+        _fileContentRegexExcludeController.text != widget.data.fileContentRegexExclude ||
+        _enumNameFromRegexController.text != widget.data.enumNameFromRegex ||
+        _pathValueFromRegexController.text != widget.data.pathValueFromRegex ||
+        _autoByFileAutoRefresh != widget.data.autoByFileAutoRefresh;
+  }
+
+  void _saveSettings() {
+    if (!_validateLocalSettings()) return;
+
+    providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+          DbCmdEditEnumFileSettings.values(
+            entityId: widget.data.id,
+            filePathRegex: _filePathRegexController.text,
+            filePathRegexExclude: _filePathRegexExcludeController.text,
+            fileContentRegexInclude: _fileContentRegexIncludeController.text,
+            fileContentRegexExclude: _fileContentRegexExcludeController.text,
+            enumNameFromRegex: _enumNameFromRegexController.text,
+            pathValueFromRegex: _pathValueFromRegexController.text,
+            autoByFileAutoRefresh: _autoByFileAutoRefresh,
+          ),
+        );
   }
 
   @override
@@ -156,156 +241,240 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                   kStyle.kPropertiesVerticalDivider,
                   TooltipWrapper(
                     message: Loc.get.autoByFileTooltip,
-                    child: Row(
-                      children: [
-                        kStyle.wrapCheckbox(
-                          Checkbox(
-                            value: widget.data.autoByFile,
-                            onChanged: (val) {
-                              providerContainer.read(clientOwnCommandsStateProvider).addCommand(
-                                    DbCmdEditEnumFileSettings.values(
-                                      entityId: widget.data.id,
-                                      autoByFile: val ?? false,
-                                    ),
-                                  );
-                            },
+                    child: SizedBox(
+                      height: 30 * kScale,
+                      child: Row(
+                        children: [
+                          kStyle.wrapCheckbox(
+                            Checkbox(
+                              value: widget.data.autoByFile,
+                              onChanged: (val) {
+                                providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+                                      DbCmdEditEnumFileSettings.values(
+                                        entityId: widget.data.id,
+                                        autoByFile: val ?? false,
+                                      ),
+                                    );
+                              },
+                            ),
                           ),
-                        ),
-                        Text(
-                          Loc.get.autoByFile,
-                          style: kStyle.kTextRegular.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
-                      ],
+                          Text(
+                            Loc.get.autoByFile,
+                            style: kStyle.kTextExtraSmallPropertyHeader,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   if (widget.data.autoByFile) ...[
                     kStyle.kPropertiesVerticalDivider,
-                    TooltipWrapper(
-                      message: Loc.get.filePathRegexTooltip,
-                      child: PropertyStringView(
-                        key: ValueKey('${widget.data.id}_filePathRegex'),
-                        title: Loc.get.filePathRegex,
-                        value: widget.data.filePathRegex,
-                        saveCallback: (v) => DbCmdEditEnumFileSettings.values(
-                          entityId: widget.data.id,
-                          filePathRegex: v,
-                        ),
-                      ),
-                    ),
-                    kStyle.kPropertiesVerticalDivider,
-                    TooltipWrapper(
-                      message: Loc.get.filePathRegexExcludeTooltip,
-                      child: PropertyStringView(
-                        key: ValueKey('${widget.data.id}_filePathRegexExclude'),
-                        title: Loc.get.filePathRegexExclude,
-                        value: widget.data.filePathRegexExclude,
-                        saveCallback: (v) => DbCmdEditEnumFileSettings.values(
-                          entityId: widget.data.id,
-                          filePathRegexExclude: v,
-                        ),
-                      ),
-                    ),
-                    kStyle.kPropertiesVerticalDivider,
-                    TooltipWrapper(
-                      message: Loc.get.fileContentRegexIncludeTooltip,
-                      child: PropertyStringView(
-                        key: ValueKey('${widget.data.id}_fileContentRegexInclude'),
-                        title: Loc.get.fileContentRegexInclude,
-                        value: widget.data.fileContentRegexInclude,
-                        saveCallback: (v) => DbCmdEditEnumFileSettings.values(
-                          entityId: widget.data.id,
-                          fileContentRegexInclude: v,
-                        ),
-                      ),
-                    ),
-                    kStyle.kPropertiesVerticalDivider,
-                    TooltipWrapper(
-                      message: Loc.get.fileContentRegexExcludeTooltip,
-                      child: PropertyStringView(
-                        key: ValueKey('${widget.data.id}_fileContentRegexExclude'),
-                        title: Loc.get.fileContentRegexExclude,
-                        value: widget.data.fileContentRegexExclude,
-                        saveCallback: (v) => DbCmdEditEnumFileSettings.values(
-                          entityId: widget.data.id,
-                          fileContentRegexExclude: v,
-                        ),
-                      ),
-                    ),
-                    kStyle.kPropertiesVerticalDivider,
-                    TooltipWrapper(
-                      message: Loc.get.enumNameFromRegexTooltip,
-                      child: PropertyStringView(
-                        key: ValueKey('${widget.data.id}_enumNameFromRegex'),
-                        title: Loc.get.enumNameFromRegex,
-                        value: widget.data.enumNameFromRegex,
-                        saveCallback: (v) => DbCmdEditEnumFileSettings.values(
-                          entityId: widget.data.id,
-                          enumNameFromRegex: v,
-                        ),
-                      ),
-                    ),
-                    kStyle.kPropertiesVerticalDivider,
-                    TooltipWrapper(
-                      message: Loc.get.pathValueFromRegexTooltip,
-                      child: PropertyStringView(
-                        key: ValueKey('${widget.data.id}_pathValueFromRegex'),
-                        title: Loc.get.pathValueFromRegex,
-                        value: widget.data.pathValueFromRegex,
-                        saveCallback: (v) => DbCmdEditEnumFileSettings.values(
-                          entityId: widget.data.id,
-                          pathValueFromRegex: v,
-                        ),
-                      ),
-                    ),
-                    kStyle.kPropertiesVerticalDivider,
                     Row(
                       children: [
                         TooltipWrapper(
-                          message: Loc.get.runTooltip,
-                          child: ElevatedButton(
-                            style: kButtonBlue.copyWith(
-                              padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 20 * kScale, vertical: 10 * kScale)),
+                          message: Loc.get.autoByFileSettingsTooltip,
+                          child: IconButtonTransparent(
+                            size: 35 * kScale,
+                            onClick: () {
+                              setState(() {
+                                _showSettings = !_showSettings;
+                              });
+                            },
+                            icon: Icon(
+                              FontAwesomeIcons.gear,
+                              color: _showSettings ? kColorAccentBlue : Colors.white,
+                              size: 20 * kScale,
                             ),
-                            onPressed: () {
+                          ),
+                        ),
+                        SizedBox(width: 10 * kScale),
+                        TooltipWrapper(
+                          message: Loc.get.runTooltip,
+                          child: IconButtonTransparent(
+                            size: 35 * kScale,
+                            enabled: !_showSettings && _validateDbSettings(),
+                            onClick: () {
                               providerContainer.read(clientOwnCommandsStateProvider).addCommand(
                                     DbCmdGenerateEnumValuesFromFiles.values(
                                       entityId: widget.data.id,
                                     ),
                                   );
                             },
-                            child: Text(
-                              Loc.get.run,
-                              style: kStyle.kTextRegular.copyWith(color: Colors.white),
+                            icon: Icon(
+                              FontAwesomeIcons.play,
+                              color: (_showSettings || !_validateDbSettings())
+                                  ? Colors.white.withOpacity(0.3)
+                                  : kColorAccentGreen,
+                              size: 20 * kScale,
                             ),
-                          ),
-                        ),
-                        SizedBox(width: 20 * kScale),
-                        TooltipWrapper(
-                          message: Loc.get.autoTooltip,
-                          child: Row(
-                            children: [
-                              kStyle.wrapCheckbox(
-                                Checkbox(
-                                  value: widget.data.autoByFileAutoRefresh,
-                                  onChanged: (val) {
-                                    providerContainer.read(clientOwnCommandsStateProvider).addCommand(
-                                          DbCmdEditEnumFileSettings.values(
-                                            entityId: widget.data.id,
-                                            autoByFileAutoRefresh: val ?? false,
-                                          ),
-                                        );
-                                  },
-                                ),
-                              ),
-                              Text(
-                                Loc.get.auto,
-                                style: kStyle.kTextRegular,
-                              ),
-                            ],
                           ),
                         ),
                       ],
                     ),
+                  ],
+                  if (widget.data.autoByFile && _showSettings) ...[
+                    kStyle.kPropertiesVerticalDivider,
+                    TooltipWrapper(
+                      message: Loc.get.filePathRegexTooltip,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              decoration: kStyle.kInputTextStyleProperties.copyWith(
+                                labelText: '${Loc.get.filePathRegex}*',
+                              ),
+                              controller: _filePathRegexController,
+                              onChanged: (_) => setState(() {}),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    kStyle.kPropertiesVerticalDivider,
+                    TooltipWrapper(
+                      message: Loc.get.filePathRegexExcludeTooltip,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              decoration: kStyle.kInputTextStyleProperties.copyWith(
+                                labelText: Loc.get.filePathRegexExclude,
+                              ),
+                              controller: _filePathRegexExcludeController,
+                              onChanged: (_) => setState(() {}),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    kStyle.kPropertiesVerticalDivider,
+                    TooltipWrapper(
+                      message: Loc.get.fileContentRegexIncludeTooltip,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              decoration: kStyle.kInputTextStyleProperties.copyWith(
+                                labelText: Loc.get.fileContentRegexInclude,
+                              ),
+                              controller: _fileContentRegexIncludeController,
+                              onChanged: (_) => setState(() {}),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    kStyle.kPropertiesVerticalDivider,
+                    TooltipWrapper(
+                      message: Loc.get.fileContentRegexExcludeTooltip,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              decoration: kStyle.kInputTextStyleProperties.copyWith(
+                                labelText: Loc.get.fileContentRegexExclude,
+                              ),
+                              controller: _fileContentRegexExcludeController,
+                              onChanged: (_) => setState(() {}),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    kStyle.kPropertiesVerticalDivider,
+                    TooltipWrapper(
+                      message: Loc.get.enumNameFromRegexTooltip,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              decoration: kStyle.kInputTextStyleProperties.copyWith(
+                                labelText: '${Loc.get.enumNameFromRegex}*',
+                              ),
+                              controller: _enumNameFromRegexController,
+                              onChanged: (_) => setState(() {}),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    kStyle.kPropertiesVerticalDivider,
+                    TooltipWrapper(
+                      message: Loc.get.pathValueFromRegexTooltip,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              decoration: kStyle.kInputTextStyleProperties.copyWith(
+                                labelText: Loc.get.pathValueFromRegex,
+                              ),
+                              controller: _pathValueFromRegexController,
+                              onChanged: (_) => setState(() {}),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    kStyle.kPropertiesVerticalDivider,
+                    TooltipWrapper(
+                      message: Loc.get.autoTooltip,
+                      child: SizedBox(
+                        height: 30 * kScale,
+                        child: Row(
+                          children: [
+                            kStyle.wrapCheckbox(
+                              Checkbox(
+                                value: _autoByFileAutoRefresh,
+                                onChanged: (val) {
+                                  setState(() {
+                                    _autoByFileAutoRefresh = val ?? false;
+                                  });
+                                },
+                              ),
+                            ),
+                            Text(
+                              Loc.get.auto,
+                              style: kStyle.kTextExtraSmallPropertyHeader,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (_hasAnyChanges()) ...[
+                      kStyle.kPropertiesVerticalDivider,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          IconButtonTransparent(
+                            size: 35 * kScale,
+                            enabled: _validateLocalSettings(),
+                            onClick: () {
+                              _saveSettings();
+                            },
+                            icon: Icon(
+                              FontAwesomeIcons.check,
+                              color: !_validateLocalSettings()
+                                  ? kColorAccentGreen.withOpacity(0.3)
+                                  : kColorAccentGreen,
+                              size: 20 * kScale,
+                            ),
+                          ),
+                          IconButtonTransparent(
+                            size: 35 * kScale,
+                            onClick: () {
+                              setState(() {
+                                _initControllers();
+                              });
+                            },
+                            icon: Icon(
+                              FontAwesomeIcons.xmark,
+                              color: kColorAccentRed,
+                              size: 27 * kScale,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ],
               ),

@@ -9,6 +9,7 @@ import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/server/generators/generator_csharp_runner.dart';
 import 'package:gceditor/server/generators/generators_job.dart';
+import 'package:gceditor/utils/utils.dart';
 
 void main() {
   test('Enum auto generation from files works correctly', () {
@@ -165,5 +166,37 @@ void main() {
     } finally {
       tempDir.deleteSync(recursive: true);
     }
+  });
+
+  test('Utils capturing group count and settings validation works correctly', () {
+    // 1. Capturing group count
+    expect(Utils.countCapturingGroups(r'Assets/Prefabs/(.*)\.prefab'), equals(1));
+    expect(Utils.countCapturingGroups(r'Assets/Prefabs/Player\.prefab'), equals(0));
+    expect(Utils.countCapturingGroups(r'Assets/Prefabs/(?:ignored)/(.*)\.prefab'), equals(1));
+    expect(Utils.countCapturingGroups(r'Assets/Prefabs/(\d+)/(\w+)\.prefab'), equals(2));
+    expect(Utils.countCapturingGroups(r'Assets/Prefabs/(?<name>\w+)\.prefab'), equals(1));
+    expect(Utils.countCapturingGroups(r'Assets/Prefabs/\((\w+)\)\.prefab'), equals(1));
+    expect(Utils.countCapturingGroups(r'Assets/Prefabs/\\(\w+)\.prefab'), equals(1));
+    expect(Utils.countCapturingGroups(r'Assets/Prefabs/\(\w+\)\.prefab'), equals(0)); // escaped parentheses
+
+    // 2. Settings validation
+    // Empty settings
+    expect(Utils.validateAutoByFileSettings('', ''), isFalse);
+    expect(Utils.validateAutoByFileSettings('abc', ''), isFalse);
+    expect(Utils.validateAutoByFileSettings('', 'abc'), isFalse);
+
+    // Invalid regex syntax
+    expect(Utils.validateAutoByFileSettings('[a-z', '{1}'), isFalse);
+
+    // Missing {N} placeholder
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', 'value'), isFalse);
+
+    // Out-of-bounds group index
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{2}'), isFalse);
+
+    // Valid group index
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}'), isTrue);
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{0}'), isTrue);
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(\d+)/(\w+)\.prefab', 'Item_{2}'), isTrue);
   });
 }

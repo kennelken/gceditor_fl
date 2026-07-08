@@ -974,5 +974,9 @@
 	"autoByFileSettings": "auto by files",
 	"@autoByFileSettings": {
 		"description": ""
+	},
+	"autoByFileSettingsTooltip": "Toggle auto by file settings panel",
+	"@autoByFileSettingsTooltip": {
+		"description": ""
 	}
 }

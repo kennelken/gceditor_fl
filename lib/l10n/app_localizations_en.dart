@@ -759,4 +759,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get autoByFileSettings => 'auto by files';
+
+  @override
+  String get autoByFileSettingsTooltip => 'Toggle auto by file settings panel';
 }
