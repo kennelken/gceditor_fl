@@ -19,7 +19,8 @@ DbCmdGenerateEnumValuesFromFiles _$DbCmdGenerateEnumValuesFromFilesFromJson(
           ?.map((e) => EnumValue.fromJson(e as Map<String, dynamic>))
           .toList()
       ..filesFound = (json['filesFound'] as num?)?.toInt()
-      ..valuesAdded = (json['valuesAdded'] as num?)?.toInt();
+      ..valuesAdded = (json['valuesAdded'] as num?)?.toInt()
+      ..silent = json['silent'] as bool;
 
 Map<String, dynamic> _$DbCmdGenerateEnumValuesFromFilesToJson(
     DbCmdGenerateEnumValuesFromFiles instance) {
@@ -41,6 +42,7 @@ Map<String, dynamic> _$DbCmdGenerateEnumValuesFromFilesToJson(
       'oldValues', instance.oldValues?.map((e) => e.toJson()).toList());
   writeNotNull('filesFound', instance.filesFound);
   writeNotNull('valuesAdded', instance.valuesAdded);
+  val['silent'] = instance.silent;
   return val;
 }
 

@@ -1,18 +1,25 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gceditor/client/client_app.dart';
+import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db/class_meta_entity_enum.dart';
 import 'package:gceditor/model/db/enum_value.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db/generator_csharp.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_generate_enum_values_from_files.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_enum_file_settings.dart';
+import 'package:gceditor/model/db_network/authentication_data.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
+import 'package:gceditor/model/state/auth_list_state.dart';
+import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/server/generators/generator_csharp_runner.dart';
 import 'package:gceditor/server/generators/generators_job.dart';
+import 'package:gceditor/server/server_app.dart';
 import 'package:gceditor/utils/utils.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   test('Enum auto generation from files works correctly', () {
     final tempDir = Directory.systemTemp.createTempSync('gceditor_test');
     File('${tempDir.path}/Assets/Prefabs/Player.prefab').createSync(recursive: true);
@@ -299,6 +306,89 @@ void main() {
       dbModel.settings.appFilesPath = './NonExistentDir';
       final emptyResults = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
       expect(emptyResults, isEmpty);
+    } finally {
+      tempDir.deleteSync(recursive: true);
+    }
+  });
+
+  test('loopback test of enum auto generation triggered from client', () async {
+    final tempDir = Directory.systemTemp.createTempSync('gceditor_integration_test');
+    
+    try {
+      // 1. Create a dummy project.json
+      final projectFile = File('${tempDir.path}/project.json');
+      final dbModel = DbModel();
+      
+      // Configure settings
+      dbModel.settings.appFilesPath = './Src';
+      dbModel.settings.autoGenerateEnumValues = true;
+      
+      // Add enum entity
+      final entity = ClassMetaEntityEnum()
+        ..id = 'MyScannedEnum'
+        ..autoByFile = true
+        ..filePathRegex = r'Src/Prefabs/(.*)\.prefab'
+        ..enumNameFromRegex = '{1}';
+      dbModel.classes.add(entity);
+      
+      projectFile.writeAsStringSync(Config.fileJsonOptions.convert(dbModel.toJson()));
+
+      // 2. Create folders and files to scan
+      final appFilesFolder = Directory('${tempDir.path}/Src/Prefabs')..createSync(recursive: true);
+      File('${appFilesFolder.path}/Player.prefab').createSync();
+      File('${appFilesFolder.path}/Monster.prefab').createSync();
+
+      // Initialize mock auth
+      final authFile = File('${tempDir.path}/auth.json');
+      authFile.writeAsStringSync('{"users": {"admin": {"login": "admin", "secret": "admin12345678", "salt": "salt"}}}');
+      providerContainer.read(authListStateProvider).setPath(authFile.path);
+
+      // 3. Start ServerApp
+      final serverApp = ServerApp(
+        port: 12346,
+        projectFile: projectFile,
+      );
+      final initErr = await serverApp.init();
+      if (initErr != null) {
+        fail('Failed to start server: $initErr');
+      }
+
+      // 4. Initialize Client App
+      final authData = AuthenticationData()
+        ..login = 'admin'
+        ..secret = 'admin12345678'
+        ..password = 'admin12345678';
+      final clientApp = ClientApp(
+        ipAddress: 'localhost',
+        port: 12346,
+        authData: authData,
+      );
+      
+      // Set projectFile on client too
+      providerContainer.read(appStateProvider).state.projectFile = projectFile;
+      
+      final clientInitErr = await clientApp.init();
+      if (clientInitErr != null) {
+        fail('Failed to start client: $clientInitErr');
+      }
+
+      // Print initial client state
+      final clientEnumValues = (providerContainer.read(clientStateProvider).state.model.classes.first as ClassMetaEntityEnum).values;
+      expect(clientEnumValues, isEmpty);
+
+      // 5. Trigger run generators request on client
+      await clientApp.requestRunGenerators();
+
+      // Wait a short time for everything to settle
+      await Future.delayed(const Duration(milliseconds: 1000));
+
+      // 6. Check client model enum values
+      final updatedModel = providerContainer.read(clientStateProvider).state.model;
+      final updatedEnum = updatedModel.classes.first as ClassMetaEntityEnum;
+      expect(updatedEnum.values.length, equals(2));
+      expect(updatedEnum.values[0].id, equals('Monster'));
+      expect(updatedEnum.values[1].id, equals('Player'));
+
     } finally {
       tempDir.deleteSync(recursive: true);
     }

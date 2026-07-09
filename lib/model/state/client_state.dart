@@ -82,7 +82,7 @@ class ClientStateNotifier extends ServerStateNotifier {
       case DbCmdType.fillColumn:
       case DbCmdType.editEnumFileSettings:
       case DbCmdType.generateEnumValuesFromFiles:
-        if (command is DbCmdGenerateEnumValuesFromFiles && (command.filesFound ?? 0) > 0) {
+        if (command is DbCmdGenerateEnumValuesFromFiles && !command.silent && (command.filesFound ?? 0) > 0) {
           PopupMessages.show(
             PopupMessageData(
               message: Loc.get.enumAutoGenerationSummary(command.filesFound!, command.valuesAdded ?? 0),

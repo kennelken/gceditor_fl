@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db_cmd/base_db_cmd.dart';
+import 'package:gceditor/model/db_cmd/db_cmd_generate_enum_values_from_files.dart';
 import 'package:gceditor/model/db_network/authentication_data.dart';
 import 'package:gceditor/model/db_network/command_request_git_payload.dart';
 import 'package:gceditor/model/db_network/command_request_git_response_payload.dart';
@@ -235,15 +236,29 @@ class ClientApp {
   Future requestRunGenerators() async {
     providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.log, 'ClientApp: send run generators request'));
     providerContainer.read(waitingStateProvider).toggleWaiting(this, true);
-    final response = await _commandsProcessor!.sendCommand<BaseCommand>(CommandRequestRunGenerators());
-    if (response is CommandOkResponse) {
-      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Generators job finished without errors'));
-    } else if (response is CommandErrorResponse) {
-      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Generators job caused error "${response.message}"'));
-    } else {
-      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Server responded with unexpected response "$response"'));
+
+    try {
+      if (clientModel.settings.autoGenerateEnumValues) {
+        final enumsToScan = clientModel.cache.allEnums.where((e) => e.autoByFile).toList();
+        for (final enumEntity in enumsToScan) {
+          final cmd = DbCmdGenerateEnumValuesFromFiles.values(entityId: enumEntity.id, silent: true);
+          await sendDbCommand(cmd);
+        }
+      }
+
+      final response = await _commandsProcessor!.sendCommand<BaseCommand>(CommandRequestRunGenerators());
+      if (response is CommandOkResponse) {
+        providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Generators job finished without errors'));
+      } else if (response is CommandErrorResponse) {
+        providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Generators job caused error "${response.message}"'));
+      } else {
+        providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Server responded with unexpected response "$response"'));
+      }
+    } catch (e) {
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Error during run generators: $e'));
+    } finally {
+      providerContainer.read(waitingStateProvider).toggleWaiting(this, false);
     }
-    providerContainer.read(waitingStateProvider).toggleWaiting(this, false);
   }
 
   Future<CommandRequestGitResponsePayload?> requestGit(CommandRequestGitPayload payload) async {

@@ -19,12 +19,14 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
   List<EnumValue>? oldValues;
   int? filesFound;
   int? valuesAdded;
+  bool silent = false;
 
   DbCmdGenerateEnumValuesFromFiles.values({
     String? id,
     required this.entityId,
     this.newValues,
     this.oldValues,
+    this.silent = false,
   }) : super.withId(id) {
     $type = DbCmdType.generateEnumValuesFromFiles;
   }

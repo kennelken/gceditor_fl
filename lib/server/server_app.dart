@@ -4,11 +4,8 @@ import 'dart:typed_data';
 
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db/db_model.dart';
-import 'package:gceditor/model/db/class_meta_entity_enum.dart';
-import 'package:gceditor/model/db/enum_value.dart';
 import 'package:gceditor/model/db_cmd/base_db_cmd.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_result.dart';
-import 'package:gceditor/model/db_cmd/db_cmd_generate_enum_values_from_files.dart';
 import 'package:gceditor/model/db_network/command_request_git_response_payload.dart';
 import 'package:gceditor/model/db_network/command_request_history_execute_response_payload.dart';
 import 'package:gceditor/model/db_network/command_request_history_response_payload.dart';
@@ -147,6 +144,7 @@ class ServerApp {
     final settings = dbModel.settings;
 
     final outputRel = settings.outputPath ?? Config.newOutputListDefaultName;
+    providerContainer.read(appStateProvider.notifier).state.projectFile = projectFile;
     providerContainer.read(appStateProvider.notifier).state.output = Directory(path.join(projectDir, outputRel));
 
     final historyRel = settings.historyPath ?? Config.newHistoryListDefaultName;
@@ -158,36 +156,7 @@ class ServerApp {
     return null;
   }
 
-  bool _areEnumValuesEqual(List<EnumValue> a, List<EnumValue> b) {
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i].id != b[i].id || a[i].description != b[i].description) {
-        return false;
-      }
-    }
-    return true;
-  }
 
-  Future<void> _autoGenerateEnumValues(DbModel dbModel) async {
-    if (!dbModel.settings.autoGenerateEnumValues) //
-      return;
-
-    var modelChanged = false;
-    for (final classMeta in dbModel.classes) {
-      if (classMeta is ClassMetaEntityEnum && classMeta.autoByFile) {
-        final newValues = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, classMeta);
-        if (!_areEnumValuesEqual(classMeta.values, newValues)) {
-          classMeta.values = newValues;
-          modelChanged = true;
-        }
-      }
-    }
-
-    if (modelChanged) {
-      final jsonText = Config.fileJsonOptions.convert(dbModel.toJson());
-      await projectFile.writeAsString(jsonText);
-    }
-  }
 
   void _handleClientRequest(Socket client, BaseCommand command) async {
     final waitingResult = await _commandProcessorByClient[client]!.waitForIncomingCommandOrder(command);
@@ -227,7 +196,6 @@ class ServerApp {
       _executeCommand(cmd, command, client);
     } else if (command is CommandRequestRunGenerators) {
       final dbModel = providerContainer.read(serverStateProvider).state.model;
-      await _autoGenerateEnumValues(dbModel);
 
       final results = await GeneratorsJob().start(dbModel, _authorizedClients[client]!);
       var errorsMessage = '';
