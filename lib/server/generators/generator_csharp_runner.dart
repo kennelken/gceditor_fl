@@ -412,21 +412,19 @@ namespace ${data.namespace}
     for (final enumEntity in model.cache.allEnums) {
       if (enumEntity.autoByFile) {
         final typeName = '${data.prefix}${enumEntity.id}${data.postfix}';
-        sb.writeln('${_indent * 2}public static string GetPathByEnum($typeName value)');
-        sb.writeln('${_indent * 2}{');
-        sb.writeln('${_indent * 3}switch (value)');
-        sb.writeln('${_indent * 3}{');
+        sb.writeln('        public static string GetPathByEnum($typeName value)');
+        sb.writeln('        {');
+        sb.writeln('            switch (value)');
+        sb.writeln('            {');
         for (final val in enumEntity.values) {
           final escapedPath = val.description.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
-          sb.writeln('${_indent * 4}case $typeName.${val.id}:');
-          sb.writeln('${_indent * 5}return "$escapedPath";');
+          sb.writeln('                case $typeName.${val.id}:');
+          sb.writeln('                    return "$escapedPath";');
         }
-        sb.writeln('${_indent * 4}default:');
-        sb.writeln('${_indent * 5}throw new ArgumentOutOfRangeException(nameof(value), value, null);');
-        sb.writeln('${_indent * 3}}');
-        sb.writeln('${_indent * 2}}');
-        sb.writeln();
-        sb.writeln('${_indent * 2}public static string GetEnumPath($typeName value) => GetPathByEnum(value);');
+        sb.writeln('                default:');
+        sb.writeln('                    throw new ArgumentOutOfRangeException(nameof(value), value, null);');
+        sb.writeln('            }');
+        sb.writeln('        }');
         sb.writeln();
       }
     }
@@ -441,7 +439,7 @@ namespace ${data.namespace}
 
     sb.writeln('    public static class $extClassName');
     sb.writeln('    {');
-    
+
     // ICloneable extensions
     sb.writeln('        public static List<T> Clone<T>(this IEnumerable<ICloneable<T>> source)');
     sb.writeln('        {');
@@ -450,6 +448,7 @@ namespace ${data.namespace}
     sb.writeln('                result.Add(i.Clone());');
     sb.writeln('            return result;');
     sb.writeln('        }');
+    sb.writeln('');
     sb.writeln('        public static List<T> Clone<T>(this IEnumerable<ICloneable<T>> source, Action<T> modify)');
     sb.writeln('        {');
     sb.writeln('            var result = new List<T>();');
@@ -461,8 +460,7 @@ namespace ${data.namespace}
     sb.writeln('            }');
     sb.writeln('            return result;');
     sb.writeln('        }');
-
-    // List extensions
+    sb.writeln('');
     sb.writeln('        public static List<T> Clone<T>(this List<T> source)');
     sb.writeln('        {');
     sb.writeln('            var result = new List<T>(source.Count);');
@@ -479,26 +477,24 @@ namespace ${data.namespace}
     sb.writeln('            }');
     sb.writeln('            return result;');
     sb.writeln('        }');
-
-    // HashSet extensions
+    sb.writeln('');
     sb.writeln('        public static HashSet<T> Clone<T>(this HashSet<T> source)');
     sb.writeln('        {');
     sb.writeln('            return new HashSet<T>(source);');
     sb.writeln('        }');
-
-    // Dictionary extensions
+    sb.writeln('');
     sb.writeln('        public static Dictionary<TKey, TValue> Clone<TKey, TValue>(this Dictionary<TKey, TValue> source)');
     sb.writeln('        {');
     sb.writeln('            return new Dictionary<TKey, TValue>(source);');
     sb.writeln('        }');
 
-    // Enum Path extensions
     for (final enumEntity in model.cache.allEnums) {
       if (enumEntity.autoByFile) {
+        sb.writeln('');
         final typeName = '${data.prefix}${enumEntity.id}${data.postfix}';
         sb.writeln('        public static string Path(this $typeName value)');
         sb.writeln('        {');
-        sb.writeln('            return $rootClassName.GetEnumPath(value);');
+        sb.writeln('            return $rootClassName.GetPathByEnum(value);');
         sb.writeln('        }');
       }
     }

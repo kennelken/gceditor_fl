@@ -94,7 +94,10 @@ class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with Output
         fileExtension: data.fileExtension,
       );
 
-      if (!resultChanged(resultJson, previousResult, '"tables": {')) //
+      final tablesChanged = resultChanged(resultJson, previousResult, '"tables": {');
+      final pathByEnumChanged = resultChanged(resultJson, previousResult, '"pathByEnum": {');
+
+      if (!tablesChanged && !pathByEnumChanged) //
         return GeneratorResult.success();
 
       final saveError = await saveToFile(

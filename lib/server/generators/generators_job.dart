@@ -173,7 +173,10 @@ mixin FilesComparer {
     final payloadStartOldResult = oldResult.indexOf(payloadBeginning);
     final payloadStartNewResult = newResult.indexOf(payloadBeginning);
 
-    if (payloadStartOldResult <= -1) //
+    if (payloadStartOldResult <= -1 && payloadStartNewResult <= -1) //
+      return false;
+
+    if (payloadStartOldResult <= -1 || payloadStartNewResult <= -1) //
       return true;
 
     final hashOld = _getHash(oldResult, payloadStartOldResult);
