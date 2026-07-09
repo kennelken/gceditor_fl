@@ -70,9 +70,11 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
 
   @override
   BaseDbCmd createUndoCmd(DbModel dbModel) {
+    final entity = dbModel.cache.getClass(entityId) as ClassMetaEntityEnum;
+    final previousValues = entity.values.map((e) => EnumValue.fromJson(e.toJson())).toList();
     return DbCmdGenerateEnumValuesFromFiles.values(
       entityId: entityId,
-      newValues: oldValues,
+      newValues: previousValues,
     );
   }
 

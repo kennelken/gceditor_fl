@@ -269,6 +269,52 @@ void main() {
     expect(entity.pathValueFromRegex, equals('old_path'));
   });
 
+  test('DbCmdGenerateEnumValuesFromFiles execution and undo works correctly', () {
+    final dbModel = DbModel();
+    final entity = ClassMetaEntityEnum()
+      ..id = 'MyEnum'
+      ..values = [
+        EnumValue()..id = 'Val1'..description = 'Desc1',
+        EnumValue()..id = 'Val2'..description = 'Desc2',
+      ];
+    dbModel.classes.add(entity);
+    dbModel.cache.invalidate();
+
+    final cmd = DbCmdGenerateEnumValuesFromFiles.values(
+      entityId: 'MyEnum',
+      newValues: [
+        EnumValue()..id = 'Val3'..description = 'Desc3',
+      ],
+    );
+
+    // Create undo command BEFORE executing the original command, as done in ClientOwnCommandsStateNotifier
+    final undoCmd = cmd.createUndoCmd(dbModel);
+
+    // Verify undo command contains the old values
+    expect(undoCmd, isA<DbCmdGenerateEnumValuesFromFiles>());
+    final undoGenerate = undoCmd as DbCmdGenerateEnumValuesFromFiles;
+    expect(undoGenerate.newValues!.length, equals(2));
+    expect(undoGenerate.newValues![0].id, equals('Val1'));
+    expect(undoGenerate.newValues![1].id, equals('Val2'));
+
+    // Execute the original command
+    final result = cmd.execute(dbModel);
+    expect(result.success, isTrue);
+
+    // Verify fields updated in db
+    expect(entity.values.length, equals(1));
+    expect(entity.values[0].id, equals('Val3'));
+
+    // Execute the undo command
+    final undoResult = undoCmd.execute(dbModel);
+    expect(undoResult.success, isTrue);
+
+    // Verify fields reverted
+    expect(entity.values.length, equals(2));
+    expect(entity.values[0].id, equals('Val1'));
+    expect(entity.values[1].id, equals('Val2'));
+  });
+
   test('Enum auto generation respects appFilesPath setting', () {
     final tempDir = Directory.systemTemp.createTempSync('gceditor_test');
     
