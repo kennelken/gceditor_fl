@@ -6,6 +6,7 @@ import 'package:gceditor/model/db/class_meta_entity_enum.dart';
 import 'package:gceditor/model/db/enum_value.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db/generator_csharp.dart';
+import 'package:gceditor/model/db/generator_java.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_generate_enum_values_from_files.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_enum_file_settings.dart';
 import 'package:gceditor/model/db_network/authentication_data.dart';
@@ -14,6 +15,7 @@ import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/model/state/auth_list_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/server/generators/generator_csharp_runner.dart';
+import 'package:gceditor/server/generators/generator_java_runner.dart';
 import 'package:gceditor/server/generators/generators_job.dart';
 import 'package:gceditor/server/server_app.dart';
 import 'package:gceditor/utils/utils.dart';
@@ -125,7 +127,7 @@ void main() {
     }
   });
 
-  test('C# generator generates correct static path overloads and extension class', () async {
+  test('C# generator generates correct dynamic path overloads and extension class', () async {
     final tempDir = Directory.systemTemp.createTempSync('gceditor_test');
     try {
       final dbModel = DbModel();
@@ -163,13 +165,61 @@ void main() {
       expect(file.existsSync(), isTrue);
       final generatedCode = file.readAsStringSync();
 
-      expect(generatedCode.contains('public static string GetPathByEnum(MyPrefixBuildingPresentationTypeMyPostfix value)'), isTrue);
+      expect(generatedCode.contains('public string GetPathByEnum(MyPrefixBuildingPresentationTypeMyPostfix value)'), isTrue);
+      expect(generatedCode.contains('public Dictionary<string, Dictionary<string, string>> PathByEnum { get; set; }'), isTrue);
+      expect(generatedCode.contains('public static MyPrefixRootMyPostfix Instance { get; private set; }'), isTrue);
 
       expect(generatedCode.contains('public static class MyPrefixExtensionsMyPostfix'), isTrue);
-      expect(generatedCode.contains('public static string Path(this MyPrefixBuildingPresentationTypeMyPostfix value)'), isTrue);
-      expect(generatedCode.contains('return MyPrefixRootMyPostfix.GetPathByEnum(value);'), isTrue);
+      expect(generatedCode.contains('public static string Path(this MyPrefixBuildingPresentationTypeMyPostfix value, MyPrefixRootMyPostfix root = null)'), isTrue);
+      expect(generatedCode.contains('return (root ?? MyPrefixRootMyPostfix.Instance)?.GetPathByEnum(value) ?? "";'), isTrue);
       expect(generatedCode.contains('public static class ListExtensions'), isFalse);
       expect(generatedCode.contains('public static class IClonableExtensions'), isFalse);
+    } finally {
+      tempDir.deleteSync(recursive: true);
+    }
+  });
+
+  test('Java generator generates correct dynamic path overloads', () async {
+    final tempDir = Directory.systemTemp.createTempSync('gceditor_test_java');
+    try {
+      final dbModel = DbModel();
+      
+      final entity = ClassMetaEntityEnum()
+        ..id = 'BuildingPresentationType'
+        ..autoByFile = true
+        ..filePathRegex = r'Assets/Prefabs/(.*)\.prefab'
+        ..enumNameFromRegex = '{1}'
+        ..pathValueFromRegex = '{0}';
+      entity.values = [
+        EnumValue()..id = 'Player'..description = 'Assets/Prefabs/Player.prefab',
+        EnumValue()..id = 'Monster'..description = 'Assets/Prefabs/Monster.prefab',
+      ];
+      dbModel.classes.add(entity);
+      dbModel.cache.invalidate();
+
+      final generator = GeneratorJava()
+        ..prefix = 'MyPrefix'
+        ..postfix = 'MyPostfix'
+        ..namespace = 'MyNamespace'
+        ..fileName = 'MyPrefixRootMyPostfix'
+        ..fileExtension = 'java';
+
+      final runner = GeneratorJavaRunner();
+      final genResult = await runner.execute(
+        tempDir.path,
+        dbModel,
+        generator,
+        GeneratorAdditionalInformation(date: '2026-07-08', user: 'TestUser'),
+      );
+      expect(genResult.success, isTrue, reason: genResult.error);
+
+      final file = File('${tempDir.path}/MyPrefixRootMyPostfix.java');
+      expect(file.existsSync(), isTrue);
+      final generatedCode = file.readAsStringSync();
+
+      expect(generatedCode.contains('public String GetPathByEnum(MyPrefixBuildingPresentationTypeMyPostfix value)'), isTrue);
+      expect(generatedCode.contains('public HashMap<String, HashMap<String, String>> PathByEnum;'), isTrue);
+      expect(generatedCode.contains('public HashMap<String, HashMap<String, String>> pathByEnum;'), isTrue);
     } finally {
       tempDir.deleteSync(recursive: true);
     }

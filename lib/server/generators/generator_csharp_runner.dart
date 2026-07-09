@@ -412,18 +412,14 @@ namespace ${data.namespace}
     for (final enumEntity in model.cache.allEnums) {
       if (enumEntity.autoByFile) {
         final typeName = '${data.prefix}${enumEntity.id}${data.postfix}';
-        sb.writeln('        public static string GetPathByEnum($typeName value)');
+        sb.writeln('        public string GetPathByEnum($typeName value)');
         sb.writeln('        {');
-        sb.writeln('            switch (value)');
+        sb.writeln('            if (PathByEnum != null && PathByEnum.TryGetValue("${enumEntity.id}", out var enumMap))');
         sb.writeln('            {');
-        for (final val in enumEntity.values) {
-          final escapedPath = val.description.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
-          sb.writeln('                case $typeName.${val.id}:');
-          sb.writeln('                    return "$escapedPath";');
-        }
-        sb.writeln('                default:');
-        sb.writeln('                    throw new ArgumentOutOfRangeException(nameof(value), value, null);');
+        sb.writeln('                if (enumMap.TryGetValue(value.ToString(), out var pathValue))');
+        sb.writeln('                    return pathValue;');
         sb.writeln('            }');
+        sb.writeln('            throw new ArgumentOutOfRangeException(nameof(value), value, "Path not found in JSON data for enum value");');
         sb.writeln('        }');
         sb.writeln();
       }
@@ -492,9 +488,9 @@ namespace ${data.namespace}
       if (enumEntity.autoByFile) {
         sb.writeln('');
         final typeName = '${data.prefix}${enumEntity.id}${data.postfix}';
-        sb.writeln('        public static string Path(this $typeName value)');
+        sb.writeln('        public static string Path(this $typeName value, $rootClassName root = null)');
         sb.writeln('        {');
-        sb.writeln('            return $rootClassName.GetPathByEnum(value);');
+        sb.writeln('            return (root ?? $rootClassName.Instance)?.GetPathByEnum(value) ?? "";');
         sb.writeln('        }');
       }
     }
@@ -1087,7 +1083,6 @@ using Rectangle = System.Drawing.RectangleF;
         string Id { get; }
         bool IsGlobal { get; }
     }
-#endregion
 
 #region Root
     /// <summary>
@@ -1105,6 +1100,8 @@ using Rectangle = System.Drawing.RectangleF;
 
         public ItemsLists Lists { get; internal set; }
         public TablesList Tables { get; internal set; }
+        public Dictionary<string, Dictionary<string, string>> PathByEnum { get; set; }
+        public static {${_paramPrefix}}Root{${_paramPostfix}} Instance { get; private set; }
 
         public T Get<T>(string id) where T : IIdentifiable
         {
@@ -1194,6 +1191,7 @@ using Rectangle = System.Drawing.RectangleF;
         /// </summary>
         internal void Initialize(List<IIdentifiable> items)
         {
+            Instance = this;
             _emptyCollectionFactory = new EmptyCollectionFactory();
 
             AllItems = new Dictionary<string, IIdentifiable>();
@@ -1634,6 +1632,7 @@ using Rectangle = System.Drawing.RectangleF;
             root.CreationTime = jsonRoot.generationDate;
             root.Initialize(new List<IIdentifiable>(objectsByIds.Values));
             root.Tables = new TablesList(tables);
+            root.PathByEnum = jsonRoot.pathByEnum ?? new Dictionary<string, Dictionary<string, string>>();
 
             var cache = new CacheRoot();
 
@@ -1658,6 +1657,7 @@ using Rectangle = System.Drawing.RectangleF;
             public string generationDate;
             public string generationUser;
             public Dictionary<string, List<Dictionary<string, object>>> tables;
+            public Dictionary<string, Dictionary<string, string>> pathByEnum;
         }
 
         private static IIdentifiable GetNewInstance(string className, Dictionary<string, object> item, string ownerId = null)
@@ -2078,7 +2078,6 @@ using Rectangle = System.Drawing.RectangleF;
     }
 
 {${_paramExtensionsClass}}
-
     public class ErrorData
     {
         public IIdentifiable Entity { get; }

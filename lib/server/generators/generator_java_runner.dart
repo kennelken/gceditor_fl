@@ -87,13 +87,13 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
               _paramAssignValueCases: _getAssignValuesCases(model, data),
               _paramMaxStructDepth: _getMaxStructDepth(model, 3),
               _paramTableClassMap: _getTableClassMap(model, data),
+              _paramGetPathByEnumOverloads: _getPathByEnumOverloads(model, data),
             },
           ),
           _paramListItemsListsAssignment: _getListItemsListAssignment(model, data),
           _paramListItemsListsDeclarations: _getListItemsListsDeclarations(model, data),
           _paramTablesListDeclarations: _getTablesListDeclarations(model, data),
           _paramTablesListAssignment: _getTablesListAssignment(model, data),
-          _paramGetPathByEnumOverloads: _getPathByEnumOverloads(model, data),
         },
       );
 
@@ -379,16 +379,17 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
         final typeName = '${data.prefix}${enumEntity.id}${data.postfix}';
         sb.writeln('    public String GetPathByEnum($typeName value)');
         sb.writeln('    {');
-        sb.writeln('        switch (value)');
+        sb.writeln('        if (PathByEnum != null)');
         sb.writeln('        {');
-        for (final val in enumEntity.values) {
-          final escapedPath = val.description.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
-          sb.writeln('            case ${val.id}:');
-          sb.writeln('                return "$escapedPath";');
-        }
-        sb.writeln('            default:');
-        sb.writeln('                throw new IllegalArgumentException("Unexpected value: " + value);');
+        sb.writeln('            var enumMap = PathByEnum.get("${enumEntity.id}");');
+        sb.writeln('            if (enumMap != null)');
+        sb.writeln('            {');
+        sb.writeln('                var pathValue = enumMap.get(value.name());');
+        sb.writeln('                if (pathValue != null)');
+        sb.writeln('                    return pathValue;');
+        sb.writeln('            }');
         sb.writeln('        }');
+        sb.writeln('        throw new IllegalArgumentException("Unexpected value or path not found in JSON: " + value);');
         sb.writeln('    }');
         sb.writeln();
       }
@@ -936,6 +937,7 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
     public ItemsLists getLists() { return Lists; }
     public TablesList Tables;
     public TablesList getTables() { return Tables; }
+    public HashMap<String, HashMap<String, String>> PathByEnum;
 
     public <T extends IIdentifiable> T Get(Class<T> itemClass, String id) throws Exception
     {
@@ -1363,6 +1365,7 @@ class RectangleInt {
             root.CreationTime = jsonRoot.generationDate;
             root.Initialize(new ArrayList<IIdentifiable>(objectsByIds.values()));
             root.Tables = new TablesList(tables);
+            root.PathByEnum = jsonRoot.pathByEnum != null ? jsonRoot.pathByEnum : new HashMap<>();
 
             _inlineItemsCounter.clear();
 
@@ -1374,6 +1377,7 @@ class RectangleInt {
             public String generationDate;
             public String generationUser;
             public HashMap<String, ArrayList<HashMap<String, Object>>> tables;
+            public HashMap<String, HashMap<String, String>> pathByEnum;
         }
 
         private static String GetTableClass(String tableId)
