@@ -143,22 +143,6 @@ class ServerApp {
 
     providerContainer.read(serverStateProvider).setModel(dbModel);
 
-    // Auto-generate enum values from files if configured
-    var modelChanged = false;
-    for (final classMeta in dbModel.classes) {
-      if (classMeta is ClassMetaEntityEnum && classMeta.autoByFile && classMeta.autoByFileAutoRefresh) {
-        final newValues = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, classMeta);
-        if (!_areEnumValuesEqual(classMeta.values, newValues)) {
-          classMeta.values = newValues;
-          modelChanged = true;
-        }
-      }
-    }
-    if (modelChanged) {
-      final jsonText = Config.fileJsonOptions.convert(dbModel.toJson());
-      await projectFile.writeAsString(jsonText);
-    }
-
     final projectDir = projectFile.parent.path;
     final settings = dbModel.settings;
 
@@ -182,6 +166,27 @@ class ServerApp {
       }
     }
     return true;
+  }
+
+  Future<void> _autoGenerateEnumValues(DbModel dbModel) async {
+    if (!dbModel.settings.autoGenerateEnumValues) //
+      return;
+
+    var modelChanged = false;
+    for (final classMeta in dbModel.classes) {
+      if (classMeta is ClassMetaEntityEnum && classMeta.autoByFile) {
+        final newValues = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, classMeta);
+        if (!_areEnumValuesEqual(classMeta.values, newValues)) {
+          classMeta.values = newValues;
+          modelChanged = true;
+        }
+      }
+    }
+
+    if (modelChanged) {
+      final jsonText = Config.fileJsonOptions.convert(dbModel.toJson());
+      await projectFile.writeAsString(jsonText);
+    }
   }
 
   void _handleClientRequest(Socket client, BaseCommand command) async {
@@ -221,7 +226,10 @@ class ServerApp {
       final cmd = command.payload;
       _executeCommand(cmd, command, client);
     } else if (command is CommandRequestRunGenerators) {
-      final results = await GeneratorsJob().start(providerContainer.read(serverStateProvider).state.model, _authorizedClients[client]!);
+      final dbModel = providerContainer.read(serverStateProvider).state.model;
+      await _autoGenerateEnumValues(dbModel);
+
+      final results = await GeneratorsJob().start(dbModel, _authorizedClients[client]!);
       var errorsMessage = '';
       var numErrors = 0;
       results.where((element) => !element.success).forEach((element) {
@@ -231,7 +239,11 @@ class ServerApp {
       if (errorsMessage.isNotEmpty) {
         errorsMessage = '$numErrors errors occured:\n$errorsMessage';
         _commandProcessorByClient[client]!.sendCommand(
-          CommandErrorResponse(sourceCommand: command, message: errorsMessage, model: providerContainer.read(serverStateProvider).state.model),
+          CommandErrorResponse(
+            sourceCommand: command,
+            message: errorsMessage,
+            model: providerContainer.read(serverStateProvider).state.model,
+          ),
           command,
         );
       } else {

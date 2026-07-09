@@ -157,11 +157,10 @@ void main() {
       final generatedCode = file.readAsStringSync();
 
       expect(generatedCode.contains('public static string GetPathByEnum(MyPrefixBuildingPresentationTypeMyPostfix value)'), isTrue);
-      expect(generatedCode.contains('public static string GetEnumPath(MyPrefixBuildingPresentationTypeMyPostfix value) => GetPathByEnum(value);'), isTrue);
 
       expect(generatedCode.contains('public static class MyPrefixExtensionsMyPostfix'), isTrue);
       expect(generatedCode.contains('public static string Path(this MyPrefixBuildingPresentationTypeMyPostfix value)'), isTrue);
-      expect(generatedCode.contains('return MyPrefixRootMyPostfix.GetEnumPath(value);'), isTrue);
+      expect(generatedCode.contains('return MyPrefixRootMyPostfix.GetPathByEnum(value);'), isTrue);
       expect(generatedCode.contains('public static class ListExtensions'), isFalse);
       expect(generatedCode.contains('public static class IClonableExtensions'), isFalse);
     } finally {
@@ -219,8 +218,7 @@ void main() {
       ..filePathRegex = 'old_regex'
       ..filePathRegexExclude = 'old_exclude'
       ..enumNameFromRegex = 'old_name'
-      ..pathValueFromRegex = 'old_path'
-      ..autoByFileAutoRefresh = false;
+      ..pathValueFromRegex = 'old_path';
     dbModel.classes.add(entity);
     dbModel.cache.invalidate();
 
@@ -230,7 +228,6 @@ void main() {
       filePathRegexExclude: 'new_exclude',
       enumNameFromRegex: 'new_name',
       pathValueFromRegex: 'new_path',
-      autoByFileAutoRefresh: true,
     );
 
     // Create undo command BEFORE executing the original command, as done in ClientOwnCommandsStateNotifier
@@ -243,7 +240,6 @@ void main() {
     expect(undoEdit.filePathRegexExclude, equals('old_exclude'));
     expect(undoEdit.enumNameFromRegex, equals('old_name'));
     expect(undoEdit.pathValueFromRegex, equals('old_path'));
-    expect(undoEdit.autoByFileAutoRefresh, equals(false));
 
     // Execute the original command
     final result = cmd.execute(dbModel);
@@ -254,7 +250,6 @@ void main() {
     expect(entity.filePathRegexExclude, equals('new_exclude'));
     expect(entity.enumNameFromRegex, equals('new_name'));
     expect(entity.pathValueFromRegex, equals('new_path'));
-    expect(entity.autoByFileAutoRefresh, equals(true));
 
     // Execute the undo command
     final undoResult = undoCmd.execute(dbModel);
@@ -265,7 +260,6 @@ void main() {
     expect(entity.filePathRegexExclude, equals('old_exclude'));
     expect(entity.enumNameFromRegex, equals('old_name'));
     expect(entity.pathValueFromRegex, equals('old_path'));
-    expect(entity.autoByFileAutoRefresh, equals(false));
   });
 
   test('Enum auto generation respects appFilesPath setting', () {

@@ -23,8 +23,6 @@ class ClassMetaEntityEnum extends ClassMeta {
   String enumNameFromRegex = '';
   @JsonKey(defaultValue: '')
   String pathValueFromRegex = '';
-  @JsonKey(defaultValue: false)
-  bool autoByFileAutoRefresh = false;
 
   ClassMetaEntityEnum() {
     $type = ClassMetaType.$enum;

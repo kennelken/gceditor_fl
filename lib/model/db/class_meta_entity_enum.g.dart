@@ -23,8 +23,7 @@ ClassMetaEntityEnum _$ClassMetaEntityEnumFromJson(Map<String, dynamic> json) =>
       ..fileContentRegexExclude =
           json['fileContentRegexExclude'] as String? ?? ''
       ..enumNameFromRegex = json['enumNameFromRegex'] as String? ?? ''
-      ..pathValueFromRegex = json['pathValueFromRegex'] as String? ?? ''
-      ..autoByFileAutoRefresh = json['autoByFileAutoRefresh'] as bool? ?? false;
+      ..pathValueFromRegex = json['pathValueFromRegex'] as String? ?? '';
 
 Map<String, dynamic> _$ClassMetaEntityEnumToJson(ClassMetaEntityEnum instance) {
   final val = <String, dynamic>{};
@@ -47,7 +46,6 @@ Map<String, dynamic> _$ClassMetaEntityEnumToJson(ClassMetaEntityEnum instance) {
   val['fileContentRegexExclude'] = instance.fileContentRegexExclude;
   val['enumNameFromRegex'] = instance.enumNameFromRegex;
   val['pathValueFromRegex'] = instance.pathValueFromRegex;
-  val['autoByFileAutoRefresh'] = instance.autoByFileAutoRefresh;
   return val;
 }
 

@@ -428,6 +428,33 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                     GeneratorsView(
                       key: ValueKey(ref.watch(clientStateProvider).state.version),
                     ),
+                    SizedBox(height: 10 * kScale),
+                    TooltipWrapper(
+                      message: Loc.get.autoGenerateEnumValuesTooltip,
+                      child: SizedBox(
+                        height: 30 * kScale,
+                        child: Row(
+                          children: [
+                            kStyle.wrapCheckbox(
+                              Checkbox(
+                                value: model.settings.autoGenerateEnumValues,
+                                onChanged: (val) {
+                                  providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+                                        DbCmdEditProjectSettings.values(
+                                          autoGenerateEnumValues: val ?? false,
+                                        ),
+                                      );
+                                },
+                              ),
+                            ),
+                            Text(
+                              Loc.get.autoGenerateEnumValues,
+                              style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

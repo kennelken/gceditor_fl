@@ -50,7 +50,6 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
   late final TextEditingController _fileContentRegexExcludeController = TextEditingController();
   late final TextEditingController _enumNameFromRegexController = TextEditingController();
   late final TextEditingController _pathValueFromRegexController = TextEditingController();
-  bool _autoByFileAutoRefresh = false;
 
   @override
   void initState() {
@@ -76,8 +75,7 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
         oldWidget.data.fileContentRegexInclude != widget.data.fileContentRegexInclude ||
         oldWidget.data.fileContentRegexExclude != widget.data.fileContentRegexExclude ||
         oldWidget.data.enumNameFromRegex != widget.data.enumNameFromRegex ||
-        oldWidget.data.pathValueFromRegex != widget.data.pathValueFromRegex ||
-        oldWidget.data.autoByFileAutoRefresh != widget.data.autoByFileAutoRefresh) {
+        oldWidget.data.pathValueFromRegex != widget.data.pathValueFromRegex) {
       _initControllers();
     }
   }
@@ -100,7 +98,6 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
     _fileContentRegexExcludeController.text = widget.data.fileContentRegexExclude;
     _enumNameFromRegexController.text = widget.data.enumNameFromRegex;
     _pathValueFromRegexController.text = widget.data.pathValueFromRegex;
-    _autoByFileAutoRefresh = widget.data.autoByFileAutoRefresh;
   }
 
   void _handleClientStateChanges([bool toSetState = true]) {
@@ -189,8 +186,7 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
         _fileContentRegexIncludeController.text != widget.data.fileContentRegexInclude ||
         _fileContentRegexExcludeController.text != widget.data.fileContentRegexExclude ||
         _enumNameFromRegexController.text != widget.data.enumNameFromRegex ||
-        _pathValueFromRegexController.text != widget.data.pathValueFromRegex ||
-        _autoByFileAutoRefresh != widget.data.autoByFileAutoRefresh;
+        _pathValueFromRegexController.text != widget.data.pathValueFromRegex;
   }
 
   void _saveSettings() {
@@ -205,7 +201,6 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
             fileContentRegexExclude: _fileContentRegexExcludeController.text,
             enumNameFromRegex: _enumNameFromRegexController.text,
             pathValueFromRegex: _pathValueFromRegexController.text,
-            autoByFileAutoRefresh: _autoByFileAutoRefresh,
           ),
         );
   }
@@ -509,31 +504,6 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                             ),
                           ),
                         ],
-                      ),
-                    ),
-                    kStyle.kPropertiesVerticalDivider,
-                    TooltipWrapper(
-                      message: Loc.get.autoTooltip,
-                      child: SizedBox(
-                        height: 30 * kScale,
-                        child: Row(
-                          children: [
-                            kStyle.wrapCheckbox(
-                              Checkbox(
-                                value: _autoByFileAutoRefresh,
-                                onChanged: (val) {
-                                  setState(() {
-                                    _autoByFileAutoRefresh = val ?? false;
-                                  });
-                                },
-                              ),
-                            ),
-                            Text(
-                              Loc.get.auto,
-                              style: kStyle.kTextExtraSmallPropertyHeader,
-                            ),
-                          ],
-                        ),
                       ),
                     ),
                     if (_hasAnyChanges()) ...[

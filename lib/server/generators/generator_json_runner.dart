@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:gceditor/model/db/db_model.dart';
-import 'package:gceditor/model/db/class_meta_entity_enum.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/db/generator_json.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';

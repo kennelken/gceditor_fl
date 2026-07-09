@@ -15,6 +15,7 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
   double? saveDelay;
   @JsonKey(toJson: BaseGenerator.encodeGenerators, fromJson: BaseGenerator.decodeGenerators)
   List<BaseGenerator>? generators;
+  bool? autoGenerateEnumValues;
   String? outputPath;
   String? historyPath;
   String? authPath;
@@ -25,6 +26,7 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
     this.timezone,
     this.saveDelay,
     this.generators,
+    this.autoGenerateEnumValues,
     this.outputPath,
     this.historyPath,
     this.authPath,
@@ -48,6 +50,8 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
       dbModel.settings.saveDelay = saveDelay!;
 
     if (generators != null) dbModel.settings.generators = generators!;
+
+    if (autoGenerateEnumValues != null) dbModel.settings.autoGenerateEnumValues = autoGenerateEnumValues!;
 
     if (outputPath != null) {
       if (outputPath!.isEmpty)
@@ -115,6 +119,7 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
     return DbCmdEditProjectSettings.values(
       timezone: timezone != null ? dbModel.settings.timeZone : null,
       generators: generators != null ? BaseGenerator.decodeGenerators(BaseGenerator.encodeGenerators(dbModel.settings.generators)) : null,
+      autoGenerateEnumValues: autoGenerateEnumValues != null ? dbModel.settings.autoGenerateEnumValues : null,
       outputPath: outputPath != null ? dbModel.settings.outputPath : null,
       historyPath: historyPath != null ? dbModel.settings.historyPath : null,
       authPath: authPath != null ? dbModel.settings.authPath : null,

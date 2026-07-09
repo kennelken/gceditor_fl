@@ -17,6 +17,8 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
   late String entityId;
   List<EnumValue>? newValues;
   List<EnumValue>? oldValues;
+  int? filesFound;
+  int? valuesAdded;
 
   DbCmdGenerateEnumValuesFromFiles.values({
     String? id,
@@ -43,6 +45,10 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
       final scanned = scan(dbModel, entity);
       newValues = scanned;
     }
+
+    filesFound = newValues!.length;
+    final oldIds = oldValues!.map((e) => e.id).toSet();
+    valuesAdded = newValues!.where((e) => !oldIds.contains(e.id)).length;
 
     entity.values = newValues!;
     return DbCmdResult.success();

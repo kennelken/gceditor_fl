@@ -19,7 +19,6 @@ DbCmdEditEnumFileSettings _$DbCmdEditEnumFileSettingsFromJson(
       ..fileContentRegexExclude = json['fileContentRegexExclude'] as String?
       ..enumNameFromRegex = json['enumNameFromRegex'] as String?
       ..pathValueFromRegex = json['pathValueFromRegex'] as String?
-      ..autoByFileAutoRefresh = json['autoByFileAutoRefresh'] as bool?
       ..oldAutoByFile = json['oldAutoByFile'] as bool?
       ..oldFilePathRegex = json['oldFilePathRegex'] as String?
       ..oldFilePathRegexExclude = json['oldFilePathRegexExclude'] as String?
@@ -28,8 +27,7 @@ DbCmdEditEnumFileSettings _$DbCmdEditEnumFileSettingsFromJson(
       ..oldFileContentRegexExclude =
           json['oldFileContentRegexExclude'] as String?
       ..oldEnumNameFromRegex = json['oldEnumNameFromRegex'] as String?
-      ..oldPathValueFromRegex = json['oldPathValueFromRegex'] as String?
-      ..oldAutoByFileAutoRefresh = json['oldAutoByFileAutoRefresh'] as bool?;
+      ..oldPathValueFromRegex = json['oldPathValueFromRegex'] as String?;
 
 Map<String, dynamic> _$DbCmdEditEnumFileSettingsToJson(
     DbCmdEditEnumFileSettings instance) {
@@ -52,7 +50,6 @@ Map<String, dynamic> _$DbCmdEditEnumFileSettingsToJson(
   writeNotNull('fileContentRegexExclude', instance.fileContentRegexExclude);
   writeNotNull('enumNameFromRegex', instance.enumNameFromRegex);
   writeNotNull('pathValueFromRegex', instance.pathValueFromRegex);
-  writeNotNull('autoByFileAutoRefresh', instance.autoByFileAutoRefresh);
   writeNotNull('oldAutoByFile', instance.oldAutoByFile);
   writeNotNull('oldFilePathRegex', instance.oldFilePathRegex);
   writeNotNull('oldFilePathRegexExclude', instance.oldFilePathRegexExclude);
@@ -62,7 +59,6 @@ Map<String, dynamic> _$DbCmdEditEnumFileSettingsToJson(
       'oldFileContentRegexExclude', instance.oldFileContentRegexExclude);
   writeNotNull('oldEnumNameFromRegex', instance.oldEnumNameFromRegex);
   writeNotNull('oldPathValueFromRegex', instance.oldPathValueFromRegex);
-  writeNotNull('oldAutoByFileAutoRefresh', instance.oldAutoByFileAutoRefresh);
   return val;
 }
 

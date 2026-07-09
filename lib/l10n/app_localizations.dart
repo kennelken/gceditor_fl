@@ -1407,6 +1407,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This path is optional and is used as the base directory for auto-generating enums.\n\nResolved absolute path:\n{resolvedPath}'**
   String appFilesPathTooltip(String resolvedPath);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'auto-generate enum values from files'**
+  String get autoGenerateEnumValues;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically scan and update enum values from files every time generators are run'**
+  String get autoGenerateEnumValuesTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Found {filesFound} file(s) and added {valuesAdded} value(s) to enums'**
+  String enumAutoGenerationSummary(int filesFound, int valuesAdded);
 }
 
 class _AppLocalizationsDelegate

@@ -17,7 +17,6 @@ class DbCmdEditEnumFileSettings extends BaseDbCmd {
   String? fileContentRegexExclude;
   String? enumNameFromRegex;
   String? pathValueFromRegex;
-  bool? autoByFileAutoRefresh;
 
   // For undo
   bool? oldAutoByFile;
@@ -27,7 +26,6 @@ class DbCmdEditEnumFileSettings extends BaseDbCmd {
   String? oldFileContentRegexExclude;
   String? oldEnumNameFromRegex;
   String? oldPathValueFromRegex;
-  bool? oldAutoByFileAutoRefresh;
 
   DbCmdEditEnumFileSettings.values({
     String? id,
@@ -39,7 +37,6 @@ class DbCmdEditEnumFileSettings extends BaseDbCmd {
     this.fileContentRegexExclude,
     this.enumNameFromRegex,
     this.pathValueFromRegex,
-    this.autoByFileAutoRefresh,
   }) : super.withId(id) {
     $type = DbCmdType.editEnumFileSettings;
   }
@@ -61,7 +58,6 @@ class DbCmdEditEnumFileSettings extends BaseDbCmd {
     oldFileContentRegexExclude = entity.fileContentRegexExclude;
     oldEnumNameFromRegex = entity.enumNameFromRegex;
     oldPathValueFromRegex = entity.pathValueFromRegex;
-    oldAutoByFileAutoRefresh = entity.autoByFileAutoRefresh;
 
     if (autoByFile != null) entity.autoByFile = autoByFile!;
     if (filePathRegex != null) entity.filePathRegex = filePathRegex!;
@@ -70,7 +66,6 @@ class DbCmdEditEnumFileSettings extends BaseDbCmd {
     if (fileContentRegexExclude != null) entity.fileContentRegexExclude = fileContentRegexExclude!;
     if (enumNameFromRegex != null) entity.enumNameFromRegex = enumNameFromRegex!;
     if (pathValueFromRegex != null) entity.pathValueFromRegex = pathValueFromRegex!;
-    if (autoByFileAutoRefresh != null) entity.autoByFileAutoRefresh = autoByFileAutoRefresh!;
 
     return DbCmdResult.success();
   }
@@ -99,7 +94,6 @@ class DbCmdEditEnumFileSettings extends BaseDbCmd {
       fileContentRegexExclude: fileContentRegexExclude != null ? entity.fileContentRegexExclude : null,
       enumNameFromRegex: enumNameFromRegex != null ? entity.enumNameFromRegex : null,
       pathValueFromRegex: pathValueFromRegex != null ? entity.pathValueFromRegex : null,
-      autoByFileAutoRefresh: autoByFileAutoRefresh != null ? entity.autoByFileAutoRefresh : null,
     );
   }
 }
