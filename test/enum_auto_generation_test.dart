@@ -215,7 +215,11 @@ void main() {
     // 4. Optional filePathRegexExclude validation
     expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', '[a-z'), isFalse); // invalid exclude regex syntax
     expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', 'Player'), isTrue); // valid exclude regex
-    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', ''), isTrue); // empty exclude regex (optional)
+    // 5. Optional fileContentRegexInclude / fileContentRegexExclude validation
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', '', '[a-z'), isFalse);
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', '', 'Status: Active'), isTrue);
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', '', '', '[a-z'), isFalse);
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', '', '', 'Type: Enemy'), isTrue);
   });
 
   test('DbCmdEditEnumFileSettings execution and undo works correctly', () {

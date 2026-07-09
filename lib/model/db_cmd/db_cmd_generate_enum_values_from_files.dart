@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:gceditor/model/db/class_meta_entity_enum.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db/enum_value.dart';
@@ -99,35 +100,9 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
       return [];
     }
 
-    RegExp? regExpExclude;
-    final regexExcludeText = entity.filePathRegexExclude;
-    if (regexExcludeText.isNotEmpty) {
-      try {
-        regExpExclude = RegExp(regexExcludeText);
-      } catch (e) {
-        // ignore
-      }
-    }
-
-    RegExp? contentRegExpInclude;
-    final contentRegexIncludeText = entity.fileContentRegexInclude;
-    if (contentRegexIncludeText.isNotEmpty) {
-      try {
-        contentRegExpInclude = RegExp(contentRegexIncludeText);
-      } catch (e) {
-        // ignore
-      }
-    }
-
-    RegExp? contentRegExpExclude;
-    final contentRegexExcludeText = entity.fileContentRegexExclude;
-    if (contentRegexExcludeText.isNotEmpty) {
-      try {
-        contentRegExpExclude = RegExp(contentRegexExcludeText);
-      } catch (e) {
-        // ignore
-      }
-    }
+    final regExpExclude = _tryParseRegExp(entity.filePathRegexExclude);
+    final contentRegExpInclude = _tryParseRegExp(entity.fileContentRegexInclude);
+    final contentRegExpExclude = _tryParseRegExp(entity.fileContentRegexExclude);
 
     final files = _getAllFiles(scanDir);
     final results = <EnumValue>[];
@@ -184,35 +159,119 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
 
   static String sanitizeIdentifier(String name) {
     if (name.isEmpty) return 'Invalid';
-    
+
     // Replace any character not in [a-zA-Z0-9_] with '_'
     var sanitized = name.replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '_');
-    
+
     // If it starts with a digit, prepend '_'
     if (RegExp(r'^[0-9]').hasMatch(sanitized)) {
       sanitized = '_$sanitized';
     }
-    
+
     // Ensure length >= 2
     if (sanitized.length < 2) {
       sanitized = '${sanitized}_';
     }
 
     const keywords = {
-      'abstract', 'as', 'base', 'bool', 'break', 'byte', 'case', 'catch', 'char', 'checked', 'class', 'const',
-      'continue', 'decimal', 'default', 'delegate', 'do', 'double', 'else', 'enum', 'event', 'explicit',
-      'extern', 'false', 'finally', 'fixed', 'float', 'for', 'foreach', 'goto', 'if', 'implicit', 'in', 'int',
-      'interface', 'internal', 'is', 'lock', 'long', 'namespace', 'new', 'null', 'object', 'operator', 'out',
-      'override', 'params', 'private', 'protected', 'public', 'readonly', 'ref', 'return', 'sbyte', 'sealed',
-      'short', 'sizeof', 'stackalloc', 'static', 'string', 'struct', 'switch', 'this', 'throw', 'true', 'try',
-      'typeof', 'uint', 'ulong', 'unchecked', 'unsafe', 'ushort', 'using', 'virtual', 'void', 'volatile', 'while',
-      'assert', 'boolean', 'extends', 'final', 'implements', 'import', 'instanceof', 'native', 'package',
-      'strictfp', 'super', 'synchronized', 'transient', 'exports', 'module', 'requires'
+      'abstract',
+      'as',
+      'base',
+      'bool',
+      'break',
+      'byte',
+      'case',
+      'catch',
+      'char',
+      'checked',
+      'class',
+      'const',
+      'continue',
+      'decimal',
+      'default',
+      'delegate',
+      'do',
+      'double',
+      'else',
+      'enum',
+      'event',
+      'explicit',
+      'extern',
+      'false',
+      'finally',
+      'fixed',
+      'float',
+      'for',
+      'foreach',
+      'goto',
+      'if',
+      'implicit',
+      'in',
+      'int',
+      'interface',
+      'internal',
+      'is',
+      'lock',
+      'long',
+      'namespace',
+      'new',
+      'null',
+      'object',
+      'operator',
+      'out',
+      'override',
+      'params',
+      'private',
+      'protected',
+      'public',
+      'readonly',
+      'ref',
+      'return',
+      'sbyte',
+      'sealed',
+      'short',
+      'sizeof',
+      'stackalloc',
+      'static',
+      'string',
+      'struct',
+      'switch',
+      'this',
+      'throw',
+      'true',
+      'try',
+      'typeof',
+      'uint',
+      'ulong',
+      'unchecked',
+      'unsafe',
+      'ushort',
+      'using',
+      'virtual',
+      'void',
+      'volatile',
+      'while',
+      'assert',
+      'boolean',
+      'extends',
+      'final',
+      'implements',
+      'import',
+      'instanceof',
+      'native',
+      'package',
+      'strictfp',
+      'super',
+      'synchronized',
+      'transient',
+      'exports',
+      'module',
+      'requires'
     };
     if (keywords.contains(sanitized)) {
       sanitized = '_$sanitized';
     }
-    
+
     return sanitized;
   }
 
@@ -238,5 +297,14 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
       result = result.replaceAll('{$i}', groupVal);
     }
     return result;
+  }
+
+  static RegExp? _tryParseRegExp(String pattern) {
+    if (pattern.isEmpty) return null;
+    try {
+      return RegExp(pattern);
+    } catch (_) {
+      return null;
+    }
   }
 }
