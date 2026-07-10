@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/properties/primitives/delete_button.dart';
@@ -12,6 +15,7 @@ import 'package:gceditor/model/db/enum_value.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_delete_enum_value.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_enum_value.dart';
 import 'package:gceditor/model/model_root.dart';
+import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/model/state/client_find_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/client_view_mode_state.dart';
@@ -113,6 +117,35 @@ class _EnumValueViewState extends State<EnumValueView> {
                 ),
               ),
             ),
+            if (ref.watch(appStateProvider).state.appMode == AppMode.standalone &&
+                widget.entity.autoByFile &&
+                widget.data.fullPath != null &&
+                widget.data.fullPath!.isNotEmpty) ...[
+              TooltipWrapper(
+                message: _getAbsolutePath() ?? widget.data.fullPath!,
+                child: IconButtonTransparent(
+                  size: 22 * kScale,
+                  icon: Icon(
+                    FontAwesomeIcons.folderOpen,
+                    color: kColorPrimaryLight,
+                    size: 12 * kScale,
+                  ),
+                  onClick: _handleShowInExplorer,
+                ),
+              ),
+              TooltipWrapper(
+                message: _getAbsolutePath() ?? widget.data.fullPath!,
+                child: IconButtonTransparent(
+                  size: 22 * kScale,
+                  icon: Icon(
+                    FontAwesomeIcons.arrowUpRightFromSquare,
+                    color: kColorPrimaryLight,
+                    size: 12 * kScale,
+                  ),
+                  onClick: _handleOpenFile,
+                ),
+              ),
+            ],
             if (ref.watch(clientViewModeStateProvider).state.actionsMode) ...[
               TooltipWrapper(
                 message: Loc.get.findReferencesTooltip,
@@ -206,5 +239,42 @@ class _EnumValueViewState extends State<EnumValueView> {
 
   void _handleFindClick() {
     providerContainer.read(clientFindStateProvider).findUsage(clientModel, widget.data.id);
+  }
+
+  String? _getAbsolutePath() {
+    final projectFile = providerContainer.read(appStateProvider).state.projectFile;
+    if (projectFile == null || widget.data.fullPath == null) return null;
+    final projectDir = projectFile.parent.path;
+    return path.normalize(path.join(projectDir, widget.data.fullPath!));
+  }
+
+  void _handleShowInExplorer() {
+    final absolutePath = _getAbsolutePath();
+    if (absolutePath == null) return;
+    final file = File(absolutePath);
+    if (!file.existsSync()) return;
+
+    if (Platform.isWindows) {
+      Process.run('explorer', ['/select,', absolutePath]);
+    } else if (Platform.isMacOS) {
+      Process.run('open', ['-R', absolutePath]);
+    } else {
+      Process.run('xdg-open', [path.dirname(absolutePath)]);
+    }
+  }
+
+  void _handleOpenFile() {
+    final absolutePath = _getAbsolutePath();
+    if (absolutePath == null) return;
+    final file = File(absolutePath);
+    if (!file.existsSync()) return;
+
+    if (Platform.isWindows) {
+      Process.run('cmd', ['/c', 'start', '', absolutePath]);
+    } else if (Platform.isMacOS) {
+      Process.run('open', [absolutePath]);
+    } else {
+      Process.run('xdg-open', [absolutePath]);
+    }
   }
 }

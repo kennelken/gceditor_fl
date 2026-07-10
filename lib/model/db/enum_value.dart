@@ -10,6 +10,9 @@ class EnumValue implements IIdentifiable, IDescribable {
   @override
   String description = '';
 
+  @JsonKey(includeIfNull: false)
+  String? fullPath;
+
   EnumValue();
 
   factory EnumValue.fromJson(Map<String, dynamic> json) => _$EnumValueFromJson(json);

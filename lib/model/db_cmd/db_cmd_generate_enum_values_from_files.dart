@@ -156,7 +156,8 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
           }
           final val = EnumValue()
             ..id = uniqueName
-            ..description = pathValue;
+            ..description = pathValue
+            ..fullPath = normalizedPath;
           results.add(val);
         }
       }
