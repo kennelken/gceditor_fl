@@ -1,14 +1,15 @@
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gceditor/client/client_app.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/model/db/class_meta_entity_enum.dart';
-import 'package:gceditor/model/db/enum_value.dart';
 import 'package:gceditor/model/db/db_model.dart';
+import 'package:gceditor/model/db/enum_value.dart';
 import 'package:gceditor/model/db/generator_csharp.dart';
 import 'package:gceditor/model/db/generator_java.dart';
-import 'package:gceditor/model/db_cmd/db_cmd_generate_enum_values_from_files.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_enum_file_settings.dart';
+import 'package:gceditor/model/db_cmd/db_cmd_generate_enum_values_from_files.dart';
 import 'package:gceditor/model/db_network/authentication_data.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
@@ -45,7 +46,7 @@ void main() {
       expect(results.length, 4);
       expect(results[0].id, 'Undefined');
       expect(results[0].description, '');
-      
+
       final playerVal = results.firstWhere((e) => e.id == 'Player');
       expect(playerVal.description, 'Assets/Prefabs/Player.prefab');
 
@@ -117,7 +118,7 @@ void main() {
 
       // Should only include Undefined + 123Player (since class has Status: Deprecated, Monster is Type: Enemy).
       expect(results.length, 2);
-      
+
       expect(results[0].id, 'Undefined');
       // 123Player starts with a digit, so it should be prefixed with an underscore -> _123Player
       expect(results[1].id, '_123Player');
@@ -173,7 +174,7 @@ void main() {
     final tempDir = Directory.systemTemp.createTempSync('gceditor_test');
     try {
       final dbModel = DbModel();
-      
+
       final entity = ClassMetaEntityEnum()
         ..id = 'BuildingPresentationType'
         ..autoByFile = true
@@ -225,7 +226,7 @@ void main() {
     final tempDir = Directory.systemTemp.createTempSync('gceditor_test_java');
     try {
       final dbModel = DbModel();
-      
+
       final entity = ClassMetaEntityEnum()
         ..id = 'BuildingPresentationType'
         ..autoByFile = true
@@ -413,12 +414,12 @@ void main() {
 
   test('Enum auto generation respects appFilesPath setting', () {
     final tempDir = Directory.systemTemp.createTempSync('gceditor_test');
-    
+
     // Create folders
     final appFilesFolder = Directory('${tempDir.path}/Src/Prefabs')..createSync(recursive: true);
     final anotherFolder = Directory('${tempDir.path}/Assets/Prefabs')..createSync(recursive: true);
     final outsideFolder = Directory('${tempDir.path}/Outside/Prefabs')..createSync(recursive: true);
-    
+
     // Create files
     File('${appFilesFolder.path}/Player.prefab').createSync();
     File('${anotherFolder.path}/Monster.prefab').createSync();
@@ -430,14 +431,14 @@ void main() {
 
       final dbModel = DbModel();
       // Test multiple paths with spaces, semicolon and comma
-      dbModel.settings.appFilesPath = './Src;  ./Assets,,'; 
+      dbModel.settings.appFilesPath = './Src;  ./Assets,,';
 
       final entity = ClassMetaEntityEnum()
         ..id = 'Prefabs'
         ..autoByFile = true
         ..filePathRegex = r'(?:Src|Assets)/Prefabs/(.*)\.prefab'
         ..enumNameFromRegex = '{1}';
-      
+
       dbModel.classes.add(entity);
       dbModel.cache.invalidate();
 
@@ -457,18 +458,59 @@ void main() {
     }
   });
 
+  test('Enum auto generation respects appFilesPathExcludeRegex setting', () {
+    final tempDir = Directory.systemTemp.createTempSync('gceditor_test_exclude');
+
+    // Create folders (including a dot folder like .git)
+    final srcFolder = Directory('${tempDir.path}/Src/Prefabs')..createSync(recursive: true);
+    final dotFolder = Directory('${tempDir.path}/Src/.git/Prefabs')..createSync(recursive: true);
+    final buildFolder = Directory('${tempDir.path}/Src/Build/Prefabs')..createSync(recursive: true);
+
+    // Create files
+    File('${srcFolder.path}/Player.prefab').createSync();
+    File('${dotFolder.path}/IgnoreMe1.prefab').createSync();
+    File('${buildFolder.path}/IgnoreMe2.prefab').createSync();
+
+    try {
+      final projectFile = File('${tempDir.path}/project.json');
+      providerContainer.read(appStateProvider).state.projectFile = projectFile;
+
+      final dbModel = DbModel();
+      dbModel.settings.appFilesPath = './Src';
+      // Default value matches folders starting by "." or "Build" folder specifically
+      dbModel.settings.appFilesPathExcludeRegex = r'(?:^|\/)\.[^.\/]|Src/Build/.*';
+
+      final entity = ClassMetaEntityEnum()
+        ..id = 'Prefabs'
+        ..autoByFile = true
+        ..filePathRegex = r'Src/(?:.*/)?Prefabs/(.*)\.prefab'
+        ..enumNameFromRegex = '{1}';
+
+      dbModel.classes.add(entity);
+      dbModel.cache.invalidate();
+
+      // Scan and check that IgnoreMe1 and IgnoreMe2 are filtered out
+      final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
+      expect(results.length, equals(2));
+      expect(results[0].id, equals('Undefined'));
+      expect(results[1].id, equals('Player'));
+    } finally {
+      tempDir.deleteSync(recursive: true);
+    }
+  });
+
   test('loopback test of enum auto generation triggered from client', () async {
     final tempDir = Directory.systemTemp.createTempSync('gceditor_integration_test');
-    
+
     try {
       // 1. Create a dummy project.json
       final projectFile = File('${tempDir.path}/project.json');
       final dbModel = DbModel();
-      
+
       // Configure settings
       dbModel.settings.appFilesPath = './Src';
       dbModel.settings.autoGenerateEnumValues = true;
-      
+
       // Add enum entity
       final entity = ClassMetaEntityEnum()
         ..id = 'MyScannedEnum'
@@ -476,7 +518,7 @@ void main() {
         ..filePathRegex = r'Src/Prefabs/(.*)\.prefab'
         ..enumNameFromRegex = '{1}';
       dbModel.classes.add(entity);
-      
+
       projectFile.writeAsStringSync(Config.fileJsonOptions.convert(dbModel.toJson()));
 
       // 2. Create folders and files to scan
@@ -509,10 +551,10 @@ void main() {
         port: 12346,
         authData: authData,
       );
-      
+
       // Set projectFile on client too
       providerContainer.read(appStateProvider).state.projectFile = projectFile;
-      
+
       final clientInitErr = await clientApp.init();
       if (clientInitErr != null) {
         fail('Failed to start client: $clientInitErr');

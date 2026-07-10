@@ -15,7 +15,8 @@ DbModelSettings _$DbModelSettingsFromJson(Map<String, dynamic> json) =>
       ..outputPath = json['outputPath'] as String?
       ..historyPath = json['historyPath'] as String?
       ..authPath = json['authPath'] as String?
-      ..appFilesPath = json['appFilesPath'] as String? ?? '.';
+      ..appFilesPath = json['appFilesPath'] as String? ?? '.'
+      ..appFilesPathExcludeRegex = json['appFilesPathExcludeRegex'] as String? ?? r'(?:^|\/)\.[^.\/]';
 
 Map<String, dynamic> _$DbModelSettingsToJson(DbModelSettings instance) {
   final val = <String, dynamic>{
@@ -36,5 +37,6 @@ Map<String, dynamic> _$DbModelSettingsToJson(DbModelSettings instance) {
   writeNotNull('historyPath', instance.historyPath);
   writeNotNull('authPath', instance.authPath);
   val['appFilesPath'] = instance.appFilesPath;
+  val['appFilesPathExcludeRegex'] = instance.appFilesPathExcludeRegex;
   return val;
 }

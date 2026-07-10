@@ -18,7 +18,8 @@ DbCmdEditProjectSettings _$DbCmdEditProjectSettingsFromJson(
       ..outputPath = json['outputPath'] as String?
       ..historyPath = json['historyPath'] as String?
       ..authPath = json['authPath'] as String?
-      ..appFilesPath = json['appFilesPath'] as String?;
+      ..appFilesPath = json['appFilesPath'] as String?
+      ..appFilesPathExcludeRegex = json['appFilesPathExcludeRegex'] as String?;
 
 Map<String, dynamic> _$DbCmdEditProjectSettingsToJson(
     DbCmdEditProjectSettings instance) {
@@ -42,6 +43,7 @@ Map<String, dynamic> _$DbCmdEditProjectSettingsToJson(
   writeNotNull('historyPath', instance.historyPath);
   writeNotNull('authPath', instance.authPath);
   writeNotNull('appFilesPath', instance.appFilesPath);
+  writeNotNull('appFilesPathExcludeRegex', instance.appFilesPathExcludeRegex);
   return val;
 }
 

@@ -36,6 +36,10 @@ class SettingsViewState extends ConsumerState<SettingsView> {
   final FocusNode _appFilesPathFocusNode = FocusNode();
   String _resolvedAppFilesPath = '';
   bool _isAppFilesPathValid = true;
+
+  TextEditingController? _appFilesPathExcludeRegexController;
+  final FocusNode _appFilesPathExcludeRegexFocusNode = FocusNode();
+  bool _isAppFilesPathExcludeRegexValid = true;
   bool _initialized = false;
 
   @override
@@ -51,6 +55,8 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     _secretTextController.dispose();
     _appFilesPathController?.dispose();
     _appFilesPathFocusNode.dispose();
+    _appFilesPathExcludeRegexController?.dispose();
+    _appFilesPathExcludeRegexFocusNode.dispose();
     super.dispose();
   }
 
@@ -91,6 +97,17 @@ class SettingsViewState extends ConsumerState<SettingsView> {
       if (dbValue != _appFilesPathController!.text && !_appFilesPathFocusNode.hasFocus) {
         _appFilesPathController!.text = dbValue;
         _computeAppFilesPathValidation(dbValue);
+      }
+    }
+
+    if (_appFilesPathExcludeRegexController == null) {
+      _appFilesPathExcludeRegexController = TextEditingController(text: model.settings.appFilesPathExcludeRegex);
+      _computeAppFilesPathExcludeRegexValidation(model.settings.appFilesPathExcludeRegex);
+    } else {
+      final dbValue = model.settings.appFilesPathExcludeRegex;
+      if (dbValue != _appFilesPathExcludeRegexController!.text && !_appFilesPathExcludeRegexFocusNode.hasFocus) {
+        _appFilesPathExcludeRegexController!.text = dbValue;
+        _computeAppFilesPathExcludeRegexValidation(dbValue);
       }
     }
 
@@ -309,6 +326,51 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                                color: _isAppFilesPathValid ? kColorAccentBlue : kColorAccentBlue.withOpacity(0.3),
                              ),
                              onClick: _handleAppFilesPathSave,
+                           ),
+                         ),
+                       ],
+                    ),
+                    SizedBox(height: 5 * kScale),
+                    Row(
+                       children: [
+                         Expanded(
+                           flex: 4,
+                           child: Text(
+                             Loc.get.appFilesPathExcludeRegex,
+                             style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                           ),
+                         ),
+                         Expanded(
+                           flex: 3,
+                           child: TooltipWrapper(
+                             message: Loc.get.appFilesPathExcludeRegexTooltip,
+                             child: ClipRRect(
+                               borderRadius: kCardBorder,
+                               child: TextField(
+                                 controller: _appFilesPathExcludeRegexController,
+                                 focusNode: _appFilesPathExcludeRegexFocusNode,
+                                 decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                                   fillColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withOpacity(0.15),
+                                   focusColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withOpacity(0.15),
+                                   hoverColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withOpacity(0.15),
+                                 ),
+                                 textAlign: TextAlign.left,
+                                 onChanged: _handleAppFilesPathExcludeRegexChanged,
+                               ),
+                             ),
+                           ),
+                         ),
+                         TooltipWrapper(
+                           message: 'save',
+                           child: IconButtonTransparent(
+                             size: 30 * kScale,
+                             enabled: _isAppFilesPathExcludeRegexValid,
+                             icon: Icon(
+                               FontAwesomeIcons.floppyDisk,
+                               size: 12 * kScale,
+                               color: _isAppFilesPathExcludeRegexValid ? kColorAccentBlue : kColorAccentBlue.withOpacity(0.3),
+                             ),
+                             onClick: _handleAppFilesPathExcludeRegexSave,
                            ),
                          ),
                        ],
@@ -645,6 +707,39 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(
           DbCmdEditProjectSettings.values(
             appFilesPath: value,
+          ),
+        );
+  }
+
+  void _computeAppFilesPathExcludeRegexValidation(String value) {
+    if (value.isEmpty) {
+      _isAppFilesPathExcludeRegexValid = true;
+      return;
+    }
+    try {
+      RegExp(value);
+      _isAppFilesPathExcludeRegexValid = true;
+    } catch (_) {
+      _isAppFilesPathExcludeRegexValid = false;
+    }
+  }
+
+  void _handleAppFilesPathExcludeRegexChanged(String value) {
+    setState(() {
+      _computeAppFilesPathExcludeRegexValidation(value);
+    });
+  }
+
+  void _handleAppFilesPathExcludeRegexSave() {
+    final rawValue = _appFilesPathExcludeRegexController?.text;
+    if (rawValue == null) return;
+
+    final value = rawValue.trim();
+    if (value == clientModel.settings.appFilesPathExcludeRegex) return;
+
+    providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+          DbCmdEditProjectSettings.values(
+            appFilesPathExcludeRegex: value,
           ),
         );
   }

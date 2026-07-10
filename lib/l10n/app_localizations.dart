@@ -1411,6 +1411,18 @@ abstract class AppLocalizations {
   ///
   ///
   /// In en, this message translates to:
+  /// **'app files path exclude regex'**
+  String get appFilesPathExcludeRegex;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Regular expression used to exclude matching files and folders from the scan.'**
+  String get appFilesPathExcludeRegexTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
   /// **'auto-generate enum values from files'**
   String get autoGenerateEnumValues;
 

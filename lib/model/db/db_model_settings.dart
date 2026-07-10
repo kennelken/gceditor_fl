@@ -18,6 +18,8 @@ class DbModelSettings {
   String? authPath;
   @JsonKey(defaultValue: '.')
   String appFilesPath = '.';
+  @JsonKey(defaultValue: r'(?:^|\/)\.[^.\/]')
+  String appFilesPathExcludeRegex = r'(?:^|\/)\.[^.\/]';
 
   DbModelSettings();
 

@@ -992,6 +992,14 @@
 			}
 		}
 	},
+	"appFilesPathExcludeRegex": "app files path exclude regex",
+	"@appFilesPathExcludeRegex": {
+		"description": ""
+	},
+	"appFilesPathExcludeRegexTooltip": "Regular expression used to exclude matching files and folders from the scan.",
+	"@appFilesPathExcludeRegexTooltip": {
+		"description": ""
+	},
 	"autoGenerateEnumValues": "auto-generate enum values from files",
 	"@autoGenerateEnumValues": {
 		"description": ""

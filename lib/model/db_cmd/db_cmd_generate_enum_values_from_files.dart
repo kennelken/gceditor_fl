@@ -90,6 +90,14 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
     final paths = appFilesPath.split(RegExp(r'[;,]')).map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
     if (paths.isEmpty) return [];
 
+    final excludeRegexText = dbModel.settings.appFilesPathExcludeRegex;
+    RegExp? excludeRegExp;
+    if (excludeRegexText.isNotEmpty) {
+      try {
+        excludeRegExp = RegExp(excludeRegexText);
+      } catch (_) {}
+    }
+
     final files = <File>[];
     final seenFilePaths = <String>{};
     bool anyDirectoryExists = false;
@@ -99,6 +107,11 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
       if (scanDir.existsSync()) {
         anyDirectoryExists = true;
         for (final file in _getAllFiles(scanDir)) {
+          final relativePath = path.relative(file.path, from: projectDir.path);
+          final normalizedPath = relativePath.replaceAll('\\', '/');
+          if (excludeRegExp != null && excludeRegExp.hasMatch(normalizedPath)) {
+            continue;
+          }
           final absPath = path.absolute(file.path);
           if (seenFilePaths.add(absPath)) {
             files.add(file);
@@ -156,11 +169,11 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
         enumName = _replaceGroups(enumName, match);
         enumName = sanitizeIdentifier(enumName);
 
-        var pathValue = entity.pathValueFromRegex;
-        if (pathValue.isEmpty) {
-          pathValue = '{0}';
+        var pathValue = '';
+        final pathValueFromRegex = entity.pathValueFromRegex;
+        if (pathValueFromRegex.isNotEmpty) {
+          pathValue = _replaceGroups(pathValueFromRegex, match);
         }
-        pathValue = _replaceGroups(pathValue, match);
 
         if (enumName.isNotEmpty) {
           var uniqueName = enumName;

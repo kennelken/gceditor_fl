@@ -772,6 +772,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get appFilesPathExcludeRegex => 'app files path exclude regex';
+
+  @override
+  String get appFilesPathExcludeRegexTooltip =>
+      'Regular expression used to exclude matching files and folders from the scan.';
+
+  @override
   String get autoGenerateEnumValues => 'auto-generate enum values from files';
 
   @override

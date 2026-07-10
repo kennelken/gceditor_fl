@@ -20,6 +20,7 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
   String? historyPath;
   String? authPath;
   String? appFilesPath;
+  String? appFilesPathExcludeRegex;
 
   DbCmdEditProjectSettings.values({
     String? id,
@@ -31,6 +32,7 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
     this.historyPath,
     this.authPath,
     this.appFilesPath,
+    this.appFilesPathExcludeRegex,
   }) : super.withId(id) {
     $type = DbCmdType.editProjectSettings;
   }
@@ -78,6 +80,10 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
       dbModel.settings.appFilesPath = appFilesPath!;
     }
 
+    if (appFilesPathExcludeRegex != null) {
+      dbModel.settings.appFilesPathExcludeRegex = appFilesPathExcludeRegex!;
+    }
+
     return DbCmdResult.success();
   }
 
@@ -91,6 +97,14 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
     if (saveDelay != null) {
       if (saveDelay! > Config.maxSaveDelay) //
         return DbCmdResult.fail('saveDelay is too big. it is not recommended to set it to value higher than "${Config.maxSaveDelay}" seconds');
+    }
+
+    if (appFilesPathExcludeRegex != null) {
+      try {
+        RegExp(appFilesPathExcludeRegex!);
+      } catch (_) {
+        return DbCmdResult.fail('Invalid exclude regex syntax');
+      }
     }
 
     if (generators != null) {
@@ -121,6 +135,7 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
       historyPath: historyPath != null ? dbModel.settings.historyPath : null,
       authPath: authPath != null ? dbModel.settings.authPath : null,
       appFilesPath: appFilesPath != null ? dbModel.settings.appFilesPath : null,
+      appFilesPathExcludeRegex: appFilesPathExcludeRegex != null ? dbModel.settings.appFilesPathExcludeRegex : null,
     );
   }
 }
