@@ -163,6 +163,7 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
     }
 
     results.sort((a, b) => a.id.compareTo(b.id));
+    results.insert(0, EnumValue()..id = 'Undefined'..description = '');
     return results;
   }
 

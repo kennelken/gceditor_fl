@@ -42,7 +42,9 @@ void main() {
 
       final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
 
-      expect(results.length, 3);
+      expect(results.length, 4);
+      expect(results[0].id, 'Undefined');
+      expect(results[0].description, '');
       
       final playerVal = results.firstWhere((e) => e.id == 'Player');
       expect(playerVal.description, 'Assets/Prefabs/Player.prefab');
@@ -77,7 +79,8 @@ void main() {
 
       final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
 
-      expect(results.length, 2);
+      expect(results.length, 3);
+      expect(results[0].id, 'Undefined');
       expect(results.any((e) => e.id == 'Player'), isTrue);
       expect(results.any((e) => e.id == 'Monster'), isTrue);
       expect(results.any((e) => e.id == 'Items_Sword'), isFalse);
@@ -112,12 +115,13 @@ void main() {
 
       final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
 
-      // Should only include 123Player (since class has Status: Deprecated, Monster is Type: Enemy).
-      expect(results.length, 1);
+      // Should only include Undefined + 123Player (since class has Status: Deprecated, Monster is Type: Enemy).
+      expect(results.length, 2);
       
+      expect(results[0].id, 'Undefined');
       // 123Player starts with a digit, so it should be prefixed with an underscore -> _123Player
-      expect(results[0].id, '_123Player');
-      expect(results[0].description, 'Assets/Prefabs/123Player.prefab');
+      expect(results[1].id, '_123Player');
+      expect(results[1].description, 'Assets/Prefabs/123Player.prefab');
 
       // Test manual keyword prefixing logic directly
       expect(DbCmdGenerateEnumValuesFromFiles.sanitizeIdentifier('class'), '_class');
@@ -150,14 +154,14 @@ void main() {
 
       final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
 
-      expect(results.length, 4);
+      expect(results.length, 5);
 
-      // Should have Player, Player_1, Player_2, Zombie — sorted alphabetically
+      // Should have Undefined first, then Player, Player_1, Player_2, Zombie — sorted alphabetically
       final names = results.map((e) => e.id).toList();
-      expect(names, ['Player', 'Player_1', 'Player_2', 'Zombie']);
+      expect(names, ['Undefined', 'Player', 'Player_1', 'Player_2', 'Zombie']);
 
-      // Verify results are sorted
-      for (var i = 1; i < results.length; i++) {
+      // Verify remaining results (after Undefined) are sorted
+      for (var i = 2; i < results.length; i++) {
         expect(results[i].id.compareTo(results[i - 1].id) >= 0, isTrue);
       }
     } finally {
@@ -436,9 +440,10 @@ void main() {
 
       // 1. Scan with valid App files path
       final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
-      expect(results.length, equals(1));
-      expect(results[0].id, equals('Player'));
-      expect(results[0].description, equals('Src/Prefabs/Player.prefab')); // relative path computed from project root
+      expect(results.length, equals(2));
+      expect(results[0].id, equals('Undefined'));
+      expect(results[1].id, equals('Player'));
+      expect(results[1].description, equals('Src/Prefabs/Player.prefab')); // relative path computed from project root
 
       // 2. Scan with invalid App files path (non-existent)
       dbModel.settings.appFilesPath = './NonExistentDir';
@@ -523,9 +528,10 @@ void main() {
       // 6. Check client model enum values
       final updatedModel = providerContainer.read(clientStateProvider).state.model;
       final updatedEnum = updatedModel.classes.first as ClassMetaEntityEnum;
-      expect(updatedEnum.values.length, equals(2));
-      expect(updatedEnum.values[0].id, equals('Monster'));
-      expect(updatedEnum.values[1].id, equals('Player'));
+      expect(updatedEnum.values.length, equals(3));
+      expect(updatedEnum.values[0].id, equals('Undefined'));
+      expect(updatedEnum.values[1].id, equals('Monster'));
+      expect(updatedEnum.values[2].id, equals('Player'));
 
     } finally {
       tempDir.deleteSync(recursive: true);
