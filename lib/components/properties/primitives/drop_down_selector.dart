@@ -60,9 +60,10 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
           constraints: BoxConstraints.loose(const Size.fromHeight(1000)),
           disabledItemFn: (i) => !_isEnabled(i),
           menuProps: const MenuProps(
-            elevation: 0,
-            barrierColor: kColorPrimaryLightTransparent2,
+            elevation: 30,
+            barrierColor: kColorPrimaryLightTransparent3,
             backgroundColor: kColorAccentBlue2,
+            shadowColor: Colors.black,
           ),
           itemBuilder: (context, item, isSelected) {
             final enabled = _isEnabled(item);

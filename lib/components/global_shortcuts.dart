@@ -85,9 +85,11 @@ class GlobalShortcuts {
   static void openProjectSettings() {
     showDialog(
       context: popupContext!,
-      barrierColor: kColorTransparent,
+      barrierColor: kColorPrimaryLightTransparent3,
       builder: (context) {
         return const Dialog(
+          elevation: 30,
+          shadowColor: Colors.black,
           child: SettingsView(),
         );
       },
@@ -97,9 +99,11 @@ class GlobalShortcuts {
   static void openHistory(HistoryItemData history) {
     showDialog(
       context: popupContext!,
-      barrierColor: kColorTransparent,
+      barrierColor: kColorPrimaryLightTransparent3,
       builder: (context) {
         return Dialog(
+          elevation: 30,
+          shadowColor: Colors.black,
           child: HistoryDialog(data: history),
         );
       },
