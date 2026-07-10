@@ -68,7 +68,12 @@ class DataTableCellReferenceView extends ConsumerWidget {
         ? Utils.getAbsolutePath(ref.watch(appStateProvider).state.projectFile, selectedItem.fullPath)
         : null;
 
-    final rightPadding = (actionsMode ? (showOpenButtons ? 75 : 35) : 0) * kScale;
+    final double rightPadding;
+    if (showOpenButtons) {
+      rightPadding = (actionsMode ? 75 : 45) * kScale;
+    } else {
+      rightPadding = (actionsMode ? 35 : 0) * kScale;
+    }
 
     return Align(
       alignment: Alignment.topCenter,
@@ -89,21 +94,22 @@ class DataTableCellReferenceView extends ConsumerWidget {
             ).copyWith(contentPadding: EdgeInsets.only(left: 5 * kScale, right: rightPadding)),
             nullValueLabel: null /* nullValueLabel */, //
           ),
-          if (actionsMode) ...[
+          if (actionsMode || showOpenButtons) ...[
             SizedBox(
               height: kStyle.kTableTopRowHeight,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  IconButtonTransparent(
-                    size: 22 * kScale,
-                    icon: Icon(
-                      FontAwesomeIcons.magnifyingGlass,
-                      color: kColorPrimaryLight,
-                      size: 12 * kScale,
+                  if (actionsMode)
+                    IconButtonTransparent(
+                      size: 22 * kScale,
+                      icon: Icon(
+                        FontAwesomeIcons.magnifyingGlass,
+                        color: kColorPrimaryLight,
+                        size: 12 * kScale,
+                      ),
+                      onClick: _handleFindClick,
                     ),
-                    onClick: _handleFindClick,
-                  ),
                   if (showOpenButtons) ...[
                     TooltipWrapper(
                       message: absolutePath ?? selectedItem.fullPath!,
@@ -132,7 +138,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
                       ),
                     ),
                   ],
-                  if (selectedItem is DataTableRow)
+                  if (actionsMode && selectedItem is DataTableRow)
                     IconButtonTransparent(
                       size: 22 * kScale,
                       icon: Icon(
