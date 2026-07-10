@@ -39,11 +39,13 @@ class TooltipWrapper extends StatelessWidget {
     return Tooltip(
       decoration: BoxDecoration(color: kColorPrimaryDarkest.withAlpha(240), borderRadius: kCardBorder),
       padding: EdgeInsets.all(7 * kStyle.globalScale),
-      richMessage: TextSpan(
-        children: [
-          if (showImage)
-            WidgetSpan(
-              child: Padding(
+      richMessage: WidgetSpan(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (showImage)
+              Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
@@ -56,15 +58,13 @@ class TooltipWrapper extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-          WidgetSpan(
-            child: _LazyTooltipText(
+            _LazyTooltipText(
               message: message,
               messageBuilder: messageBuilder,
               style: kStyle.kTextExtraSmall,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       waitDuration: kTooltipDelay,
       child: child,

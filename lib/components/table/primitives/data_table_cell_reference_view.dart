@@ -77,7 +77,11 @@ class DataTableCellReferenceView extends ConsumerWidget {
     }
 
     String? Function()? tooltipMessageBuilder;
+    String? imagePath;
     if (selectedItem != null) {
+      if (selectedItem is EnumValue && selectedItem.fullPath != null && selectedItem.fullPath!.isNotEmpty) {
+        imagePath = Utils.getAbsolutePath(ref.watch(appStateProvider).state.projectFile, selectedItem.fullPath);
+      }
       tooltipMessageBuilder = () {
         if (selectedItem is DataTableRow) {
           final table = model.cache.allDataTables.firstWhereOrNull((t) => t.rows.contains(selectedItem));
@@ -103,6 +107,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
         children: [
           TooltipWrapper(
             messageBuilder: tooltipMessageBuilder,
+            imagePath: imagePath,
             child: DropDownSelector<IIdentifiable>(
               label: '',
               items: items,
