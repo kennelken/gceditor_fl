@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -81,6 +82,12 @@ class DataTableRowIdView extends ConsumerWidget {
     final selectionState = ref.watch(clientDataSelectionStateProvider).state;
     final isSelected = selectionState.selectionTable == table && selectionState.selectedItems.contains(index);
 
+    final tooltipMessageBuilder = row != null ? () {
+      final model = clientModel;
+      final jsonMap = DbModelUtils.rowToJson(model, table, row!);
+      return const JsonEncoder.withIndent('  ').convert(jsonMap);
+    } : null;
+
     return Material(
       color: isSelected ? kColorSelectedDataTableId : kColorTransparent,
       child: InkWell(
@@ -98,13 +105,16 @@ class DataTableRowIdView extends ConsumerWidget {
               ),
             ),
             Expanded(
-              child: ScrollConfiguration(
-                behavior: kScrollNoScroll,
-                child: TextField(
-                  controller: _controller,
-                  inputFormatters: Config.filterId,
-                  focusNode: _focusNode,
-                  decoration: kStyle.kInputTextStylePropertiesTableRowId,
+              child: TooltipWrapper(
+                messageBuilder: tooltipMessageBuilder,
+                child: ScrollConfiguration(
+                  behavior: kScrollNoScroll,
+                  child: TextField(
+                    controller: _controller,
+                    inputFormatters: Config.filterId,
+                    focusNode: _focusNode,
+                    decoration: kStyle.kInputTextStylePropertiesTableRowId,
+                  ),
                 ),
               ),
             ),
