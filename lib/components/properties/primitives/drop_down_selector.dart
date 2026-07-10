@@ -39,7 +39,7 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
     return SizedBox(
       height: kStyle.kTableTopRowHeight,
       child: DropdownSearch<T?>(
-        items: items,
+        items: (filter, loadProps) => items,
         dropdownBuilder: (context, selectedItem) {
           return TooltipWrapper(
             message: showTooltip && (selectedItem is IDescribable) ? (selectedItem as IDescribable).description : null,
@@ -65,7 +65,7 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
             backgroundColor: kColorAccentBlue2,
             shadowColor: Colors.black,
           ),
-          itemBuilder: (context, item, isSelected) {
+          itemBuilder: (context, item, isDisabled, isSelected) {
             final enabled = _isEnabled(item);
             return TooltipWrapper(
               message: (item is IDescribable) ? (item as IDescribable).description : null,
@@ -99,16 +99,18 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
             ),
           ),
         ),
-        dropdownButtonProps: DropdownButtonProps(
-          color: kColorPrimaryLight,
-          padding: EdgeInsets.zero,
-          iconSize: 15 * kScale,
-          constraints: BoxConstraints.tightFor(width: 35 * kScale, height: 25),
-          splashRadius: 20 * kScale,
-          icon: const Icon(FontAwesomeIcons.caretDown),
+        suffixProps: DropdownSuffixProps(
+          dropdownButtonProps: DropdownButtonProps(
+            color: kColorPrimaryLight,
+            padding: EdgeInsets.zero,
+            iconSize: 15 * kScale,
+            constraints: BoxConstraints.tightFor(width: 35 * kScale, height: 25),
+            splashRadius: 20 * kScale,
+            iconClosed: const Icon(FontAwesomeIcons.caretDown),
+          ),
         ),
-        dropdownDecoratorProps: DropDownDecoratorProps(
-          dropdownSearchDecoration: (inputDecoration ?? kStyle.kInputTextStyleProperties)
+        decoratorProps: DropDownDecoratorProps(
+          decoration: (inputDecoration ?? kStyle.kInputTextStyleProperties)
               .copyWith(labelText: (selectedItem == null ? nullValueLabel : null) ?? label, hintText: ''),
         ),
 /*      maxHeight: kStyle.dropDownSelectorHeight, */
@@ -120,7 +122,7 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
           size: 15 * kScale,
         ),
         */
-        onChanged: onValueChanged,
+        onSelected: onValueChanged,
         selectedItem: selectedItem,
         itemAsString: _getItemName,
       ),
