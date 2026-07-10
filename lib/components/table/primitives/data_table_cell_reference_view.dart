@@ -76,22 +76,25 @@ class DataTableCellReferenceView extends ConsumerWidget {
       rightPadding = (actionsMode ? 35 : 0) * kScale;
     }
 
-    String? tooltipMessage;
+    String? Function()? tooltipMessageBuilder;
     if (selectedItem != null) {
-      if (selectedItem is DataTableRow) {
-        final table = model.cache.allDataTables.firstWhereOrNull((t) => t.rows.contains(selectedItem));
-        if (table != null) {
-          final jsonMap = DbModelUtils.rowToJson(model, table, selectedItem);
-          tooltipMessage = const JsonEncoder.withIndent('  ').convert(jsonMap);
+      tooltipMessageBuilder = () {
+        if (selectedItem is DataTableRow) {
+          final table = model.cache.allDataTables.firstWhereOrNull((t) => t.rows.contains(selectedItem));
+          if (table != null) {
+            final jsonMap = DbModelUtils.rowToJson(model, table, selectedItem);
+            return const JsonEncoder.withIndent('  ').convert(jsonMap);
+          }
+        } else {
+          try {
+            final jsonMap = (selectedItem as dynamic).toJson();
+            return const JsonEncoder.withIndent('  ').convert(jsonMap);
+          } catch (_) {
+            return selectedItem.id;
+          }
         }
-      } else {
-        try {
-          final jsonMap = (selectedItem as dynamic).toJson();
-          tooltipMessage = const JsonEncoder.withIndent('  ').convert(jsonMap);
-        } catch (_) {
-          tooltipMessage = selectedItem.id;
-        }
-      }
+        return null;
+      };
     }
 
     return Align(
@@ -99,7 +102,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
       child: Stack(
         children: [
           TooltipWrapper(
-            message: tooltipMessage,
+            messageBuilder: tooltipMessageBuilder,
             child: DropDownSelector<IIdentifiable>(
               label: '',
               items: items,
