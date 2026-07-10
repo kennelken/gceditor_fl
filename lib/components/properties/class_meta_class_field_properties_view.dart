@@ -157,9 +157,11 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
             ),
             kStyle.kPropertiesVerticalDivider
           ],
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 10 * kScale, horizontal: 5 * kScale),
-            color: kColorBlueMetaPropertiesGroup,
+          ClipRRect(
+            borderRadius: kCardBorder,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 10 * kScale, horizontal: 5 * kScale),
+              color: kColorBlueMetaPropertiesGroup,
             child: Column(
               children: [
                 Row(
@@ -344,6 +346,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                 ],
               ],
             ),
+          ),
           ),
           kStyle.kPropertiesVerticalDivider,
         ]);

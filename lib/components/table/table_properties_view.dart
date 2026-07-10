@@ -101,6 +101,7 @@ class TablePropertiesView extends ConsumerWidget {
                           child: TooltipWrapper(
                             message: Loc.get.closeTooltip,
                             child: MaterialButton(
+                              shape: const RoundedRectangleBorder(borderRadius: kCardBorder),
                               onPressed: () => _handleBackButton(selectedEntity),
                               child: Icon(
                                 FontAwesomeIcons.xmark,

@@ -104,7 +104,7 @@ final ButtonStyle kButtonTransparent = ButtonStyle(
   foregroundColor: WidgetStateProperty.all(Colors.white),
 );
 
-const Radius kCardRadius = Radius.circular(2.0);
+const Radius kCardRadius = Radius.circular(5.0);
 const BorderRadius kCardBorder = BorderRadius.all(kCardRadius);
 
 final kTimeFormat = DateFormat('HH:mm:ss');

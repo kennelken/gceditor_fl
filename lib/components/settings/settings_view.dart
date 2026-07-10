@@ -122,8 +122,8 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     _secretTextController.text = AppLocalStorage.instance.newSecret ?? Config.defaultNewSecret;
 
     return Container(
-      width: 1100 * kScale,
-      height: 860 * kScale,
+      width: 1200 * kScale,
+      height: 920 * kScale,
       color: kTextColorLightest,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -404,20 +404,22 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                     SizedBox(height: 10 * kScale),
                     const Divider(height: 1),
                     SizedBox(height: 10 * kScale),
-                    Container(
-                      color: kTextColorLight,
-                      width: 9999,
-                      height: 229 * kScale,
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0 * kScale),
-                        child: Column(
+                    ClipRRect(
+                      borderRadius: kCardBorder,
+                      child: Container(
+                        color: kTextColorLight,
+                        width: 9999,
+                        height: 229 * kScale,
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0 * kScale),
+                          child: Column(
                           children: [
                             SizedBox(
                               height: 30 * kScale,
                               child: Row(
                                 children: [
                                   Text(
-                                    'Registered users',
+                                    'registered users',
                                     style: kStyle.kTextRegular.copyWith(color: kColorTextButton),
                                   ),
                                 ],
@@ -511,6 +513,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           ],
                         ),
                       ),
+                    ),
                     ),
                     SizedBox(height: 10 * kScale),
                     GeneratorsView(

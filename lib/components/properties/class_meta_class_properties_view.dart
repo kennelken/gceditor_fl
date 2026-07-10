@@ -151,87 +151,93 @@ class _ClassMetaClassPropertiesViewPropertiesState extends State<ClassMetaClassP
               ),
             ],
             kStyle.kPropertiesVerticalDivider,
-            Container(
-              color: kColorBlueMetaPropertiesGroup,
-              width: 9999,
-              child: Padding(
-                padding: EdgeInsets.only(left: 5 * kScale, top: 5 * kScale, bottom: 5 * kScale),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Flexible(
-                      fit: FlexFit.loose,
-                      child: Theme(
-                        data: kStyle.kReorderableListTheme,
-                        child: ReorderableListView.builder(
-                          scrollController: ScrollController(),
-                          shrinkWrap: true,
-                          itemCount: _columns.length,
-                          onReorder: _handleColumnsReorder,
-                          header: Padding(
-                            padding: EdgeInsets.only(left: 10 * kScale),
-                            child: PropertyTitle(
-                              title: Loc.get.classFieldsListTitle,
+            ClipRRect(
+              borderRadius: kCardBorder,
+              child: Container(
+                color: kColorBlueMetaPropertiesGroup,
+                width: 9999,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 5 * kScale, top: 5 * kScale, bottom: 5 * kScale),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: Theme(
+                          data: kStyle.kReorderableListTheme,
+                          child: ReorderableListView.builder(
+                            scrollController: ScrollController(),
+                            shrinkWrap: true,
+                            itemCount: _columns.length,
+                            onReorder: _handleColumnsReorder,
+                            header: Padding(
+                              padding: EdgeInsets.only(left: 10 * kScale),
+                              child: PropertyTitle(
+                                title: Loc.get.classFieldsListTitle,
+                              ),
                             ),
+                            itemBuilder: (context, index) {
+                              return ClassFieldValueView(
+                                key: ObjectKey(_columns[index]),
+                                entity: widget.data,
+                                data: _columns[index],
+                              );
+                            },
                           ),
-                          itemBuilder: (context, index) {
-                            return ClassFieldValueView(
-                              key: ObjectKey(_columns[index]),
-                              entity: widget.data,
-                              data: _columns[index],
-                            );
-                          },
                         ),
                       ),
-                    ),
-                    AddNewEnumValueButton(
-                      onClick: _handleAddNewColumn,
-                    ),
-                  ],
+                      AddNewEnumValueButton(
+                        onClick: _handleAddNewColumn,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
             kStyle.kPropertiesVerticalDivider,
-            Container(
-              color: kColorBlueMetaPropertiesGroup,
-              width: 9999,
-              child: Padding(
-                padding: EdgeInsets.only(left: 5 * kScale, top: 5 * kScale, bottom: 5 * kScale),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Flexible(
-                      fit: FlexFit.loose,
-                      child: Theme(
-                        data: kStyle.kReorderableListTheme,
-                        child: ReorderableListView.builder(
-                          scrollController: ScrollController(),
-                          shrinkWrap: true,
-                          itemCount: _interfaces.length,
-                          onReorder: _handleInterfaceReorder,
-                          header: Padding(
-                            padding: EdgeInsets.only(left: 10 * kScale),
-                            child: PropertyTitle(
-                              title: Loc.get.interfacesListTitle,
+            ClipRRect(
+              borderRadius: kCardBorder,
+              child: Container(
+                color: kColorBlueMetaPropertiesGroup,
+                width: 9999,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 5 * kScale, top: 5 * kScale, bottom: 5 * kScale),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: Theme(
+                          data: kStyle.kReorderableListTheme,
+                          child: ReorderableListView.builder(
+                            scrollController: ScrollController(),
+                            shrinkWrap: true,
+                            itemCount: _interfaces.length,
+                            onReorder: _handleInterfaceReorder,
+                            header: Padding(
+                              padding: EdgeInsets.only(left: 10 * kScale),
+                              child: PropertyTitle(
+                                title: Loc.get.interfacesListTitle,
+                              ),
                             ),
+                            itemBuilder: (context, index) {
+                              return PropertyClassInterface(
+                                key: ValueKey('${clientVersion}_${index}_'),
+                                entity: widget.data,
+                                interface: _interfaces[index],
+                                index: index,
+                              );
+                            },
                           ),
-                          itemBuilder: (context, index) {
-                            return PropertyClassInterface(
-                              key: ValueKey('${clientVersion}_${index}_'),
-                              entity: widget.data,
-                              interface: _interfaces[index],
-                              index: index,
-                            );
-                          },
                         ),
                       ),
-                    ),
-                    AddNewEnumValueButton(
-                      onClick: _handleAddNewInterface,
-                    ),
-                  ],
+                      AddNewEnumValueButton(
+                        onClick: _handleAddNewInterface,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

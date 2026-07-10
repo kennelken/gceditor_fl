@@ -156,6 +156,10 @@ class StyleStateNotifier extends ChangeNotifier {
     state.kLandingInputTextStyle = InputDecoration(
       isDense: true,
       contentPadding: EdgeInsets.symmetric(horizontal: 11 * kScale, vertical: 15 * kScale),
+      border: const OutlineInputBorder(borderSide: BorderSide.none, borderRadius: kCardBorder),
+      disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: kColorTransparent), borderRadius: kCardBorder),
+      focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: kColorTransparent), borderRadius: kCardBorder),
+      enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: kColorTransparent), borderRadius: kCardBorder),
       filled: true,
       fillColor: kColorPrimaryLighter1_5,
     );
@@ -244,7 +248,7 @@ class StyleStateNotifier extends ChangeNotifier {
       menuTheme: const MenuThemeData(
         style: MenuStyle(
           backgroundColor: WidgetStatePropertyAll(kColorPrimaryDarker2),
-          shape: WidgetStatePropertyAll(RoundedRectangleBorder()),
+          shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: kCardBorder)),
           padding: WidgetStatePropertyAll(EdgeInsets.zero),
         ),
       ),
@@ -255,7 +259,10 @@ class StyleStateNotifier extends ChangeNotifier {
           padding: WidgetStatePropertyAll(EdgeInsets.zero),
         ),
       ),
-      dialogTheme: const DialogThemeData(backgroundColor: kColorBackground),
+      dialogTheme: const DialogThemeData(
+        backgroundColor: kColorBackground,
+        shape: RoundedRectangleBorder(borderRadius: kCardBorder),
+      ),
     );
 
     state.kInputThemeLight = state.kAppTheme.copyWith(

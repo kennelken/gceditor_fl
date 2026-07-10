@@ -230,12 +230,14 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
               multiline: true,
             ),
             kStyle.kPropertiesVerticalDivider,
-            Container(
-              color: kColorBlueMetaPropertiesGroup,
-              width: 9999,
-              child: Padding(
-                padding: EdgeInsets.only(left: 5 * kScale, top: 5 * kScale, bottom: 5 * kScale),
-                child: Column(
+            ClipRRect(
+              borderRadius: kCardBorder,
+              child: Container(
+                color: kColorBlueMetaPropertiesGroup,
+                width: 9999,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 5 * kScale, top: 5 * kScale, bottom: 5 * kScale),
+                  child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -275,11 +277,14 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                 ),
               ),
             ),
+            ),
             kStyle.kPropertiesVerticalDivider,
-            Container(
-              color: kColorBlueMetaPropertiesGroup,
-              width: 9999,
-              padding: EdgeInsets.symmetric(horizontal: 10 * kScale, vertical: 10 * kScale),
+            ClipRRect(
+              borderRadius: kCardBorder,
+              child: Container(
+                color: kColorBlueMetaPropertiesGroup,
+                width: 9999,
+                padding: EdgeInsets.symmetric(horizontal: 10 * kScale, vertical: 10 * kScale),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -543,6 +548,7 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                   ],
                 ],
               ),
+            ),
             ),
           ],
         );

@@ -47,12 +47,14 @@ class GeneratorsViewState extends State<GeneratorsView> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: kTextColorLight,
-      width: 9999,
-      height: 182 * kScale,
-      child: Padding(
-        padding: EdgeInsets.all(8.0 * kScale),
+    return ClipRRect(
+      borderRadius: kCardBorder,
+      child: Container(
+        color: kTextColorLight,
+        width: 9999,
+        height: 182 * kScale,
+        child: Padding(
+          padding: EdgeInsets.all(8.0 * kScale),
         child: Column(
           children: [
             SizedBox(
@@ -115,6 +117,7 @@ class GeneratorsViewState extends State<GeneratorsView> {
           ],
         ),
       ),
+    ),
     );
   }
 

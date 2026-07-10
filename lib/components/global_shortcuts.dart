@@ -90,6 +90,8 @@ class GlobalShortcuts {
         return const Dialog(
           elevation: 30,
           shadowColor: Colors.black,
+          shape: RoundedRectangleBorder(borderRadius: kCardBorder),
+          clipBehavior: Clip.antiAlias,
           child: SettingsView(),
         );
       },
@@ -104,6 +106,8 @@ class GlobalShortcuts {
         return Dialog(
           elevation: 30,
           shadowColor: Colors.black,
+          shape: const RoundedRectangleBorder(borderRadius: kCardBorder),
+          clipBehavior: Clip.antiAlias,
           child: HistoryDialog(data: history),
         );
       },
