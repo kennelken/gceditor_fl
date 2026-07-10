@@ -41,6 +41,7 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
       child: DropdownSearch<T?>(
         items: (filter, loadProps) => items,
         dropdownBuilder: (context, selectedItem) {
+          if (selectedItem == null) return const SizedBox();
           return TooltipWrapper(
             message: showTooltip && (selectedItem is IDescribable) ? (selectedItem as IDescribable).description : null,
             child: Text(
@@ -110,8 +111,10 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
           ),
         ),
         decoratorProps: DropDownDecoratorProps(
-          decoration: (inputDecoration ?? kStyle.kInputTextStyleProperties)
-              .copyWith(labelText: (selectedItem == null ? nullValueLabel : null) ?? label, hintText: ''),
+          decoration: (inputDecoration ?? kStyle.kInputTextStyleProperties).copyWith(
+            labelText: selectedItem == null ? null : label,
+            hintText: selectedItem == null ? (nullValueLabel ?? label) : '',
+          ),
         ),
 /*      maxHeight: kStyle.dropDownSelectorHeight, */
 /*      showAsSuffixIcons: true,*/
