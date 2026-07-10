@@ -16,6 +16,7 @@ import 'package:gceditor/model/db_cmd/db_cmd_delete_enum_value.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_enum_value.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
+import 'package:gceditor/utils/utils.dart';
 import 'package:gceditor/model/state/client_find_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/client_view_mode_state.dart';
@@ -72,6 +73,8 @@ class _EnumValueViewState extends State<EnumValueView> {
       ref.watch(enumValueWidthRatioProvider);
       ref.watch(clientStateProvider);
 
+      final absolutePath = Utils.getAbsolutePath(ref.watch(appStateProvider).state.projectFile, widget.data.fullPath);
+
       final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
         MetaValueCoordinates(classId: widget.entity.id, enumId: widget.data.id),
         ref.watch(clientFindStateProvider).state,
@@ -122,7 +125,7 @@ class _EnumValueViewState extends State<EnumValueView> {
                 widget.data.fullPath != null &&
                 widget.data.fullPath!.isNotEmpty) ...[
               TooltipWrapper(
-                message: _getAbsolutePath() ?? widget.data.fullPath!,
+                message: absolutePath ?? widget.data.fullPath!,
                 child: IconButtonTransparent(
                   size: 22 * kScale,
                   icon: Icon(
@@ -130,11 +133,11 @@ class _EnumValueViewState extends State<EnumValueView> {
                     color: kColorPrimaryLight,
                     size: 12 * kScale,
                   ),
-                  onClick: _handleShowInExplorer,
+                  onClick: () => Utils.showInExplorer(absolutePath),
                 ),
               ),
               TooltipWrapper(
-                message: _getAbsolutePath() ?? widget.data.fullPath!,
+                message: absolutePath ?? widget.data.fullPath!,
                 child: IconButtonTransparent(
                   size: 22 * kScale,
                   icon: Icon(
@@ -142,7 +145,7 @@ class _EnumValueViewState extends State<EnumValueView> {
                     color: kColorPrimaryLight,
                     size: 12 * kScale,
                   ),
-                  onClick: _handleOpenFile,
+                  onClick: () => Utils.openFile(absolutePath),
                 ),
               ),
             ],
@@ -239,42 +242,5 @@ class _EnumValueViewState extends State<EnumValueView> {
 
   void _handleFindClick() {
     providerContainer.read(clientFindStateProvider).findUsage(clientModel, widget.data.id);
-  }
-
-  String? _getAbsolutePath() {
-    final projectFile = providerContainer.read(appStateProvider).state.projectFile;
-    if (projectFile == null || widget.data.fullPath == null) return null;
-    final projectDir = projectFile.parent.path;
-    return path.normalize(path.join(projectDir, widget.data.fullPath!));
-  }
-
-  void _handleShowInExplorer() {
-    final absolutePath = _getAbsolutePath();
-    if (absolutePath == null) return;
-    final file = File(absolutePath);
-    if (!file.existsSync()) return;
-
-    if (Platform.isWindows) {
-      Process.run('explorer', ['/select,', absolutePath]);
-    } else if (Platform.isMacOS) {
-      Process.run('open', ['-R', absolutePath]);
-    } else {
-      Process.run('xdg-open', [path.dirname(absolutePath)]);
-    }
-  }
-
-  void _handleOpenFile() {
-    final absolutePath = _getAbsolutePath();
-    if (absolutePath == null) return;
-    final file = File(absolutePath);
-    if (!file.existsSync()) return;
-
-    if (Platform.isWindows) {
-      Process.run('cmd', ['/c', 'start', '', absolutePath]);
-    } else if (Platform.isMacOS) {
-      Process.run('open', [absolutePath]);
-    } else {
-      Process.run('xdg-open', [absolutePath]);
-    }
   }
 }

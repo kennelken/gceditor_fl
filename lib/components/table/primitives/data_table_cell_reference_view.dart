@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,13 +7,17 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/properties/primitives/drop_down_selector.dart';
 import 'package:gceditor/components/properties/primitives/icon_button_transparent.dart';
 import 'package:gceditor/components/table/primitives/data_table_cell_view.dart';
+import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/db/class_field_description_data_info.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
+import 'package:gceditor/model/db/class_meta_entity_enum.dart';
 import 'package:gceditor/model/db/data_table_row.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
+import 'package:gceditor/model/db/enum_value.dart';
 import 'package:gceditor/model/model_root.dart';
+import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/model/state/client_find_state.dart';
 import 'package:gceditor/model/state/client_problems_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
@@ -20,6 +26,7 @@ import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/model/state/pinned_items_state.dart';
 import 'package:gceditor/model/state/service/client_navigation_service.dart';
 import 'package:gceditor/model/state/style_state.dart';
+import 'package:gceditor/utils/utils.dart';
 
 class DataTableCellReferenceView extends ConsumerWidget {
   final DataTableValueCoordinates coordinates;
@@ -50,6 +57,19 @@ class DataTableCellReferenceView extends ConsumerWidget {
 
     final actionsMode = ref.watch(clientViewModeStateProvider).state.actionsMode;
 
+    final showOpenButtons = ref.watch(appStateProvider).state.appMode == AppMode.standalone &&
+        classEntity is ClassMetaEntityEnum &&
+        classEntity.autoByFile &&
+        selectedItem is EnumValue &&
+        selectedItem.fullPath != null &&
+        selectedItem.fullPath!.isNotEmpty;
+
+    final absolutePath = showOpenButtons
+        ? Utils.getAbsolutePath(ref.watch(appStateProvider).state.projectFile, selectedItem.fullPath)
+        : null;
+
+    final rightPadding = (actionsMode ? (showOpenButtons ? 75 : 35) : 0) * kScale;
+
     return Align(
       alignment: Alignment.topCenter,
       child: Stack(
@@ -66,7 +86,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
               ref.watch(clientProblemsStateProvider).state,
               ref.watch(clientFindStateProvider).state,
               ref.watch(clientNavigationServiceProvider).state,
-            ).copyWith(contentPadding: EdgeInsets.only(left: 5 * kScale, right: (actionsMode ? 35 : 0) * kScale)),
+            ).copyWith(contentPadding: EdgeInsets.only(left: 5 * kScale, right: rightPadding)),
             nullValueLabel: null /* nullValueLabel */, //
           ),
           if (actionsMode) ...[
@@ -84,6 +104,32 @@ class DataTableCellReferenceView extends ConsumerWidget {
                     ),
                     onClick: _handleFindClick,
                   ),
+                  if (showOpenButtons) ...[
+                    TooltipWrapper(
+                      message: absolutePath ?? selectedItem.fullPath!,
+                      child: IconButtonTransparent(
+                        size: 22 * kScale,
+                        icon: Icon(
+                          FontAwesomeIcons.folderOpen,
+                          color: kColorPrimaryLight,
+                          size: 12 * kScale,
+                        ),
+                        onClick: () => Utils.showInExplorer(absolutePath),
+                      ),
+                    ),
+                    TooltipWrapper(
+                      message: absolutePath ?? selectedItem.fullPath!,
+                      child: IconButtonTransparent(
+                        size: 22 * kScale,
+                        icon: Icon(
+                          FontAwesomeIcons.arrowUpRightFromSquare,
+                          color: kColorPrimaryLight,
+                          size: 12 * kScale,
+                        ),
+                        onClick: () => Utils.openFile(absolutePath),
+                      ),
+                    ),
+                  ],
                   if (selectedItem is DataTableRow)
                     IconButtonTransparent(
                       size: 22 * kScale,

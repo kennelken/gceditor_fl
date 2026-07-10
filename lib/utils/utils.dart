@@ -1,11 +1,47 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:dartx/dartx_io.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
 
 abstract class Utils {
+  static String? getAbsolutePath(File? projectFile, String? fullPath) {
+    if (fullPath == null || projectFile == null) return null;
+    final projectDir = projectFile.parent.path;
+    return path.normalize(path.join(projectDir, fullPath));
+  }
+
+  static void showInExplorer(String? absolutePath) {
+    if (absolutePath == null) return;
+    final file = File(absolutePath);
+    if (!file.existsSync()) return;
+
+    if (Platform.isWindows) {
+      Process.run('explorer', ['/select,', absolutePath]);
+    } else if (Platform.isMacOS) {
+      Process.run('open', ['-R', absolutePath]);
+    } else {
+      Process.run('xdg-open', [path.dirname(absolutePath)]);
+    }
+  }
+
+  static void openFile(String? absolutePath) {
+    if (absolutePath == null) return;
+    final file = File(absolutePath);
+    if (!file.existsSync()) return;
+
+    if (Platform.isWindows) {
+      Process.run('cmd', ['/c', 'start', '', absolutePath]);
+    } else if (Platform.isMacOS) {
+      Process.run('open', [absolutePath]);
+    } else {
+      Process.run('xdg-open', [absolutePath]);
+    }
+  }
+
   static bool isIOs(BuildContext context) => Theme.of(context).platform == TargetPlatform.iOS;
 
   static int enumToInt<T extends dynamic>(T enumValue) {
