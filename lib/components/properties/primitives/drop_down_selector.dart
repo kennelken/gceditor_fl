@@ -17,6 +17,7 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
   final ValueChanged<T?> onValueChanged;
   final InputDecoration? inputDecoration;
   final String? nullValueLabel;
+  final bool showTooltip;
 
   DropDownSelector({
     super.key,
@@ -28,6 +29,7 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
     this.addNull = true,
     this.inputDecoration,
     this.nullValueLabel,
+    this.showTooltip = true,
   }) {
     this.items = addNull ? [null, ...items] : items;
   }
@@ -40,7 +42,7 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
         items: items,
         dropdownBuilder: (context, selectedItem) {
           return TooltipWrapper(
-            message: (selectedItem is IDescribable) ? (selectedItem as IDescribable).description : null,
+            message: showTooltip && (selectedItem is IDescribable) ? (selectedItem as IDescribable).description : null,
             child: Text(
               _getItemName(selectedItem),
               style: kStyle.kTextExtraSmall,

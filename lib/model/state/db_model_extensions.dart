@@ -1772,6 +1772,95 @@ class DbModelUtils {
     }
     return result;
   }
+
+  static dynamic convertToSimpleFormat(ClassFieldType type, dynamic value) {
+    if (value is! String) return value;
+
+    switch (type) {
+      case ClassFieldType.date:
+        final date = DbModelUtils.parseDate(value);
+        return date?.millisecondsSinceEpoch;
+      case ClassFieldType.duration:
+        final duration = DbModelUtils.parseDuration(value);
+        return duration?.inMilliseconds;
+      case ClassFieldType.vector2:
+        final v = DbModelUtils.parseVector2(value);
+        return v != null ? '${v.x};${v.y}' : value;
+      case ClassFieldType.vector2Int:
+        final v = DbModelUtils.parseVector2Int(value);
+        return v != null ? '${v.x};${v.y}' : value;
+      case ClassFieldType.vector3:
+        final v = DbModelUtils.parseVector3(value);
+        return v != null ? '${v.x};${v.y};${v.z}' : value;
+      case ClassFieldType.vector3Int:
+        final v = DbModelUtils.parseVector3Int(value);
+        return v != null ? '${v.x};${v.y};${v.z}' : value;
+      case ClassFieldType.vector4:
+        final v = DbModelUtils.parseVector4(value);
+        return v != null ? '${v.x};${v.y};${v.z};${v.w}' : value;
+      case ClassFieldType.vector4Int:
+        final v = DbModelUtils.parseVector4Int(value);
+        return v != null ? '${v.x};${v.y};${v.z};${v.w}' : value;
+      case ClassFieldType.rectangle:
+        final v = DbModelUtils.parseRectangle(value);
+        return v != null ? '${v.x};${v.y};${v.width};${v.height}' : value;
+      case ClassFieldType.rectangleInt:
+        final v = DbModelUtils.parseRectangleInt(value);
+        return v != null ? '${v.x};${v.y};${v.width};${v.height}' : value;
+      default:
+        return value;
+    }
+  }
+
+  static Map<String, dynamic> rowToJson(DbModel model, TableMetaEntity table, DataTableRow row) {
+    final rowData = <String, dynamic>{};
+    rowData['id'] = row.id;
+
+    final allFields = model.cache.getAllFieldsByClassId(table.classId);
+    if (allFields != null) {
+      for (var i = 0; i < allFields.length; i++) {
+        if (i >= row.values.length) continue;
+        final field = allFields[i];
+
+        if (field.typeInfo.type.hasMultiValueType()) {
+          final listRows = row.values[i].listInlineCellValues();
+          if (listRows != null) {
+            final columns = DbModelUtils.getListInlineColumns(model, field.valueTypeInfo!);
+            final outInlineRows = <Map<String, dynamic>>[];
+            rowData[field.id] = outInlineRows;
+
+            if (columns != null) {
+              for (var j = 0; j < listRows.length; j++) {
+                final inlineRow = <String, dynamic>{};
+                outInlineRows.add(inlineRow);
+                for (var k = 0; k < columns.length; k++) {
+                  if (listRows[j].values != null && k < listRows[j].values!.length) {
+                    inlineRow[columns[k].id] = listRows[j].values![k];
+                  }
+                }
+              }
+            }
+          }
+        } else if (field.typeInfo.type.hasKeyType()) {
+          final dictRows = row.values[i].dictionaryCellValues();
+          if (dictRows != null) {
+            final mapData = <String, dynamic>{};
+            for (final item in dictRows) {
+              if (item.key != null) {
+                mapData[item.key.toString()] = item.value;
+              }
+            }
+            rowData[field.id] = mapData;
+          } else {
+            rowData[field.id] = {};
+          }
+        } else {
+          rowData[field.id] = convertToSimpleFormat(field.typeInfo.type, row.values[i].simpleValue);
+        }
+      }
+    }
+    return rowData;
+  }
 }
 
 class MetaValueCoordinates {

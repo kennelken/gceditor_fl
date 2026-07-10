@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
@@ -75,24 +76,46 @@ class DataTableCellReferenceView extends ConsumerWidget {
       rightPadding = (actionsMode ? 35 : 0) * kScale;
     }
 
+    String? tooltipMessage;
+    if (selectedItem != null) {
+      if (selectedItem is DataTableRow) {
+        final table = model.cache.allDataTables.firstWhereOrNull((t) => t.rows.contains(selectedItem));
+        if (table != null) {
+          final jsonMap = DbModelUtils.rowToJson(model, table, selectedItem);
+          tooltipMessage = const JsonEncoder.withIndent('  ').convert(jsonMap);
+        }
+      } else {
+        try {
+          final jsonMap = (selectedItem as dynamic).toJson();
+          tooltipMessage = const JsonEncoder.withIndent('  ').convert(jsonMap);
+        } catch (_) {
+          tooltipMessage = selectedItem.id;
+        }
+      }
+    }
+
     return Align(
       alignment: Alignment.topCenter,
       child: Stack(
         children: [
-          DropDownSelector<IIdentifiable>(
-            label: '',
-            items: items,
-            onValueChanged: _handleValueChanged,
-            selectedItem: selectedItem,
-            addNull: classEntity is ClassMetaEntity,
-            isEnabled: (_) => true,
-            inputDecoration: DbModelUtils.getDataCellInputDecoration(
-              coordinates,
-              ref.watch(clientProblemsStateProvider).state,
-              ref.watch(clientFindStateProvider).state,
-              ref.watch(clientNavigationServiceProvider).state,
-            ).copyWith(contentPadding: EdgeInsets.only(left: 5 * kScale, right: rightPadding)),
-            nullValueLabel: null /* nullValueLabel */, //
+          TooltipWrapper(
+            message: tooltipMessage,
+            child: DropDownSelector<IIdentifiable>(
+              label: '',
+              items: items,
+              onValueChanged: _handleValueChanged,
+              selectedItem: selectedItem,
+              addNull: classEntity is ClassMetaEntity,
+              isEnabled: (_) => true,
+              showTooltip: false,
+              inputDecoration: DbModelUtils.getDataCellInputDecoration(
+                coordinates,
+                ref.watch(clientProblemsStateProvider).state,
+                ref.watch(clientFindStateProvider).state,
+                ref.watch(clientNavigationServiceProvider).state,
+              ).copyWith(contentPadding: EdgeInsets.only(left: 5 * kScale, right: rightPadding)),
+              nullValueLabel: null /* nullValueLabel */, //
+            ),
           ),
           if (actionsMode || showOpenButtons) ...[
             SizedBox(
