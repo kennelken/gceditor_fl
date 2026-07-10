@@ -127,6 +127,44 @@ void main() {
     }
   });
 
+  test('Enum auto generation adds incremental suffix for duplicate names and sorts results', () {
+    final tempDir = Directory.systemTemp.createTempSync('gceditor_test_dup');
+    // Create files that will produce duplicate enum names via the regex
+    // Using subdirectories: A/Player.prefab, B/Player.prefab, C/Player.prefab, A/Zombie.prefab
+    File('${tempDir.path}/Assets/A/Player.prefab').createSync(recursive: true);
+    File('${tempDir.path}/Assets/B/Player.prefab').createSync(recursive: true);
+    File('${tempDir.path}/Assets/C/Player.prefab').createSync(recursive: true);
+    File('${tempDir.path}/Assets/A/Zombie.prefab').createSync(recursive: true);
+
+    try {
+      final projectFile = File('${tempDir.path}/project.json');
+      providerContainer.read(appStateProvider).state.projectFile = projectFile;
+
+      final dbModel = DbModel();
+      final entity = ClassMetaEntityEnum()
+        ..id = 'TestEnum'
+        // Only captures the filename, not the directory, so A/Player and B/Player both become "Player"
+        ..filePathRegex = r'Assets/[^/]+/([^/]+)\.prefab'
+        ..enumNameFromRegex = '{1}'
+        ..pathValueFromRegex = '{0}';
+
+      final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
+
+      expect(results.length, 4);
+
+      // Should have Player, Player_1, Player_2, Zombie — sorted alphabetically
+      final names = results.map((e) => e.id).toList();
+      expect(names, ['Player', 'Player_1', 'Player_2', 'Zombie']);
+
+      // Verify results are sorted
+      for (var i = 1; i < results.length; i++) {
+        expect(results[i].id.compareTo(results[i - 1].id) >= 0, isTrue);
+      }
+    } finally {
+      tempDir.deleteSync(recursive: true);
+    }
+  });
+
   test('C# generator generates correct dynamic path overloads and extension class', () async {
     final tempDir = Directory.systemTemp.createTempSync('gceditor_test');
     try {

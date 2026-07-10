@@ -145,15 +145,24 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
         }
         pathValue = _replaceGroups(pathValue, match);
 
-        if (enumName.isNotEmpty && seen.add(enumName)) {
+        if (enumName.isNotEmpty) {
+          var uniqueName = enumName;
+          if (!seen.add(uniqueName)) {
+            var suffix = 1;
+            while (!seen.add('${enumName}_$suffix')) {
+              suffix++;
+            }
+            uniqueName = '${enumName}_$suffix';
+          }
           final val = EnumValue()
-            ..id = enumName
+            ..id = uniqueName
             ..description = pathValue;
           results.add(val);
         }
       }
     }
 
+    results.sort((a, b) => a.id.compareTo(b.id));
     return results;
   }
 
