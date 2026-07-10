@@ -126,6 +126,7 @@ class _EnumValueViewState extends State<EnumValueView> {
                 widget.data.fullPath!.isNotEmpty) ...[
               TooltipWrapper(
                 message: absolutePath ?? widget.data.fullPath!,
+                imagePath: absolutePath,
                 child: IconButtonTransparent(
                   size: 22 * kScale,
                   icon: Icon(
@@ -138,6 +139,7 @@ class _EnumValueViewState extends State<EnumValueView> {
               ),
               TooltipWrapper(
                 message: absolutePath ?? widget.data.fullPath!,
+                imagePath: absolutePath,
                 child: IconButtonTransparent(
                   size: 22 * kScale,
                   icon: Icon(

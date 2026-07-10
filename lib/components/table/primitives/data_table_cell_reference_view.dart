@@ -107,6 +107,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
                   if (showOpenButtons) ...[
                     TooltipWrapper(
                       message: absolutePath ?? selectedItem.fullPath!,
+                      imagePath: absolutePath,
                       child: IconButtonTransparent(
                         size: 22 * kScale,
                         icon: Icon(
@@ -119,6 +120,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
                     ),
                     TooltipWrapper(
                       message: absolutePath ?? selectedItem.fullPath!,
+                      imagePath: absolutePath,
                       child: IconButtonTransparent(
                         size: 22 * kScale,
                         icon: Icon(
