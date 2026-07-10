@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/properties/primitives/delete_button.dart';
@@ -16,13 +13,13 @@ import 'package:gceditor/model/db_cmd/db_cmd_delete_enum_value.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_enum_value.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
-import 'package:gceditor/utils/utils.dart';
 import 'package:gceditor/model/state/client_find_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/client_view_mode_state.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/model/state/service/client_navigation_service.dart';
 import 'package:gceditor/model/state/style_state.dart';
+import 'package:gceditor/utils/utils.dart';
 import 'package:gceditor/utils/value_change_notifier.dart';
 
 final enumValueWidthRatioProvider = ChangeNotifierProvider((_) => ValueChangeNotifier(Config.enumColumnDefaultWidth));

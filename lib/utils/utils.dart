@@ -192,9 +192,9 @@ abstract class Utils {
   }
 
   static int countCapturingGroups(String pattern) {
-    int count = 0;
-    bool inCharacterClass = false;
-    for (int i = 0; i < pattern.length; i++) {
+    var count = 0;
+    var inCharacterClass = false;
+    for (var i = 0; i < pattern.length; i++) {
       final char = pattern[i];
       if (char == '\\') {
         i++; // skip next char
@@ -235,7 +235,7 @@ abstract class Utils {
       return false;
     }
 
-    int groupCount = 0;
+    var groupCount = 0;
     try {
       RegExp(filePathRegex);
       groupCount = countCapturingGroups(filePathRegex);

@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -312,93 +313,93 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                     ),
                     SizedBox(height: 5 * kScale),
                     Row(
-                       children: [
-                         Expanded(
-                           flex: 4,
-                           child: Text(
-                             Loc.get.appFilesPath,
-                             style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
-                           ),
-                         ),
-                         Expanded(
-                           flex: 3,
-                           child: TooltipWrapper(
-                             message: Loc.get.appFilesPathTooltip(_resolvedAppFilesPath),
-                             child: ClipRRect(
-                               borderRadius: kCardBorder,
-                               child: TextField(
-                                 controller: _appFilesPathController,
-                                 focusNode: _appFilesPathFocusNode,
-                                 decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
-                                   fillColor: _isAppFilesPathValid ? null : kColorAccentRed.withOpacity(0.15),
-                                   focusColor: _isAppFilesPathValid ? null : kColorAccentRed.withOpacity(0.15),
-                                   hoverColor: _isAppFilesPathValid ? null : kColorAccentRed.withOpacity(0.15),
-                                 ),
-                                 textAlign: TextAlign.left,
-                                 onChanged: _handleAppFilesPathChanged,
-                               ),
-                             ),
-                           ),
-                         ),
-                         TooltipWrapper(
-                           message: 'save',
-                           child: IconButtonTransparent(
-                             size: 30 * kScale,
-                             enabled: _isAppFilesPathValid,
-                             icon: Icon(
-                               FontAwesomeIcons.floppyDisk,
-                               size: 12 * kScale,
-                               color: _isAppFilesPathValid ? kColorAccentBlue : kColorAccentBlue.withOpacity(0.3),
-                             ),
-                             onClick: _handleAppFilesPathSave,
-                           ),
-                         ),
-                       ],
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Text(
+                            Loc.get.appFilesPath,
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: TooltipWrapper(
+                            message: Loc.get.appFilesPathTooltip(_resolvedAppFilesPath),
+                            child: ClipRRect(
+                              borderRadius: kCardBorder,
+                              child: TextField(
+                                controller: _appFilesPathController,
+                                focusNode: _appFilesPathFocusNode,
+                                decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                                  fillColor: _isAppFilesPathValid ? null : kColorAccentRed.withOpacity(0.15),
+                                  focusColor: _isAppFilesPathValid ? null : kColorAccentRed.withOpacity(0.15),
+                                  hoverColor: _isAppFilesPathValid ? null : kColorAccentRed.withOpacity(0.15),
+                                ),
+                                textAlign: TextAlign.left,
+                                onChanged: _handleAppFilesPathChanged,
+                              ),
+                            ),
+                          ),
+                        ),
+                        TooltipWrapper(
+                          message: 'save',
+                          child: IconButtonTransparent(
+                            size: 30 * kScale,
+                            enabled: _isAppFilesPathValid,
+                            icon: Icon(
+                              FontAwesomeIcons.floppyDisk,
+                              size: 12 * kScale,
+                              color: _isAppFilesPathValid ? kColorAccentBlue : kColorAccentBlue.withOpacity(0.3),
+                            ),
+                            onClick: _handleAppFilesPathSave,
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 5 * kScale),
                     Row(
-                       children: [
-                         Expanded(
-                           flex: 4,
-                           child: Text(
-                             Loc.get.appFilesPathExcludeRegex,
-                             style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
-                           ),
-                         ),
-                         Expanded(
-                           flex: 3,
-                           child: TooltipWrapper(
-                             message: Loc.get.appFilesPathExcludeRegexTooltip,
-                             child: ClipRRect(
-                               borderRadius: kCardBorder,
-                               child: TextField(
-                                 controller: _appFilesPathExcludeRegexController,
-                                 focusNode: _appFilesPathExcludeRegexFocusNode,
-                                 decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
-                                   fillColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withOpacity(0.15),
-                                   focusColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withOpacity(0.15),
-                                   hoverColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withOpacity(0.15),
-                                 ),
-                                 textAlign: TextAlign.left,
-                                 onChanged: _handleAppFilesPathExcludeRegexChanged,
-                               ),
-                             ),
-                           ),
-                         ),
-                         TooltipWrapper(
-                           message: 'save',
-                           child: IconButtonTransparent(
-                             size: 30 * kScale,
-                             enabled: _isAppFilesPathExcludeRegexValid,
-                             icon: Icon(
-                               FontAwesomeIcons.floppyDisk,
-                               size: 12 * kScale,
-                               color: _isAppFilesPathExcludeRegexValid ? kColorAccentBlue : kColorAccentBlue.withOpacity(0.3),
-                             ),
-                             onClick: _handleAppFilesPathExcludeRegexSave,
-                           ),
-                         ),
-                       ],
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Text(
+                            Loc.get.appFilesPathExcludeRegex,
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: TooltipWrapper(
+                            message: Loc.get.appFilesPathExcludeRegexTooltip,
+                            child: ClipRRect(
+                              borderRadius: kCardBorder,
+                              child: TextField(
+                                controller: _appFilesPathExcludeRegexController,
+                                focusNode: _appFilesPathExcludeRegexFocusNode,
+                                decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                                  fillColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withOpacity(0.15),
+                                  focusColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withOpacity(0.15),
+                                  hoverColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withOpacity(0.15),
+                                ),
+                                textAlign: TextAlign.left,
+                                onChanged: _handleAppFilesPathExcludeRegexChanged,
+                              ),
+                            ),
+                          ),
+                        ),
+                        TooltipWrapper(
+                          message: 'save',
+                          child: IconButtonTransparent(
+                            size: 30 * kScale,
+                            enabled: _isAppFilesPathExcludeRegexValid,
+                            icon: Icon(
+                              FontAwesomeIcons.floppyDisk,
+                              size: 12 * kScale,
+                              color: _isAppFilesPathExcludeRegexValid ? kColorAccentBlue : kColorAccentBlue.withOpacity(0.3),
+                            ),
+                            onClick: _handleAppFilesPathExcludeRegexSave,
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 10 * kScale),
                     const Divider(height: 1),
@@ -639,7 +640,9 @@ class SettingsViewState extends ConsumerState<SettingsView> {
       return;
 
     if (newTooltipDelay > Config.maxTooltipDelay) {
-      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'tooltipDelay is too big. Max value is "${Config.maxTooltipDelay}" seconds'));
+      providerContainer
+          .read(logStateProvider)
+          .addMessage(LogEntry(LogLevel.error, 'tooltipDelay is too big. Max value is "${Config.maxTooltipDelay}" seconds'));
       providerContainer.read(clientStateProvider).dispatchChange();
       return;
     }
@@ -731,8 +734,8 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     }
     final projectDir = path.dirname(projectFile.path);
     final rawPaths = value.trim().isEmpty ? <String>[] : value.split(RegExp(r'[;,]'));
-    final List<String> resolvedPaths = [];
-    bool allExist = true;
+    final resolvedPaths = <String>[];
+    var allExist = true;
     for (final rawPath in rawPaths) {
       final trimmed = rawPath.trim();
       if (trimmed.isEmpty) continue;

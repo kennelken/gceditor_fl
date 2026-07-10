@@ -100,7 +100,7 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
 
     final files = <File>[];
     final seenFilePaths = <String>{};
-    bool anyDirectoryExists = false;
+    var anyDirectoryExists = false;
     for (final p in paths) {
       final scanDirPath = path.normalize(path.absolute(path.join(projectDir.path, p)));
       final scanDir = Directory(scanDirPath);
@@ -194,7 +194,11 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
     }
 
     results.sort((a, b) => a.id.compareTo(b.id));
-    results.insert(0, EnumValue()..id = 'Undefined'..description = '');
+    results.insert(
+        0,
+        EnumValue()
+          ..id = 'Undefined'
+          ..description = '');
     return results;
   }
 
@@ -319,7 +323,7 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
   static List<File> _getAllFiles(Directory dir) {
     final files = <File>[];
     try {
-      final List<FileSystemEntity> entities = dir.listSync(recursive: true, followLinks: false);
+      final entities = dir.listSync(recursive: true, followLinks: false);
       for (final entity in entities) {
         if (entity is File) {
           files.add(entity);

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -65,9 +64,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
         selectedItem.fullPath != null &&
         selectedItem.fullPath!.isNotEmpty;
 
-    final absolutePath = showOpenButtons
-        ? Utils.getAbsolutePath(ref.watch(appStateProvider).state.projectFile, selectedItem.fullPath)
-        : null;
+    final absolutePath = showOpenButtons ? Utils.getAbsolutePath(ref.watch(appStateProvider).state.projectFile, selectedItem.fullPath) : null;
 
     final double rightPadding;
     if (showOpenButtons) {

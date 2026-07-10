@@ -164,7 +164,6 @@ class StyleStateNotifier extends ChangeNotifier {
     state.kTableTopRowHeight = 32.0 * state.globalScale; // means a row of home layout
 
     state.kAppTheme = ThemeData(
-      dialogBackgroundColor: kColorBackground,
       scaffoldBackgroundColor: kColorBackground,
       inputDecorationTheme: InputDecorationTheme(
         hintStyle: state.kTextSmall.copyWith(color: kColorPrimaryLight),
@@ -256,6 +255,7 @@ class StyleStateNotifier extends ChangeNotifier {
           padding: WidgetStatePropertyAll(EdgeInsets.zero),
         ),
       ),
+      dialogTheme: const DialogThemeData(backgroundColor: kColorBackground),
     );
 
     state.kInputThemeLight = state.kAppTheme.copyWith(
