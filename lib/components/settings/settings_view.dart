@@ -331,9 +331,9 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                                 controller: _appFilesPathController,
                                 focusNode: _appFilesPathFocusNode,
                                 decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
-                                  fillColor: _isAppFilesPathValid ? null : kColorAccentRed.withOpacity(0.15),
-                                  focusColor: _isAppFilesPathValid ? null : kColorAccentRed.withOpacity(0.15),
-                                  hoverColor: _isAppFilesPathValid ? null : kColorAccentRed.withOpacity(0.15),
+                                  fillColor: _isAppFilesPathValid ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                  focusColor: _isAppFilesPathValid ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                  hoverColor: _isAppFilesPathValid ? null : kColorAccentRed.withValues(alpha: 0.15),
                                 ),
                                 textAlign: TextAlign.left,
                                 onChanged: _handleAppFilesPathChanged,
@@ -349,7 +349,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                             icon: Icon(
                               FontAwesomeIcons.floppyDisk,
                               size: 12 * kScale,
-                              color: _isAppFilesPathValid ? kColorAccentBlue : kColorAccentBlue.withOpacity(0.3),
+                              color: _isAppFilesPathValid ? kColorAccentBlue : kColorAccentBlue.withValues(alpha: 0.3),
                             ),
                             onClick: _handleAppFilesPathSave,
                           ),
@@ -376,9 +376,9 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                                 controller: _appFilesPathExcludeRegexController,
                                 focusNode: _appFilesPathExcludeRegexFocusNode,
                                 decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
-                                  fillColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withOpacity(0.15),
-                                  focusColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withOpacity(0.15),
-                                  hoverColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withOpacity(0.15),
+                                  fillColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                  focusColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                  hoverColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withValues(alpha: 0.15),
                                 ),
                                 textAlign: TextAlign.left,
                                 onChanged: _handleAppFilesPathExcludeRegexChanged,
@@ -394,7 +394,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                             icon: Icon(
                               FontAwesomeIcons.floppyDisk,
                               size: 12 * kScale,
-                              color: _isAppFilesPathExcludeRegexValid ? kColorAccentBlue : kColorAccentBlue.withOpacity(0.3),
+                              color: _isAppFilesPathExcludeRegexValid ? kColorAccentBlue : kColorAccentBlue.withValues(alpha: 0.3),
                             ),
                             onClick: _handleAppFilesPathExcludeRegexSave,
                           ),

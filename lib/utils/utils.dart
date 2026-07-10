@@ -83,9 +83,9 @@ abstract class Utils {
   static MaterialColor createMaterialColor(Color color) {
     final strengths = <double>[.05];
     final swatch = <int, Color>{};
-    final r = color.red;
-    final g = color.green;
-    final b = color.blue;
+    final r = (color.r * 255.0).round();
+    final g = (color.g * 255.0).round();
+    final b = (color.b * 255.0).round();
 
     for (var i = 1; i < 10; i++) {
       strengths.add(0.1 * i);
@@ -99,7 +99,7 @@ abstract class Utils {
         1,
       );
     }
-    return MaterialColor(color.value, swatch);
+    return MaterialColor(color.toARGB32(), swatch);
   }
 
   static final _uuidV4Regex = RegExp('[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}');

@@ -350,7 +350,7 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                             icon: Icon(
                               FontAwesomeIcons.play,
                               color: (_showSettings || !_validateDbSettings())
-                                  ? Colors.white.withOpacity(0.3)
+                                  ? Colors.white.withValues(alpha: 0.3)
                                   : kColorAccentGreen,
                               size: 20 * kScale,
                             ),
@@ -368,9 +368,9 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                           Expanded(
                             child: TextField(
                               decoration: kStyle.kInputTextStyleProperties.copyWith(
-                                fillColor: _isRegExpPatternValid(_filePathRegexController.text, isMandatory: true) ? null : kColorAccentRed.withOpacity(0.15),
-                                focusColor: _isRegExpPatternValid(_filePathRegexController.text, isMandatory: true) ? null : kColorAccentRed.withOpacity(0.15),
-                                hoverColor: _isRegExpPatternValid(_filePathRegexController.text, isMandatory: true) ? null : kColorAccentRed.withOpacity(0.15),
+                                fillColor: _isRegExpPatternValid(_filePathRegexController.text, isMandatory: true) ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                focusColor: _isRegExpPatternValid(_filePathRegexController.text, isMandatory: true) ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                hoverColor: _isRegExpPatternValid(_filePathRegexController.text, isMandatory: true) ? null : kColorAccentRed.withValues(alpha: 0.15),
                                 label: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -400,9 +400,9 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                           Expanded(
                             child: TextField(
                               decoration: kStyle.kInputTextStyleProperties.copyWith(
-                                fillColor: _isRegExpPatternValid(_filePathRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withOpacity(0.15),
-                                focusColor: _isRegExpPatternValid(_filePathRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withOpacity(0.15),
-                                hoverColor: _isRegExpPatternValid(_filePathRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withOpacity(0.15),
+                                fillColor: _isRegExpPatternValid(_filePathRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                focusColor: _isRegExpPatternValid(_filePathRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                hoverColor: _isRegExpPatternValid(_filePathRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
                                 labelText: Loc.get.filePathRegexExclude,
                               ),
                               controller: _filePathRegexExcludeController,
@@ -420,9 +420,9 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                           Expanded(
                             child: TextField(
                               decoration: kStyle.kInputTextStyleProperties.copyWith(
-                                fillColor: _isRegExpPatternValid(_fileContentRegexIncludeController.text, isMandatory: false) ? null : kColorAccentRed.withOpacity(0.15),
-                                focusColor: _isRegExpPatternValid(_fileContentRegexIncludeController.text, isMandatory: false) ? null : kColorAccentRed.withOpacity(0.15),
-                                hoverColor: _isRegExpPatternValid(_fileContentRegexIncludeController.text, isMandatory: false) ? null : kColorAccentRed.withOpacity(0.15),
+                                fillColor: _isRegExpPatternValid(_fileContentRegexIncludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                focusColor: _isRegExpPatternValid(_fileContentRegexIncludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                hoverColor: _isRegExpPatternValid(_fileContentRegexIncludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
                                 labelText: Loc.get.fileContentRegexInclude,
                               ),
                               controller: _fileContentRegexIncludeController,
@@ -440,9 +440,9 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                           Expanded(
                             child: TextField(
                               decoration: kStyle.kInputTextStyleProperties.copyWith(
-                                fillColor: _isRegExpPatternValid(_fileContentRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withOpacity(0.15),
-                                focusColor: _isRegExpPatternValid(_fileContentRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withOpacity(0.15),
-                                hoverColor: _isRegExpPatternValid(_fileContentRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withOpacity(0.15),
+                                fillColor: _isRegExpPatternValid(_fileContentRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                focusColor: _isRegExpPatternValid(_fileContentRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                hoverColor: _isRegExpPatternValid(_fileContentRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
                                 labelText: Loc.get.fileContentRegexExclude,
                               ),
                               controller: _fileContentRegexExcludeController,
@@ -460,9 +460,9 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                           Expanded(
                             child: TextField(
                               decoration: kStyle.kInputTextStyleProperties.copyWith(
-                                fillColor: _isEnumNameFromRegexValid() ? null : kColorAccentRed.withOpacity(0.15),
-                                focusColor: _isEnumNameFromRegexValid() ? null : kColorAccentRed.withOpacity(0.15),
-                                hoverColor: _isEnumNameFromRegexValid() ? null : kColorAccentRed.withOpacity(0.15),
+                                fillColor: _isEnumNameFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                focusColor: _isEnumNameFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                hoverColor: _isEnumNameFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
                                 label: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -492,9 +492,9 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                           Expanded(
                             child: TextField(
                               decoration: kStyle.kInputTextStyleProperties.copyWith(
-                                fillColor: _isPathValueFromRegexValid() ? null : kColorAccentRed.withOpacity(0.15),
-                                focusColor: _isPathValueFromRegexValid() ? null : kColorAccentRed.withOpacity(0.15),
-                                hoverColor: _isPathValueFromRegexValid() ? null : kColorAccentRed.withOpacity(0.15),
+                                fillColor: _isPathValueFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                focusColor: _isPathValueFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                hoverColor: _isPathValueFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
                                 labelText: Loc.get.pathValueFromRegex,
                               ),
                               controller: _pathValueFromRegexController,
@@ -519,7 +519,7 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                             icon: Icon(
                               FontAwesomeIcons.check,
                               color: !_validateLocalSettings()
-                                  ? kColorAccentGreen.withOpacity(0.3)
+                                  ? kColorAccentGreen.withValues(alpha: 0.3)
                                   : kColorAccentGreen,
                               size: 20 * kScale,
                             ),
