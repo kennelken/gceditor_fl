@@ -143,6 +143,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectSettingsSaveDelay => 'save delay (seconds)';
 
   @override
+  String get projectSettingsTooltipDelay => 'tooltip delay (seconds)';
+
+  @override
   String get projectSettingsGeneratorsTitle => 'generators';
 
   @override

@@ -18,6 +18,8 @@ class DbModelSettings {
   String? authPath;
   @JsonKey(defaultValue: '.')
   String appFilesPath = '.';
+  @JsonKey(defaultValue: 0.3)
+  double tooltipDelay = Config.defaultTooltipDelay;
   @JsonKey(defaultValue: r'(?:^|\/)\.[^.\/]')
   String appFilesPathExcludeRegex = r'(?:^|\/)\.[^.\/]';
 

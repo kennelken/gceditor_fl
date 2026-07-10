@@ -80,6 +80,10 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     final saveDelayFocusNode = FocusNode();
     saveDelayFocusNode.addListener(() => _handleSaveDelayFocus(saveDelayFocusNode, saveDelayController));
 
+    final tooltipDelayController = TextEditingController(text: model.settings.tooltipDelay.toString());
+    final tooltipDelayFocusNode = FocusNode();
+    tooltipDelayFocusNode.addListener(() => _handleTooltipDelayFocus(tooltipDelayFocusNode, tooltipDelayController));
+
     final outputPathController = TextEditingController(text: model.settings.outputPath ?? './${Config.newOutputListDefaultName}');
     _outputPathController = outputPathController;
 
@@ -154,6 +158,27 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                             decoration: kStyle.kInputTextStyleSettingsProperties,
                             inputFormatters: Config.filterCellTypeFloat,
                             focusNode: saveDelayFocusNode,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Text(
+                            Loc.get.projectSettingsTooltipDelay,
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                          ),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: tooltipDelayController,
+                            decoration: kStyle.kInputTextStyleSettingsProperties,
+                            inputFormatters: Config.filterCellTypeFloat,
+                            focusNode: tooltipDelayFocusNode,
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -592,6 +617,36 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(
           DbCmdEditProjectSettings.values(
             saveDelay: newSaveDelay,
+          ),
+        );
+  }
+
+  void _handleTooltipDelayFocus(FocusNode focus, TextEditingController textComponent) {
+    if (focus.hasFocus) //
+      return;
+
+    final value = textComponent.text;
+    final match = Config.validCharactersForCellTypeFloat.firstMatch(value);
+    if (match == null || double.tryParse(value) == null) {
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Invalid float value. Valid format example "0.3"'));
+      providerContainer.read(clientStateProvider).dispatchChange();
+      return;
+    }
+
+    final newTooltipDelay = double.parse(value);
+
+    if (newTooltipDelay == clientModel.settings.tooltipDelay) //
+      return;
+
+    if (newTooltipDelay > Config.maxTooltipDelay) {
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'tooltipDelay is too big. Max value is "${Config.maxTooltipDelay}" seconds'));
+      providerContainer.read(clientStateProvider).dispatchChange();
+      return;
+    }
+
+    providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+          DbCmdEditProjectSettings.values(
+            tooltipDelay: newTooltipDelay,
           ),
         );
   }

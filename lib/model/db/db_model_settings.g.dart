@@ -16,6 +16,7 @@ DbModelSettings _$DbModelSettingsFromJson(Map<String, dynamic> json) =>
       ..historyPath = json['historyPath'] as String?
       ..authPath = json['authPath'] as String?
       ..appFilesPath = json['appFilesPath'] as String? ?? '.'
+      ..tooltipDelay = (json['tooltipDelay'] as num?)?.toDouble() ?? 0.3
       ..appFilesPathExcludeRegex = json['appFilesPathExcludeRegex'] as String? ?? r'(?:^|\/)\.[^.\/]';
 
 Map<String, dynamic> _$DbModelSettingsToJson(DbModelSettings instance) {
@@ -37,6 +38,7 @@ Map<String, dynamic> _$DbModelSettingsToJson(DbModelSettings instance) {
   writeNotNull('historyPath', instance.historyPath);
   writeNotNull('authPath', instance.authPath);
   val['appFilesPath'] = instance.appFilesPath;
+  val['tooltipDelay'] = instance.tooltipDelay;
   val['appFilesPathExcludeRegex'] = instance.appFilesPathExcludeRegex;
   return val;
 }

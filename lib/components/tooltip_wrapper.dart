@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:gceditor/consts/consts.dart';
+import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/style_state.dart';
 
 class TooltipWrapper extends StatelessWidget {
@@ -36,6 +37,11 @@ class TooltipWrapper extends StatelessWidget {
          imagePath!.endsWith('.bmp')) &&
         File(imagePath!).existsSync();
 
+    var delay = kTooltipDelay;
+    try {
+      delay = Duration(milliseconds: (clientModel.settings.tooltipDelay * 1000).round());
+    } catch (_) {}
+
     return Tooltip(
       decoration: BoxDecoration(color: kColorPrimaryDarkest.withAlpha(240), borderRadius: kCardBorder),
       padding: EdgeInsets.all(7 * kStyle.globalScale),
@@ -66,7 +72,7 @@ class TooltipWrapper extends StatelessWidget {
           ],
         ),
       ),
-      waitDuration: kTooltipDelay,
+      waitDuration: delay,
       child: child,
     );
   }

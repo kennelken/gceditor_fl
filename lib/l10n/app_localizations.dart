@@ -349,6 +349,12 @@ abstract class AppLocalizations {
   ///
   ///
   /// In en, this message translates to:
+  /// **'tooltip delay (seconds)'**
+  String get projectSettingsTooltipDelay;
+
+  ///
+  ///
+  /// In en, this message translates to:
   /// **'generators'**
   String get projectSettingsGeneratorsTitle;
 

@@ -196,6 +196,10 @@
 	"@projectSettingsSaveDelay": {
 		"description": ""
 	},
+	"projectSettingsTooltipDelay": "tooltip delay (seconds)",
+	"@projectSettingsTooltipDelay": {
+		"description": ""
+	},
 	"projectSettingsGeneratorsTitle": "generators",
 	"@projectSettingsGeneratorsTitle": {
 		"description": ""

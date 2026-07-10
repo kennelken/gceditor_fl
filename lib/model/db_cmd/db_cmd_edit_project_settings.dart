@@ -21,6 +21,7 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
   String? authPath;
   String? appFilesPath;
   String? appFilesPathExcludeRegex;
+  double? tooltipDelay;
 
   DbCmdEditProjectSettings.values({
     String? id,
@@ -33,6 +34,7 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
     this.authPath,
     this.appFilesPath,
     this.appFilesPathExcludeRegex,
+    this.tooltipDelay,
   }) : super.withId(id) {
     $type = DbCmdType.editProjectSettings;
   }
@@ -84,6 +86,10 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
       dbModel.settings.appFilesPathExcludeRegex = appFilesPathExcludeRegex!;
     }
 
+    if (tooltipDelay != null) {
+      dbModel.settings.tooltipDelay = tooltipDelay!;
+    }
+
     return DbCmdResult.success();
   }
 
@@ -97,6 +103,11 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
     if (saveDelay != null) {
       if (saveDelay! > Config.maxSaveDelay) //
         return DbCmdResult.fail('saveDelay is too big. it is not recommended to set it to value higher than "${Config.maxSaveDelay}" seconds');
+    }
+
+    if (tooltipDelay != null) {
+      if (tooltipDelay! > Config.maxTooltipDelay) //
+        return DbCmdResult.fail('tooltipDelay is too big. it is not recommended to set it to value higher than "${Config.maxTooltipDelay}" seconds');
     }
 
     if (appFilesPathExcludeRegex != null) {
@@ -136,6 +147,7 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
       authPath: authPath != null ? dbModel.settings.authPath : null,
       appFilesPath: appFilesPath != null ? dbModel.settings.appFilesPath : null,
       appFilesPathExcludeRegex: appFilesPathExcludeRegex != null ? dbModel.settings.appFilesPathExcludeRegex : null,
+      tooltipDelay: tooltipDelay != null ? dbModel.settings.tooltipDelay : null,
     );
   }
 }
