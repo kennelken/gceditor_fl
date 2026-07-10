@@ -75,10 +75,7 @@ class DbCmdEditProjectSettings extends BaseDbCmd {
     }
 
     if (appFilesPath != null) {
-      if (appFilesPath!.isEmpty)
-        dbModel.settings.appFilesPath = '.';
-      else
-        dbModel.settings.appFilesPath = appFilesPath!;
+      dbModel.settings.appFilesPath = appFilesPath!;
     }
 
     return DbCmdResult.success();

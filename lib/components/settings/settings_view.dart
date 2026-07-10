@@ -613,10 +613,20 @@ class SettingsViewState extends ConsumerState<SettingsView> {
       return;
     }
     final projectDir = path.dirname(projectFile.path);
-    final resolvedPath = path.normalize(path.absolute(path.join(projectDir, value.trim().isEmpty ? '.' : value)));
-    final exists = Directory(resolvedPath).existsSync();
-    _resolvedAppFilesPath = resolvedPath;
-    _isAppFilesPathValid = exists;
+    final rawPaths = value.trim().isEmpty ? <String>[] : value.split(RegExp(r'[;,]'));
+    final List<String> resolvedPaths = [];
+    bool allExist = true;
+    for (final rawPath in rawPaths) {
+      final trimmed = rawPath.trim();
+      if (trimmed.isEmpty) continue;
+      final resolved = path.normalize(path.absolute(path.join(projectDir, trimmed)));
+      resolvedPaths.add(resolved);
+      if (!Directory(resolved).existsSync()) {
+        allExist = false;
+      }
+    }
+    _resolvedAppFilesPath = resolvedPaths.isEmpty ? 'No paths specified (scanning disabled)' : resolvedPaths.join('\n');
+    _isAppFilesPathValid = allExist;
   }
 
   void _handleAppFilesPathChanged(String value) {
@@ -629,7 +639,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     final rawValue = _appFilesPathController?.text;
     if (rawValue == null) return;
 
-    final value = rawValue.trim().isEmpty ? '.' : rawValue;
+    final value = rawValue.trim();
     if (value == clientModel.settings.appFilesPath) return;
 
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(

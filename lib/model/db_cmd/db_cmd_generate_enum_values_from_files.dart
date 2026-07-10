@@ -86,9 +86,27 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
     if (!projectDir.existsSync()) return [];
 
     final appFilesPath = dbModel.settings.appFilesPath;
-    final scanDirPath = path.normalize(path.absolute(path.join(projectDir.path, appFilesPath)));
-    final scanDir = Directory(scanDirPath);
-    if (!scanDir.existsSync()) return [];
+    if (appFilesPath.trim().isEmpty) return [];
+    final paths = appFilesPath.split(RegExp(r'[;,]')).map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
+    if (paths.isEmpty) return [];
+
+    final files = <File>[];
+    final seenFilePaths = <String>{};
+    bool anyDirectoryExists = false;
+    for (final p in paths) {
+      final scanDirPath = path.normalize(path.absolute(path.join(projectDir.path, p)));
+      final scanDir = Directory(scanDirPath);
+      if (scanDir.existsSync()) {
+        anyDirectoryExists = true;
+        for (final file in _getAllFiles(scanDir)) {
+          final absPath = path.absolute(file.path);
+          if (seenFilePaths.add(absPath)) {
+            files.add(file);
+          }
+        }
+      }
+    }
+    if (!anyDirectoryExists) return [];
 
     final regexText = entity.filePathRegex;
     if (regexText.isEmpty) return [];
@@ -104,7 +122,6 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
     final contentRegExpInclude = _tryParseRegExp(entity.fileContentRegexInclude);
     final contentRegExpExclude = _tryParseRegExp(entity.fileContentRegexExclude);
 
-    final files = _getAllFiles(scanDir);
     final results = <EnumValue>[];
     final seen = <String>{};
 

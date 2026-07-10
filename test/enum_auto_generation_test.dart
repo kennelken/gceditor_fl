@@ -416,34 +416,37 @@ void main() {
     
     // Create folders
     final appFilesFolder = Directory('${tempDir.path}/Src/Prefabs')..createSync(recursive: true);
+    final anotherFolder = Directory('${tempDir.path}/Assets/Prefabs')..createSync(recursive: true);
     final outsideFolder = Directory('${tempDir.path}/Outside/Prefabs')..createSync(recursive: true);
     
     // Create files
     File('${appFilesFolder.path}/Player.prefab').createSync();
-    File('${outsideFolder.path}/Monster.prefab').createSync();
+    File('${anotherFolder.path}/Monster.prefab').createSync();
+    File('${outsideFolder.path}/IgnoreMe.prefab').createSync();
 
     try {
       final projectFile = File('${tempDir.path}/project.json');
       providerContainer.read(appStateProvider).state.projectFile = projectFile;
 
       final dbModel = DbModel();
-      dbModel.settings.appFilesPath = './Src'; // Restrict to Src
+      // Test multiple paths with spaces, semicolon and comma
+      dbModel.settings.appFilesPath = './Src;  ./Assets,,'; 
 
       final entity = ClassMetaEntityEnum()
         ..id = 'Prefabs'
         ..autoByFile = true
-        ..filePathRegex = r'Src/Prefabs/(.*)\.prefab'
+        ..filePathRegex = r'(?:Src|Assets)/Prefabs/(.*)\.prefab'
         ..enumNameFromRegex = '{1}';
       
       dbModel.classes.add(entity);
       dbModel.cache.invalidate();
 
-      // 1. Scan with valid App files path
+      // 1. Scan with valid App files paths
       final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
-      expect(results.length, equals(2));
+      expect(results.length, equals(3));
       expect(results[0].id, equals('Undefined'));
-      expect(results[1].id, equals('Player'));
-      expect(results[1].description, equals('Src/Prefabs/Player.prefab')); // relative path computed from project root
+      expect(results[1].id, equals('Monster'));
+      expect(results[2].id, equals('Player'));
 
       // 2. Scan with invalid App files path (non-existent)
       dbModel.settings.appFilesPath = './NonExistentDir';

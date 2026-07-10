@@ -1399,13 +1399,13 @@ abstract class AppLocalizations {
   ///
   ///
   /// In en, this message translates to:
-  /// **'app files path'**
+  /// **'app files paths'**
   String get appFilesPath;
 
   ///
   ///
   /// In en, this message translates to:
-  /// **'This path is optional and is used as the base directory for auto-generating enums.\n\nResolved absolute path:\n{resolvedPath}'**
+  /// **'These paths are optional and are used as the base directories for auto-generating enums. Multiple paths can be separated by \';\' or \',\'.\n\nResolved absolute paths:\n{resolvedPath}'**
   String appFilesPathTooltip(String resolvedPath);
 
   ///
