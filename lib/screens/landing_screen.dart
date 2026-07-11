@@ -225,7 +225,10 @@ class LandingScreenState extends State<LandingScreen> {
                                                         onTap: () => _handleRecentProjectTap(p),
                                                         child: Container(
                                                           height: 22 * kScale,
-                                                          color: isSelected ? kColorPrimaryLightTransparent : kColorTransparent,
+                                                          decoration: BoxDecoration(
+                                                            color: isSelected ? kColorPrimaryLightTransparent : kColorTransparent,
+                                                            borderRadius: kCardBorder,
+                                                          ),
                                                           child: Padding(
                                                             padding: EdgeInsets.only(left: 5 * kScale, right: 10 * kScale),
                                                             child: Row(
