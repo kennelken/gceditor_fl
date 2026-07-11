@@ -74,27 +74,34 @@ class DataTableCellReferenceView extends ConsumerWidget {
     }
 
     String? Function()? tooltipMessageBuilder;
+    String? Function()? tooltipHeaderBuilder;
     String? imagePath;
     if (selectedItem != null) {
       if (selectedItem is EnumValue && selectedItem.fullPath != null && selectedItem.fullPath!.isNotEmpty) {
         imagePath = Utils.getAbsolutePath(ref.watch(appStateProvider).state.projectFile, selectedItem.fullPath);
       }
+      final rowItem = selectedItem is DataTableRow ? selectedItem : null;
+      final tableForItem = rowItem != null ? model.cache.getTableByRowId(rowItem.id) : null;
+
       tooltipMessageBuilder = () {
-        if (selectedItem is DataTableRow) {
-          final table = model.cache.allDataTables.firstWhereOrNull((t) => t.rows.contains(selectedItem));
-          if (table != null) {
-            final jsonMap = DbModelUtils.rowToJson(model, table, selectedItem);
-            return const JsonEncoder.withIndent('  ').convert(jsonMap);
-          }
-        } else {
-          try {
-            final jsonMap = (selectedItem as dynamic).toJson();
-            return const JsonEncoder.withIndent('  ').convert(jsonMap);
-          } catch (_) {
-            return selectedItem.id;
-          }
+        if (rowItem != null && tableForItem != null) {
+          final jsonMap = DbModelUtils.rowToJson(model, tableForItem, rowItem);
+          return const JsonEncoder.withIndent('  ').convert(jsonMap);
         }
-        return null;
+        try {
+          final jsonMap = (selectedItem as dynamic).toJson();
+          return const JsonEncoder.withIndent('  ').convert(jsonMap);
+        } catch (_) {
+          return selectedItem.id;
+        }
+      };
+
+      tooltipHeaderBuilder = () {
+        final typeName = classEntity.id;
+        final tableName = tableForItem?.id ?? '';
+        if (tableName.isEmpty) //
+          return typeName;
+        return '$typeName · $tableName';
       };
     }
 
@@ -104,6 +111,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
         children: [
           TooltipWrapper(
             messageBuilder: tooltipMessageBuilder,
+            headerMessageBuilder: tooltipHeaderBuilder,
             imagePath: imagePath,
             child: DropDownSelector<IIdentifiable>(
               label: '',

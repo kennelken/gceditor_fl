@@ -9,6 +9,8 @@ class TooltipWrapper extends StatelessWidget {
   final Widget child;
   final String? message;
   final String? Function()? messageBuilder;
+  final String? headerMessage;
+  final String? Function()? headerMessageBuilder;
   final String? imagePath;
 
   const TooltipWrapper({
@@ -16,6 +18,8 @@ class TooltipWrapper extends StatelessWidget {
     required this.child,
     this.message,
     this.messageBuilder,
+    this.headerMessage,
+    this.headerMessageBuilder,
     this.imagePath,
   });
 
@@ -30,11 +34,11 @@ class TooltipWrapper extends StatelessWidget {
 
     final showImage = imagePath != null &&
         (imagePath!.endsWith('.png') ||
-         imagePath!.endsWith('.jpg') ||
-         imagePath!.endsWith('.jpeg') ||
-         imagePath!.endsWith('.gif') ||
-         imagePath!.endsWith('.webp') ||
-         imagePath!.endsWith('.bmp')) &&
+            imagePath!.endsWith('.jpg') ||
+            imagePath!.endsWith('.jpeg') ||
+            imagePath!.endsWith('.gif') ||
+            imagePath!.endsWith('.webp') ||
+            imagePath!.endsWith('.bmp')) &&
         File(imagePath!).existsSync();
 
     var delay = kTooltipDelay;
@@ -49,7 +53,7 @@ class TooltipWrapper extends StatelessWidget {
       richMessage: WidgetSpan(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (showImage)
               Padding(
@@ -63,6 +67,15 @@ class TooltipWrapper extends StatelessWidget {
                     File(imagePath!),
                     fit: BoxFit.contain,
                   ),
+                ),
+              ),
+            if (headerMessage != null || headerMessageBuilder != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: _LazyTooltipText(
+                  message: headerMessage,
+                  messageBuilder: headerMessageBuilder,
+                  style: kStyle.kTextExtraSmallInactive,
                 ),
               ),
             _LazyTooltipText(

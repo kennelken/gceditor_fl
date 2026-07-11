@@ -9,6 +9,7 @@ import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/model/db/data_table_row.dart';
+import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_delete_data_row.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_table_row_id.dart';
@@ -88,6 +89,11 @@ class DataTableRowIdView extends ConsumerWidget {
       return const JsonEncoder.withIndent('  ').convert(jsonMap);
     } : null;
 
+    String? tooltipHeaderBuilder() {
+      final className = clientModel.cache.getClass<ClassMetaEntity>(table.classId)?.id ?? table.classId;
+      return '$className · ${table.id}';
+    }
+
     return Material(
       color: isSelected ? kColorSelectedDataTableId : kColorTransparent,
       child: InkWell(
@@ -107,6 +113,7 @@ class DataTableRowIdView extends ConsumerWidget {
             Expanded(
               child: TooltipWrapper(
                 messageBuilder: tooltipMessageBuilder,
+                headerMessageBuilder: tooltipHeaderBuilder,
                 child: ScrollConfiguration(
                   behavior: kScrollNoScroll,
                   child: TextField(
