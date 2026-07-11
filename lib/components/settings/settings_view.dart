@@ -124,7 +124,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     return Container(
       width: 1200 * kScale,
       height: 920 * kScale,
-      color: kTextColorLightest,
+      color: kColorPrimaryDarker2,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -150,7 +150,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           flex: 4,
                           child: Text(
                             Loc.get.projectSettingsSaveDelay,
-                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                           ),
                         ),
                         Expanded(
@@ -171,7 +171,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           flex: 4,
                           child: Text(
                             Loc.get.projectSettingsTooltipDelay,
-                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                           ),
                         ),
                         Expanded(
@@ -192,7 +192,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           flex: 4,
                           child: Text(
                             Loc.get.projectSettingsTimezoneTitle,
-                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                           ),
                         ),
                         Expanded(
@@ -213,7 +213,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           flex: 4,
                           child: Text(
                             Loc.get.outputPath,
-                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                           ),
                         ),
                         Expanded(
@@ -248,7 +248,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           flex: 4,
                           child: Text(
                             Loc.get.historyPath,
-                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                           ),
                         ),
                         Expanded(
@@ -283,7 +283,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           flex: 4,
                           child: Text(
                             Loc.get.authListPath,
-                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                           ),
                         ),
                         Expanded(
@@ -318,7 +318,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           flex: 4,
                           child: Text(
                             Loc.get.appFilesPath,
-                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                           ),
                         ),
                         Expanded(
@@ -363,7 +363,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           flex: 4,
                           child: Text(
                             Loc.get.appFilesPathExcludeRegex,
-                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                           ),
                         ),
                         Expanded(
@@ -407,113 +407,113 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                     ClipRRect(
                       borderRadius: kCardBorder,
                       child: Container(
-                        color: kTextColorLight,
+                        color: kColorPrimary,
                         width: 9999,
-                        height: 229 * kScale,
+                        height: 231 * kScale,
                         child: Padding(
                           padding: EdgeInsets.all(8.0 * kScale),
                           child: Column(
-                          children: [
-                            SizedBox(
-                              height: 30 * kScale,
-                              child: Row(
+                            children: [
+                              SizedBox(
+                                height: 30 * kScale,
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      'registered users',
+                                      style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Row(
                                 children: [
-                                  Text(
-                                    'registered users',
-                                    style: kStyle.kTextRegular.copyWith(color: kColorTextButton),
+                                  Expanded(
+                                    flex: 2,
+                                    child: TextField(
+                                      controller: _loginTextController,
+                                      decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                                        hintText: Loc.get.newLoginHint,
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 7 * kScale, vertical: 13 * kScale),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10 * kScale),
+                                  Expanded(
+                                    flex: 2,
+                                    child: TextField(
+                                      controller: _secretTextController,
+                                      decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                                        hintText: Loc.get.newSecretHint,
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 7 * kScale, vertical: 13 * kScale),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10 * kScale),
+                                  TooltipWrapper(
+                                    message: Loc.get.buttonRegisterNewLogin,
+                                    child: IconButtonTransparent(
+                                      size: 35 * kScale,
+                                      icon: Icon(
+                                        FontAwesomeIcons.plus,
+                                        size: 14 * kScale,
+                                        color: kColorAccentBlue,
+                                      ),
+                                      onClick: _handleRegisterLoginClick,
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                            Row(
-                              children: [
+                              if (users.isNotEmpty) ...[
+                                SizedBox(height: 8 * kScale),
                                 Expanded(
-                                  flex: 2,
-                                  child: TextField(
-                                    controller: _loginTextController,
-                                    decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
-                                      hintText: Loc.get.newLoginHint,
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 7 * kScale, vertical: 13 * kScale),
+                                  child: ScrollConfiguration(
+                                    behavior: kScrollDraggable,
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.vertical,
+                                      itemCount: users.length,
+                                      itemBuilder: (context, index) {
+                                        final user = users[index];
+                                        return Padding(
+                                          padding: EdgeInsets.only(bottom: 4 * kScale),
+                                          child: Container(
+                                            height: 30 * kScale,
+                                            color: kColorPrimaryDarker,
+                                            child: Padding(
+                                              padding: EdgeInsets.only(left: 5 * kScale, right: 8 * kScale),
+                                              child: Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      user.key,
+                                                      style: kStyle.kTextExtraSmall.copyWith(color: kTextColorLight),
+                                                    ),
+                                                  ),
+                                                  TooltipWrapper(
+                                                    message: Loc.get.buttonUnregisterLogin,
+                                                    child: IconButtonTransparent(
+                                                      size: 28 * kScale,
+                                                      icon: Icon(
+                                                        FontAwesomeIcons.trashCan,
+                                                        size: 12 * kScale,
+                                                        color: kColorAccentRed,
+                                                      ),
+                                                      onClick: () => _handleRemoveUser(user.key),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
                                     ),
-                                  ),
-                                ),
-                                SizedBox(width: 10 * kScale),
-                                Expanded(
-                                  flex: 2,
-                                  child: TextField(
-                                    controller: _secretTextController,
-                                    decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
-                                      hintText: Loc.get.newSecretHint,
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 7 * kScale, vertical: 13 * kScale),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 10 * kScale),
-                                TooltipWrapper(
-                                  message: Loc.get.buttonRegisterNewLogin,
-                                  child: IconButtonTransparent(
-                                    size: 35 * kScale,
-                                    icon: Icon(
-                                      FontAwesomeIcons.plus,
-                                      size: 14 * kScale,
-                                      color: kColorAccentBlue,
-                                    ),
-                                    onClick: _handleRegisterLoginClick,
                                   ),
                                 ),
                               ],
-                            ),
-                            if (users.isNotEmpty) ...[
-                              SizedBox(height: 8 * kScale),
-                              Expanded(
-                                child: ScrollConfiguration(
-                                  behavior: kScrollDraggable,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.vertical,
-                                    itemCount: users.length,
-                                    itemBuilder: (context, index) {
-                                      final user = users[index];
-                                      return Padding(
-                                        padding: EdgeInsets.only(bottom: 4 * kScale),
-                                        child: Container(
-                                          height: 30 * kScale,
-                                          color: kTextColorLightest,
-                                          child: Padding(
-                                            padding: EdgeInsets.only(left: 5 * kScale, right: 8 * kScale),
-                                            child: Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    user.key,
-                                                    style: kStyle.kTextExtraSmall.copyWith(color: kTextColorDark),
-                                                  ),
-                                                ),
-                                                TooltipWrapper(
-                                                  message: Loc.get.buttonUnregisterLogin,
-                                                  child: IconButtonTransparent(
-                                                    size: 28 * kScale,
-                                                    icon: Icon(
-                                                      FontAwesomeIcons.trashCan,
-                                                      size: 12 * kScale,
-                                                      color: kColorAccentRed,
-                                                    ),
-                                                    onClick: () => _handleRemoveUser(user.key),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
                             ],
-                          ],
+                          ),
                         ),
                       ),
-                    ),
                     ),
                     SizedBox(height: 10 * kScale),
                     GeneratorsView(
@@ -540,7 +540,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                             ),
                             Text(
                               Loc.get.autoGenerateEnumValues,
-                              style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                              style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                             ),
                           ],
                         ),

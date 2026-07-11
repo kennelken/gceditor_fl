@@ -40,12 +40,12 @@ class HistoryDialogItem extends StatelessWidget {
               SizedBox(width: 8 * kScale),
               Text(
                 kDateTimeFormat.format(data.time),
-                style: kStyle.kTextExtraSmallDark.copyWith(color: kColorAccentOrange),
+                style: kStyle.kTextExtraSmall.copyWith(color: kColorAccentOrange),
               ),
               SizedBox(width: 20 * kScale),
               Text(
                 data.user,
-                style: kStyle.kTextExtraSmallDark.copyWith(color: kColorAccentBlue1_5),
+                style: kStyle.kTextExtraSmall.copyWith(color: kColorAccentBlue1_5),
               ),
               SizedBox(width: 20 * kScale),
               Expanded(
@@ -53,7 +53,7 @@ class HistoryDialogItem extends StatelessWidget {
                   providerContainer.read(clientHistoryStateProvider).state.getEntryString(data),
                   textAlign: TextAlign.left,
                   maxLines: 1,
-                  style: kStyle.kTextExtraSmallDark,
+                  style: kStyle.kTextExtraSmall,
                 ),
               ),
               SizedBox(width: 20 * kScale),

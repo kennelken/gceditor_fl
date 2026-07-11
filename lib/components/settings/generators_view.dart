@@ -50,7 +50,7 @@ class GeneratorsViewState extends State<GeneratorsView> {
     return ClipRRect(
       borderRadius: kCardBorder,
       child: Container(
-        color: kTextColorLight,
+        color: kColorPrimary,
         width: 9999,
         height: 182 * kScale,
         child: Padding(
@@ -63,7 +63,7 @@ class GeneratorsViewState extends State<GeneratorsView> {
                 children: [
                   Text(
                     Loc.get.projectSettingsGeneratorsTitle,
-                    style: kStyle.kTextRegular.copyWith(color: kColorTextButton),
+                    style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                   ),
                   TooltipWrapper(
                     message: Loc.get.runGenerators,

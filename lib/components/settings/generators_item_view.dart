@@ -141,7 +141,7 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
       padding: EdgeInsets.symmetric(vertical: GeneratorsItemView.itemPadding),
       child: Container(
         height: GeneratorsItemView.itemHeight,
-        color: kTextColorLightest,
+        color: kColorPrimaryDarker,
         child: Padding(
           padding: EdgeInsets.only(left: 5 * kScale, right: 30 * kScale),
           child: Row(
@@ -152,13 +152,13 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
                   children: [
                     Text(
                       '${widget.index}.',
-                      style: kStyle.kTextExtraSmall.copyWith(color: kTextColorDark),
+                      style: kStyle.kTextExtraSmall.copyWith(color: kTextColorLight),
                     ),
                     SizedBox(width: 4 * kScale),
                     Expanded(
                       child: Text(
                         _generatorCopy.$type!.name,
-                        style: kStyle.kTextExtraSmall.copyWith(color: kTextColorDark),
+                        style: kStyle.kTextExtraSmall.copyWith(color: kTextColorLight),
                       ),
                     ),
                     ..._getOptions(),
