@@ -1153,6 +1153,42 @@ abstract class AppLocalizations {
   ///
   ///
   /// In en, this message translates to:
+  /// **'Changes committed'**
+  String get gitCommitSuccess;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to commit changes'**
+  String get gitCommitFailed;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Changes pushed'**
+  String get gitPushSuccess;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to push changes'**
+  String get gitPushFailed;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Changes pulled'**
+  String get gitPullSuccess;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to pull changes'**
+  String get gitPullFailed;
+
+  ///
+  ///
+  /// In en, this message translates to:
   /// **'Refresh the history'**
   String get historyRefreshTooltip;
 

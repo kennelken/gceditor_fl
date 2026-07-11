@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/db_network/command_request_git_payload.dart';
 import 'package:gceditor/model/db_network/command_request_git_response_payload.dart';
 import 'package:gceditor/model/db_network/get_item_data.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
+import 'package:gceditor/utils/components/popup_messages.dart';
 
 final clientGitStateProvider = ChangeNotifierProvider((ref) {
   final notifier = ClientGitStateNotifier(ClientGitState());
@@ -53,6 +55,7 @@ class ClientGitStateNotifier extends ChangeNotifier {
             ),
           );
       _updateByPayload(payload);
+      PopupMessages.show(PopupMessageData(message: payload != null ? Loc.get.gitCommitSuccess : Loc.get.gitCommitFailed));
     });
   }
 
@@ -65,6 +68,7 @@ class ClientGitStateNotifier extends ChangeNotifier {
             ),
           );
       _updateByPayload(payload);
+      PopupMessages.show(PopupMessageData(message: payload != null ? Loc.get.gitPushSuccess : Loc.get.gitPushFailed));
     });
   }
 
@@ -77,6 +81,7 @@ class ClientGitStateNotifier extends ChangeNotifier {
             ),
           );
       _updateByPayload(payload);
+      PopupMessages.show(PopupMessageData(message: payload != null ? Loc.get.gitPullSuccess : Loc.get.gitPullFailed));
     });
   }
 

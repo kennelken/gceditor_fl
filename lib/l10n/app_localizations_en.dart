@@ -628,6 +628,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gitPullTooltip => 'git: Pull';
 
   @override
+  String get gitCommitSuccess => 'Changes committed';
+
+  @override
+  String get gitCommitFailed => 'Failed to commit changes';
+
+  @override
+  String get gitPushSuccess => 'Changes pushed';
+
+  @override
+  String get gitPushFailed => 'Failed to push changes';
+
+  @override
+  String get gitPullSuccess => 'Changes pulled';
+
+  @override
+  String get gitPullFailed => 'Failed to pull changes';
+
+  @override
   String get historyRefreshTooltip => 'Refresh the history';
 
   @override

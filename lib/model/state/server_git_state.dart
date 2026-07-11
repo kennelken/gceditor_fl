@@ -49,8 +49,10 @@ class ServerGitStateNotifier extends ChangeNotifier {
 
         final newState = ServerGitState();
 
-        final projectDir = appState.projectFile!.parent.path;
-        final authListDir = File(authListState.filePath!).parent.path;
+        final projectFile = File(await _resolvePath(appState.projectFile!.path));
+        final projectDir = projectFile.parent.path;
+        final authListFile = File(await _resolvePath(authListState.filePath!));
+        final authListDir = authListFile.parent.path;
         final outputDir = appState.output!.path;
         final historyDir = historyState.folderPath!;
 
@@ -61,7 +63,7 @@ class ServerGitStateNotifier extends ChangeNotifier {
             id: 'project',
             name: Loc.get.gitItemProject,
             gitDir: projectGit,
-            relativePath: path.relative(appState.projectFile!.path, from: projectGit.path),
+            relativePath: path.relative(projectFile.path, from: await Directory(projectGit.path).resolveSymbolicLinks()),
             branchName: projectBranch,
             type: GitItemType.project,
           ));
@@ -74,7 +76,7 @@ class ServerGitStateNotifier extends ChangeNotifier {
             id: 'authList',
             name: Loc.get.gitItemAuthList,
             gitDir: authListGit,
-            relativePath: path.relative(authListState.filePath!, from: authListGit.path),
+            relativePath: path.relative(authListFile.path, from: await Directory(authListGit.path).resolveSymbolicLinks()),
             branchName: authListBranch,
             type: GitItemType.authList,
           ));
@@ -82,7 +84,7 @@ class ServerGitStateNotifier extends ChangeNotifier {
 
         for (var i = 0; i < generatorsList!.length; i++) {
           final generator = generatorsList[i];
-          final filePath = path.join(outputDir, '${generator.fileName}.${generator.fileExtension}');
+          final filePath = await _resolvePath(path.join(outputDir, '${generator.fileName}.${generator.fileExtension}'));
           final fileDir = File(filePath).parent.path;
 
           if (await GitDir.isGitDir(fileDir)) {
@@ -92,7 +94,7 @@ class ServerGitStateNotifier extends ChangeNotifier {
               id: 'g${generator.hashCode}',
               name: Loc.get.gitItemGenerator(generator.$type!.name, i),
               gitDir: fileGit,
-              relativePath: path.relative(filePath, from: fileGit.path),
+              relativePath: path.relative(filePath, from: await Directory(fileGit.path).resolveSymbolicLinks()),
               branchName: fileBranch,
               type: GitItemType.generator,
             ));
@@ -104,7 +106,7 @@ class ServerGitStateNotifier extends ChangeNotifier {
         final historyList = historyState.items;
         for (var i = 0; i < historyList.length; i++) {
           final historyFile = historyList[i];
-          final filePath = path.join(historyDir, '${historyFile.id}.${Config.historyFileExtension}');
+          final filePath = await _resolvePath(path.join(historyDir, '${historyFile.id}.${Config.historyFileExtension}'));
           final fileDir = File(filePath).parent.path;
 
           if (await GitDir.isGitDir(fileDir)) {
@@ -114,7 +116,7 @@ class ServerGitStateNotifier extends ChangeNotifier {
               id: 'h${historyFile.id}',
               name: Loc.get.gitItemHistory(historyFile.id, i),
               gitDir: fileGit,
-              relativePath: path.relative(filePath, from: fileGit.path),
+              relativePath: path.relative(filePath, from: await Directory(fileGit.path).resolveSymbolicLinks()),
               branchName: fileBranch,
               type: GitItemType.history,
             ));
@@ -138,8 +140,8 @@ class ServerGitStateNotifier extends ChangeNotifier {
 
         for (final item in selectedItems) {
           try {
-            await item.gitDir.runCommand(['add', '.\\${item.relativePath}']);
-            await item.gitDir.runCommand(['commit', '.\\${item.relativePath}', '-m', '$requestor via ${Config.appName}: saved "${item.name}"']);
+            await item.gitDir.runCommand(['add', path.join('.', item.relativePath)]);
+            await item.gitDir.runCommand(['commit', path.join('.', item.relativePath), '-m', '$requestor via ${Config.appName}: saved "${item.name}"']);
           } catch (e) {
             errors.add(e.toString());
           }
@@ -236,6 +238,14 @@ class ServerGitStateNotifier extends ChangeNotifier {
     notifyListeners();
 
     return result;
+  }
+
+  Future<String> _resolvePath(String filePath) async {
+    final file = File(filePath);
+    if (await file.exists()) {
+      return await file.resolveSymbolicLinks();
+    }
+    return filePath;
   }
 
   List<GitItem> _getSelectedItemsByIds(List<String> ids) {

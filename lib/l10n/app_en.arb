@@ -810,6 +810,30 @@
 	"@gitPullTooltip": {
 		"description": ""
 	},
+	"gitCommitSuccess": "Changes committed",
+	"@gitCommitSuccess": {
+		"description": ""
+	},
+	"gitCommitFailed": "Failed to commit changes",
+	"@gitCommitFailed": {
+		"description": ""
+	},
+	"gitPushSuccess": "Changes pushed",
+	"@gitPushSuccess": {
+		"description": ""
+	},
+	"gitPushFailed": "Failed to push changes",
+	"@gitPushFailed": {
+		"description": ""
+	},
+	"gitPullSuccess": "Changes pulled",
+	"@gitPullSuccess": {
+		"description": ""
+	},
+	"gitPullFailed": "Failed to pull changes",
+	"@gitPullFailed": {
+		"description": ""
+	},
 	"historyRefreshTooltip": "Refresh the history",
 	"@historyRefreshTooltip": {
 		"description": ""
