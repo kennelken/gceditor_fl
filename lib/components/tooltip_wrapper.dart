@@ -43,6 +43,7 @@ class TooltipWrapper extends StatelessWidget {
     } catch (_) {}
 
     return Tooltip(
+      ignorePointer: true,
       decoration: BoxDecoration(color: kColorPrimaryDarkest.withAlpha(240), borderRadius: kCardBorder),
       padding: EdgeInsets.all(7 * kStyle.globalScale),
       richMessage: WidgetSpan(
