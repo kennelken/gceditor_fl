@@ -695,6 +695,10 @@
 	"@newSecretHint": {
 		"description": ""
 	},
+	"registeredUsers": "registered users",
+	"@registeredUsers": {
+		"description": ""
+	},
 	"projectPathTitle": "Project path:",
 	"@projectPathTitle": {
 		"description": ""

@@ -539,6 +539,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newSecretHint => 'any secret to register';
 
   @override
+  String get registeredUsers => 'registered users';
+
+  @override
   String get projectPathTitle => 'Project path:';
 
   @override

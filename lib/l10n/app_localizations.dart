@@ -997,6 +997,12 @@ abstract class AppLocalizations {
   ///
   ///
   /// In en, this message translates to:
+  /// **'registered users'**
+  String get registeredUsers;
+
+  ///
+  ///
+  /// In en, this message translates to:
   /// **'Project path:'**
   String get projectPathTitle;
 

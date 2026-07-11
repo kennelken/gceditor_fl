@@ -419,7 +419,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                                 child: Row(
                                   children: [
                                     Text(
-                                      'registered users',
+                                      Loc.get.registeredUsers,
                                       style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                                     ),
                                   ],
