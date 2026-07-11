@@ -1027,5 +1027,109 @@
 				"type": "int"
 			}
 		}
+	},
+	"atLeastOneColumn": "At least one column expected (\"{idColumnName}\")",
+	"@atLeastOneColumn": {
+		"description": "",
+		"placeholders": {
+			"idColumnName": {
+				"type": "String"
+			}
+		}
+	},
+	"atLeastTwoRows": "At least two rows are supposed to be selected (one for column names, and all the others are data)",
+	"@atLeastTwoRows": {
+		"description": ""
+	},
+	"authFilePathChanged": "Auth file path changed to \"{path}\"",
+	"@authFilePathChanged": {
+		"description": "",
+		"placeholders": {
+			"path": {
+				"type": "String"
+			}
+		}
+	},
+	"clipboardTextEmpty": "Clipboard text is empty",
+	"@clipboardTextEmpty": {
+		"description": ""
+	},
+	"copiedToClipboardCommand": "Copied to the clipboard command \"{commandId}\"",
+	"@copiedToClipboardCommand": {
+		"description": "",
+		"placeholders": {
+			"commandId": {
+				"type": "String"
+			}
+		}
+	},
+	"dataRowLengthVaries": "Data row length varies from columns count",
+	"@dataRowLengthVaries": {
+		"description": ""
+	},
+	"firstRowShouldContain": "The first row should contain columns names and the first column name \"{idColumnName}\"",
+	"@firstRowShouldContain": {
+		"description": "",
+		"placeholders": {
+			"idColumnName": {
+				"type": "String"
+			}
+		}
+	},
+	"incorrectValue": "Incorrect value \"{value}\"",
+	"@incorrectValue": {
+		"description": "",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"incorrectValueDefaultSet": "Incorrect value \"{value}\". The default value set.",
+	"@incorrectValueDefaultSet": {
+		"description": "",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"invalidFloatValue": "Invalid float value. Valid format example \"{example}\"",
+	"@invalidFloatValue": {
+		"description": "",
+		"placeholders": {
+			"example": {
+				"type": "String"
+			}
+		}
+	},
+	"invalidTimezone": "Invalid timezone. Valid format example \"+1.5\"",
+	"@invalidTimezone": {
+		"description": ""
+	},
+	"noAppFilesPathsSpecified": "No paths specified (scanning disabled)",
+	"@noAppFilesPathsSpecified": {
+		"description": ""
+	},
+	"recentProjects": "Recent projects",
+	"@recentProjects": {
+		"description": ""
+	},
+	"remove": "Remove",
+	"@remove": {
+		"description": ""
+	},
+	"save": "save",
+	"@save": {
+		"description": ""
+	},
+	"tooltipDelayTooBig": "tooltipDelay is too big. Max value is \"{max}\" seconds",
+	"@tooltipDelayTooBig": {
+		"description": "",
+		"placeholders": {
+			"max": {
+				"type": "String"
+			}
+		}
 	}
 }

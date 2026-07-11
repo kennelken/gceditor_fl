@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/properties/primitives/icon_button_transparent.dart';
 import 'package:gceditor/consts/consts.dart';
+import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/db_network/history_item_data_entry.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/client_history_state.dart';
@@ -85,7 +86,7 @@ class HistoryDialogItem extends StatelessWidget {
   }
 
   void _handleCopyClicked() {
-    providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Copied to the clipboard command "${data.command.id}"'));
+    providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, Loc.get.copiedToClipboardCommand(data.command.id)));
     Clipboard.setData(ClipboardData(text: jsonEncode(data.command.toJson())));
   }
 }

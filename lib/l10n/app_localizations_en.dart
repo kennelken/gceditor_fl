@@ -795,4 +795,71 @@ class AppLocalizationsEn extends AppLocalizations {
   String enumAutoGenerationSummary(int filesFound, int valuesAdded) {
     return 'Found $filesFound file(s) and added $valuesAdded value(s) to enums';
   }
+
+  @override
+  String atLeastOneColumn(String idColumnName) {
+    return 'At least one column expected (\"$idColumnName\")';
+  }
+
+  @override
+  String get atLeastTwoRows =>
+      'At least two rows are supposed to be selected (one for column names, and all the others are data)';
+
+  @override
+  String authFilePathChanged(String path) {
+    return 'Auth file path changed to \"$path\"';
+  }
+
+  @override
+  String get clipboardTextEmpty => 'Clipboard text is empty';
+
+  @override
+  String copiedToClipboardCommand(String commandId) {
+    return 'Copied to the clipboard command \"$commandId\"';
+  }
+
+  @override
+  String get dataRowLengthVaries => 'Data row length varies from columns count';
+
+  @override
+  String firstRowShouldContain(String idColumnName) {
+    return 'The first row should contain columns names and the first column name \"$idColumnName\"';
+  }
+
+  @override
+  String incorrectValue(String value) {
+    return 'Incorrect value \"$value\"';
+  }
+
+  @override
+  String incorrectValueDefaultSet(String value) {
+    return 'Incorrect value \"$value\". The default value set.';
+  }
+
+  @override
+  String invalidFloatValue(String example) {
+    return 'Invalid float value. Valid format example \"$example\"';
+  }
+
+  @override
+  String get invalidTimezone =>
+      'Invalid timezone. Valid format example \"+1.5\"';
+
+  @override
+  String get noAppFilesPathsSpecified =>
+      'No paths specified (scanning disabled)';
+
+  @override
+  String get recentProjects => 'Recent projects';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get save => 'save';
+
+  @override
+  String tooltipDelayTooBig(String max) {
+    return 'tooltipDelay is too big. Max value is \"$max\" seconds';
+  }
 }

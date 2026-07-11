@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/components/table/primitives/data_table_cell_view.dart';
 import 'package:gceditor/consts/config.dart';
+import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/db/class_field_description_data_info.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/model_root.dart';
@@ -151,13 +152,13 @@ class _DataTableCellTextViewState extends State<DataTableCellTextView> {
 
     if (newValue == null) {
       if (DbModelUtils.validateSimpleValue(widget.fieldType.type, widget.value)) {
-        providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Incorrect value "${_textController.text}"'));
+        providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, Loc.get.incorrectValue(_textController.text)));
         _textController.text = widget.value.toString();
         return;
       } else {
         providerContainer
             .read(logStateProvider)
-            .addMessage(LogEntry(LogLevel.warning, 'Incorrect value "${_textController.text}". The default value set.'));
+            .addMessage(LogEntry(LogLevel.warning, Loc.get.incorrectValueDefaultSet(_textController.text)));
         newValue = widget.defaultValue;
       }
     }

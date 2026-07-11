@@ -228,7 +228,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           ),
                         ),
                         TooltipWrapper(
-                          message: 'save',
+                          message: Loc.get.save,
                           child: IconButtonTransparent(
                             size: 30 * kScale,
                             icon: Icon(
@@ -263,7 +263,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           ),
                         ),
                         TooltipWrapper(
-                          message: 'save',
+                          message: Loc.get.save,
                           child: IconButtonTransparent(
                             size: 30 * kScale,
                             icon: Icon(
@@ -298,7 +298,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           ),
                         ),
                         TooltipWrapper(
-                          message: 'save',
+                          message: Loc.get.save,
                           child: IconButtonTransparent(
                             size: 30 * kScale,
                             icon: Icon(
@@ -342,7 +342,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           ),
                         ),
                         TooltipWrapper(
-                          message: 'save',
+                          message: Loc.get.save,
                           child: IconButtonTransparent(
                             size: 30 * kScale,
                             enabled: _isAppFilesPathValid,
@@ -387,7 +387,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           ),
                         ),
                         TooltipWrapper(
-                          message: 'save',
+                          message: Loc.get.save,
                           child: IconButtonTransparent(
                             size: 30 * kScale,
                             enabled: _isAppFilesPathExcludeRegexValid,
@@ -583,7 +583,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
 
     final match = Config.validTimezoneFormat.firstMatch(textComponent.text);
     if (match == null) {
-      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Invalid timezone. Valid format example "+1.5"'));
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, Loc.get.invalidTimezone));
       providerContainer.read(clientStateProvider).dispatchChange();
       return;
     }
@@ -608,7 +608,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     final value = textComponent.text;
     final match = Config.validCharactersForCellTypeFloat.firstMatch(value);
     if (match == null || double.tryParse(value) == null) {
-      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Invalid float value. Valid format example "2.0"'));
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, Loc.get.invalidFloatValue('2.0')));
       providerContainer.read(clientStateProvider).dispatchChange();
       return;
     }
@@ -632,7 +632,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     final value = textComponent.text;
     final match = Config.validCharactersForCellTypeFloat.firstMatch(value);
     if (match == null || double.tryParse(value) == null) {
-      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Invalid float value. Valid format example "0.3"'));
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, Loc.get.invalidFloatValue('0.3')));
       providerContainer.read(clientStateProvider).dispatchChange();
       return;
     }
@@ -645,7 +645,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     if (newTooltipDelay > Config.maxTooltipDelay) {
       providerContainer
           .read(logStateProvider)
-          .addMessage(LogEntry(LogLevel.error, 'tooltipDelay is too big. Max value is "${Config.maxTooltipDelay}" seconds'));
+          .addMessage(LogEntry(LogLevel.error, Loc.get.tooltipDelayTooBig(Config.maxTooltipDelay.toString())));
       providerContainer.read(clientStateProvider).dispatchChange();
       return;
     }
@@ -716,7 +716,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
 
     final currentPath = providerContainer.read(authListStateProvider).state.filePath;
     if (currentPath != newPath) {
-      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Auth file path changed to "$newPath"'));
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, Loc.get.authFilePathChanged(newPath)));
       providerContainer.read(authListStateProvider).renameFile(newPath);
     }
 
@@ -748,7 +748,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
         allExist = false;
       }
     }
-    _resolvedAppFilesPath = resolvedPaths.isEmpty ? 'No paths specified (scanning disabled)' : resolvedPaths.join('\n');
+    _resolvedAppFilesPath = resolvedPaths.isEmpty ? Loc.get.noAppFilesPathsSpecified : resolvedPaths.join('\n');
     _isAppFilesPathValid = allExist;
   }
 

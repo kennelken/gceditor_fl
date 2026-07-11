@@ -314,7 +314,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
     final clipboardText = await Clipboard.getData(Clipboard.kTextPlain);
 
     if (clipboardText?.text?.isNullOrEmpty ?? true) {
-      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Clipboard text is empty'));
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, Loc.get.clipboardTextEmpty));
       return;
     }
 
@@ -322,7 +322,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
     if (rows.length < 2) {
       providerContainer
           .read(logStateProvider)
-          .addMessage(LogEntry(LogLevel.error, 'At least two rows are supposed to be selected (one for column names, and all the others are data)'));
+          .addMessage(LogEntry(LogLevel.error, Loc.get.atLeastTwoRows));
       return;
     }
 
@@ -337,13 +337,13 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
         if (columnsCount < 1) {
           providerContainer
               .read(logStateProvider)
-              .addMessage(LogEntry(LogLevel.error, 'At least one column expected ("${ClientDataSelectionStateNotifier.idColumnName}")'));
+              .addMessage(LogEntry(LogLevel.error, Loc.get.atLeastOneColumn(ClientDataSelectionStateNotifier.idColumnName)));
           return;
         }
 
         if (rowData[0] != ClientDataSelectionStateNotifier.idColumnName) {
           providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error,
-              'The first row should contain columns names and the first column name "${ClientDataSelectionStateNotifier.idColumnName}"'));
+              Loc.get.firstRowShouldContain(ClientDataSelectionStateNotifier.idColumnName)));
           return;
         }
 
@@ -352,7 +352,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
       }
 
       if (rowData.length != columnsCount) {
-        providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Data row length varies from columns count'));
+        providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, Loc.get.dataRowLengthVaries));
         return;
       }
 

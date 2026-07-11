@@ -1449,6 +1449,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Found {filesFound} file(s) and added {valuesAdded} value(s) to enums'**
   String enumAutoGenerationSummary(int filesFound, int valuesAdded);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'At least one column expected (\"{idColumnName}\")'**
+  String atLeastOneColumn(String idColumnName);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'At least two rows are supposed to be selected (one for column names, and all the others are data)'**
+  String get atLeastTwoRows;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Auth file path changed to \"{path}\"'**
+  String authFilePathChanged(String path);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Clipboard text is empty'**
+  String get clipboardTextEmpty;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to the clipboard command \"{commandId}\"'**
+  String copiedToClipboardCommand(String commandId);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Data row length varies from columns count'**
+  String get dataRowLengthVaries;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'The first row should contain columns names and the first column name \"{idColumnName}\"'**
+  String firstRowShouldContain(String idColumnName);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect value \"{value}\"'**
+  String incorrectValue(String value);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect value \"{value}\". The default value set.'**
+  String incorrectValueDefaultSet(String value);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid float value. Valid format example \"{example}\"'**
+  String invalidFloatValue(String example);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid timezone. Valid format example \"+1.5\"'**
+  String get invalidTimezone;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'No paths specified (scanning disabled)'**
+  String get noAppFilesPathsSpecified;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Recent projects'**
+  String get recentProjects;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'save'**
+  String get save;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'tooltipDelay is too big. Max value is \"{max}\" seconds'**
+  String tooltipDelayTooBig(String max);
 }
 
 class _AppLocalizationsDelegate
