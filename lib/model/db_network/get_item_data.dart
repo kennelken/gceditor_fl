@@ -12,6 +12,9 @@ class GitItemData {
   late final String name;
   late final String branchName;
   late final GitItemType? type;
+  late final bool isModified;
+  late final bool isUnpushed;
+  late final bool isUnpulled;
 
   GitItemData();
   GitItemData.values({
@@ -19,13 +22,19 @@ class GitItemData {
     required this.name,
     required this.branchName,
     required this.type,
+    this.isModified = false,
+    this.isUnpushed = false,
+    this.isUnpulled = false,
   });
 
   GitItemData.fromItem(GitItem item)
       : id = item.id,
-        name = item.name,
-        branchName = item.branchName,
-        type = item.type;
+      name = item.name,
+      branchName = item.branchName,
+      type = item.type,
+      isModified = item.isModified,
+      isUnpushed = item.isUnpushed,
+      isUnpulled = item.isUnpulled;
 
   @JsonKey(includeToJson: false)
   Color get color {

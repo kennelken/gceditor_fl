@@ -287,6 +287,9 @@ class ServerApp {
                     name: e.name,
                     branchName: e.branchName,
                     type: e.type,
+                    isModified: e.isModified,
+                    isUnpushed: e.isUnpushed,
+                    isUnpulled: e.isUnpulled,
                   ),
                 )
                 .toList(),
@@ -415,8 +418,21 @@ class ServerApp {
 
     providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.debug, 'ServerApp: saving the model'));
     try {
-      await projectFile.writeAsString(jsonText);
+      await projectFile.writeAsString(jsonText, flush: true);
       providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.debug, 'ServerApp: the model has been saved successfully'));
+      
+      // Delay slightly to prevent git from missing the change due to identical mtime and size (racy git problem)
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      await providerContainer.read(serverGitStateProvider).refresh();
+      
+      final payload = CommandRequestGitResponsePayload.values(
+        items: providerContainer.read(serverGitStateProvider).state.items.map((e) => GitItemData.fromItem(e)).toList(),
+      );
+
+      for (final processor in _commandProcessorByClient.values) {
+        processor.doSendCommand(Uint8List.fromList(CommandFactory.write(CommandRequestGitResponse()..id = 0..payload = payload)));
+      }
     } catch (error, callstack) {
       providerContainer
           .read(logStateProvider)

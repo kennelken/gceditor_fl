@@ -41,7 +41,7 @@ class ClientGitStateNotifier extends ChangeNotifier {
         final payload = await providerContainer.read(appStateProvider).state.clientApp!.requestGit(
               CommandRequestGitPayload.values(refresh: true),
             );
-        _updateByPayload(payload);
+        updateByPayload(payload);
       },
     );
   }
@@ -54,7 +54,7 @@ class ClientGitStateNotifier extends ChangeNotifier {
               items: state.selectedItems.toList(),
             ),
           );
-      _updateByPayload(payload);
+      updateByPayload(payload);
       PopupMessages.show(PopupMessageData(message: payload != null ? Loc.get.gitCommitSuccess : Loc.get.gitCommitFailed));
     });
   }
@@ -67,7 +67,7 @@ class ClientGitStateNotifier extends ChangeNotifier {
               items: state.selectedItems.toList(),
             ),
           );
-      _updateByPayload(payload);
+      updateByPayload(payload);
       PopupMessages.show(PopupMessageData(message: payload != null ? Loc.get.gitPushSuccess : Loc.get.gitPushFailed));
     });
   }
@@ -80,7 +80,7 @@ class ClientGitStateNotifier extends ChangeNotifier {
               items: state.selectedItems.toList(),
             ),
           );
-      _updateByPayload(payload);
+      updateByPayload(payload);
       PopupMessages.show(PopupMessageData(message: payload != null ? Loc.get.gitPullSuccess : Loc.get.gitPullFailed));
     });
   }
@@ -119,11 +119,12 @@ class ClientGitStateNotifier extends ChangeNotifier {
     }
   }
 
-  void _updateByPayload(CommandRequestGitResponsePayload? payload) {
+  void updateByPayload(CommandRequestGitResponsePayload? payload) {
     if (payload == null) //
       return;
 
-    state.items = payload.items!;
+    state.items = payload.items ?? [];
     _updateSelectedItems();
+    notifyListeners();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/model/db_network/get_item_data.dart';
 import 'package:gceditor/model/model_root.dart';
@@ -38,8 +39,48 @@ class TableGitItemView extends ConsumerWidget {
                     ),
                   ),
                   SizedBox(width: 5 * kScale),
-                  Text(
-                    data.name,
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(text: data.name),
+                        if (data.isModified)
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Transform.translate(
+                              offset: Offset(1 * kScale, -4 * kScale),
+                              child: FaIcon(
+                                FontAwesomeIcons.asterisk,
+                                size: 8 * kScale,
+                                color: kColorAccentBlue,
+                              ),
+                            ),
+                          ),
+                        if (data.isUnpushed)
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Padding(
+                              padding: EdgeInsets.only(left: 2 * kScale),
+                              child: FaIcon(
+                                FontAwesomeIcons.arrowUp,
+                                size: 9 * kScale,
+                                color: kColorAccentBlue,
+                              ),
+                            ),
+                          ),
+                        if (data.isUnpulled)
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Padding(
+                              padding: EdgeInsets.only(left: 2 * kScale),
+                              child: FaIcon(
+                                FontAwesomeIcons.arrowDown,
+                                size: 9 * kScale,
+                                color: kColorAccentBlue,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                     style: kStyle.kTextExtraSmall.copyWith(color: data.color),
                   ),
                   SizedBox(width: 12 * kScale),

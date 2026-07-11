@@ -35,27 +35,35 @@ class CommandsProcessor {
       idCounter++;
     }
 
-    responseByRequest[command] = null;
+    if (inResponseTo == null) {
+      responseByRequest[command] = null;
+    }
 
     doSendCommand(Uint8List.fromList(CommandFactory.write(command)));
 
-    await Utils.waitWhile(() => responseByRequest[command] == null, Config.asyncPollInterval);
-    final result = responseByRequest[command] is T ? responseByRequest[command] as T? : null;
+    if (inResponseTo == null) {
+      await Utils.waitWhile(() => responseByRequest[command] == null, Config.asyncPollInterval);
+      final result = responseByRequest[command] is T ? responseByRequest[command] as T? : null;
 
-    responseByRequest.remove(command);
+      responseByRequest.remove(command);
 
-    return result;
+      return result;
+    } else {
+      return null;
+    }
   }
 
   bool handleResponse(BaseCommand response) {
     if (response is! BaseResponse) return false;
 
     final id = response.id;
+    var matched = false;
 
     for (final source in responseByRequest.keys) {
       if (source.id == id) {
         responseByRequest[source] = response;
         (response as BaseResponse).sourceCommand = source;
+        matched = true;
         break;
       }
     }
@@ -64,7 +72,7 @@ class CommandsProcessor {
       doHandleError(response);
     }
 
-    return true;
+    return matched;
   }
 
   Future<bool> waitForIncomingCommandOrder(BaseCommand command) async {

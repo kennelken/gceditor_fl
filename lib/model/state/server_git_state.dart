@@ -56,29 +56,78 @@ class ServerGitStateNotifier extends ChangeNotifier {
         final outputDir = appState.output!.path;
         final historyDir = historyState.folderPath!;
 
+        Future<bool> checkIsModified(GitDir gitDir, String relativePath) async {
+          try {
+            final pr = await gitDir.runCommand(['status', '--porcelain', relativePath]);
+            final out = (pr.stdout as String).trim();
+            return out.isNotEmpty;
+          } catch (_) {
+            return false;
+          }
+        }
+
+        Future<bool> checkIsUnpushed(GitDir gitDir, String relativePath) async {
+          final normalizedPath = relativePath.replaceAll('\\', '/');
+          try {
+            final pr = await gitDir.runCommand(['log', '@{u}..HEAD', '--name-only', '--format=']);
+            final out = (pr.stdout as String).trim();
+            final files = out.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty);
+            return files.any((e) => e == normalizedPath || normalizedPath.startsWith('$e/'));
+          } catch (_) {
+            try {
+              final pr = await gitDir.runCommand(['log', '--branches', '--not', '--remotes', '--name-only', '--format=']);
+              final out = (pr.stdout as String).trim();
+              final files = out.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty);
+              return files.any((e) => e == normalizedPath || normalizedPath.startsWith('$e/'));
+            } catch (_) {
+              return false;
+            }
+          }
+        }
+
+        Future<bool> checkIsUnpulled(GitDir gitDir, String relativePath) async {
+          final normalizedPath = relativePath.replaceAll('\\', '/');
+          try {
+            final pr = await gitDir.runCommand(['log', 'HEAD..@{u}', '--name-only', '--format=']);
+            final out = (pr.stdout as String).trim();
+            final files = out.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty);
+            return files.any((e) => e == normalizedPath || normalizedPath.startsWith('$e/'));
+          } catch (_) {
+            return false; // No upstream or error
+          }
+        }
+
         if (await GitDir.isGitDir(projectDir)) {
           final projectGit = await GitDir.fromExisting(projectDir, allowSubdirectory: true);
           final projectBranch = (await projectGit.currentBranch()).branchName;
+          final relativePath = path.relative(projectFile.path, from: await Directory(projectGit.path).resolveSymbolicLinks());
           newState.items.add(GitItem(
             id: 'project',
             name: Loc.get.gitItemProject,
             gitDir: projectGit,
-            relativePath: path.relative(projectFile.path, from: await Directory(projectGit.path).resolveSymbolicLinks()),
+            relativePath: relativePath,
             branchName: projectBranch,
             type: GitItemType.project,
+            isModified: await checkIsModified(projectGit, relativePath),
+            isUnpushed: await checkIsUnpushed(projectGit, relativePath),
+            isUnpulled: await checkIsUnpulled(projectGit, relativePath),
           ));
         }
 
         if (await GitDir.isGitDir(authListDir)) {
           final authListGit = await GitDir.fromExisting(authListDir, allowSubdirectory: true);
           final authListBranch = (await authListGit.currentBranch()).branchName;
+          final relativePath = path.relative(authListFile.path, from: await Directory(authListGit.path).resolveSymbolicLinks());
           newState.items.add(GitItem(
             id: 'authList',
             name: Loc.get.gitItemAuthList,
             gitDir: authListGit,
-            relativePath: path.relative(authListFile.path, from: await Directory(authListGit.path).resolveSymbolicLinks()),
+            relativePath: relativePath,
             branchName: authListBranch,
             type: GitItemType.authList,
+            isModified: await checkIsModified(authListGit, relativePath),
+            isUnpushed: await checkIsUnpushed(authListGit, relativePath),
+            isUnpulled: await checkIsUnpulled(authListGit, relativePath),
           ));
         }
 
@@ -90,13 +139,17 @@ class ServerGitStateNotifier extends ChangeNotifier {
           if (await GitDir.isGitDir(fileDir)) {
             final fileGit = await GitDir.fromExisting(fileDir, allowSubdirectory: true);
             final fileBranch = (await fileGit.currentBranch()).branchName;
+            final relativePath = path.relative(filePath, from: await Directory(fileGit.path).resolveSymbolicLinks());
             newState.items.add(GitItem(
               id: 'g${generator.hashCode}',
               name: Loc.get.gitItemGenerator(generator.$type!.name, i),
               gitDir: fileGit,
-              relativePath: path.relative(filePath, from: await Directory(fileGit.path).resolveSymbolicLinks()),
+              relativePath: relativePath,
               branchName: fileBranch,
               type: GitItemType.generator,
+              isModified: await checkIsModified(fileGit, relativePath),
+              isUnpushed: await checkIsUnpushed(fileGit, relativePath),
+              isUnpulled: await checkIsUnpulled(fileGit, relativePath),
             ));
           }
         }
@@ -112,13 +165,17 @@ class ServerGitStateNotifier extends ChangeNotifier {
           if (await GitDir.isGitDir(fileDir)) {
             final fileGit = await GitDir.fromExisting(fileDir, allowSubdirectory: true);
             final fileBranch = (await fileGit.currentBranch()).branchName;
+            final relativePath = path.relative(filePath, from: await Directory(fileGit.path).resolveSymbolicLinks());
             newState.items.add(GitItem(
               id: 'h${historyFile.id}',
               name: Loc.get.gitItemHistory(historyFile.id, i),
               gitDir: fileGit,
-              relativePath: path.relative(filePath, from: await Directory(fileGit.path).resolveSymbolicLinks()),
+              relativePath: relativePath,
               branchName: fileBranch,
               type: GitItemType.history,
+              isModified: await checkIsModified(fileGit, relativePath),
+              isUnpushed: await checkIsUnpushed(fileGit, relativePath),
+              isUnpulled: await checkIsUnpulled(fileGit, relativePath),
             ));
           }
         }
@@ -130,7 +187,7 @@ class ServerGitStateNotifier extends ChangeNotifier {
   }
 
   Future<String?> doCommit(List<String> items, String requestor) async {
-    return await _doAction(
+    final result = await _doAction(
       () async {
         final selectedItems = _getSelectedItemsByIds(items);
         if (selectedItems.length != items.length) //
@@ -154,10 +211,12 @@ class ServerGitStateNotifier extends ChangeNotifier {
         return null;
       },
     );
+    await refresh();
+    return result;
   }
 
   Future<String?> doPush(List<String> items) async {
-    return await _doAction(
+    final result = await _doAction(
       () async {
         final selectedItems = _getSelectedItemsByIds(items);
         if (selectedItems.length != items.length) //
@@ -186,10 +245,12 @@ class ServerGitStateNotifier extends ChangeNotifier {
         return null;
       },
     );
+    await refresh();
+    return result;
   }
 
   Future<String?> doPull(List<String> items) async {
-    return await _doAction(
+    final result = await _doAction(
       () async {
         final selectedItems = _getSelectedItemsByIds(items);
         if (selectedItems.length != items.length) //
@@ -205,7 +266,7 @@ class ServerGitStateNotifier extends ChangeNotifier {
 
           allPathes.remove(item.gitDir.path);
           try {
-            await item.gitDir.runCommand(['pull']);
+            await item.gitDir.runCommand(['pull', '--rebase']);
           } catch (e) {
             errors.add(e.toString());
           }
@@ -218,6 +279,8 @@ class ServerGitStateNotifier extends ChangeNotifier {
         return null;
       },
     );
+    await refresh();
+    return result;
   }
 
   void clear({bool silent = false}) {
@@ -260,6 +323,9 @@ class GitItem {
   final String branchName;
   final String relativePath;
   final GitItemType type;
+  final bool isModified;
+  final bool isUnpushed;
+  final bool isUnpulled;
 
   GitItem({
     required this.id,
@@ -268,5 +334,8 @@ class GitItem {
     required this.branchName,
     required this.relativePath,
     required this.type,
+    required this.isModified,
+    required this.isUnpushed,
+    required this.isUnpulled,
   });
 }

@@ -13,6 +13,7 @@ import 'package:gceditor/model/db_network/command_request_history_payload.dart';
 import 'package:gceditor/model/db_network/command_request_history_response_payload.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
+import 'package:gceditor/model/state/client_git_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/log_state.dart';
 import 'package:gceditor/model/state/pinned_items_state.dart';
@@ -144,6 +145,12 @@ class ClientApp {
       return;
     }
 
+    if (command is CommandRequestGitResponse) {
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.debug, 'ClientApp: received unsolicited Git update, directly applying payload'));
+      providerContainer.read(clientGitStateProvider).updateByPayload(command.payload);
+      return;
+    }
+
     providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.debug, 'ClientApp: incoming message was treated as a request'));
     _handleServerRequest(command);
   }
@@ -254,6 +261,8 @@ class ClientApp {
       } else {
         providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Server responded with unexpected response "$response"'));
       }
+
+      await providerContainer.read(clientGitStateProvider).refresh();
     } catch (e) {
       providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Error during run generators: $e'));
     } finally {
