@@ -20,7 +20,7 @@ class TextButtonTransparent extends StatelessWidget {
       focusElevation: 0,
       hoverElevation: 0,
       highlightElevation: 0,
-      shape: const Border(),
+      shape: const RoundedRectangleBorder(borderRadius: kCardBorder),
       color: kColorTransparent,
       onPressed: onClick,
       padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),

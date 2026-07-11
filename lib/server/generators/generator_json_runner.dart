@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:gceditor/model/db/db_model.dart';
-import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/db/generator_json.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/server/generators/json/generator_json_root.dart';
@@ -15,6 +14,20 @@ class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with Output
     final result = GeneratorJsonRoot();
     result.generationDate = additionalInfo.date;
     result.generationUser = additionalInfo.user;
+
+    final pathByEnumMap = <String, Map<String, String>>{};
+    for (final enumEntity in model.cache.allEnums) {
+      if (enumEntity.autoByFile) {
+        final enumValuesMap = <String, String>{};
+        for (final value in enumEntity.values) {
+          enumValuesMap[value.id] = value.description;
+        }
+        pathByEnumMap[enumEntity.id] = enumValuesMap;
+      }
+    }
+    if (pathByEnumMap.isNotEmpty) {
+      result.pathByEnum = pathByEnumMap;
+    }
 
     try {
       for (final table in model.cache.allDataTables) {
@@ -56,7 +69,7 @@ class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with Output
                   rowData[field.id] = {};
                 }
               } else {
-                rowData[field.id] = _convertToSimpleFormat(field.typeInfo.type, row.values[i].simpleValue);
+                rowData[field.id] = DbModelUtils.convertToSimpleFormat(field.typeInfo.type, row.values[i].simpleValue);
               }
             }
           }
@@ -79,7 +92,10 @@ class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with Output
         fileExtension: data.fileExtension,
       );
 
-      if (!resultChanged(resultJson, previousResult, '"tables": {')) //
+      final tablesChanged = resultChanged(resultJson, previousResult, '"tables": {');
+      final pathByEnumChanged = resultChanged(resultJson, previousResult, '"pathByEnum": {');
+
+      if (!tablesChanged && !pathByEnumChanged) //
         return GeneratorResult.success();
 
       final saveError = await saveToFile(
@@ -97,44 +113,5 @@ class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with Output
     }
 
     return GeneratorResult.success();
-  }
-
-  dynamic _convertToSimpleFormat(ClassFieldType type, dynamic value) {
-    if (value is! String) return value;
-
-    switch (type) {
-      case ClassFieldType.date:
-        final date = DbModelUtils.parseDate(value);
-        return date?.millisecondsSinceEpoch;
-      case ClassFieldType.duration:
-        final duration = DbModelUtils.parseDuration(value);
-        return duration?.inMilliseconds;
-      case ClassFieldType.vector2:
-        final v = DbModelUtils.parseVector2(value);
-        return v != null ? '${v.x};${v.y}' : value;
-      case ClassFieldType.vector2Int:
-        final v = DbModelUtils.parseVector2Int(value);
-        return v != null ? '${v.x};${v.y}' : value;
-      case ClassFieldType.vector3:
-        final v = DbModelUtils.parseVector3(value);
-        return v != null ? '${v.x};${v.y};${v.z}' : value;
-      case ClassFieldType.vector3Int:
-        final v = DbModelUtils.parseVector3Int(value);
-        return v != null ? '${v.x};${v.y};${v.z}' : value;
-      case ClassFieldType.vector4:
-        final v = DbModelUtils.parseVector4(value);
-        return v != null ? '${v.x};${v.y};${v.z};${v.w}' : value;
-      case ClassFieldType.vector4Int:
-        final v = DbModelUtils.parseVector4Int(value);
-        return v != null ? '${v.x};${v.y};${v.z};${v.w}' : value;
-      case ClassFieldType.rectangle:
-        final v = DbModelUtils.parseRectangle(value);
-        return v != null ? '${v.x};${v.y};${v.width};${v.height}' : value;
-      case ClassFieldType.rectangleInt:
-        final v = DbModelUtils.parseRectangleInt(value);
-        return v != null ? '${v.x};${v.y};${v.width};${v.height}' : value;
-      default:
-        return value;
-    }
   }
 }

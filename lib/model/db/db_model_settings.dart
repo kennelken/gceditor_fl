@@ -11,9 +11,17 @@ class DbModelSettings {
   double saveDelay = Config.defaultSaveDelay;
   @JsonKey(toJson: BaseGenerator.encodeGenerators, fromJson: BaseGenerator.decodeGenerators)
   List<BaseGenerator>? generators = [];
+  @JsonKey(defaultValue: true)
+  bool autoGenerateEnumValues = true;
   String? outputPath;
   String? historyPath;
   String? authPath;
+  @JsonKey(defaultValue: '.')
+  String appFilesPath = '.';
+  @JsonKey(defaultValue: 0.3)
+  double tooltipDelay = Config.defaultTooltipDelay;
+  @JsonKey(defaultValue: r'(?:^|\/)\.[^.\/]')
+  String appFilesPathExcludeRegex = r'(?:^|\/)\.[^.\/]';
 
   DbModelSettings();
 

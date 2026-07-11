@@ -61,4 +61,6 @@ const _$DbCmdTypeEnumMap = {
   DbCmdType.resizeInnerCell: 'resizeInnerCell',
   DbCmdType.copypaste: 'copypaste',
   DbCmdType.fillColumn: 'fillColumn',
+  DbCmdType.editEnumFileSettings: 'editEnumFileSettings',
+  DbCmdType.generateEnumValuesFromFiles: 'generateEnumValuesFromFiles',
 };

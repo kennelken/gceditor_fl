@@ -28,6 +28,7 @@ class IconButtonTransparent extends StatelessWidget {
         highlightElevation: 0,
         shape: const CircleBorder(),
         color: kColorTransparent,
+        padding: EdgeInsets.zero,
         onPressed: enabled ? onClick : null,
         child: icon,
       ),

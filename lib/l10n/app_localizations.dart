@@ -349,6 +349,12 @@ abstract class AppLocalizations {
   ///
   ///
   /// In en, this message translates to:
+  /// **'tooltip delay (seconds)'**
+  String get projectSettingsTooltipDelay;
+
+  ///
+  ///
+  /// In en, this message translates to:
   /// **'generators'**
   String get projectSettingsGeneratorsTitle;
 
@@ -991,6 +997,12 @@ abstract class AppLocalizations {
   ///
   ///
   /// In en, this message translates to:
+  /// **'registered users'**
+  String get registeredUsers;
+
+  ///
+  ///
+  /// In en, this message translates to:
   /// **'Project path:'**
   String get projectPathTitle;
 
@@ -1275,6 +1287,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fill column \'\'{column}\'\' with'**
   String fillColumnLabel(String column);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'enabled'**
+  String get autoByFile;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'file path regex'**
+  String get filePathRegex;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'enum name from regex'**
+  String get enumNameFromRegex;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'path value from regex'**
+  String get pathValueFromRegex;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Run'**
+  String get run;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'auto'**
+  String get auto;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'file path regex exclude'**
+  String get filePathRegexExclude;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Enable/disable enum auto-generation based on file system lookup'**
+  String get autoByFileTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'RegExp to match file relative paths (e.g. .*\\.prefab)'**
+  String get filePathRegexTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'RegExp to exclude matched file relative paths'**
+  String get filePathRegexExcludeTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'file content regex include'**
+  String get fileContentRegexInclude;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'RegExp that file contents must match to be included'**
+  String get fileContentRegexIncludeTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'file content regex exclude'**
+  String get fileContentRegexExclude;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'RegExp that file contents must NOT match to be included'**
+  String get fileContentRegexExcludeTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Template to generate the enum value ID from regex match groups (e.g. using group 1)'**
+  String get enumNameFromRegexTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Template to generate the path stored in the description field (e.g. using whole match or group 0)'**
+  String get pathValueFromRegexTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Execute file system lookup and generate enum values on demand'**
+  String get runTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically run the file lookup every time the project is opened'**
+  String get autoTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'auto by files'**
+  String get autoByFileSettings;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle auto by file settings panel'**
+  String get autoByFileSettingsTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'app files paths'**
+  String get appFilesPath;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'These paths are optional and are used as the base directories for auto-generating enums. Multiple paths can be separated by \';\' or \',\'.\n\nResolved absolute paths:\n{resolvedPath}'**
+  String appFilesPathTooltip(String resolvedPath);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'app files path exclude regex'**
+  String get appFilesPathExcludeRegex;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Regular expression used to exclude matching files and folders from the scan.'**
+  String get appFilesPathExcludeRegexTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'auto-generate enum values from files'**
+  String get autoGenerateEnumValues;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically scan and update enum values from files every time generators are run'**
+  String get autoGenerateEnumValuesTooltip;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Found {filesFound} file(s) and added {valuesAdded} value(s) to enums'**
+  String enumAutoGenerationSummary(int filesFound, int valuesAdded);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'At least one column expected (\"{idColumnName}\")'**
+  String atLeastOneColumn(String idColumnName);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'At least two rows are supposed to be selected (one for column names, and all the others are data)'**
+  String get atLeastTwoRows;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Auth file path changed to \"{path}\"'**
+  String authFilePathChanged(String path);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Clipboard text is empty'**
+  String get clipboardTextEmpty;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to the clipboard command \"{commandId}\"'**
+  String copiedToClipboardCommand(String commandId);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Data row length varies from columns count'**
+  String get dataRowLengthVaries;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'The first row should contain columns names and the first column name \"{idColumnName}\"'**
+  String firstRowShouldContain(String idColumnName);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect value \"{value}\"'**
+  String incorrectValue(String value);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect value \"{value}\". The default value set.'**
+  String incorrectValueDefaultSet(String value);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid float value. Valid format example \"{example}\"'**
+  String invalidFloatValue(String example);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid timezone. Valid format example \"+1.5\"'**
+  String get invalidTimezone;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'No paths specified (scanning disabled)'**
+  String get noAppFilesPathsSpecified;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Recent projects'**
+  String get recentProjects;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'save'**
+  String get save;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'tooltipDelay is too big. Max value is \"{max}\" seconds'**
+  String tooltipDelayTooBig(String max);
 }
 
 class _AppLocalizationsDelegate

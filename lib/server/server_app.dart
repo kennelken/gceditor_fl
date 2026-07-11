@@ -144,6 +144,7 @@ class ServerApp {
     final settings = dbModel.settings;
 
     final outputRel = settings.outputPath ?? Config.newOutputListDefaultName;
+    providerContainer.read(appStateProvider.notifier).state.projectFile = projectFile;
     providerContainer.read(appStateProvider.notifier).state.output = Directory(path.join(projectDir, outputRel));
 
     final historyRel = settings.historyPath ?? Config.newHistoryListDefaultName;
@@ -154,6 +155,8 @@ class ServerApp {
 
     return null;
   }
+
+
 
   void _handleClientRequest(Socket client, BaseCommand command) async {
     final waitingResult = await _commandProcessorByClient[client]!.waitForIncomingCommandOrder(command);
@@ -192,7 +195,9 @@ class ServerApp {
       final cmd = command.payload;
       _executeCommand(cmd, command, client);
     } else if (command is CommandRequestRunGenerators) {
-      final results = await GeneratorsJob().start(providerContainer.read(serverStateProvider).state.model, _authorizedClients[client]!);
+      final dbModel = providerContainer.read(serverStateProvider).state.model;
+
+      final results = await GeneratorsJob().start(dbModel, _authorizedClients[client]!);
       var errorsMessage = '';
       var numErrors = 0;
       results.where((element) => !element.success).forEach((element) {
@@ -202,7 +207,11 @@ class ServerApp {
       if (errorsMessage.isNotEmpty) {
         errorsMessage = '$numErrors errors occured:\n$errorsMessage';
         _commandProcessorByClient[client]!.sendCommand(
-          CommandErrorResponse(sourceCommand: command, message: errorsMessage, model: providerContainer.read(serverStateProvider).state.model),
+          CommandErrorResponse(
+            sourceCommand: command,
+            message: errorsMessage,
+            model: providerContainer.read(serverStateProvider).state.model,
+          ),
           command,
         );
       } else {

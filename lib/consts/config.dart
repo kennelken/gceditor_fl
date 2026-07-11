@@ -61,6 +61,8 @@ class Config {
   static const int dbCmdBufferLength = 50; // must be >= 1
   static const double defaultSaveDelay = 2.0;
   static const double maxSaveDelay = 60.0;
+  static const double defaultTooltipDelay = 0.3;
+  static const double maxTooltipDelay = 10.0;
 
   static JsonEncoder get fileJsonOptions => const JsonEncoder.withIndent('\t');
   static JsonEncoder get streamJsonOptions => const JsonEncoder();

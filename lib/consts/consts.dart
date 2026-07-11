@@ -26,8 +26,8 @@ const Color kColorPrimaryLighter2 = Color(0xFF3E4452);
 const Color kColorPrimaryLight = Color(0xFF979DAD);
 const Color kColorPrimaryLightTransparent = Color(0x66979DAD);
 const Color kColorPrimaryLightTransparent1_5 = Color(0x46979DAD);
-const Color kColorPrimaryLightTransparent2 = Color(0x28979DAD);
-const Color kColorPrimaryLightTransparent3 = Color.fromARGB(91, 29, 31, 33);
+const Color kColorPrimaryLightTransparent2 = Color.fromARGB(45, 151, 157, 173);
+const Color kColorPrimaryLightTransparent3 = Color.fromARGB(91, 29, 31, 40);
 const Color kColorSecondary = Color(0xffe2c08d);
 const Color kColorBackground = Color(0xff282c34);
 const Color kColorButtonActive = Color(0xFFBFC7D6);
@@ -104,7 +104,7 @@ final ButtonStyle kButtonTransparent = ButtonStyle(
   foregroundColor: WidgetStateProperty.all(Colors.white),
 );
 
-const Radius kCardRadius = Radius.circular(2.0);
+const Radius kCardRadius = Radius.circular(5.0);
 const BorderRadius kCardBorder = BorderRadius.all(kCardRadius);
 
 final kTimeFormat = DateFormat('HH:mm:ss');
@@ -124,6 +124,7 @@ ScrollBehavior getScrollDraggable(BuildContext context) {
     dragDevices: {
       PointerDeviceKind.touch,
       PointerDeviceKind.mouse,
+      PointerDeviceKind.trackpad,
     },
   );
 }
@@ -137,6 +138,7 @@ ScrollBehavior get kScrollDraggableNoScrollBar {
       dragDevices: {
         PointerDeviceKind.touch,
         PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
       },
     );
   }

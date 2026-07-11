@@ -9,6 +9,20 @@ part 'class_meta_entity_enum.g.dart';
 class ClassMetaEntityEnum extends ClassMeta {
   List<EnumValue> values = <EnumValue>[];
   double valueColumnWidth = Config.enumColumnDefaultWidth;
+  @JsonKey(defaultValue: false)
+  bool autoByFile = false;
+  @JsonKey(defaultValue: '')
+  String filePathRegex = '';
+  @JsonKey(defaultValue: '')
+  String filePathRegexExclude = '';
+  @JsonKey(defaultValue: '')
+  String fileContentRegexInclude = '';
+  @JsonKey(defaultValue: '')
+  String fileContentRegexExclude = '';
+  @JsonKey(defaultValue: '')
+  String enumNameFromRegex = '';
+  @JsonKey(defaultValue: '')
+  String pathValueFromRegex = '';
 
   ClassMetaEntityEnum() {
     $type = ClassMetaType.$enum;

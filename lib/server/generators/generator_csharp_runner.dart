@@ -65,6 +65,8 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
   static const _paramTablesListAssignment = 'tablesListAssignment';
   static const _paramFastListActivatorCases = 'fastListActivatorCases';
   static const _paramTableClassMap = 'tableClassMap';
+  static const _paramGetPathByEnumOverloads = 'getPathByEnumOverloads';
+  static const _paramExtensionsClass = 'extensionsClass';
 
   @override
   Future<GeneratorResult> execute(String outputFolder, DbModel model, GeneratorCsharp data, GeneratorAdditionalInformation additionalInfo) async {
@@ -89,6 +91,7 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
               _paramAssignValueCases: _getAssignValuesCases(model, data),
               _paramMaxStructDepth: _getMaxStructDepth(model, 3),
               _paramTableClassMap: _getTableClassMap(model, data),
+              _paramExtensionsClass: _getExtensionsClass(model, data),
             },
           ),
           _paramListItemsListsAssignment: _getListItemsListAssignment(model, data),
@@ -96,6 +99,7 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
           _paramTablesListDeclarations: _getTablesListDeclarations(model, data),
           _paramTablesListAssignment: _getTablesListAssignment(model, data),
           _paramFastListActivatorCases: _getFastListActivatorCases(model, data),
+          _paramGetPathByEnumOverloads: _getPathByEnumOverloads(model, data),
         },
       );
 
@@ -401,6 +405,98 @@ namespace ${data.namespace}
     }
 
     return items.join();
+  }
+
+  String _getPathByEnumOverloads(DbModel model, GeneratorCsharp data) {
+    final sb = StringBuffer();
+    for (final enumEntity in model.cache.allEnums) {
+      if (enumEntity.autoByFile) {
+        final typeName = '${data.prefix}${enumEntity.id}${data.postfix}';
+        sb.writeln('        public string GetPathByEnum($typeName value)');
+        sb.writeln('        {');
+        sb.writeln('            if (PathByEnum != null && PathByEnum.TryGetValue("${enumEntity.id}", out var enumMap))');
+        sb.writeln('            {');
+        sb.writeln('                if (enumMap.TryGetValue(value.ToString(), out var pathValue))');
+        sb.writeln('                    return pathValue;');
+        sb.writeln('            }');
+        sb.writeln('            throw new ArgumentOutOfRangeException(nameof(value), value, "Path not found in JSON data for enum value");');
+        sb.writeln('        }');
+        sb.writeln();
+      }
+    }
+    return sb.toString();
+  }
+
+  String _getExtensionsClass(DbModel model, GeneratorCsharp data) {
+    final sb = StringBuffer();
+    final extClassName = '${data.prefix}Extensions${data.postfix}';
+    final rootClassName = '${data.prefix}Root${data.postfix}';
+    final baseItemName = 'Base${data.prefix}Item${data.postfix}';
+
+    sb.writeln('    public static class $extClassName');
+    sb.writeln('    {');
+
+    // ICloneable extensions
+    sb.writeln('        public static List<T> Clone<T>(this IEnumerable<ICloneable<T>> source)');
+    sb.writeln('        {');
+    sb.writeln('            var result = new List<T>();');
+    sb.writeln('            foreach (var i in source)');
+    sb.writeln('                result.Add(i.Clone());');
+    sb.writeln('            return result;');
+    sb.writeln('        }');
+    sb.writeln('');
+    sb.writeln('        public static List<T> Clone<T>(this IEnumerable<ICloneable<T>> source, Action<T> modify)');
+    sb.writeln('        {');
+    sb.writeln('            var result = new List<T>();');
+    sb.writeln('            foreach (var i in source)');
+    sb.writeln('            {');
+    sb.writeln('                var item = i.Clone();');
+    sb.writeln('                modify(item);');
+    sb.writeln('                result.Add(item);');
+    sb.writeln('            }');
+    sb.writeln('            return result;');
+    sb.writeln('        }');
+    sb.writeln('');
+    sb.writeln('        public static List<T> Clone<T>(this List<T> source)');
+    sb.writeln('        {');
+    sb.writeln('            var result = new List<T>(source.Count);');
+    sb.writeln('            foreach (var item in source)');
+    sb.writeln('            {');
+    sb.writeln('                if (item is $baseItemName modelItem && !modelItem.IsGlobal)');
+    sb.writeln('                {');
+    sb.writeln('                    result.Add((modelItem as ICloneable<T>).Clone());');
+    sb.writeln('                }');
+    sb.writeln('                else');
+    sb.writeln('                {');
+    sb.writeln('                    result.Add(item);');
+    sb.writeln('                }');
+    sb.writeln('            }');
+    sb.writeln('            return result;');
+    sb.writeln('        }');
+    sb.writeln('');
+    sb.writeln('        public static HashSet<T> Clone<T>(this HashSet<T> source)');
+    sb.writeln('        {');
+    sb.writeln('            return new HashSet<T>(source);');
+    sb.writeln('        }');
+    sb.writeln('');
+    sb.writeln('        public static Dictionary<TKey, TValue> Clone<TKey, TValue>(this Dictionary<TKey, TValue> source)');
+    sb.writeln('        {');
+    sb.writeln('            return new Dictionary<TKey, TValue>(source);');
+    sb.writeln('        }');
+
+    for (final enumEntity in model.cache.allEnums) {
+      if (enumEntity.autoByFile) {
+        sb.writeln('');
+        final typeName = '${data.prefix}${enumEntity.id}${data.postfix}';
+        sb.writeln('        public static string Path(this $typeName value, $rootClassName root = null)');
+        sb.writeln('        {');
+        sb.writeln('            return (root ?? $rootClassName.Instance)?.GetPathByEnum(value) ?? "";');
+        sb.writeln('        }');
+      }
+    }
+
+    sb.writeln('    }');
+    return sb.toString();
   }
 
   String _getListStructGetHashCode(DbModel model, ClassMetaEntity classEntity) {
@@ -981,35 +1077,12 @@ using Rectangle = System.Drawing.RectangleF;
     {
         T Clone();
     }
-
-    public static class IClonableExtensions
-    {
-        public static List<T> Clone<T>(this IEnumerable<ICloneable<T>> source)
-        {
-            var result = new List<T>();
-            foreach (var i in source)
-                result.Add(i.Clone());
-            return result;
-        }
-        public static List<T> Clone<T>(this IEnumerable<ICloneable<T>> source, Action<T> modify)
-        {
-            var result = new List<T>();
-            foreach (var i in source)
-            {
-                var item = i.Clone();
-                modify(item);
-                result.Add(item);
-            }
-            return result;
-        }
-    }
-
+#endregion
     public interface IIdentifiable
     {
         string Id { get; }
         bool IsGlobal { get; }
     }
-#endregion
 
 #region Root
     /// <summary>
@@ -1027,6 +1100,8 @@ using Rectangle = System.Drawing.RectangleF;
 
         public ItemsLists Lists { get; internal set; }
         public TablesList Tables { get; internal set; }
+        public Dictionary<string, Dictionary<string, string>> PathByEnum { get; set; }
+        public static {${_paramPrefix}}Root{${_paramPostfix}} Instance { get; private set; }
 
         public T Get<T>(string id) where T : IIdentifiable
         {
@@ -1116,6 +1191,7 @@ using Rectangle = System.Drawing.RectangleF;
         /// </summary>
         internal void Initialize(List<IIdentifiable> items)
         {
+            Instance = this;
             _emptyCollectionFactory = new EmptyCollectionFactory();
 
             AllItems = new Dictionary<string, IIdentifiable>();
@@ -1182,7 +1258,8 @@ using Rectangle = System.Drawing.RectangleF;
             }
             return result;
         }
-    }
+
+{${_paramGetPathByEnumOverloads}}    }
 
     public class ItemsLists
     {{${_paramListItemsListsDeclarations}}
@@ -1555,6 +1632,7 @@ using Rectangle = System.Drawing.RectangleF;
             root.CreationTime = jsonRoot.generationDate;
             root.Initialize(new List<IIdentifiable>(objectsByIds.Values));
             root.Tables = new TablesList(tables);
+            root.PathByEnum = jsonRoot.pathByEnum ?? new Dictionary<string, Dictionary<string, string>>();
 
             var cache = new CacheRoot();
 
@@ -1579,6 +1657,7 @@ using Rectangle = System.Drawing.RectangleF;
             public string generationDate;
             public string generationUser;
             public Dictionary<string, List<Dictionary<string, object>>> tables;
+            public Dictionary<string, Dictionary<string, string>> pathByEnum;
         }
 
         private static IIdentifiable GetNewInstance(string className, Dictionary<string, object> item, string ownerId = null)
@@ -1998,42 +2077,7 @@ using Rectangle = System.Drawing.RectangleF;
 #endregion
     }
 
-    public static class ListExtensions
-    {
-        public static List<T> Clone<T>(this List<T> source)
-        {
-            var result = new List<T>(source.Count);
-            foreach (var item in source)
-            {
-                if (item is Base{${_paramPrefix}}Item{${_paramPostfix}} modelItem && !modelItem.IsGlobal)
-                {
-                    result.Add((modelItem as ICloneable<T>).Clone());
-                }
-                else
-                {
-                    result.Add(item);
-                }
-            }
-            return result;
-        }
-    }
-
-    public static class HashSetExtensions
-    {
-        public static HashSet<T> Clone<T>(this HashSet<T> source)
-        {
-            return new HashSet<T>(source);
-        }
-    }
-
-    public static class DictionaryExtensions
-    {
-        public static Dictionary<TKey, TValue> Clone<TKey, TValue>(this Dictionary<TKey, TValue> source)
-        {
-            return new Dictionary<TKey, TValue>(source);
-        }
-    }
-
+{${_paramExtensionsClass}}
     public class ErrorData
     {
         public IIdentifiable Entity { get; }

@@ -1,21 +1,29 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'db_cmd_add_enum_value.dart';
+part of 'db_cmd_generate_enum_values_from_files.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-DbCmdAddEnumValue _$DbCmdAddEnumValueFromJson(Map<String, dynamic> json) =>
-    DbCmdAddEnumValue()
+DbCmdGenerateEnumValuesFromFiles _$DbCmdGenerateEnumValuesFromFilesFromJson(
+        Map<String, dynamic> json) =>
+    DbCmdGenerateEnumValuesFromFiles()
       ..id = json['id'] as String
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..entityId = json['entityId'] as String
-      ..index = (json['index'] as num).toInt()
-      ..value = json['value'] as String
-      ..description = json['description'] as String?;
+      ..newValues = (json['newValues'] as List<dynamic>?)
+          ?.map((e) => EnumValue.fromJson(e as Map<String, dynamic>))
+          .toList()
+      ..oldValues = (json['oldValues'] as List<dynamic>?)
+          ?.map((e) => EnumValue.fromJson(e as Map<String, dynamic>))
+          .toList()
+      ..filesFound = (json['filesFound'] as num?)?.toInt()
+      ..valuesAdded = (json['valuesAdded'] as num?)?.toInt()
+      ..silent = json['silent'] as bool;
 
-Map<String, dynamic> _$DbCmdAddEnumValueToJson(DbCmdAddEnumValue instance) {
+Map<String, dynamic> _$DbCmdGenerateEnumValuesFromFilesToJson(
+    DbCmdGenerateEnumValuesFromFiles instance) {
   final val = <String, dynamic>{
     'id': instance.id,
   };
@@ -28,9 +36,13 @@ Map<String, dynamic> _$DbCmdAddEnumValueToJson(DbCmdAddEnumValue instance) {
 
   writeNotNull(r'$type', _$DbCmdTypeEnumMap[instance.$type]);
   val['entityId'] = instance.entityId;
-  val['index'] = instance.index;
-  val['value'] = instance.value;
-  writeNotNull('description', instance.description);
+  writeNotNull(
+      'newValues', instance.newValues?.map((e) => e.toJson()).toList());
+  writeNotNull(
+      'oldValues', instance.oldValues?.map((e) => e.toJson()).toList());
+  writeNotNull('filesFound', instance.filesFound);
+  writeNotNull('valuesAdded', instance.valuesAdded);
+  val['silent'] = instance.silent;
   return val;
 }
 

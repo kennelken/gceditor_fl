@@ -85,9 +85,13 @@ class GlobalShortcuts {
   static void openProjectSettings() {
     showDialog(
       context: popupContext!,
-      barrierColor: kColorTransparent,
+      barrierColor: kColorPrimaryLightTransparent3,
       builder: (context) {
         return const Dialog(
+          elevation: 30,
+          shadowColor: Colors.black,
+          shape: RoundedRectangleBorder(borderRadius: kCardBorder),
+          clipBehavior: Clip.antiAlias,
           child: SettingsView(),
         );
       },
@@ -97,9 +101,13 @@ class GlobalShortcuts {
   static void openHistory(HistoryItemData history) {
     showDialog(
       context: popupContext!,
-      barrierColor: kColorTransparent,
+      barrierColor: kColorPrimaryLightTransparent3,
       builder: (context) {
         return Dialog(
+          elevation: 30,
+          shadowColor: Colors.black,
+          shape: const RoundedRectangleBorder(borderRadius: kCardBorder),
+          clipBehavior: Clip.antiAlias,
           child: HistoryDialog(data: history),
         );
       },

@@ -17,6 +17,7 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
   final ValueChanged<T?> onValueChanged;
   final InputDecoration? inputDecoration;
   final String? nullValueLabel;
+  final bool showTooltip;
 
   DropDownSelector({
     super.key,
@@ -28,6 +29,7 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
     this.addNull = true,
     this.inputDecoration,
     this.nullValueLabel,
+    this.showTooltip = true,
   }) {
     this.items = addNull ? [null, ...items] : items;
   }
@@ -37,10 +39,11 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
     return SizedBox(
       height: kStyle.kTableTopRowHeight,
       child: DropdownSearch<T?>(
-        items: items,
+        items: (filter, loadProps) => items,
         dropdownBuilder: (context, selectedItem) {
+          if (selectedItem == null) return const SizedBox();
           return TooltipWrapper(
-            message: (selectedItem is IDescribable) ? (selectedItem as IDescribable).description : null,
+            message: showTooltip && (selectedItem is IDescribable) ? (selectedItem as IDescribable).description : null,
             child: Text(
               _getItemName(selectedItem),
               style: kStyle.kTextExtraSmall,
@@ -58,11 +61,12 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
           constraints: BoxConstraints.loose(const Size.fromHeight(1000)),
           disabledItemFn: (i) => !_isEnabled(i),
           menuProps: const MenuProps(
-            elevation: 0,
-            barrierColor: kColorPrimaryLightTransparent2,
+            elevation: 30,
+            barrierColor: kColorPrimaryLightTransparent3,
             backgroundColor: kColorAccentBlue2,
+            shadowColor: Colors.black,
           ),
-          itemBuilder: (context, item, isSelected) {
+          itemBuilder: (context, item, isDisabled, isSelected) {
             final enabled = _isEnabled(item);
             return TooltipWrapper(
               message: (item is IDescribable) ? (item as IDescribable).description : null,
@@ -96,17 +100,21 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
             ),
           ),
         ),
-        dropdownButtonProps: DropdownButtonProps(
-          color: kColorPrimaryLight,
-          padding: EdgeInsets.zero,
-          iconSize: 15 * kScale,
-          constraints: BoxConstraints.tightFor(width: 35 * kScale, height: 25),
-          splashRadius: 20 * kScale,
-          icon: const Icon(FontAwesomeIcons.caretDown),
+        suffixProps: DropdownSuffixProps(
+          dropdownButtonProps: DropdownButtonProps(
+            color: kColorPrimaryLight,
+            padding: EdgeInsets.zero,
+            iconSize: 15 * kScale,
+            constraints: BoxConstraints.tightFor(width: 35 * kScale, height: 25),
+            splashRadius: 20 * kScale,
+            iconClosed: const Icon(FontAwesomeIcons.caretDown),
+          ),
         ),
-        dropdownDecoratorProps: DropDownDecoratorProps(
-          dropdownSearchDecoration: (inputDecoration ?? kStyle.kInputTextStyleProperties)
-              .copyWith(labelText: (selectedItem == null ? nullValueLabel : null) ?? label, hintText: ''),
+        decoratorProps: DropDownDecoratorProps(
+          decoration: (inputDecoration ?? kStyle.kInputTextStyleProperties).copyWith(
+            labelText: selectedItem == null ? null : label,
+            hintText: selectedItem == null ? (nullValueLabel ?? label) : '',
+          ),
         ),
 /*      maxHeight: kStyle.dropDownSelectorHeight, */
 /*      showAsSuffixIcons: true,*/
@@ -117,7 +125,7 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
           size: 15 * kScale,
         ),
         */
-        onChanged: onValueChanged,
+        onSelected: onValueChanged,
         selectedItem: selectedItem,
         itemAsString: _getItemName,
       ),

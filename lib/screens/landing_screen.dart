@@ -207,7 +207,7 @@ class LandingScreenState extends State<LandingScreen> {
                                             SizedBox(height: 10 * kScale),
                                             InputDecorator(
                                               decoration: kStyle.kLandingInputTextStyle.copyWith(
-                                                labelText: 'Recent projects',
+                                                labelText: Loc.get.recentProjects,
                                               ),
                                               child: Padding(
                                                 padding: EdgeInsets.only(top: 14 * kScale),
@@ -240,7 +240,7 @@ class LandingScreenState extends State<LandingScreen> {
                                                                   ),
                                                                 ),
                                                                 TooltipWrapper(
-                                                                  message: 'Remove',
+                                                                  message: Loc.get.remove,
                                                                   child: IconButtonTransparent(
                                                                     size: 20 * kScale,
                                                                     icon: Icon(

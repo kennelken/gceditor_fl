@@ -14,7 +14,10 @@ import 'package:gceditor/model/state/menubar_state.dart';
 import 'package:gceditor/model/state/server_history_state.dart';
 import 'package:gceditor/model/state/server_state.dart';
 import 'package:gceditor/model/state/service/client_data_selection_state.dart';
+import 'package:gceditor/model/db_cmd/db_cmd_generate_enum_values_from_files.dart';
 import 'package:gceditor/server/net_commands.dart';
+import 'package:gceditor/utils/components/popup_messages.dart';
+import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/utils/event_notifier.dart';
 import 'package:path/path.dart' as path;
 
@@ -77,6 +80,15 @@ class ClientStateNotifier extends ServerStateNotifier {
       case DbCmdType.resizeColumn:
       case DbCmdType.resizeInnerCell:
       case DbCmdType.fillColumn:
+      case DbCmdType.editEnumFileSettings:
+      case DbCmdType.generateEnumValuesFromFiles:
+        if (command is DbCmdGenerateEnumValuesFromFiles && !command.silent && (command.filesFound ?? 0) > 0) {
+          PopupMessages.show(
+            PopupMessageData(
+              message: Loc.get.enumAutoGenerationSummary(command.filesFound!, command.valuesAdded ?? 0),
+            ),
+          );
+        }
         break;
 
       case DbCmdType.editProjectSettings:

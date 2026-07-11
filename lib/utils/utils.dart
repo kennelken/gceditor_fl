@@ -1,11 +1,47 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:dartx/dartx_io.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
 
 abstract class Utils {
+  static String? getAbsolutePath(File? projectFile, String? fullPath) {
+    if (fullPath == null || projectFile == null) return null;
+    final projectDir = projectFile.parent.path;
+    return path.normalize(path.join(projectDir, fullPath));
+  }
+
+  static void showInExplorer(String? absolutePath) {
+    if (absolutePath == null) return;
+    final file = File(absolutePath);
+    if (!file.existsSync()) return;
+
+    if (Platform.isWindows) {
+      Process.run('explorer', ['/select,', absolutePath]);
+    } else if (Platform.isMacOS) {
+      Process.run('open', ['-R', absolutePath]);
+    } else {
+      Process.run('xdg-open', [path.dirname(absolutePath)]);
+    }
+  }
+
+  static void openFile(String? absolutePath) {
+    if (absolutePath == null) return;
+    final file = File(absolutePath);
+    if (!file.existsSync()) return;
+
+    if (Platform.isWindows) {
+      Process.run('cmd', ['/c', 'start', '', absolutePath]);
+    } else if (Platform.isMacOS) {
+      Process.run('open', [absolutePath]);
+    } else {
+      Process.run('xdg-open', [absolutePath]);
+    }
+  }
+
   static bool isIOs(BuildContext context) => Theme.of(context).platform == TargetPlatform.iOS;
 
   static int enumToInt<T extends dynamic>(T enumValue) {
@@ -47,9 +83,9 @@ abstract class Utils {
   static MaterialColor createMaterialColor(Color color) {
     final strengths = <double>[.05];
     final swatch = <int, Color>{};
-    final r = color.red;
-    final g = color.green;
-    final b = color.blue;
+    final r = (color.r * 255.0).round();
+    final g = (color.g * 255.0).round();
+    final b = (color.b * 255.0).round();
 
     for (var i = 1; i < 10; i++) {
       strengths.add(0.1 * i);
@@ -63,7 +99,7 @@ abstract class Utils {
         1,
       );
     }
-    return MaterialColor(color.value, swatch);
+    return MaterialColor(color.toARGB32(), swatch);
   }
 
   static final _uuidV4Regex = RegExp('[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}');
@@ -121,7 +157,8 @@ abstract class Utils {
     final matches = parametersRegExp.allMatches(input).toList();
     for (var i = matches.length - 1; i >= 0; i--) {
       final match = matches[i];
-      result = result.replaceRange(match.start, match.end, params[match.group(1)]?.toString() ?? match.group(0)!);
+      final key = match.group(1);
+      result = result.replaceRange(match.start, match.end, params[key]?.toString() ?? match.group(0)!);
     }
 
     return result;
@@ -152,6 +189,96 @@ abstract class Utils {
     }
 
     (context as Element).visitChildren(rebuild);
+  }
+
+  static int countCapturingGroups(String pattern) {
+    var count = 0;
+    var inCharacterClass = false;
+    for (var i = 0; i < pattern.length; i++) {
+      final char = pattern[i];
+      if (char == '\\') {
+        i++; // skip next char
+        continue;
+      }
+      if (inCharacterClass) {
+        if (char == ']') {
+          inCharacterClass = false;
+        }
+        continue;
+      }
+      if (char == '[') {
+        inCharacterClass = true;
+        continue;
+      }
+      if (char == '(') {
+        if (i + 1 < pattern.length && pattern[i + 1] == '?') {
+          if (i + 2 < pattern.length && pattern[i + 2] == '<') {
+            count++;
+          }
+        } else {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+
+  static bool validateAutoByFileSettings(
+    String filePathRegex,
+    String enumNameFromRegex, [
+    String? pathValueFromRegex,
+    String? filePathRegexExclude,
+    String? fileContentRegexInclude,
+    String? fileContentRegexExclude,
+  ]) {
+    if (filePathRegex.isEmpty || enumNameFromRegex.isEmpty) {
+      return false;
+    }
+
+    var groupCount = 0;
+    try {
+      RegExp(filePathRegex);
+      groupCount = countCapturingGroups(filePathRegex);
+    } catch (_) {
+      return false;
+    }
+
+    if (!_isValidRegExp(filePathRegexExclude)) return false;
+    if (!_isValidRegExp(fileContentRegexInclude)) return false;
+    if (!_isValidRegExp(fileContentRegexExclude)) return false;
+
+    final matches = RegExp(r'\{(\d+)\}').allMatches(enumNameFromRegex);
+    if (matches.isEmpty) {
+      return false;
+    }
+    for (final match in matches) {
+      final groupIndex = int.tryParse(match.group(1) ?? '');
+      if (groupIndex == null || groupIndex < 0 || groupIndex > groupCount) {
+        return false;
+      }
+    }
+
+    if (pathValueFromRegex != null && pathValueFromRegex.isNotEmpty) {
+      final pathMatches = RegExp(r'\{(\d+)\}').allMatches(pathValueFromRegex);
+      for (final match in pathMatches) {
+        final groupIndex = int.tryParse(match.group(1) ?? '');
+        if (groupIndex == null || groupIndex < 0 || groupIndex > groupCount) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  static bool _isValidRegExp(String? pattern) {
+    if (pattern == null || pattern.isEmpty) return true;
+    try {
+      RegExp(pattern);
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 }
 

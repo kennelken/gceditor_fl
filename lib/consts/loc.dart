@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:gceditor/l10n/app_localizations.dart';
 import 'package:gceditor/main.dart';
 
@@ -5,6 +6,10 @@ import 'package:gceditor/main.dart';
 
 class Loc {
   static AppLocalizations get get {
-    return AppLocalizations.of(localizationContext)!;
+    try {
+      return AppLocalizations.of(localizationContext)!;
+    } catch (_) {
+      return lookupAppLocalizations(const Locale('en'));
+    }
   }
 }

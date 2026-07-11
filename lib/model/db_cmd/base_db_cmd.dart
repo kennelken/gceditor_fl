@@ -27,6 +27,8 @@ import 'package:gceditor/model/db_cmd/db_cmd_reorder_enum.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_reorder_meta_entity.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_resize_column.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_resize_inner_cell.dart';
+import 'package:gceditor/model/db_cmd/db_cmd_edit_enum_file_settings.dart';
+import 'package:gceditor/model/db_cmd/db_cmd_generate_enum_values_from_files.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
@@ -146,6 +148,10 @@ abstract class BaseDbCmd {
         return DbCmdCopyPaste.fromJson(element);
       case DbCmdType.fillColumn:
         return DbCmdFillColumn.fromJson(element);
+      case DbCmdType.editEnumFileSettings:
+        return DbCmdEditEnumFileSettings.fromJson(element);
+      case DbCmdType.generateEnumValuesFromFiles:
+        return DbCmdGenerateEnumValuesFromFiles.fromJson(element);
     }
 
     throw Exception('Can not decode command of type "$type"');
@@ -186,4 +192,6 @@ enum DbCmdType {
   resizeInnerCell,
   copypaste,
   fillColumn,
+  editEnumFileSettings,
+  generateEnumValuesFromFiles,
 }

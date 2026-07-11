@@ -1,21 +1,36 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'db_cmd_add_enum_value.dart';
+part of 'db_cmd_edit_enum_file_settings.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-DbCmdAddEnumValue _$DbCmdAddEnumValueFromJson(Map<String, dynamic> json) =>
-    DbCmdAddEnumValue()
+DbCmdEditEnumFileSettings _$DbCmdEditEnumFileSettingsFromJson(
+        Map<String, dynamic> json) =>
+    DbCmdEditEnumFileSettings()
       ..id = json['id'] as String
       ..$type = $enumDecodeNullable(_$DbCmdTypeEnumMap, json[r'$type'])
       ..entityId = json['entityId'] as String
-      ..index = (json['index'] as num).toInt()
-      ..value = json['value'] as String
-      ..description = json['description'] as String?;
+      ..autoByFile = json['autoByFile'] as bool?
+      ..filePathRegex = json['filePathRegex'] as String?
+      ..filePathRegexExclude = json['filePathRegexExclude'] as String?
+      ..fileContentRegexInclude = json['fileContentRegexInclude'] as String?
+      ..fileContentRegexExclude = json['fileContentRegexExclude'] as String?
+      ..enumNameFromRegex = json['enumNameFromRegex'] as String?
+      ..pathValueFromRegex = json['pathValueFromRegex'] as String?
+      ..oldAutoByFile = json['oldAutoByFile'] as bool?
+      ..oldFilePathRegex = json['oldFilePathRegex'] as String?
+      ..oldFilePathRegexExclude = json['oldFilePathRegexExclude'] as String?
+      ..oldFileContentRegexInclude =
+          json['oldFileContentRegexInclude'] as String?
+      ..oldFileContentRegexExclude =
+          json['oldFileContentRegexExclude'] as String?
+      ..oldEnumNameFromRegex = json['oldEnumNameFromRegex'] as String?
+      ..oldPathValueFromRegex = json['oldPathValueFromRegex'] as String?;
 
-Map<String, dynamic> _$DbCmdAddEnumValueToJson(DbCmdAddEnumValue instance) {
+Map<String, dynamic> _$DbCmdEditEnumFileSettingsToJson(
+    DbCmdEditEnumFileSettings instance) {
   final val = <String, dynamic>{
     'id': instance.id,
   };
@@ -28,9 +43,22 @@ Map<String, dynamic> _$DbCmdAddEnumValueToJson(DbCmdAddEnumValue instance) {
 
   writeNotNull(r'$type', _$DbCmdTypeEnumMap[instance.$type]);
   val['entityId'] = instance.entityId;
-  val['index'] = instance.index;
-  val['value'] = instance.value;
-  writeNotNull('description', instance.description);
+  writeNotNull('autoByFile', instance.autoByFile);
+  writeNotNull('filePathRegex', instance.filePathRegex);
+  writeNotNull('filePathRegexExclude', instance.filePathRegexExclude);
+  writeNotNull('fileContentRegexInclude', instance.fileContentRegexInclude);
+  writeNotNull('fileContentRegexExclude', instance.fileContentRegexExclude);
+  writeNotNull('enumNameFromRegex', instance.enumNameFromRegex);
+  writeNotNull('pathValueFromRegex', instance.pathValueFromRegex);
+  writeNotNull('oldAutoByFile', instance.oldAutoByFile);
+  writeNotNull('oldFilePathRegex', instance.oldFilePathRegex);
+  writeNotNull('oldFilePathRegexExclude', instance.oldFilePathRegexExclude);
+  writeNotNull(
+      'oldFileContentRegexInclude', instance.oldFileContentRegexInclude);
+  writeNotNull(
+      'oldFileContentRegexExclude', instance.oldFileContentRegexExclude);
+  writeNotNull('oldEnumNameFromRegex', instance.oldEnumNameFromRegex);
+  writeNotNull('oldPathValueFromRegex', instance.oldPathValueFromRegex);
   return val;
 }
 

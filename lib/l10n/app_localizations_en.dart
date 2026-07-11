@@ -143,6 +143,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectSettingsSaveDelay => 'save delay (seconds)';
 
   @override
+  String get projectSettingsTooltipDelay => 'tooltip delay (seconds)';
+
+  @override
   String get projectSettingsGeneratorsTitle => 'generators';
 
   @override
@@ -536,6 +539,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newSecretHint => 'any secret to register';
 
   @override
+  String get registeredUsers => 'registered users';
+
+  @override
   String get projectPathTitle => 'Project path:';
 
   @override
@@ -692,5 +698,168 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String fillColumnLabel(String column) {
     return 'Fill column \'$column\' with';
+  }
+
+  @override
+  String get autoByFile => 'enabled';
+
+  @override
+  String get filePathRegex => 'file path regex';
+
+  @override
+  String get enumNameFromRegex => 'enum name from regex';
+
+  @override
+  String get pathValueFromRegex => 'path value from regex';
+
+  @override
+  String get run => 'Run';
+
+  @override
+  String get auto => 'auto';
+
+  @override
+  String get filePathRegexExclude => 'file path regex exclude';
+
+  @override
+  String get autoByFileTooltip =>
+      'Enable/disable enum auto-generation based on file system lookup';
+
+  @override
+  String get filePathRegexTooltip =>
+      'RegExp to match file relative paths (e.g. .*\\.prefab)';
+
+  @override
+  String get filePathRegexExcludeTooltip =>
+      'RegExp to exclude matched file relative paths';
+
+  @override
+  String get fileContentRegexInclude => 'file content regex include';
+
+  @override
+  String get fileContentRegexIncludeTooltip =>
+      'RegExp that file contents must match to be included';
+
+  @override
+  String get fileContentRegexExclude => 'file content regex exclude';
+
+  @override
+  String get fileContentRegexExcludeTooltip =>
+      'RegExp that file contents must NOT match to be included';
+
+  @override
+  String get enumNameFromRegexTooltip =>
+      'Template to generate the enum value ID from regex match groups (e.g. using group 1)';
+
+  @override
+  String get pathValueFromRegexTooltip =>
+      'Template to generate the path stored in the description field (e.g. using whole match or group 0)';
+
+  @override
+  String get runTooltip =>
+      'Execute file system lookup and generate enum values on demand';
+
+  @override
+  String get autoTooltip =>
+      'Automatically run the file lookup every time the project is opened';
+
+  @override
+  String get autoByFileSettings => 'auto by files';
+
+  @override
+  String get autoByFileSettingsTooltip => 'Toggle auto by file settings panel';
+
+  @override
+  String get appFilesPath => 'app files paths';
+
+  @override
+  String appFilesPathTooltip(String resolvedPath) {
+    return 'These paths are optional and are used as the base directories for auto-generating enums. Multiple paths can be separated by ; or ,.\n\nResolved absolute paths:\n$resolvedPath';
+  }
+
+  @override
+  String get appFilesPathExcludeRegex => 'app files path exclude regex';
+
+  @override
+  String get appFilesPathExcludeRegexTooltip =>
+      'Regular expression used to exclude matching files and folders from the scan.';
+
+  @override
+  String get autoGenerateEnumValues => 'auto-generate enum values from files';
+
+  @override
+  String get autoGenerateEnumValuesTooltip =>
+      'Automatically scan and update enum values from files every time generators are run';
+
+  @override
+  String enumAutoGenerationSummary(int filesFound, int valuesAdded) {
+    return 'Found $filesFound file(s) and added $valuesAdded value(s) to enums';
+  }
+
+  @override
+  String atLeastOneColumn(String idColumnName) {
+    return 'At least one column expected (\"$idColumnName\")';
+  }
+
+  @override
+  String get atLeastTwoRows =>
+      'At least two rows are supposed to be selected (one for column names, and all the others are data)';
+
+  @override
+  String authFilePathChanged(String path) {
+    return 'Auth file path changed to \"$path\"';
+  }
+
+  @override
+  String get clipboardTextEmpty => 'Clipboard text is empty';
+
+  @override
+  String copiedToClipboardCommand(String commandId) {
+    return 'Copied to the clipboard command \"$commandId\"';
+  }
+
+  @override
+  String get dataRowLengthVaries => 'Data row length varies from columns count';
+
+  @override
+  String firstRowShouldContain(String idColumnName) {
+    return 'The first row should contain columns names and the first column name \"$idColumnName\"';
+  }
+
+  @override
+  String incorrectValue(String value) {
+    return 'Incorrect value \"$value\"';
+  }
+
+  @override
+  String incorrectValueDefaultSet(String value) {
+    return 'Incorrect value \"$value\". The default value set.';
+  }
+
+  @override
+  String invalidFloatValue(String example) {
+    return 'Invalid float value. Valid format example \"$example\"';
+  }
+
+  @override
+  String get invalidTimezone =>
+      'Invalid timezone. Valid format example \"+1.5\"';
+
+  @override
+  String get noAppFilesPathsSpecified =>
+      'No paths specified (scanning disabled)';
+
+  @override
+  String get recentProjects => 'Recent projects';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get save => 'save';
+
+  @override
+  String tooltipDelayTooBig(String max) {
+    return 'tooltipDelay is too big. Max value is \"$max\" seconds';
   }
 }

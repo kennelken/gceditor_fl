@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -31,6 +33,14 @@ class SettingsViewState extends ConsumerState<SettingsView> {
   TextEditingController? _authPathController;
   TextEditingController? _outputPathController;
   TextEditingController? _historyPathController;
+  TextEditingController? _appFilesPathController;
+  final FocusNode _appFilesPathFocusNode = FocusNode();
+  String _resolvedAppFilesPath = '';
+  bool _isAppFilesPathValid = true;
+
+  TextEditingController? _appFilesPathExcludeRegexController;
+  final FocusNode _appFilesPathExcludeRegexFocusNode = FocusNode();
+  bool _isAppFilesPathExcludeRegexValid = true;
   bool _initialized = false;
 
   @override
@@ -44,6 +54,10 @@ class SettingsViewState extends ConsumerState<SettingsView> {
   void dispose() {
     _loginTextController.dispose();
     _secretTextController.dispose();
+    _appFilesPathController?.dispose();
+    _appFilesPathFocusNode.dispose();
+    _appFilesPathExcludeRegexController?.dispose();
+    _appFilesPathExcludeRegexFocusNode.dispose();
     super.dispose();
   }
 
@@ -67,6 +81,10 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     final saveDelayFocusNode = FocusNode();
     saveDelayFocusNode.addListener(() => _handleSaveDelayFocus(saveDelayFocusNode, saveDelayController));
 
+    final tooltipDelayController = TextEditingController(text: model.settings.tooltipDelay.toString());
+    final tooltipDelayFocusNode = FocusNode();
+    tooltipDelayFocusNode.addListener(() => _handleTooltipDelayFocus(tooltipDelayFocusNode, tooltipDelayController));
+
     final outputPathController = TextEditingController(text: model.settings.outputPath ?? './${Config.newOutputListDefaultName}');
     _outputPathController = outputPathController;
 
@@ -76,15 +94,37 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     final authPathController = TextEditingController(text: model.settings.authPath ?? './${Config.newAuthListDefaultName}');
     _authPathController = authPathController;
 
+    if (_appFilesPathController == null) {
+      _appFilesPathController = TextEditingController(text: model.settings.appFilesPath);
+      _computeAppFilesPathValidation(model.settings.appFilesPath);
+    } else {
+      final dbValue = model.settings.appFilesPath;
+      if (dbValue != _appFilesPathController!.text && !_appFilesPathFocusNode.hasFocus) {
+        _appFilesPathController!.text = dbValue;
+        _computeAppFilesPathValidation(dbValue);
+      }
+    }
+
+    if (_appFilesPathExcludeRegexController == null) {
+      _appFilesPathExcludeRegexController = TextEditingController(text: model.settings.appFilesPathExcludeRegex);
+      _computeAppFilesPathExcludeRegexValidation(model.settings.appFilesPathExcludeRegex);
+    } else {
+      final dbValue = model.settings.appFilesPathExcludeRegex;
+      if (dbValue != _appFilesPathExcludeRegexController!.text && !_appFilesPathExcludeRegexFocusNode.hasFocus) {
+        _appFilesPathExcludeRegexController!.text = dbValue;
+        _computeAppFilesPathExcludeRegexValidation(dbValue);
+      }
+    }
+
     final users = authListState.loginListData?.users.entries.toList() ?? [];
 
     _loginTextController.text = AppLocalStorage.instance.newLogin ?? Config.defaultNewLogin;
     _secretTextController.text = AppLocalStorage.instance.newSecret ?? Config.defaultNewSecret;
 
     return Container(
-      width: 1100 * kScale,
-      height: 717 * kScale,
-      color: kTextColorLightest,
+      width: 1200 * kScale,
+      height: 920 * kScale,
+      color: kColorPrimaryDarker2,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -110,7 +150,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           flex: 4,
                           child: Text(
                             Loc.get.projectSettingsSaveDelay,
-                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                           ),
                         ),
                         Expanded(
@@ -130,8 +170,29 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                         Expanded(
                           flex: 4,
                           child: Text(
+                            Loc.get.projectSettingsTooltipDelay,
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
+                          ),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: tooltipDelayController,
+                            decoration: kStyle.kInputTextStyleSettingsProperties,
+                            inputFormatters: Config.filterCellTypeFloat,
+                            focusNode: tooltipDelayFocusNode,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Text(
                             Loc.get.projectSettingsTimezoneTitle,
-                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                           ),
                         ),
                         Expanded(
@@ -152,7 +213,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           flex: 4,
                           child: Text(
                             Loc.get.outputPath,
-                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                           ),
                         ),
                         Expanded(
@@ -167,7 +228,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           ),
                         ),
                         TooltipWrapper(
-                          message: 'save',
+                          message: Loc.get.save,
                           child: IconButtonTransparent(
                             size: 30 * kScale,
                             icon: Icon(
@@ -187,7 +248,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           flex: 4,
                           child: Text(
                             Loc.get.historyPath,
-                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                           ),
                         ),
                         Expanded(
@@ -202,7 +263,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           ),
                         ),
                         TooltipWrapper(
-                          message: 'save',
+                          message: Loc.get.save,
                           child: IconButtonTransparent(
                             size: 30 * kScale,
                             icon: Icon(
@@ -222,7 +283,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           flex: 4,
                           child: Text(
                             Loc.get.authListPath,
-                            style: kStyle.kTextRegular.copyWith(color: kTextColorDark),
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
                           ),
                         ),
                         Expanded(
@@ -237,7 +298,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           ),
                         ),
                         TooltipWrapper(
-                          message: 'save',
+                          message: Loc.get.save,
                           child: IconButtonTransparent(
                             size: 30 * kScale,
                             icon: Icon(
@@ -250,120 +311,240 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                         ),
                       ],
                     ),
+                    SizedBox(height: 5 * kScale),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Text(
+                            Loc.get.appFilesPath,
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: TooltipWrapper(
+                            message: Loc.get.appFilesPathTooltip(_resolvedAppFilesPath),
+                            child: ClipRRect(
+                              borderRadius: kCardBorder,
+                              child: TextField(
+                                controller: _appFilesPathController,
+                                focusNode: _appFilesPathFocusNode,
+                                decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                                  fillColor: _isAppFilesPathValid ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                  focusColor: _isAppFilesPathValid ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                  hoverColor: _isAppFilesPathValid ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                ),
+                                textAlign: TextAlign.left,
+                                onChanged: _handleAppFilesPathChanged,
+                              ),
+                            ),
+                          ),
+                        ),
+                        TooltipWrapper(
+                          message: Loc.get.save,
+                          child: IconButtonTransparent(
+                            size: 30 * kScale,
+                            enabled: _isAppFilesPathValid,
+                            icon: Icon(
+                              FontAwesomeIcons.floppyDisk,
+                              size: 12 * kScale,
+                              color: _isAppFilesPathValid ? kColorAccentBlue : kColorAccentBlue.withValues(alpha: 0.3),
+                            ),
+                            onClick: _handleAppFilesPathSave,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5 * kScale),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Text(
+                            Loc.get.appFilesPathExcludeRegex,
+                            style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: TooltipWrapper(
+                            message: Loc.get.appFilesPathExcludeRegexTooltip,
+                            child: ClipRRect(
+                              borderRadius: kCardBorder,
+                              child: TextField(
+                                controller: _appFilesPathExcludeRegexController,
+                                focusNode: _appFilesPathExcludeRegexFocusNode,
+                                decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                                  fillColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                  focusColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                  hoverColor: _isAppFilesPathExcludeRegexValid ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                ),
+                                textAlign: TextAlign.left,
+                                onChanged: _handleAppFilesPathExcludeRegexChanged,
+                              ),
+                            ),
+                          ),
+                        ),
+                        TooltipWrapper(
+                          message: Loc.get.save,
+                          child: IconButtonTransparent(
+                            size: 30 * kScale,
+                            enabled: _isAppFilesPathExcludeRegexValid,
+                            icon: Icon(
+                              FontAwesomeIcons.floppyDisk,
+                              size: 12 * kScale,
+                              color: _isAppFilesPathExcludeRegexValid ? kColorAccentBlue : kColorAccentBlue.withValues(alpha: 0.3),
+                            ),
+                            onClick: _handleAppFilesPathExcludeRegexSave,
+                          ),
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 10 * kScale),
                     const Divider(height: 1),
                     SizedBox(height: 10 * kScale),
-                    Container(
-                      color: kTextColorLight,
-                      width: 9999,
-                      height: 229 * kScale,
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0 * kScale),
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height: 30 * kScale,
-                              child: Row(
+                    ClipRRect(
+                      borderRadius: kCardBorder,
+                      child: Container(
+                        color: kColorPrimary,
+                        width: 9999,
+                        height: 231 * kScale,
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0 * kScale),
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: 30 * kScale,
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      Loc.get.registeredUsers,
+                                      style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Row(
                                 children: [
-                                  Text(
-                                    'Registered users',
-                                    style: kStyle.kTextRegular.copyWith(color: kColorTextButton),
+                                  Expanded(
+                                    flex: 2,
+                                    child: TextField(
+                                      controller: _loginTextController,
+                                      decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                                        hintText: Loc.get.newLoginHint,
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 7 * kScale, vertical: 13 * kScale),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10 * kScale),
+                                  Expanded(
+                                    flex: 2,
+                                    child: TextField(
+                                      controller: _secretTextController,
+                                      decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                                        hintText: Loc.get.newSecretHint,
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 7 * kScale, vertical: 13 * kScale),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10 * kScale),
+                                  TooltipWrapper(
+                                    message: Loc.get.buttonRegisterNewLogin,
+                                    child: IconButtonTransparent(
+                                      size: 35 * kScale,
+                                      icon: Icon(
+                                        FontAwesomeIcons.plus,
+                                        size: 14 * kScale,
+                                        color: kColorAccentBlue,
+                                      ),
+                                      onClick: _handleRegisterLoginClick,
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                            Row(
-                              children: [
+                              if (users.isNotEmpty) ...[
+                                SizedBox(height: 8 * kScale),
                                 Expanded(
-                                  flex: 2,
-                                  child: TextField(
-                                    controller: _loginTextController,
-                                    decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
-                                      hintText: Loc.get.newLoginHint,
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 7 * kScale, vertical: 13 * kScale),
+                                  child: ScrollConfiguration(
+                                    behavior: kScrollDraggable,
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.vertical,
+                                      itemCount: users.length,
+                                      itemBuilder: (context, index) {
+                                        final user = users[index];
+                                        return Padding(
+                                          padding: EdgeInsets.only(bottom: 4 * kScale),
+                                          child: Container(
+                                            height: 30 * kScale,
+                                            color: kColorPrimaryDarker,
+                                            child: Padding(
+                                              padding: EdgeInsets.only(left: 5 * kScale, right: 8 * kScale),
+                                              child: Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      user.key,
+                                                      style: kStyle.kTextExtraSmall.copyWith(color: kTextColorLight),
+                                                    ),
+                                                  ),
+                                                  TooltipWrapper(
+                                                    message: Loc.get.buttonUnregisterLogin,
+                                                    child: IconButtonTransparent(
+                                                      size: 28 * kScale,
+                                                      icon: Icon(
+                                                        FontAwesomeIcons.trashCan,
+                                                        size: 12 * kScale,
+                                                        color: kColorAccentRed,
+                                                      ),
+                                                      onClick: () => _handleRemoveUser(user.key),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
                                     ),
-                                  ),
-                                ),
-                                SizedBox(width: 10 * kScale),
-                                Expanded(
-                                  flex: 2,
-                                  child: TextField(
-                                    controller: _secretTextController,
-                                    decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
-                                      hintText: Loc.get.newSecretHint,
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 7 * kScale, vertical: 13 * kScale),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 10 * kScale),
-                                TooltipWrapper(
-                                  message: Loc.get.buttonRegisterNewLogin,
-                                  child: IconButtonTransparent(
-                                    size: 35 * kScale,
-                                    icon: Icon(
-                                      FontAwesomeIcons.plus,
-                                      size: 14 * kScale,
-                                      color: kColorAccentBlue,
-                                    ),
-                                    onClick: _handleRegisterLoginClick,
                                   ),
                                 ),
                               ],
-                            ),
-                            if (users.isNotEmpty) ...[
-                              SizedBox(height: 8 * kScale),
-                              Expanded(
-                                child: ScrollConfiguration(
-                                  behavior: kScrollDraggable,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.vertical,
-                                    itemCount: users.length,
-                                    itemBuilder: (context, index) {
-                                      final user = users[index];
-                                      return Padding(
-                                        padding: EdgeInsets.only(bottom: 4 * kScale),
-                                        child: Container(
-                                          height: 30 * kScale,
-                                          color: kTextColorLightest,
-                                          child: Padding(
-                                            padding: EdgeInsets.only(left: 5 * kScale, right: 8 * kScale),
-                                            child: Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    user.key,
-                                                    style: kStyle.kTextExtraSmall.copyWith(color: kTextColorDark),
-                                                  ),
-                                                ),
-                                                TooltipWrapper(
-                                                  message: Loc.get.buttonUnregisterLogin,
-                                                  child: IconButtonTransparent(
-                                                    size: 28 * kScale,
-                                                    icon: Icon(
-                                                      FontAwesomeIcons.trashCan,
-                                                      size: 12 * kScale,
-                                                      color: kColorAccentRed,
-                                                    ),
-                                                    onClick: () => _handleRemoveUser(user.key),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
                             ],
-                          ],
+                          ),
                         ),
                       ),
                     ),
                     SizedBox(height: 10 * kScale),
                     GeneratorsView(
                       key: ValueKey(ref.watch(clientStateProvider).state.version),
+                    ),
+                    SizedBox(height: 10 * kScale),
+                    TooltipWrapper(
+                      message: Loc.get.autoGenerateEnumValuesTooltip,
+                      child: SizedBox(
+                        height: 30 * kScale,
+                        child: Row(
+                          children: [
+                            kStyle.wrapCheckbox(
+                              Checkbox(
+                                value: model.settings.autoGenerateEnumValues,
+                                onChanged: (val) {
+                                  providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+                                        DbCmdEditProjectSettings.values(
+                                          autoGenerateEnumValues: val ?? false,
+                                        ),
+                                      );
+                                },
+                              ),
+                            ),
+                            Text(
+                              Loc.get.autoGenerateEnumValues,
+                              style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -402,7 +583,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
 
     final match = Config.validTimezoneFormat.firstMatch(textComponent.text);
     if (match == null) {
-      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Invalid timezone. Valid format example "+1.5"'));
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, Loc.get.invalidTimezone));
       providerContainer.read(clientStateProvider).dispatchChange();
       return;
     }
@@ -427,7 +608,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     final value = textComponent.text;
     final match = Config.validCharactersForCellTypeFloat.firstMatch(value);
     if (match == null || double.tryParse(value) == null) {
-      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, 'Invalid float value. Valid format example "2.0"'));
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, Loc.get.invalidFloatValue('2.0')));
       providerContainer.read(clientStateProvider).dispatchChange();
       return;
     }
@@ -440,6 +621,38 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(
           DbCmdEditProjectSettings.values(
             saveDelay: newSaveDelay,
+          ),
+        );
+  }
+
+  void _handleTooltipDelayFocus(FocusNode focus, TextEditingController textComponent) {
+    if (focus.hasFocus) //
+      return;
+
+    final value = textComponent.text;
+    final match = Config.validCharactersForCellTypeFloat.firstMatch(value);
+    if (match == null || double.tryParse(value) == null) {
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, Loc.get.invalidFloatValue('0.3')));
+      providerContainer.read(clientStateProvider).dispatchChange();
+      return;
+    }
+
+    final newTooltipDelay = double.parse(value);
+
+    if (newTooltipDelay == clientModel.settings.tooltipDelay) //
+      return;
+
+    if (newTooltipDelay > Config.maxTooltipDelay) {
+      providerContainer
+          .read(logStateProvider)
+          .addMessage(LogEntry(LogLevel.error, Loc.get.tooltipDelayTooBig(Config.maxTooltipDelay.toString())));
+      providerContainer.read(clientStateProvider).dispatchChange();
+      return;
+    }
+
+    providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+          DbCmdEditProjectSettings.values(
+            tooltipDelay: newTooltipDelay,
           ),
         );
   }
@@ -503,7 +716,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
 
     final currentPath = providerContainer.read(authListStateProvider).state.filePath;
     if (currentPath != newPath) {
-      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, 'Auth file path changed to "$newPath"'));
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.warning, Loc.get.authFilePathChanged(newPath)));
       providerContainer.read(authListStateProvider).renameFile(newPath);
     }
 
@@ -511,6 +724,83 @@ class SettingsViewState extends ConsumerState<SettingsView> {
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(
           DbCmdEditProjectSettings.values(
             authPath: modelValue,
+          ),
+        );
+  }
+
+  void _computeAppFilesPathValidation(String value) {
+    final projectFile = providerContainer.read(appStateProvider).state.projectFile;
+    if (projectFile == null) {
+      _resolvedAppFilesPath = '';
+      _isAppFilesPathValid = false;
+      return;
+    }
+    final projectDir = path.dirname(projectFile.path);
+    final rawPaths = value.trim().isEmpty ? <String>[] : value.split(RegExp(r'[;,]'));
+    final resolvedPaths = <String>[];
+    var allExist = true;
+    for (final rawPath in rawPaths) {
+      final trimmed = rawPath.trim();
+      if (trimmed.isEmpty) continue;
+      final resolved = path.normalize(path.absolute(path.join(projectDir, trimmed)));
+      resolvedPaths.add(resolved);
+      if (!Directory(resolved).existsSync()) {
+        allExist = false;
+      }
+    }
+    _resolvedAppFilesPath = resolvedPaths.isEmpty ? Loc.get.noAppFilesPathsSpecified : resolvedPaths.join('\n');
+    _isAppFilesPathValid = allExist;
+  }
+
+  void _handleAppFilesPathChanged(String value) {
+    setState(() {
+      _computeAppFilesPathValidation(value);
+    });
+  }
+
+  void _handleAppFilesPathSave() {
+    final rawValue = _appFilesPathController?.text;
+    if (rawValue == null) return;
+
+    final value = rawValue.trim();
+    if (value == clientModel.settings.appFilesPath) return;
+
+    providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+          DbCmdEditProjectSettings.values(
+            appFilesPath: value,
+          ),
+        );
+  }
+
+  void _computeAppFilesPathExcludeRegexValidation(String value) {
+    if (value.isEmpty) {
+      _isAppFilesPathExcludeRegexValid = true;
+      return;
+    }
+    try {
+      RegExp(value);
+      _isAppFilesPathExcludeRegexValid = true;
+    } catch (_) {
+      _isAppFilesPathExcludeRegexValid = false;
+    }
+  }
+
+  void _handleAppFilesPathExcludeRegexChanged(String value) {
+    setState(() {
+      _computeAppFilesPathExcludeRegexValidation(value);
+    });
+  }
+
+  void _handleAppFilesPathExcludeRegexSave() {
+    final rawValue = _appFilesPathExcludeRegexController?.text;
+    if (rawValue == null) return;
+
+    final value = rawValue.trim();
+    if (value == clientModel.settings.appFilesPathExcludeRegex) return;
+
+    providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+          DbCmdEditProjectSettings.values(
+            appFilesPathExcludeRegex: value,
           ),
         );
   }

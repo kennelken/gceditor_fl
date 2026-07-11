@@ -29,6 +29,7 @@ class DeleteButton extends StatelessWidget {
         message: tooltipText,
         child: MaterialButton(
           padding: EdgeInsets.zero,
+          shape: const RoundedRectangleBorder(borderRadius: kCardBorder),
           onPressed: () => PopupMessages.show(PopupMessageData(message: Loc.get.longTapToDelete)),
           onLongPress: onAction,
           child: FittedBox(

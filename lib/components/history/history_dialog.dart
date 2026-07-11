@@ -50,7 +50,7 @@ class _HistoryDialogState extends State<HistoryDialog> {
       return Container(
         width: MediaQuery.of(popupContext!).size.width - 200,
         height: MediaQuery.of(popupContext!).size.height - 150,
-        color: kTextColorLightest,
+        color: kColorPrimaryDarker2,
         child: WaitingOverlay(
           child: Column(
             children: [

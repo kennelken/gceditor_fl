@@ -63,6 +63,7 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
   static const _paramTablesListDeclarations = 'tablesListDeclarations';
   static const _paramTablesListAssignment = 'tablesListAssignment';
   static const _paramTableClassMap = 'tableClassMap';
+  static const _paramGetPathByEnumOverloads = 'getPathByEnumOverloads';
 
   @override
   Future<GeneratorResult> execute(String outputFolder, DbModel model, GeneratorCsharp data, GeneratorAdditionalInformation additionalInfo) async {
@@ -86,6 +87,7 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
               _paramAssignValueCases: _getAssignValuesCases(model, data),
               _paramMaxStructDepth: _getMaxStructDepth(model, 3),
               _paramTableClassMap: _getTableClassMap(model, data),
+              _paramGetPathByEnumOverloads: _getPathByEnumOverloads(model, data),
             },
           ),
           _paramListItemsListsAssignment: _getListItemsListAssignment(model, data),
@@ -368,6 +370,31 @@ class GeneratorJavaRunner extends BaseGeneratorRunner<GeneratorJava> with Output
     }
 
     return items.join();
+  }
+
+  String _getPathByEnumOverloads(DbModel model, GeneratorCsharp data) {
+    final sb = StringBuffer();
+    for (final enumEntity in model.cache.allEnums) {
+      if (enumEntity.autoByFile) {
+        final typeName = '${data.prefix}${enumEntity.id}${data.postfix}';
+        sb.writeln('    public String GetPathByEnum($typeName value)');
+        sb.writeln('    {');
+        sb.writeln('        if (PathByEnum != null)');
+        sb.writeln('        {');
+        sb.writeln('            var enumMap = PathByEnum.get("${enumEntity.id}");');
+        sb.writeln('            if (enumMap != null)');
+        sb.writeln('            {');
+        sb.writeln('                var pathValue = enumMap.get(value.name());');
+        sb.writeln('                if (pathValue != null)');
+        sb.writeln('                    return pathValue;');
+        sb.writeln('            }');
+        sb.writeln('        }');
+        sb.writeln('        throw new IllegalArgumentException("Unexpected value or path not found in JSON: " + value);');
+        sb.writeln('    }');
+        sb.writeln();
+      }
+    }
+    return sb.toString();
   }
 
   String _getPropertyAccessLevel(ClassMetaEntity classEntity, GeneratorCsharp data) {
@@ -910,6 +937,7 @@ public class {${_paramPrefix}}Root{${_paramPostfix}}
     public ItemsLists getLists() { return Lists; }
     public TablesList Tables;
     public TablesList getTables() { return Tables; }
+    public HashMap<String, HashMap<String, String>> PathByEnum;
 
     public <T extends IIdentifiable> T Get(Class<T> itemClass, String id) throws Exception
     {
@@ -1337,6 +1365,7 @@ class RectangleInt {
             root.CreationTime = jsonRoot.generationDate;
             root.Initialize(new ArrayList<IIdentifiable>(objectsByIds.values()));
             root.Tables = new TablesList(tables);
+            root.PathByEnum = jsonRoot.pathByEnum != null ? jsonRoot.pathByEnum : new HashMap<>();
 
             _inlineItemsCounter.clear();
 
@@ -1348,6 +1377,7 @@ class RectangleInt {
             public String generationDate;
             public String generationUser;
             public HashMap<String, ArrayList<HashMap<String, Object>>> tables;
+            public HashMap<String, HashMap<String, String>> pathByEnum;
         }
 
         private static String GetTableClass(String tableId)
@@ -1675,7 +1705,8 @@ class RectangleInt {
         {
             return ParseLong(value);
         }
-    }
+
+{${_paramGetPathByEnumOverloads}}    }
 ''';
 }
 

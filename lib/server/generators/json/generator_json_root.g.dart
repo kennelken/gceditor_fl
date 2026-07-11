@@ -16,11 +16,24 @@ GeneratorJsonRoot _$GeneratorJsonRootFromJson(Map<String, dynamic> json) =>
             (e as List<dynamic>)
                 .map((e) => e as Map<String, dynamic>)
                 .toList()),
+      )
+      ..pathByEnum = (json['pathByEnum'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, Map<String, String>.from(e as Map)),
       );
 
-Map<String, dynamic> _$GeneratorJsonRootToJson(GeneratorJsonRoot instance) =>
-    <String, dynamic>{
-      'generationDate': instance.generationDate,
-      'generationUser': instance.generationUser,
-      'tables': instance.tables,
-    };
+Map<String, dynamic> _$GeneratorJsonRootToJson(GeneratorJsonRoot instance) {
+  final val = <String, dynamic>{
+    'generationDate': instance.generationDate,
+    'generationUser': instance.generationUser,
+    'tables': instance.tables,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('pathByEnum', instance.pathByEnum);
+  return val;
+}

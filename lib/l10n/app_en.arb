@@ -196,6 +196,10 @@
 	"@projectSettingsSaveDelay": {
 		"description": ""
 	},
+	"projectSettingsTooltipDelay": "tooltip delay (seconds)",
+	"@projectSettingsTooltipDelay": {
+		"description": ""
+	},
 	"projectSettingsGeneratorsTitle": "generators",
 	"@projectSettingsGeneratorsTitle": {
 		"description": ""
@@ -590,15 +594,11 @@
 		"description": "title in the file explorer"
 	},
 	"clientModeButton": "Client only",
-
 	"@clientModeButton": {
-
 		"description": "Client mode button"
 	},
 	"standaloneModeButton": "Standalone",
-
 	"@standaloneModeButton": {
-
 		"description": "Standalone mode button"
 	},
 	"serverModeButton": "Server only",
@@ -693,6 +693,10 @@
 	},
 	"newSecretHint": "any secret to register",
 	"@newSecretHint": {
+		"description": ""
+	},
+	"registeredUsers": "registered users",
+	"@registeredUsers": {
 		"description": ""
 	},
 	"projectPathTitle": "Project path:",
@@ -899,6 +903,231 @@
 		"description": "",
 		"placeholders": {
 			"column": {
+				"type": "String"
+			}
+		}
+	},
+	"autoByFile": "enabled",
+	"@autoByFile": {
+		"description": ""
+	},
+	"filePathRegex": "file path regex",
+	"@filePathRegex": {
+		"description": ""
+	},
+	"enumNameFromRegex": "enum name from regex",
+	"@enumNameFromRegex": {
+		"description": ""
+	},
+	"pathValueFromRegex": "path value from regex",
+	"@pathValueFromRegex": {
+		"description": ""
+	},
+	"run": "Run",
+	"@run": {
+		"description": ""
+	},
+	"auto": "auto",
+	"@auto": {
+		"description": ""
+	},
+	"filePathRegexExclude": "file path regex exclude",
+	"@filePathRegexExclude": {
+		"description": ""
+	},
+	"autoByFileTooltip": "Enable/disable enum auto-generation based on file system lookup",
+	"@autoByFileTooltip": {
+		"description": ""
+	},
+	"filePathRegexTooltip": "RegExp to match file relative paths (e.g. .*\\.prefab)",
+	"@filePathRegexTooltip": {
+		"description": ""
+	},
+	"filePathRegexExcludeTooltip": "RegExp to exclude matched file relative paths",
+	"@filePathRegexExcludeTooltip": {
+		"description": ""
+	},
+	"fileContentRegexInclude": "file content regex include",
+	"@fileContentRegexInclude": {
+		"description": ""
+	},
+	"fileContentRegexIncludeTooltip": "RegExp that file contents must match to be included",
+	"@fileContentRegexIncludeTooltip": {
+		"description": ""
+	},
+	"fileContentRegexExclude": "file content regex exclude",
+	"@fileContentRegexExclude": {
+		"description": ""
+	},
+	"fileContentRegexExcludeTooltip": "RegExp that file contents must NOT match to be included",
+	"@fileContentRegexExcludeTooltip": {
+		"description": ""
+	},
+	"enumNameFromRegexTooltip": "Template to generate the enum value ID from regex match groups (e.g. using group 1)",
+	"@enumNameFromRegexTooltip": {
+		"description": ""
+	},
+	"pathValueFromRegexTooltip": "Template to generate the path stored in the description field (e.g. using whole match or group 0)",
+	"@pathValueFromRegexTooltip": {
+		"description": ""
+	},
+	"runTooltip": "Execute file system lookup and generate enum values on demand",
+	"@runTooltip": {
+		"description": ""
+	},
+	"autoTooltip": "Automatically run the file lookup every time the project is opened",
+	"@autoTooltip": {
+		"description": ""
+	},
+	"autoByFileSettings": "auto by files",
+	"@autoByFileSettings": {
+		"description": ""
+	},
+	"autoByFileSettingsTooltip": "Toggle auto by file settings panel",
+	"@autoByFileSettingsTooltip": {
+		"description": ""
+	},
+	"appFilesPath": "app files paths",
+	"@appFilesPath": {
+		"description": ""
+	},
+	"appFilesPathTooltip": "These paths are optional and are used as the base directories for auto-generating enums. Multiple paths can be separated by ';' or ','.\n\nResolved absolute paths:\n{resolvedPath}",
+	"@appFilesPathTooltip": {
+		"description": "",
+		"placeholders": {
+			"resolvedPath": {
+				"type": "String"
+			}
+		}
+	},
+	"appFilesPathExcludeRegex": "app files path exclude regex",
+	"@appFilesPathExcludeRegex": {
+		"description": ""
+	},
+	"appFilesPathExcludeRegexTooltip": "Regular expression used to exclude matching files and folders from the scan.",
+	"@appFilesPathExcludeRegexTooltip": {
+		"description": ""
+	},
+	"autoGenerateEnumValues": "auto-generate enum values from files",
+	"@autoGenerateEnumValues": {
+		"description": ""
+	},
+	"autoGenerateEnumValuesTooltip": "Automatically scan and update enum values from files every time generators are run",
+	"@autoGenerateEnumValuesTooltip": {
+		"description": ""
+	},
+	"enumAutoGenerationSummary": "Found {filesFound} file(s) and added {valuesAdded} value(s) to enums",
+	"@enumAutoGenerationSummary": {
+		"description": "",
+		"placeholders": {
+			"filesFound": {
+				"type": "int"
+			},
+			"valuesAdded": {
+				"type": "int"
+			}
+		}
+	},
+	"atLeastOneColumn": "At least one column expected (\"{idColumnName}\")",
+	"@atLeastOneColumn": {
+		"description": "",
+		"placeholders": {
+			"idColumnName": {
+				"type": "String"
+			}
+		}
+	},
+	"atLeastTwoRows": "At least two rows are supposed to be selected (one for column names, and all the others are data)",
+	"@atLeastTwoRows": {
+		"description": ""
+	},
+	"authFilePathChanged": "Auth file path changed to \"{path}\"",
+	"@authFilePathChanged": {
+		"description": "",
+		"placeholders": {
+			"path": {
+				"type": "String"
+			}
+		}
+	},
+	"clipboardTextEmpty": "Clipboard text is empty",
+	"@clipboardTextEmpty": {
+		"description": ""
+	},
+	"copiedToClipboardCommand": "Copied to the clipboard command \"{commandId}\"",
+	"@copiedToClipboardCommand": {
+		"description": "",
+		"placeholders": {
+			"commandId": {
+				"type": "String"
+			}
+		}
+	},
+	"dataRowLengthVaries": "Data row length varies from columns count",
+	"@dataRowLengthVaries": {
+		"description": ""
+	},
+	"firstRowShouldContain": "The first row should contain columns names and the first column name \"{idColumnName}\"",
+	"@firstRowShouldContain": {
+		"description": "",
+		"placeholders": {
+			"idColumnName": {
+				"type": "String"
+			}
+		}
+	},
+	"incorrectValue": "Incorrect value \"{value}\"",
+	"@incorrectValue": {
+		"description": "",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"incorrectValueDefaultSet": "Incorrect value \"{value}\". The default value set.",
+	"@incorrectValueDefaultSet": {
+		"description": "",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"invalidFloatValue": "Invalid float value. Valid format example \"{example}\"",
+	"@invalidFloatValue": {
+		"description": "",
+		"placeholders": {
+			"example": {
+				"type": "String"
+			}
+		}
+	},
+	"invalidTimezone": "Invalid timezone. Valid format example \"+1.5\"",
+	"@invalidTimezone": {
+		"description": ""
+	},
+	"noAppFilesPathsSpecified": "No paths specified (scanning disabled)",
+	"@noAppFilesPathsSpecified": {
+		"description": ""
+	},
+	"recentProjects": "Recent projects",
+	"@recentProjects": {
+		"description": ""
+	},
+	"remove": "Remove",
+	"@remove": {
+		"description": ""
+	},
+	"save": "save",
+	"@save": {
+		"description": ""
+	},
+	"tooltipDelayTooBig": "tooltipDelay is too big. Max value is \"{max}\" seconds",
+	"@tooltipDelayTooBig": {
+		"description": "",
+		"placeholders": {
+			"max": {
 				"type": "String"
 			}
 		}
