@@ -124,6 +124,7 @@ ScrollBehavior getScrollDraggable(BuildContext context) {
     dragDevices: {
       PointerDeviceKind.touch,
       PointerDeviceKind.mouse,
+      PointerDeviceKind.trackpad,
     },
   );
 }
@@ -137,6 +138,7 @@ ScrollBehavior get kScrollDraggableNoScrollBar {
       dragDevices: {
         PointerDeviceKind.touch,
         PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
       },
     );
   }
