@@ -86,7 +86,7 @@ class DbCmdAddNewTable extends BaseDbCmd {
     if (existingEntity != null) //
       return DbCmdResult.fail('Entity with id "${tableMeta.id}" already exists');
 
-    var entriesCount = dbModel.classes.length;
+    var entriesCount = dbModel.tables.length;
     if (parentId != null) {
       final parent = dbModel.cache.getTable(parentId!);
       if (parent == null) {
