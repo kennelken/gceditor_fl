@@ -767,11 +767,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enumNameFromRegexTooltip =>
-      'Template to generate the enum value ID from regex match groups (e.g. using group 1)';
+      'Template to generate the enum value Id using whole match or capturing groups (\$0, \$1+)';
 
   @override
   String get pathValueFromRegexTooltip =>
-      'Template to generate the path stored in the description field (e.g. using whole match or group 0)';
+      'Template to generate the path stored in the description field using whole match or capturing groups (\$0, \$1+)';
 
   @override
   String get runTooltip =>

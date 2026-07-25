@@ -42,6 +42,7 @@ class ClassMetaEnumPropertiesViewProperties extends StatefulWidget {
 
 class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPropertiesViewProperties> {
   late List<EnumValue> values;
+  late bool _autoByFile;
   bool _showSettings = false;
 
   late final TextEditingController _filePathRegexController = TextEditingController();
@@ -70,6 +71,7 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
   void didUpdateWidget(ClassMetaEnumPropertiesViewProperties oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.data.id != widget.data.id ||
+        oldWidget.data.autoByFile != widget.data.autoByFile ||
         oldWidget.data.filePathRegex != widget.data.filePathRegex ||
         oldWidget.data.filePathRegexExclude != widget.data.filePathRegexExclude ||
         oldWidget.data.fileContentRegexInclude != widget.data.fileContentRegexInclude ||
@@ -92,6 +94,7 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
   }
 
   void _initControllers() {
+    _autoByFile = widget.data.autoByFile;
     _filePathRegexController.text = widget.data.filePathRegex;
     _filePathRegexExcludeController.text = widget.data.filePathRegexExclude;
     _fileContentRegexIncludeController.text = widget.data.fileContentRegexInclude;
@@ -123,20 +126,11 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
   }
 
   bool _isPlaceholderTemplateValid(String text, {required bool isMandatory}) {
-    if (text.isEmpty) return !isMandatory;
     final filePathRegex = _filePathRegexController.text;
     try {
       RegExp(filePathRegex);
       final groupCount = Utils.countCapturingGroups(filePathRegex);
-      final matches = RegExp(r'\{(\d+)\}').allMatches(text);
-      if (isMandatory && matches.isEmpty) return false;
-      for (final match in matches) {
-        final groupIndex = int.tryParse(match.group(1) ?? '');
-        if (groupIndex == null || groupIndex < 0 || groupIndex > groupCount) {
-          return false;
-        }
-      }
-      return true;
+      return Utils.arePlaceholdersValid(text, groupCount, isMandatory: isMandatory);
     } catch (_) {
       return false;
     }
@@ -173,7 +167,8 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
   }
 
   bool _hasAnyChanges() {
-    return _filePathRegexController.text != widget.data.filePathRegex ||
+    return _autoByFile != widget.data.autoByFile ||
+        _filePathRegexController.text != widget.data.filePathRegex ||
         _filePathRegexExcludeController.text != widget.data.filePathRegexExclude ||
         _fileContentRegexIncludeController.text != widget.data.fileContentRegexInclude ||
         _fileContentRegexExcludeController.text != widget.data.fileContentRegexExclude ||
@@ -187,6 +182,7 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
     providerContainer.read(clientOwnCommandsStateProvider).addCommand(
           DbCmdEditEnumFileSettings.values(
             entityId: widget.data.id,
+            autoByFile: _autoByFile,
             filePathRegex: _filePathRegexController.text,
             filePathRegexExclude: _filePathRegexExcludeController.text,
             fileContentRegexInclude: _fileContentRegexIncludeController.text,
@@ -300,14 +296,26 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                         children: [
                           kStyle.wrapCheckbox(
                             Checkbox(
-                              value: widget.data.autoByFile,
+                              value: _autoByFile,
                               onChanged: (val) {
-                                providerContainer.read(clientOwnCommandsStateProvider).addCommand(
-                                      DbCmdEditEnumFileSettings.values(
-                                        entityId: widget.data.id,
-                                        autoByFile: val ?? false,
-                                      ),
-                                    );
+                                final enabled = val ?? false;
+                                if (enabled) {
+                                  setState(() {
+                                    _autoByFile = true;
+                                    _showSettings = true;
+                                  });
+                                } else {
+                                  setState(() {
+                                    _autoByFile = false;
+                                    _showSettings = false;
+                                  });
+                                  providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+                                        DbCmdEditEnumFileSettings.values(
+                                          entityId: widget.data.id,
+                                          autoByFile: false,
+                                        ),
+                                      );
+                                }
                               },
                             ),
                           ),
@@ -319,7 +327,7 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                       ),
                     ),
                   ),
-                  if (widget.data.autoByFile) ...[
+                  if (_autoByFile) ...[
                     SizedBox(height: 2 * kScale),
                     Row(
                       children: [
@@ -364,7 +372,7 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                       ],
                     ),
                   ],
-                  if (widget.data.autoByFile && _showSettings) ...[
+                  if (_autoByFile && _showSettings) ...[
                     kStyle.kPropertiesVerticalDivider,
                     TooltipWrapper(
                       message: Loc.get.filePathRegexTooltip,

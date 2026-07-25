@@ -38,8 +38,8 @@ void main() {
       final entity = ClassMetaEntityEnum()
         ..id = 'BuildingPresentationType'
         ..filePathRegex = r'Assets/Prefabs/(.*)\.prefab'
-        ..enumNameFromRegex = '{1}'
-        ..pathValueFromRegex = '{0}';
+        ..enumNameFromRegex = r'$1'
+        ..pathValueFromRegex = r'$0';
 
       final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
 
@@ -75,8 +75,8 @@ void main() {
         ..id = 'BuildingPresentationType'
         ..filePathRegex = r'Assets/Prefabs/(.*)\.prefab'
         ..filePathRegexExclude = r'Items/.*'
-        ..enumNameFromRegex = '{1}'
-        ..pathValueFromRegex = '{0}';
+        ..enumNameFromRegex = r'$1'
+        ..pathValueFromRegex = r'$0';
 
       final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
 
@@ -111,8 +111,8 @@ void main() {
         ..filePathRegex = r'Assets/Prefabs/(.*)\.prefab'
         ..fileContentRegexInclude = r'Status: Active'
         ..fileContentRegexExclude = r'Type: Enemy'
-        ..enumNameFromRegex = '{1}'
-        ..pathValueFromRegex = '{0}';
+        ..enumNameFromRegex = r'$1'
+        ..pathValueFromRegex = r'$0';
 
       final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
 
@@ -150,8 +150,8 @@ void main() {
         ..id = 'TestEnum'
         // Only captures the filename, not the directory, so A/Player and B/Player both become "Player"
         ..filePathRegex = r'Assets/[^/]+/([^/]+)\.prefab'
-        ..enumNameFromRegex = '{1}'
-        ..pathValueFromRegex = '{0}';
+        ..enumNameFromRegex = r'$1'
+        ..pathValueFromRegex = r'$0';
 
       final results = DbCmdGenerateEnumValuesFromFiles.scan(dbModel, entity);
 
@@ -179,8 +179,8 @@ void main() {
         ..id = 'BuildingPresentationType'
         ..autoByFile = true
         ..filePathRegex = r'Assets/Prefabs/(.*)\.prefab'
-        ..enumNameFromRegex = '{1}'
-        ..pathValueFromRegex = '{0}';
+        ..enumNameFromRegex = r'$1'
+        ..pathValueFromRegex = r'$0';
       entity.values = [
         EnumValue()..id = 'Player'..description = 'Assets/Prefabs/Player.prefab',
         EnumValue()..id = 'Monster'..description = 'Assets/Prefabs/Monster.prefab',
@@ -231,8 +231,8 @@ void main() {
         ..id = 'BuildingPresentationType'
         ..autoByFile = true
         ..filePathRegex = r'Assets/Prefabs/(.*)\.prefab'
-        ..enumNameFromRegex = '{1}'
-        ..pathValueFromRegex = '{0}';
+        ..enumNameFromRegex = r'$1'
+        ..pathValueFromRegex = r'$0';
       entity.values = [
         EnumValue()..id = 'Player'..description = 'Assets/Prefabs/Player.prefab',
         EnumValue()..id = 'Monster'..description = 'Assets/Prefabs/Monster.prefab',
@@ -286,33 +286,33 @@ void main() {
     expect(Utils.validateAutoByFileSettings('', 'abc'), isFalse);
 
     // Invalid regex syntax
-    expect(Utils.validateAutoByFileSettings('[a-z', '{1}'), isFalse);
+    expect(Utils.validateAutoByFileSettings('[a-z', r'$1'), isFalse);
 
-    // Missing {N} placeholder
+    // Missing $N placeholder
     expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', 'value'), isFalse);
 
     // Out-of-bounds group index
-    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{2}'), isFalse);
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', r'$2'), isFalse);
 
     // Valid group index
-    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}'), isTrue);
-    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{0}'), isTrue);
-    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(\d+)/(\w+)\.prefab', 'Item_{2}'), isTrue);
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', r'$1'), isTrue);
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', r'$0'), isTrue);
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(\d+)/(\w+)\.prefab', r'Item_$2'), isTrue);
 
     // 3. Optional pathValueFromRegex validation
-    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '{2}'), isFalse); // path out of bounds
-    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '{1}'), isTrue); // path valid
-    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '{0}'), isTrue); // path valid
-    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', ''), isTrue); // path empty (optional)
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', r'$1', r'$2'), isFalse); // path out of bounds
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', r'$1', r'$1'), isTrue); // path valid
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', r'$1', r'$0'), isTrue); // path valid
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', r'$1', ''), isTrue); // path empty (optional)
 
     // 4. Optional filePathRegexExclude validation
-    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', '[a-z'), isFalse); // invalid exclude regex syntax
-    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', 'Player'), isTrue); // valid exclude regex
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', r'$1', '', '[a-z'), isFalse); // invalid exclude regex syntax
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', r'$1', '', 'Player'), isTrue); // valid exclude regex
     // 5. Optional fileContentRegexInclude / fileContentRegexExclude validation
-    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', '', '[a-z'), isFalse);
-    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', '', 'Status: Active'), isTrue);
-    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', '', '', '[a-z'), isFalse);
-    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', '{1}', '', '', '', 'Type: Enemy'), isTrue);
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', r'$1', '', '', '[a-z'), isFalse);
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', r'$1', '', '', 'Status: Active'), isTrue);
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', r'$1', '', '', '', '[a-z'), isFalse);
+    expect(Utils.validateAutoByFileSettings(r'Assets/Prefabs/(.*)\.prefab', r'$1', '', '', '', 'Type: Enemy'), isTrue);
   });
 
   test('DbCmdEditEnumFileSettings execution and undo works correctly', () {
@@ -364,6 +364,49 @@ void main() {
     expect(entity.filePathRegexExclude, equals('old_exclude'));
     expect(entity.enumNameFromRegex, equals('old_name'));
     expect(entity.pathValueFromRegex, equals('old_path'));
+  });
+
+  test('DbCmdEditEnumFileSettings.validate checks regex pattern and replacement anchor validity', () {
+    final dbModel = DbModel();
+    final entity = ClassMetaEntityEnum()
+      ..id = 'MyEnum'
+      ..autoByFile = false
+      ..filePathRegex = r'Assets/Prefabs/(.*)\.prefab'
+      ..enumNameFromRegex = r'$1';
+    dbModel.classes.add(entity);
+    dbModel.cache.invalidate();
+
+    // 1. Valid command passes validation
+    final validCmd = DbCmdEditEnumFileSettings.values(
+      entityId: 'MyEnum',
+      filePathRegex: r'Assets/Prefabs/(\d+)/(.*)\.prefab',
+      enumNameFromRegex: r'$2',
+      pathValueFromRegex: r'$1',
+    );
+    expect(validCmd.validate(dbModel).success, isTrue);
+
+    // 2. Invalid regex pattern fails validation
+    final invalidRegexCmd = DbCmdEditEnumFileSettings.values(
+      entityId: 'MyEnum',
+      filePathRegex: '[a-z',
+    );
+    expect(invalidRegexCmd.validate(dbModel).success, isFalse);
+
+    // 3. Out-of-bounds group index in enumNameFromRegex fails validation
+    final invalidGroupCmd = DbCmdEditEnumFileSettings.values(
+      entityId: 'MyEnum',
+      filePathRegex: r'Assets/Prefabs/(.*)\.prefab',
+      enumNameFromRegex: r'$2',
+    );
+    expect(invalidGroupCmd.validate(dbModel).success, isFalse);
+
+    // 4. Enabling autoByFile with invalid settings fails validation
+    final invalidAutoCmd = DbCmdEditEnumFileSettings.values(
+      entityId: 'MyEnum',
+      autoByFile: true,
+      filePathRegex: '',
+    );
+    expect(invalidAutoCmd.validate(dbModel).success, isFalse);
   });
 
   test('DbCmdGenerateEnumValuesFromFiles execution and undo works correctly', () {
@@ -437,7 +480,7 @@ void main() {
         ..id = 'Prefabs'
         ..autoByFile = true
         ..filePathRegex = r'(?:Src|Assets)/Prefabs/(.*)\.prefab'
-        ..enumNameFromRegex = '{1}';
+        ..enumNameFromRegex = r'$1';
 
       dbModel.classes.add(entity);
       dbModel.cache.invalidate();
@@ -484,7 +527,7 @@ void main() {
         ..id = 'Prefabs'
         ..autoByFile = true
         ..filePathRegex = r'Src/(?:.*/)?Prefabs/(.*)\.prefab'
-        ..enumNameFromRegex = '{1}';
+        ..enumNameFromRegex = r'$1';
 
       dbModel.classes.add(entity);
       dbModel.cache.invalidate();
@@ -516,7 +559,7 @@ void main() {
         ..id = 'MyScannedEnum'
         ..autoByFile = true
         ..filePathRegex = r'Src/Prefabs/(.*)\.prefab'
-        ..enumNameFromRegex = '{1}';
+        ..enumNameFromRegex = r'$1';
       dbModel.classes.add(entity);
 
       projectFile.writeAsStringSync(Config.fileJsonOptions.convert(dbModel.toJson()));

@@ -6,6 +6,7 @@ import 'package:gceditor/model/db/enum_value.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_result.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
+import 'package:gceditor/utils/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:path/path.dart' as path;
 
@@ -163,9 +164,6 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
         }
 
         var enumName = entity.enumNameFromRegex;
-        if (enumName.isEmpty) {
-          enumName = '{1}';
-        }
         enumName = _replaceGroups(enumName, match);
         enumName = sanitizeIdentifier(enumName);
 
@@ -336,12 +334,13 @@ class DbCmdGenerateEnumValuesFromFiles extends BaseDbCmd {
   }
 
   static String _replaceGroups(String template, RegExpMatch match) {
-    var result = template;
-    for (var i = 0; i <= match.groupCount; i++) {
-      final groupVal = match.group(i) ?? '';
-      result = result.replaceAll('{$i}', groupVal);
-    }
-    return result;
+    return template.replaceAllMapped(Utils.groupPlaceholderRegExp, (m) {
+      final groupIndex = int.tryParse(m.group(1) ?? '');
+      if (groupIndex != null && groupIndex >= 0 && groupIndex <= match.groupCount) {
+        return match.group(groupIndex) ?? '';
+      }
+      return m.group(0)!;
+    });
   }
 
   static RegExp? _tryParseRegExp(String pattern) {

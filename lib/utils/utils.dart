@@ -223,6 +223,25 @@ abstract class Utils {
     return count;
   }
 
+  static final groupPlaceholderRegExp = RegExp(r'\$(\d+)');
+
+  static bool arePlaceholdersValid(
+    String template,
+    int groupCount, {
+    bool isMandatory = false,
+  }) {
+    if (template.isEmpty) return !isMandatory;
+    final matches = groupPlaceholderRegExp.allMatches(template);
+    if (isMandatory && matches.isEmpty) return false;
+    for (final match in matches) {
+      final groupIndex = int.tryParse(match.group(1) ?? '');
+      if (groupIndex == null || groupIndex < 0 || groupIndex > groupCount) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   static bool validateAutoByFileSettings(
     String filePathRegex,
     String enumNameFromRegex, [
@@ -243,35 +262,24 @@ abstract class Utils {
       return false;
     }
 
-    if (!_isValidRegExp(filePathRegexExclude)) return false;
-    if (!_isValidRegExp(fileContentRegexInclude)) return false;
-    if (!_isValidRegExp(fileContentRegexExclude)) return false;
+    if (!isValidRegExp(filePathRegexExclude)) return false;
+    if (!isValidRegExp(fileContentRegexInclude)) return false;
+    if (!isValidRegExp(fileContentRegexExclude)) return false;
 
-    final matches = RegExp(r'\{(\d+)\}').allMatches(enumNameFromRegex);
-    if (matches.isEmpty) {
+    if (!arePlaceholdersValid(enumNameFromRegex, groupCount, isMandatory: true)) {
       return false;
-    }
-    for (final match in matches) {
-      final groupIndex = int.tryParse(match.group(1) ?? '');
-      if (groupIndex == null || groupIndex < 0 || groupIndex > groupCount) {
-        return false;
-      }
     }
 
     if (pathValueFromRegex != null && pathValueFromRegex.isNotEmpty) {
-      final pathMatches = RegExp(r'\{(\d+)\}').allMatches(pathValueFromRegex);
-      for (final match in pathMatches) {
-        final groupIndex = int.tryParse(match.group(1) ?? '');
-        if (groupIndex == null || groupIndex < 0 || groupIndex > groupCount) {
-          return false;
-        }
+      if (!arePlaceholdersValid(pathValueFromRegex, groupCount, isMandatory: false)) {
+        return false;
       }
     }
 
     return true;
   }
 
-  static bool _isValidRegExp(String? pattern) {
+  static bool isValidRegExp(String? pattern) {
     if (pattern == null || pattern.isEmpty) return true;
     try {
       RegExp(pattern);

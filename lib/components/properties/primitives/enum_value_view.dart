@@ -169,7 +169,19 @@ class _EnumValueViewState extends State<EnumValueView> {
                   tooltipText: Loc.get.delete,
                 ),
             ],
-            SizedBox(width: 30 * kScale),
+            if (widget.entity.autoByFile)
+              SizedBox(
+                width: 30 * kScale,
+                child: Center(
+                  child: Icon(
+                    Icons.drag_handle,
+                    color: kColorPrimaryLight.withValues(alpha: 0.2),
+                    size: 18 * kScale,
+                  ),
+                ),
+              )
+            else
+              SizedBox(width: 30 * kScale),
           ],
         ),
       );

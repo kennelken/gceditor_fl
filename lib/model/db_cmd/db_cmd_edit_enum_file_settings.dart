@@ -1,6 +1,7 @@
 import 'package:gceditor/model/db/class_meta_entity_enum.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_result.dart';
+import 'package:gceditor/utils/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'base_db_cmd.dart';
@@ -79,6 +80,55 @@ class DbCmdEditEnumFileSettings extends BaseDbCmd {
     if (entity is! ClassMetaEntityEnum) {
       return DbCmdResult.fail('Entity "$entityId" is not an enum');
     }
+
+    final effectiveAutoByFile = autoByFile ?? entity.autoByFile;
+    final effectiveFilePathRegex = filePathRegex ?? entity.filePathRegex;
+    final effectiveFilePathRegexExclude = filePathRegexExclude ?? entity.filePathRegexExclude;
+    final effectiveFileContentRegexInclude = fileContentRegexInclude ?? entity.fileContentRegexInclude;
+    final effectiveFileContentRegexExclude = fileContentRegexExclude ?? entity.fileContentRegexExclude;
+    final effectiveEnumNameFromRegex = enumNameFromRegex ?? entity.enumNameFromRegex;
+    final effectivePathValueFromRegex = pathValueFromRegex ?? entity.pathValueFromRegex;
+
+    if (effectiveAutoByFile) {
+      if (!Utils.validateAutoByFileSettings(
+        effectiveFilePathRegex,
+        effectiveEnumNameFromRegex,
+        effectivePathValueFromRegex,
+        effectiveFilePathRegexExclude,
+        effectiveFileContentRegexInclude,
+        effectiveFileContentRegexExclude,
+      )) {
+        return DbCmdResult.fail('Invalid auto by file regex settings');
+      }
+    } else {
+      if (!Utils.isValidRegExp(effectiveFilePathRegex)) {
+        return DbCmdResult.fail('Invalid file path regex pattern');
+      }
+      if (!Utils.isValidRegExp(effectiveFilePathRegexExclude)) {
+        return DbCmdResult.fail('Invalid file path exclude regex pattern');
+      }
+      if (!Utils.isValidRegExp(effectiveFileContentRegexInclude)) {
+        return DbCmdResult.fail('Invalid file content include regex pattern');
+      }
+      if (!Utils.isValidRegExp(effectiveFileContentRegexExclude)) {
+        return DbCmdResult.fail('Invalid file content exclude regex pattern');
+      }
+
+      if (effectiveFilePathRegex.isNotEmpty && Utils.isValidRegExp(effectiveFilePathRegex)) {
+        final groupCount = Utils.countCapturingGroups(effectiveFilePathRegex);
+
+        if (effectiveEnumNameFromRegex.isNotEmpty &&
+            !Utils.arePlaceholdersValid(effectiveEnumNameFromRegex, groupCount)) {
+          return DbCmdResult.fail('Invalid group index in enum name pattern');
+        }
+
+        if (effectivePathValueFromRegex.isNotEmpty &&
+            !Utils.arePlaceholdersValid(effectivePathValueFromRegex, groupCount)) {
+          return DbCmdResult.fail('Invalid group index in path value pattern');
+        }
+      }
+    }
+
     return DbCmdResult.success();
   }
 
