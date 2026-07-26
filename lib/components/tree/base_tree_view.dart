@@ -20,15 +20,47 @@ class BaseTreeView extends ConsumerWidget {
     ref.watch(styleStateProvider);
     ref.watch(clientStateProvider);
 
-    final hadChildrenBefore = treeController.roots.isNotEmpty;
+    final newRoots = data();
+    if (treeController.roots != newRoots) {
+      final hadChildrenBefore = treeController.roots.isNotEmpty;
+      final expandedIds = treeController.toggledNodes.map((e) => e.id).where((id) => id.isNotEmpty).toSet();
 
-    treeController.roots = data();
-    if (!hadChildrenBefore) {
-      treeController.expandAll();
+      treeController.roots = newRoots;
+      treeController.toggledNodes.clear();
+
+      if (!hadChildrenBefore) {
+        void expandAllNodes(Iterable<IIdentifiable> nodes) {
+          for (final node in nodes) {
+            treeController.setExpansionState(node, true);
+            final group = node.safeAs<IMetaGroup>();
+            if (group != null) {
+              expandAllNodes(group.entries.cast<IIdentifiable>());
+            }
+          }
+        }
+
+        expandAllNodes(newRoots);
+      } else {
+        void restoreExpanded(Iterable<IIdentifiable> nodes) {
+          for (final node in nodes) {
+            if (expandedIds.contains(node.id)) {
+              treeController.setExpansionState(node, true);
+            }
+            final group = node.safeAs<IMetaGroup>();
+            if (group != null) {
+              restoreExpanded(group.entries.cast<IIdentifiable>());
+            }
+          }
+        }
+
+        restoreExpanded(newRoots);
+      }
     }
-    treeController.rebuild();
+
+    final clientStateVersion = ref.watch(clientStateProvider).state.version;
 
     return AnimatedTreeView<IIdentifiable>(
+      key: ValueKey(clientStateVersion),
       treeController: treeController,
       padding: const EdgeInsets.only(left: 3, top: 0, right: 3, bottom: 3),
       duration: Durations.short1,
