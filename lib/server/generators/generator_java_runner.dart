@@ -1517,29 +1517,59 @@ class RectangleInt {
             return new HashSet(GceditorJsonParser.ParseList(values, valueClass, getValue, emptyCollectionFactory));
         }
 
+        private static void LogError(String message)
+        {
+            System.err.println("[ERROR] " + message);
+        }
+
         private static Boolean ParseBool(Object value)
         {
-            return Integer.parseInt(value.toString()) == 1;
+            try {
+                return Integer.parseInt(value.toString()) == 1;
+            } catch (Exception ex) {
+                LogError("[ParseBool] Failed to parse boolean from '" + value + "': " + ex.getMessage());
+                return false;
+            }
         }
 
         private static Integer ParseInt(Object value)
         {
-            return Integer.parseInt(value.toString());
+            try {
+                return Integer.parseInt(value.toString());
+            } catch (Exception ex) {
+                LogError("[ParseInt] Failed to parse int from '" + value + "': " + ex.getMessage());
+                return 0;
+            }
         }
 
         private static Long ParseLong(Object value)
         {
-            return Long.parseLong(value.toString());
+            try {
+                return Long.parseLong(value.toString());
+            } catch (Exception ex) {
+                LogError("[ParseLong] Failed to parse long from '" + value + "': " + ex.getMessage());
+                return 0L;
+            }
         }
 
         private static Float ParseFloat(Object value)
         {
-            return Float.parseFloat(value.toString());
+            try {
+                return Float.parseFloat(value.toString());
+            } catch (Exception ex) {
+                LogError("[ParseFloat] Failed to parse float from '" + value + "': " + ex.getMessage());
+                return 0f;
+            }
         }
 
         private static Double ParseDouble(Object value)
         {
-            return Double.parseDouble(value.toString());
+            try {
+                return Double.parseDouble(value.toString());
+            } catch (Exception ex) {
+                LogError("[ParseDouble] Failed to parse double from '" + value + "': " + ex.getMessage());
+                return 0.0;
+            }
         }
 
         private static String ParseString(Object value)
@@ -1549,24 +1579,39 @@ class RectangleInt {
 
         private static <T extends IIdentifiable> T ParseReference(Object value, HashMap<String, IIdentifiable> objectsByIds)
         {
+            if (value == null)
+                return null;
             var id = value.toString();
             if (id == null || id.isEmpty())
                 return null;
 
-            return (T)objectsByIds.get(id);
+            T result = (T)objectsByIds.get(id);
+            if (result == null) {
+                LogError("[ParseReference] Could not find object with id '" + id + "'");
+            }
+            return result;
         }
 
         private static <T extends Enum<T>> T ParseEnum(Object value, Class<T> enumClass)
         {
+            if (value == null)
+                return null;
             var id = value.toString();
             if (id == null || id.isEmpty())
                 return null;
 
-            return (T)Enum.valueOf(enumClass, id);
+            try {
+                return (T)Enum.valueOf(enumClass, id);
+            } catch (Exception ex) {
+                LogError("[ParseEnum] Failed to parse enum " + enumClass.getSimpleName() + " from '" + id + "': " + ex.getMessage());
+                return null;
+            }
         }
 
         private static Instant ParseDate(Object value)
         {
+            if (value == null)
+                return null;
             if (value instanceof Number)
                 return Instant.ofEpochMilli(((Number)value).longValue());
 
@@ -1576,13 +1621,16 @@ class RectangleInt {
 
             try {
                 return Instant.ofEpochMilli(Long.parseLong(date));
-            } catch (NumberFormatException e) {
+            } catch (Exception e) {
+                LogError("[ParseDate] Failed to parse Instant from '" + date + "': " + e.getMessage());
                 return null;
             }
         }
 
         private static Duration ParseDuration(Object value)
         {
+            if (value == null)
+                return null;
             if (value instanceof Number)
                 return Duration.ofMillis(((Number)value).longValue());
 
@@ -1592,113 +1640,191 @@ class RectangleInt {
 
             try {
                 return Duration.ofMillis(Long.parseLong(duration));
-            } catch (NumberFormatException e) {
+            } catch (Exception e) {
+                LogError("[ParseDuration] Failed to parse Duration from '" + duration + "': " + e.getMessage());
                 return null;
             }
         }
 
         private static Vector2 ParseVector2(Object value)
         {
+            if (value == null)
+                return null;
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
             var parts = valueString.split(";");
-            if (parts.length < 2)
+            if (parts.length < 2) {
+                LogError("[ParseVector2] Failed to parse Vector2 from '" + valueString + "': expected 2 semicolon-separated components");
                 return null;
+            }
 
-            return new Vector2(Float.parseFloat(parts[0]), Float.parseFloat(parts[1]));
+            try {
+                return new Vector2(Float.parseFloat(parts[0]), Float.parseFloat(parts[1]));
+            } catch (Exception ex) {
+                LogError("[ParseVector2] Failed to parse Vector2 from '" + valueString + "': " + ex.getMessage());
+                return null;
+            }
         }
 
         private static Vector2Int ParseVector2Int(Object value)
         {
+            if (value == null)
+                return null;
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
             var parts = valueString.split(";");
-            if (parts.length < 2)
+            if (parts.length < 2) {
+                LogError("[ParseVector2Int] Failed to parse Vector2Int from '" + valueString + "': expected 2 semicolon-separated components");
                 return null;
+            }
 
-            return new Vector2Int(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+            try {
+                return new Vector2Int(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+            } catch (Exception ex) {
+                LogError("[ParseVector2Int] Failed to parse Vector2Int from '" + valueString + "': " + ex.getMessage());
+                return null;
+            }
         }
 
         private static Vector3 ParseVector3(Object value)
         {
+            if (value == null)
+                return null;
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
             var parts = valueString.split(";");
-            if (parts.length < 3)
+            if (parts.length < 3) {
+                LogError("[ParseVector3] Failed to parse Vector3 from '" + valueString + "': expected 3 semicolon-separated components");
                 return null;
+            }
 
-            return new Vector3(Float.parseFloat(parts[0]), Float.parseFloat(parts[1]), Float.parseFloat(parts[2]));
+            try {
+                return new Vector3(Float.parseFloat(parts[0]), Float.parseFloat(parts[1]), Float.parseFloat(parts[2]));
+            } catch (Exception ex) {
+                LogError("[ParseVector3] Failed to parse Vector3 from '" + valueString + "': " + ex.getMessage());
+                return null;
+            }
         }
 
         private static Vector3Int ParseVector3Int(Object value)
         {
+            if (value == null)
+                return null;
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
             var parts = valueString.split(";");
-            if (parts.length < 3)
+            if (parts.length < 3) {
+                LogError("[ParseVector3Int] Failed to parse Vector3Int from '" + valueString + "': expected 3 semicolon-separated components");
                 return null;
+            }
 
-            return new Vector3Int(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+            try {
+                return new Vector3Int(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+            } catch (Exception ex) {
+                LogError("[ParseVector3Int] Failed to parse Vector3Int from '" + valueString + "': " + ex.getMessage());
+                return null;
+            }
         }
 
         private static Vector4 ParseVector4(Object value)
         {
+            if (value == null)
+                return null;
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
             var parts = valueString.split(";");
-            if (parts.length < 4)
+            if (parts.length < 4) {
+                LogError("[ParseVector4] Failed to parse Vector4 from '" + valueString + "': expected 4 semicolon-separated components");
                 return null;
+            }
 
-            return new Vector4(Float.parseFloat(parts[0]), Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3]));
+            try {
+                return new Vector4(Float.parseFloat(parts[0]), Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3]));
+            } catch (Exception ex) {
+                LogError("[ParseVector4] Failed to parse Vector4 from '" + valueString + "': " + ex.getMessage());
+                return null;
+            }
         }
 
         private static Vector4Int ParseVector4Int(Object value)
         {
+            if (value == null)
+                return null;
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
             var parts = valueString.split(";");
-            if (parts.length < 4)
+            if (parts.length < 4) {
+                LogError("[ParseVector4Int] Failed to parse Vector4Int from '" + valueString + "': expected 4 semicolon-separated components");
                 return null;
+            }
 
-            return new Vector4Int(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Integer.parseInt(parts[3]));
+            try {
+                return new Vector4Int(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Integer.parseInt(parts[3]));
+            } catch (Exception ex) {
+                LogError("[ParseVector4Int] Failed to parse Vector4Int from '" + valueString + "': " + ex.getMessage());
+                return null;
+            }
         }
 
         private static Rectangle ParseRectangle(Object value)
         {
+            if (value == null)
+                return null;
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
             var parts = valueString.split(";");
-            if (parts.length < 4)
+            if (parts.length < 4) {
+                LogError("[ParseRectangle] Failed to parse Rectangle from '" + valueString + "': expected 4 semicolon-separated components");
                 return null;
+            }
 
-            return new Rectangle(new Vector2(Float.parseFloat(parts[0]), Float.parseFloat(parts[1])), new Vector2(Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
+            try {
+                return new Rectangle(new Vector2(Float.parseFloat(parts[0]), Float.parseFloat(parts[1])), new Vector2(Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
+            } catch (Exception ex) {
+                LogError("[ParseRectangle] Failed to parse Rectangle from '" + valueString + "': " + ex.getMessage());
+                return null;
+            }
         }
 
         private static RectangleInt ParseRectangleInt(Object value)
         {
+            if (value == null)
+                return null;
             var valueString = value.toString();
             if (valueString == null || valueString.isEmpty())
                 return null;
 
             var parts = valueString.split(";");
-            if (parts.length < 4)
+            if (parts.length < 4) {
+                LogError("[ParseRectangleInt] Failed to parse RectangleInt from '" + valueString + "': expected 4 semicolon-separated components");
                 return null;
+            }
 
-            return new RectangleInt(new Vector2Int(Integer.parseInt(parts[0]), Integer.parseInt(parts[1])), new Vector2Int(Integer.parseInt(parts[2]), Integer.parseInt(parts[3])));
+            try {
+                return new RectangleInt(new Vector2Int(Integer.parseInt(parts[0]), Integer.parseInt(parts[1])), new Vector2Int(Integer.parseInt(parts[2]), Integer.parseInt(parts[3])));
+            } catch (Exception ex) {
+                LogError("[ParseRectangleInt] Failed to parse RectangleInt from '" + valueString + "': " + ex.getMessage());
+                return null;
+            }
+        }
+
+        private static Long ParseColor(Object value)
+        {
+            return ParseLong(value);
         }
 
         private static Long ParseColor(Object value)

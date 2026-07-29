@@ -1854,7 +1854,20 @@ class DbModelUtils {
   }
 
   static dynamic convertToSimpleFormat(ClassFieldType type, dynamic value) {
-    if (value is! String) return value;
+    if (value == null) return null;
+    if (value is! String) {
+      if (value is Vector2) return '${value.x};${value.y}';
+      if (value is Vector2Int) return '${value.x};${value.y}';
+      if (value is Vector3) return '${value.x};${value.y};${value.z}';
+      if (value is Vector3Int) return '${value.x};${value.y};${value.z}';
+      if (value is Vector4) return '${value.x};${value.y};${value.z};${value.w}';
+      if (value is Vector4Int) return '${value.x};${value.y};${value.z};${value.w}';
+      if (value is Rectangle) return '${value.x};${value.y};${value.width};${value.height}';
+      if (value is RectangleInt) return '${value.x};${value.y};${value.width};${value.height}';
+      if (value is DateTime) return value.millisecondsSinceEpoch;
+      if (value is Duration) return value.inMilliseconds;
+      return value;
+    }
 
     switch (type) {
       case ClassFieldType.date:
@@ -1915,7 +1928,7 @@ class DbModelUtils {
                 outInlineRows.add(inlineRow);
                 for (var k = 0; k < columns.length; k++) {
                   if (listRows[j].values != null && k < listRows[j].values!.length) {
-                    inlineRow[columns[k].id] = listRows[j].values![k];
+                    inlineRow[columns[k].id] = convertToSimpleFormat(columns[k].typeInfo.type, listRows[j].values![k]);
                   }
                 }
               }
@@ -1927,12 +1940,23 @@ class DbModelUtils {
             final mapData = <String, dynamic>{};
             for (final item in dictRows) {
               if (item.key != null) {
-                mapData[item.key.toString()] = item.value;
+                final formattedKey = convertToSimpleFormat(field.keyTypeInfo!.type, item.key).toString();
+                final formattedValue = convertToSimpleFormat(field.valueTypeInfo!.type, item.value);
+                mapData[formattedKey] = formattedValue;
               }
             }
             rowData[field.id] = mapData;
           } else {
             rowData[field.id] = {};
+          }
+        } else if (field.typeInfo.type.hasValueType()) {
+          final listValues = row.values[i].listCellValues;
+          if (listValues != null) {
+            rowData[field.id] = listValues
+                .map((v) => convertToSimpleFormat(field.valueTypeInfo!.type, v))
+                .toList();
+          } else {
+            rowData[field.id] = [];
           }
         } else {
           rowData[field.id] = convertToSimpleFormat(field.typeInfo.type, row.values[i].simpleValue);

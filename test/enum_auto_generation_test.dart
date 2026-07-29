@@ -19,6 +19,9 @@ import 'package:gceditor/server/generators/generator_csharp_runner.dart';
 import 'package:gceditor/server/generators/generator_java_runner.dart';
 import 'package:gceditor/server/generators/generators_job.dart';
 import 'package:gceditor/server/server_app.dart';
+import 'package:gceditor/model/db/db_model_shared.dart';
+import 'package:gceditor/model/state/custom_data_classes.dart';
+import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/utils/utils.dart';
 
 void main() {
@@ -624,5 +627,14 @@ void main() {
     } finally {
       tempDir.deleteSync(recursive: true);
     }
+  });
+
+  test('convertToSimpleFormat converts Vector2Int and other vectors to ;-separated string', () {
+    expect(DbModelUtils.convertToSimpleFormat(ClassFieldType.vector2Int, 'x:10 y:20'), equals('10;20'));
+    expect(DbModelUtils.convertToSimpleFormat(ClassFieldType.vector2Int, Vector2Int(10, 20)), equals('10;20'));
+    expect(DbModelUtils.convertToSimpleFormat(ClassFieldType.vector2, 'x:1.5 y:2.5'), equals('1.5;2.5'));
+    expect(DbModelUtils.convertToSimpleFormat(ClassFieldType.vector3Int, 'x:1 y:2 z:3'), equals('1;2;3'));
+    expect(DbModelUtils.convertToSimpleFormat(ClassFieldType.vector4Int, 'x:1 y:2 z:3 w:4'), equals('1;2;3;4'));
+    expect(DbModelUtils.convertToSimpleFormat(ClassFieldType.rectangleInt, 'x:1 y:2 w:100 h:200'), equals('1;2;100;200'));
   });
 }

@@ -48,11 +48,11 @@ class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with Output
                 final outInlineRows = <Map<String, dynamic>>[];
                 rowData[field.id] = outInlineRows;
 
-                for (var i = 0; i < listRows.length; i++) {
+                for (var j = 0; j < listRows.length; j++) {
                   final inlineRow = <String, dynamic>{};
                   outInlineRows.add(inlineRow);
-                  for (var j = 0; j < columns.length; j++) {
-                    inlineRow[columns[j].id] = listRows[i].values![j];
+                  for (var k = 0; k < columns.length; k++) {
+                    inlineRow[columns[k].id] = DbModelUtils.convertToSimpleFormat(columns[k].typeInfo.type, listRows[j].values![k]);
                   }
                 }
               } else if (field.typeInfo.type.hasKeyType()) {
@@ -61,12 +61,23 @@ class GeneratorJsonRunner extends BaseGeneratorRunner<GeneratorJson> with Output
                   final mapData = <String, dynamic>{};
                   for (final item in dictRows) {
                     if (item.key != null) {
-                      mapData[item.key.toString()] = item.value;
+                      final formattedKey = DbModelUtils.convertToSimpleFormat(field.keyTypeInfo!.type, item.key).toString();
+                      final formattedValue = DbModelUtils.convertToSimpleFormat(field.valueTypeInfo!.type, item.value);
+                      mapData[formattedKey] = formattedValue;
                     }
                   }
                   rowData[field.id] = mapData;
                 } else {
                   rowData[field.id] = {};
+                }
+              } else if (field.typeInfo.type.hasValueType()) {
+                final listValues = row.values[i].listCellValues;
+                if (listValues != null) {
+                  rowData[field.id] = listValues
+                      .map((v) => DbModelUtils.convertToSimpleFormat(field.valueTypeInfo!.type, v))
+                      .toList();
+                } else {
+                  rowData[field.id] = [];
                 }
               } else {
                 rowData[field.id] = DbModelUtils.convertToSimpleFormat(field.typeInfo.type, row.values[i].simpleValue);

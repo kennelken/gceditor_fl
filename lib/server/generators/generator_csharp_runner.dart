@@ -1818,6 +1818,15 @@ using Rectangle = System.Drawing.RectangleF;
             return new HashSet<T>(ParseList<T>(values, getValue, emptyCollectionFactory));
         }
 
+        private static void LogError(string message)
+        {
+#if UNITY_5_3_OR_NEWER
+            UnityEngine.Debug.LogError(message);
+#else
+            Console.Error.WriteLine(\$"[ERROR] {message}");
+#endif
+        }
+
         private static bool ParseBool(object value)
         {
             return ParseInt(value) == 1;
@@ -1825,38 +1834,70 @@ using Rectangle = System.Drawing.RectangleF;
 
         private static int ParseInt(object value)
         {
+            try
+            {
 #if UNITY_5_3_OR_NEWER
-            return Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                return Convert.ToInt32(value, CultureInfo.InvariantCulture);
 #else
-            return ((JsonElement)value).GetInt32();
+                return ((JsonElement)value).GetInt32();
 #endif
+            }
+            catch (Exception ex)
+            {
+                LogError(\$"[ParseInt] Failed to parse int from '{value}': {ex.Message}");
+                return default;
+            }
         }
 
         private static long ParseLong(object value)
         {
+            try
+            {
 #if UNITY_5_3_OR_NEWER
-            return Convert.ToInt64(value, CultureInfo.InvariantCulture);
+                return Convert.ToInt64(value, CultureInfo.InvariantCulture);
 #else
-            return ((JsonElement)value).GetInt64();
+                return ((JsonElement)value).GetInt64();
 #endif
+            }
+            catch (Exception ex)
+            {
+                LogError(\$"[ParseLong] Failed to parse long from '{value}': {ex.Message}");
+                return default;
+            }
         }
 
         private static float ParseFloat(object value)
         {
+            try
+            {
 #if UNITY_5_3_OR_NEWER
-            return Convert.ToSingle(value, CultureInfo.InvariantCulture);
+                return Convert.ToSingle(value, CultureInfo.InvariantCulture);
 #else
-            return ((JsonElement)value).GetSingle();
+                return ((JsonElement)value).GetSingle();
 #endif
+            }
+            catch (Exception ex)
+            {
+                LogError(\$"[ParseFloat] Failed to parse float from '{value}': {ex.Message}");
+                return default;
+            }
         }
 
         private static double ParseDouble(object value)
         {
+            try
+            {
 #if UNITY_5_3_OR_NEWER
-            return Convert.ToDouble(value, CultureInfo.InvariantCulture);
+                return Convert.ToDouble(value, CultureInfo.InvariantCulture);
 #else
-            return ((JsonElement)value).GetDouble();
+                return ((JsonElement)value).GetDouble();
 #endif
+            }
+            catch (Exception ex)
+            {
+                LogError(\$"[ParseDouble] Failed to parse double from '{value}': {ex.Message}");
+                return default;
+            }
         }
 
         private static string ParseString(object value)
@@ -1877,6 +1918,7 @@ using Rectangle = System.Drawing.RectangleF;
             if (objectsByIds.TryGetValue(id, out var instance))
                 return (T)instance;
 
+            LogError(\$"[ParseReference] Could not find object with id '{id}' of type {typeof(T).Name}");
             return default;
         }
 
@@ -1886,7 +1928,15 @@ using Rectangle = System.Drawing.RectangleF;
             if (string.IsNullOrEmpty(id))
                 return default;
 
-            return (T)Enum.Parse(typeof(T), id);
+            try
+            {
+                return (T)Enum.Parse(typeof(T), id);
+            }
+            catch (Exception ex)
+            {
+                LogError(\$"[ParseEnum] Failed to parse enum {typeof(T).Name} from '{id}': {ex.Message}");
+                return default;
+            }
         }
 
         private static DateTime ParseDate(object value)
@@ -1903,6 +1953,7 @@ using Rectangle = System.Drawing.RectangleF;
             if (long.TryParse(date, out var ms))
                 return DateTimeOffset.FromUnixTimeMilliseconds(ms).UtcDateTime;
 
+            LogError(\$"[ParseDate] Failed to parse DateTime from '{date}'");
             return default;
         }
 
@@ -1920,6 +1971,7 @@ using Rectangle = System.Drawing.RectangleF;
             if (long.TryParse(duration, out var ms))
                 return TimeSpan.FromMilliseconds(ms);
 
+            LogError(\$"[ParseDuration] Failed to parse TimeSpan from '{duration}'");
             return default;
         }
 
@@ -1931,12 +1983,23 @@ using Rectangle = System.Drawing.RectangleF;
 
             var parts = vector2.Split(';');
             if (parts.Length < 2)
+            {
+                LogError(\$"[ParseVector2] Failed to parse Vector2 from '{vector2}': expected 2 semicolon-separated components");
                 return default;
+            }
 
-            return new Vector2(
-                float.Parse(parts[0], CultureInfo.InvariantCulture),
-                float.Parse(parts[1], CultureInfo.InvariantCulture)
-            );
+            try
+            {
+                return new Vector2(
+                    float.Parse(parts[0], CultureInfo.InvariantCulture),
+                    float.Parse(parts[1], CultureInfo.InvariantCulture)
+                );
+            }
+            catch (Exception ex)
+            {
+                LogError(\$"[ParseVector2] Failed to parse Vector2 from '{vector2}': {ex.Message}");
+                return default;
+            }
         }
 
         private static Vector2Int ParseVector2Int(object value)
@@ -1947,12 +2010,23 @@ using Rectangle = System.Drawing.RectangleF;
 
             var parts = vector2Int.Split(';');
             if (parts.Length < 2)
+            {
+                LogError(\$"[ParseVector2Int] Failed to parse Vector2Int from '{vector2Int}': expected 2 semicolon-separated components");
                 return default;
+            }
 
-            return new Vector2Int(
-                int.Parse(parts[0], CultureInfo.InvariantCulture),
-                int.Parse(parts[1], CultureInfo.InvariantCulture)
-            );
+            try
+            {
+                return new Vector2Int(
+                    int.Parse(parts[0], CultureInfo.InvariantCulture),
+                    int.Parse(parts[1], CultureInfo.InvariantCulture)
+                );
+            }
+            catch (Exception ex)
+            {
+                LogError(\$"[ParseVector2Int] Failed to parse Vector2Int from '{vector2Int}': {ex.Message}");
+                return default;
+            }
         }
 
         private static Vector3 ParseVector3(object value)
@@ -1963,13 +2037,24 @@ using Rectangle = System.Drawing.RectangleF;
 
             var parts = vector3.Split(';');
             if (parts.Length < 3)
+            {
+                LogError(\$"[ParseVector3] Failed to parse Vector3 from '{vector3}': expected 3 semicolon-separated components");
                 return default;
+            }
 
-            return new Vector3(
-                float.Parse(parts[0], CultureInfo.InvariantCulture),
-                float.Parse(parts[1], CultureInfo.InvariantCulture),
-                float.Parse(parts[2], CultureInfo.InvariantCulture)
-            );
+            try
+            {
+                return new Vector3(
+                    float.Parse(parts[0], CultureInfo.InvariantCulture),
+                    float.Parse(parts[1], CultureInfo.InvariantCulture),
+                    float.Parse(parts[2], CultureInfo.InvariantCulture)
+                );
+            }
+            catch (Exception ex)
+            {
+                LogError(\$"[ParseVector3] Failed to parse Vector3 from '{vector3}': {ex.Message}");
+                return default;
+            }
         }
 
         private static Vector3Int ParseVector3Int(object value)
@@ -1980,13 +2065,24 @@ using Rectangle = System.Drawing.RectangleF;
 
             var parts = vector3Int.Split(';');
             if (parts.Length < 3)
+            {
+                LogError(\$"[ParseVector3Int] Failed to parse Vector3Int from '{vector3Int}': expected 3 semicolon-separated components");
                 return default;
+            }
 
-            return new Vector3Int(
-                int.Parse(parts[0], CultureInfo.InvariantCulture),
-                int.Parse(parts[1], CultureInfo.InvariantCulture),
-                int.Parse(parts[2], CultureInfo.InvariantCulture)
-            );
+            try
+            {
+                return new Vector3Int(
+                    int.Parse(parts[0], CultureInfo.InvariantCulture),
+                    int.Parse(parts[1], CultureInfo.InvariantCulture),
+                    int.Parse(parts[2], CultureInfo.InvariantCulture)
+                );
+            }
+            catch (Exception ex)
+            {
+                LogError(\$"[ParseVector3Int] Failed to parse Vector3Int from '{vector3Int}': {ex.Message}");
+                return default;
+            }
         }
 
         private static Vector4 ParseVector4(object value)
@@ -1997,14 +2093,25 @@ using Rectangle = System.Drawing.RectangleF;
 
             var parts = vector4.Split(';');
             if (parts.Length < 4)
+            {
+                LogError(\$"[ParseVector4] Failed to parse Vector4 from '{vector4}': expected 4 semicolon-separated components");
                 return default;
+            }
 
-            return new Vector4(
-                float.Parse(parts[0], CultureInfo.InvariantCulture),
-                float.Parse(parts[1], CultureInfo.InvariantCulture),
-                float.Parse(parts[2], CultureInfo.InvariantCulture),
-                float.Parse(parts[3], CultureInfo.InvariantCulture)
-            );
+            try
+            {
+                return new Vector4(
+                    float.Parse(parts[0], CultureInfo.InvariantCulture),
+                    float.Parse(parts[1], CultureInfo.InvariantCulture),
+                    float.Parse(parts[2], CultureInfo.InvariantCulture),
+                    float.Parse(parts[3], CultureInfo.InvariantCulture)
+                );
+            }
+            catch (Exception ex)
+            {
+                LogError(\$"[ParseVector4] Failed to parse Vector4 from '{vector4}': {ex.Message}");
+                return default;
+            }
         }
 
         private static Vector4Int ParseVector4Int(object value)
@@ -2015,14 +2122,25 @@ using Rectangle = System.Drawing.RectangleF;
 
             var parts = vector4Int.Split(';');
             if (parts.Length < 4)
+            {
+                LogError(\$"[ParseVector4Int] Failed to parse Vector4Int from '{vector4Int}': expected 4 semicolon-separated components");
                 return default;
+            }
 
-            return new Vector4Int(
-                int.Parse(parts[0], CultureInfo.InvariantCulture),
-                int.Parse(parts[1], CultureInfo.InvariantCulture),
-                int.Parse(parts[2], CultureInfo.InvariantCulture),
-                int.Parse(parts[3], CultureInfo.InvariantCulture)
-            );
+            try
+            {
+                return new Vector4Int(
+                    int.Parse(parts[0], CultureInfo.InvariantCulture),
+                    int.Parse(parts[1], CultureInfo.InvariantCulture),
+                    int.Parse(parts[2], CultureInfo.InvariantCulture),
+                    int.Parse(parts[3], CultureInfo.InvariantCulture)
+                );
+            }
+            catch (Exception ex)
+            {
+                LogError(\$"[ParseVector4Int] Failed to parse Vector4Int from '{vector4Int}': {ex.Message}");
+                return default;
+            }
         }
 
         private static Rectangle ParseRectangle(object value)
@@ -2033,14 +2151,25 @@ using Rectangle = System.Drawing.RectangleF;
 
             var parts = rectangle.Split(';');
             if (parts.Length < 4)
+            {
+                LogError(\$"[ParseRectangle] Failed to parse Rectangle from '{rectangle}': expected 4 semicolon-separated components");
                 return default;
+            }
 
-            return new Rectangle(
-                float.Parse(parts[0], CultureInfo.InvariantCulture),
-                float.Parse(parts[1], CultureInfo.InvariantCulture),
-                float.Parse(parts[2], CultureInfo.InvariantCulture),
-                float.Parse(parts[3], CultureInfo.InvariantCulture)
-            );
+            try
+            {
+                return new Rectangle(
+                    float.Parse(parts[0], CultureInfo.InvariantCulture),
+                    float.Parse(parts[1], CultureInfo.InvariantCulture),
+                    float.Parse(parts[2], CultureInfo.InvariantCulture),
+                    float.Parse(parts[3], CultureInfo.InvariantCulture)
+                );
+            }
+            catch (Exception ex)
+            {
+                LogError(\$"[ParseRectangle] Failed to parse Rectangle from '{rectangle}': {ex.Message}");
+                return default;
+            }
         }
 
         private static RectangleInt ParseRectangleInt(object value)
@@ -2051,14 +2180,25 @@ using Rectangle = System.Drawing.RectangleF;
 
             var parts = rectangleInt.Split(';');
             if (parts.Length < 4)
+            {
+                LogError(\$"[ParseRectangleInt] Failed to parse RectangleInt from '{rectangleInt}': expected 4 semicolon-separated components");
                 return default;
+            }
 
-            return new RectangleInt(
-                int.Parse(parts[0], CultureInfo.InvariantCulture),
-                int.Parse(parts[1], CultureInfo.InvariantCulture),
-                int.Parse(parts[2], CultureInfo.InvariantCulture),
-                int.Parse(parts[3], CultureInfo.InvariantCulture)
-            );
+            try
+            {
+                return new RectangleInt(
+                    int.Parse(parts[0], CultureInfo.InvariantCulture),
+                    int.Parse(parts[1], CultureInfo.InvariantCulture),
+                    int.Parse(parts[2], CultureInfo.InvariantCulture),
+                    int.Parse(parts[3], CultureInfo.InvariantCulture)
+                );
+            }
+            catch (Exception ex)
+            {
+                LogError(\$"[ParseRectangleInt] Failed to parse RectangleInt from '{rectangleInt}': {ex.Message}");
+                return default;
+            }
         }
 
         private static Color ParseColor(object value)
