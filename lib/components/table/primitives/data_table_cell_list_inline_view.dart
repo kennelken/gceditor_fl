@@ -96,45 +96,67 @@ class _DataTableCellListInlineViewState extends State<DataTableCellListInlineVie
 
   @override
   Widget build(BuildContext cellContext) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Container(
-          color: kTextColorLightHalfTransparent2,
-          height: 22 * kScale,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
+    return Consumer(
+      builder: (context, ref, child) {
+        ref.watch(columnSizeChangedProvider);
+
+        final columns = DbModelUtils.getListInlineColumns(clientModel, widget.valueFieldType);
+        final headerWidgets = <Widget>[];
+        if (columns != null) {
+          final columnFlexes = DbModelUtils.getTableInnerCellsFlex(clientModel, widget.coordinates.table, widget.coordinates.field!);
+          for (var i = 0; i < columns.length; i++) {
+            if (i != 0) {
+              headerWidgets.add(const SizedBox(width: kDividerLineWidth));
+            }
+            headerWidgets.add(
               Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(left: 5 * kScale),
-                  child: Text(
-                    Loc.get.cellListSize(_cellValue.listCellValues?.length ?? 0),
-                    textAlign: TextAlign.left,
-                    style: kStyle.kTextExtraSmall,
-                  ),
+                flex: (columnFlexes[i] * Config.flexRatioMultiplier).toInt(),
+                child: Text(
+                  columns[i].id,
+                  style: kStyle.kTextExtraSmall,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              SizedBox(
-                width: 36 * kScale,
-                child: IconButtonTransparent(
-                  size: 35 * kScale,
-                  icon: const IconPlus(),
-                  onClick: _handleAddRow,
-                ),
-              )
-            ],
-          ),
-        ),
-        Expanded(
-          child: Theme(
-            data: kStyle.kReorderableListThemeInvisibleScrollbars,
-            child: ScrollConfiguration(
-              behavior: kScrollDraggable,
-              child: Consumer(
-                builder: (context, ref, child) {
-                  ref.watch(columnSizeChangedProvider);
-                  return ReorderableListView.builder(
+            );
+          }
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              color: kTextColorLightHalfTransparent2,
+              height: 22 * kScale,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 20 * kScale),
+                      child: Row(
+                        children: headerWidgets,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 36 * kScale,
+                    child: IconButtonTransparent(
+                      size: 35 * kScale,
+                      icon: const IconPlus(),
+                      onClick: _handleAddRow,
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Expanded(
+              child: Theme(
+                data: kStyle.kReorderableListThemeInvisibleScrollbars,
+                child: ScrollConfiguration(
+                  behavior: kScrollDraggable,
+                  child: ReorderableListView.builder(
                     scrollController: _scrollController,
                     itemCount: _cellValue.listCellValues?.length ?? 0,
                     onReorder: _handleReorder,
@@ -157,18 +179,26 @@ class _DataTableCellListInlineViewState extends State<DataTableCellListInlineVie
                         ),
                       );
                     },
-                  );
-                },
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 
   List<Widget> _getInnerCells(WidgetRef ref, BuildContext cellContext, int index, DataTableCellListInlineItem value) {
-    final result = <Widget>[];
+    final result = <Widget>[
+      Flexible(
+        flex: 0,
+        child: Text(
+          '$index.',
+          style: kStyle.kTextExtraSmallInactive,
+        ),
+      ),
+    ];
 
     final columns = DbModelUtils.getListInlineColumns(clientModel, widget.valueFieldType)!;
     final columnFlexes = DbModelUtils.getTableInnerCellsFlex(clientModel, widget.coordinates.table, widget.coordinates.field!);

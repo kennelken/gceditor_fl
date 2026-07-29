@@ -98,52 +98,73 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
 
   @override
   Widget build(BuildContext cellContext) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Container(
-          color: kTextColorLightHalfTransparent2,
-          height: 22 * kScale,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(left: 5 * kScale),
-                  child: Text(
-                    Loc.get.cellListSize(_cellValue.listCellValues?.length ?? 0),
-                    textAlign: TextAlign.left,
-                    style: kStyle.kTextExtraSmall,
+    return Consumer(
+      builder: (context, ref, child) {
+        ref.watch(columnSizeChangedProvider);
+        final innerCellsFlex = DbModelUtils.getTableInnerCellsFlex(clientModel, widget.coordinates.table, widget.coordinates.field!);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              color: kTextColorLightHalfTransparent2,
+              height: 22 * kScale,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 20 * kScale),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: (innerCellsFlex[0] * Config.flexRatioMultiplier).toInt(),
+                            child: Text(
+                              'keys',
+                              style: kStyle.kTextExtraSmall,
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: kDividerLineWidth),
+                          Expanded(
+                            flex: (innerCellsFlex[1] * Config.flexRatioMultiplier).toInt(),
+                            child: Text(
+                              'values',
+                              style: kStyle.kTextExtraSmall,
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                  SizedBox(
+                    width: 36 * kScale,
+                    child: IconButtonTransparent(
+                      size: 35 * kScale,
+                      icon: const IconPlus(),
+                      onClick: _handleAddRow,
+                    ),
+                  )
+                ],
               ),
-              SizedBox(
-                width: 36 * kScale,
-                child: IconButtonTransparent(
-                  size: 35 * kScale,
-                  icon: const IconPlus(),
-                  onClick: _handleAddRow,
-                ),
-              )
-            ],
-          ),
-        ),
-        Expanded(
-          child: Theme(
-            data: kStyle.kReorderableListThemeInvisibleScrollbars,
-            child: ScrollConfiguration(
-              behavior: kScrollDraggable,
-              child: Consumer(
-                builder: (context, ref, child) {
-                  ref.watch(columnSizeChangedProvider);
-                  return ReorderableListView.builder(
+            ),
+            Expanded(
+              child: Theme(
+                data: kStyle.kReorderableListThemeInvisibleScrollbars,
+                child: ScrollConfiguration(
+                  behavior: kScrollDraggable,
+                  child: ReorderableListView.builder(
                     scrollController: _scrollController,
                     itemCount: _cellValue.listCellValues?.length ?? 0,
                     onReorder: _handleReorder,
                     itemBuilder: (context, index) {
                       final value = _cellValue.listCellValues![index] as DataTableCellDictionaryItem;
                       final key = '${index}_${value.key}_${value.value}';
-                      final innerCellsFlex = DbModelUtils.getTableInnerCellsFlex(clientModel, widget.coordinates.table, widget.coordinates.field!);
 
                       return SizedBox(
                         key: ValueKey(key),
@@ -209,13 +230,13 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
                         ),
                       );
                     },
-                  );
-                },
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 

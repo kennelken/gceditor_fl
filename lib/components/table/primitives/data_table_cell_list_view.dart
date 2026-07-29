@@ -101,10 +101,10 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
             children: [
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.only(left: 5 * kScale),
+                  padding: EdgeInsets.only(left: 20 * kScale),
                   child: Text(
-                    Loc.get.cellListSize(_cellValue.listCellValues!.length),
-                    textAlign: TextAlign.left,
+                    'values',
+                    textAlign: TextAlign.center,
                     style: kStyle.kTextExtraSmall,
                   ),
                 ),
