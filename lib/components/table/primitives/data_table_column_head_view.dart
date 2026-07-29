@@ -59,7 +59,7 @@ class DataTableColumnHeadView extends ConsumerWidget {
         children: [
           Expanded(
             child: TooltipWrapper(
-              message: field.description,
+              message: DbModelUtils.getColumnHeaderTooltip(clientModel, field),
               child: TextButtonTransparent(
                 onClick: _handleFieldClick,
                 child: Row(

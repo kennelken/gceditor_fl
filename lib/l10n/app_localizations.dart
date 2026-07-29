@@ -1581,6 +1581,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'tooltipDelay is too big. Max value is \"{max}\" seconds'**
   String tooltipDelayTooBig(String max);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Keys'**
+  String get tooltipHeaderKeys;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Values'**
+  String get tooltipHeaderValues;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Column'**
+  String get tooltipColumnLabel;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Defined in'**
+  String get tooltipDefinedInLabel;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get tooltipTypeLabel;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get tooltipDescriptionLabel;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Columns'**
+  String get tooltipColumnsLabel;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Reference to {target}'**
+  String tooltipTypeReferenceTo(String target);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'List of {elementType}'**
+  String tooltipTypeListOf(String elementType);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Set of {elementType}'**
+  String tooltipTypeSetOf(String elementType);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Dictionary of {keyType} to {valueType}'**
+  String tooltipTypeDictionaryOf(String keyType, String valueType);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'List (Inline) of {target}'**
+  String tooltipTypeListInlineOf(String target);
 }
 
 class _AppLocalizationsDelegate

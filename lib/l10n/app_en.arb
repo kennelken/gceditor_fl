@@ -1155,5 +1155,81 @@
 				"type": "String"
 			}
 		}
+	},
+	"tooltipHeaderKeys": "Keys",
+	"@tooltipHeaderKeys": {
+		"description": ""
+	},
+	"tooltipHeaderValues": "Values",
+	"@tooltipHeaderValues": {
+		"description": ""
+	},
+	"tooltipColumnLabel": "Column",
+	"@tooltipColumnLabel": {
+		"description": ""
+	},
+	"tooltipDefinedInLabel": "Defined in",
+	"@tooltipDefinedInLabel": {
+		"description": ""
+	},
+	"tooltipTypeLabel": "Type",
+	"@tooltipTypeLabel": {
+		"description": ""
+	},
+	"tooltipDescriptionLabel": "Description",
+	"@tooltipDescriptionLabel": {
+		"description": ""
+	},
+	"tooltipColumnsLabel": "Columns",
+	"@tooltipColumnsLabel": {
+		"description": ""
+	},
+	"tooltipTypeReferenceTo": "Reference to {target}",
+	"@tooltipTypeReferenceTo": {
+		"description": "",
+		"placeholders": {
+			"target": {
+				"type": "String"
+			}
+		}
+	},
+	"tooltipTypeListOf": "List of {elementType}",
+	"@tooltipTypeListOf": {
+		"description": "",
+		"placeholders": {
+			"elementType": {
+				"type": "String"
+			}
+		}
+	},
+	"tooltipTypeSetOf": "Set of {elementType}",
+	"@tooltipTypeSetOf": {
+		"description": "",
+		"placeholders": {
+			"elementType": {
+				"type": "String"
+			}
+		}
+	},
+	"tooltipTypeDictionaryOf": "Dictionary of {keyType} to {valueType}",
+	"@tooltipTypeDictionaryOf": {
+		"description": "",
+		"placeholders": {
+			"keyType": {
+				"type": "String"
+			},
+			"valueType": {
+				"type": "String"
+			}
+		}
+	},
+	"tooltipTypeListInlineOf": "List (Inline) of {target}",
+	"@tooltipTypeListInlineOf": {
+		"description": "",
+		"placeholders": {
+			"target": {
+				"type": "String"
+			}
+		}
 	}
 }

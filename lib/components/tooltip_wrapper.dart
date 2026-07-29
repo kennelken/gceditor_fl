@@ -106,9 +106,37 @@ class _LazyTooltipText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = message ?? messageBuilder?.call() ?? '';
-    return Text(
-      text,
-      style: style,
+    if (text.isEmpty) {
+      return const SizedBox();
+    }
+
+    final defaultStyle = style ?? kStyle.kTextExtraSmall;
+    final inactiveStyle = kStyle.kTextExtraSmallInactive;
+
+    final lines = text.split('\n');
+    final spans = <InlineSpan>[];
+
+    for (var i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      if (i > 0) {
+        spans.add(const TextSpan(text: '\n'));
+      }
+
+      final colonIndex = line.indexOf(':');
+      if (colonIndex != -1) {
+        final label = line.substring(0, colonIndex + 1);
+        final rest = line.substring(colonIndex + 1);
+        spans.add(TextSpan(text: label, style: inactiveStyle));
+        if (rest.isNotEmpty) {
+          spans.add(TextSpan(text: rest, style: defaultStyle));
+        }
+      } else {
+        spans.add(TextSpan(text: line, style: defaultStyle));
+      }
+    }
+
+    return Text.rich(
+      TextSpan(children: spans),
     );
   }
 }

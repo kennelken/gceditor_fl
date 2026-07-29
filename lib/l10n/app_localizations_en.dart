@@ -880,4 +880,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String tooltipDelayTooBig(String max) {
     return 'tooltipDelay is too big. Max value is \"$max\" seconds';
   }
+
+  @override
+  String get tooltipHeaderKeys => 'Keys';
+
+  @override
+  String get tooltipHeaderValues => 'Values';
+
+  @override
+  String get tooltipColumnLabel => 'Column';
+
+  @override
+  String get tooltipDefinedInLabel => 'Defined in';
+
+  @override
+  String get tooltipTypeLabel => 'Type';
+
+  @override
+  String get tooltipDescriptionLabel => 'Description';
+
+  @override
+  String get tooltipColumnsLabel => 'Columns';
+
+  @override
+  String tooltipTypeReferenceTo(String target) {
+    return 'Reference to $target';
+  }
+
+  @override
+  String tooltipTypeListOf(String elementType) {
+    return 'List of $elementType';
+  }
+
+  @override
+  String tooltipTypeSetOf(String elementType) {
+    return 'Set of $elementType';
+  }
+
+  @override
+  String tooltipTypeDictionaryOf(String keyType, String valueType) {
+    return 'Dictionary of $keyType to $valueType';
+  }
+
+  @override
+  String tooltipTypeListInlineOf(String target) {
+    return 'List (Inline) of $target';
+  }
 }

@@ -17,6 +17,7 @@ import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/utils/utils.dart';
 
+import '../../tooltip_wrapper.dart';
 import '../context_menu_button.dart';
 import 'data_table_cell_view.dart';
 
@@ -119,23 +120,43 @@ class _DataTableCellDictionaryViewState extends State<DataTableCellDictionaryVie
                         children: [
                           Expanded(
                             flex: (innerCellsFlex[0] * Config.flexRatioMultiplier).toInt(),
-                            child: Text(
-                              'keys',
-                              style: kStyle.kTextExtraSmall,
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            child: TooltipWrapper(
+                              message: widget.coordinates.field != null
+                                  ? DbModelUtils.getColumnHeaderTooltip(
+                                      clientModel,
+                                      widget.coordinates.field!,
+                                      customTitle: Loc.get.tooltipHeaderKeys,
+                                      customTypeInfo: widget.keyFieldType,
+                                    )
+                                  : null,
+                              child: Text(
+                                Loc.get.tooltipHeaderKeys,
+                                style: kStyle.kTextExtraSmall,
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
                           const SizedBox(width: kDividerLineWidth),
                           Expanded(
                             flex: (innerCellsFlex[1] * Config.flexRatioMultiplier).toInt(),
-                            child: Text(
-                              'values',
-                              style: kStyle.kTextExtraSmall,
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            child: TooltipWrapper(
+                              message: widget.coordinates.field != null
+                                  ? DbModelUtils.getColumnHeaderTooltip(
+                                      clientModel,
+                                      widget.coordinates.field!,
+                                      customTitle: Loc.get.tooltipHeaderValues,
+                                      customTypeInfo: widget.valueFieldType,
+                                    )
+                                  : null,
+                              child: Text(
+                                Loc.get.tooltipHeaderValues,
+                                style: kStyle.kTextExtraSmall,
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
                         ],

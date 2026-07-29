@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:gceditor/components/table/primitives/data_table_cell_view.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
+import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/db/class_field_description_data_info.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/class_meta_entity_enum.dart';
@@ -1720,6 +1721,85 @@ class DbModelUtils {
       default:
         return null;
     }
+  }
+
+  static String getClassChainString(DbModel model, String? classId) {
+    if (classId == null || classId.isEmpty) return 'undefined';
+    final targetClass = model.cache.getClass<ClassMetaEntity>(classId);
+    if (targetClass == null) return classId;
+    final parentClasses = model.cache.getParentClasses(targetClass);
+    if (parentClasses.isEmpty) return classId;
+    return '${parentClasses.map((p) => p.id).join(' > ')} > $classId';
+  }
+
+  static String formatDataInfo(DbModel model, ClassFieldDescriptionDataInfo info) {
+    if (info.type == ClassFieldType.reference) {
+      return Loc.get.tooltipTypeReferenceTo(getClassChainString(model, info.classId));
+    }
+    return info.type.name;
+  }
+
+  static String formatFieldTypeString(DbModel model, ClassMetaFieldDescription field) {
+    final type = field.typeInfo.type;
+    if (type == ClassFieldType.reference) {
+      return Loc.get.tooltipTypeReferenceTo(getClassChainString(model, field.typeInfo.classId));
+    } else if (type == ClassFieldType.list) {
+      final elemStr = field.valueTypeInfo != null ? formatDataInfo(model, field.valueTypeInfo!) : 'undefined';
+      return Loc.get.tooltipTypeListOf(elemStr);
+    } else if (type == ClassFieldType.set) {
+      final elemStr = field.valueTypeInfo != null ? formatDataInfo(model, field.valueTypeInfo!) : 'undefined';
+      return Loc.get.tooltipTypeSetOf(elemStr);
+    } else if (type == ClassFieldType.dictionary) {
+      final keyStr = field.keyTypeInfo != null ? formatDataInfo(model, field.keyTypeInfo!) : 'undefined';
+      final valueStr = field.valueTypeInfo != null ? formatDataInfo(model, field.valueTypeInfo!) : 'undefined';
+      return Loc.get.tooltipTypeDictionaryOf(keyStr, valueStr);
+    } else if (type == ClassFieldType.listInline) {
+      final inlineClassName = field.valueTypeInfo?.classId ?? 'undefined';
+      final inlineClassChain = getClassChainString(model, inlineClassName);
+      final buffer = StringBuffer(Loc.get.tooltipTypeListInlineOf(inlineClassChain));
+      final inlineColumns = field.valueTypeInfo != null && field.valueTypeInfo!.classId != null
+          ? model.cache.getAllFieldsByClassId(field.valueTypeInfo!.classId!)
+          : null;
+      if (inlineColumns != null && inlineColumns.isNotEmpty) {
+        buffer.writeln();
+        buffer.write('${Loc.get.tooltipColumnsLabel}:');
+        for (var col in inlineColumns) {
+          final colTypeStr = formatFieldTypeString(model, col);
+          buffer.writeln();
+          buffer.write('  • ${col.id}: $colTypeStr');
+        }
+      }
+      return buffer.toString();
+    } else {
+      return type.name;
+    }
+  }
+
+  static String getColumnHeaderTooltip(
+    DbModel model,
+    ClassMetaFieldDescription field, {
+    String? customTitle,
+    ClassFieldDescriptionDataInfo? customTypeInfo,
+  }) {
+    final buffer = StringBuffer();
+    buffer.write('${Loc.get.tooltipColumnLabel}: ${customTitle ?? field.id}');
+    final ownerClass = model.cache.getFieldOwner(field);
+    if (ownerClass != null) {
+      buffer.writeln();
+      buffer.write('${Loc.get.tooltipDefinedInLabel}: ${ownerClass.id}');
+    }
+    buffer.writeln();
+    if (customTypeInfo != null) {
+      buffer.write('${Loc.get.tooltipTypeLabel}: ${formatDataInfo(model, customTypeInfo)}');
+    } else {
+      buffer.write('${Loc.get.tooltipTypeLabel}: ${formatFieldTypeString(model, field)}');
+    }
+    if (field.description.isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln();
+      buffer.write('${Loc.get.tooltipDescriptionLabel}: ${field.description}');
+    }
+    return buffer.toString();
   }
 
   static List<(ClassMetaEntity classMeta, ClassMetaFieldDescription field)> getFieldsUsingInlineClass(DbModel dbModel, ClassMetaEntity classEntity) {

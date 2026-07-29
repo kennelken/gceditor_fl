@@ -14,6 +14,7 @@ import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/utils/utils.dart';
 
+import '../../tooltip_wrapper.dart';
 import '../context_menu_button.dart';
 import 'data_table_cell_view.dart';
 
@@ -102,10 +103,20 @@ class _DataTableCellListViewState extends State<DataTableCellListView> {
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(left: 20 * kScale),
-                  child: Text(
-                    'values',
-                    textAlign: TextAlign.center,
-                    style: kStyle.kTextExtraSmall,
+                  child: TooltipWrapper(
+                    message: widget.coordinates.field != null
+                        ? DbModelUtils.getColumnHeaderTooltip(
+                            clientModel,
+                            widget.coordinates.field!,
+                            customTitle: Loc.get.tooltipHeaderValues,
+                            customTypeInfo: widget.valueFieldType,
+                          )
+                        : null,
+                    child: Text(
+                      Loc.get.tooltipHeaderValues,
+                      textAlign: TextAlign.center,
+                      style: kStyle.kTextExtraSmall,
+                    ),
                   ),
                 ),
               ),

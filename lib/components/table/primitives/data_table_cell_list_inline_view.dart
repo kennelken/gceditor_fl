@@ -17,6 +17,7 @@ import '../../../model/db/data_table_cell_list_inline_item.dart';
 import '../../../model/db_cmd/db_cmd_resize_inner_cell.dart';
 import '../../../model/state/client_view_mode_state.dart';
 import '../../properties/primitives/delete_button.dart';
+import '../../tooltip_wrapper.dart';
 import '../context_menu_button.dart';
 import 'data_table_cell_view.dart';
 
@@ -111,12 +112,15 @@ class _DataTableCellListInlineViewState extends State<DataTableCellListInlineVie
             headerWidgets.add(
               Expanded(
                 flex: (columnFlexes[i] * Config.flexRatioMultiplier).toInt(),
-                child: Text(
-                  columns[i].id,
-                  style: kStyle.kTextExtraSmall,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                child: TooltipWrapper(
+                  message: DbModelUtils.getColumnHeaderTooltip(clientModel, columns[i]),
+                  child: Text(
+                    columns[i].id,
+                    style: kStyle.kTextExtraSmall,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
             );

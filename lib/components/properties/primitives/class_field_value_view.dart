@@ -40,7 +40,7 @@ class ClassFieldValueView extends ConsumerWidget {
     return Padding(
       padding: EdgeInsets.only(top: 2 * kScale, bottom: 4 * kScale, right: 3 * kScale),
       child: TooltipWrapper(
-        message: data.description,
+        message: DbModelUtils.getColumnHeaderTooltip(clientModel, data),
         child: SizedBox(
           height: 31 * kScale,
           child: Row(
