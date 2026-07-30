@@ -372,6 +372,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menubarRedo => 'Redo';
 
   @override
+  String get menubarBack => 'Back';
+
+  @override
+  String get menubarForward => 'Forward';
+
+  @override
   String get menubarSearch => 'Search';
 
   @override

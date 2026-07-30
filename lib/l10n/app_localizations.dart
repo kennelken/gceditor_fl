@@ -697,6 +697,18 @@ abstract class AppLocalizations {
   ///
   ///
   /// In en, this message translates to:
+  /// **'Back'**
+  String get menubarBack;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Forward'**
+  String get menubarForward;
+
+  ///
+  ///
+  /// In en, this message translates to:
   /// **'Search'**
   String get menubarSearch;
 

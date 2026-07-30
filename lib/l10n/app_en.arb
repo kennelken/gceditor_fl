@@ -480,6 +480,14 @@
 	"@menubarRedo": {
 		"description": ""
 	},
+	"menubarBack": "Back",
+	"@menubarBack": {
+		"description": ""
+	},
+	"menubarForward": "Forward",
+	"@menubarForward": {
+		"description": ""
+	},
 	"menubarSearch": "Search",
 	"@menubarSearch": {
 		"description": ""

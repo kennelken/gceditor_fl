@@ -1,6 +1,5 @@
 - fix renderbox overflow errors
 - set colors for classes, tables, columns, rows (use as row color in color column)
-- Navigation history and navigate back and forth alt+🡺, alt+🢀
 - new column property: value checkers - a list of checkers (IChecker.validate(field, value)). Every checker should define its own unique properties.
 ---- Example of such checkers IntChecker, AllowedValuesChecker, BannedValuesChecker, DateChecker, ReferenceChecker, NotNullChecker.
 ---- Move "Is Unique" property there.

@@ -9,6 +9,7 @@ import 'package:gceditor/model/db_network/history_item_data.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/model/state/client_find_state.dart';
+import 'package:gceditor/model/state/client_navigation_history_state.dart';
 import 'package:gceditor/model/state/client_problems_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/client_view_mode_state.dart';
@@ -45,6 +46,14 @@ class GlobalShortcuts {
 
   static void redo() {
     providerContainer.read(clientOwnCommandsStateProvider).redo();
+  }
+
+  static void navigateBack() {
+    providerContainer.read(clientNavigationHistoryStateProvider).goBack();
+  }
+
+  static void navigateForward() {
+    providerContainer.read(clientNavigationHistoryStateProvider).goForward();
   }
 
   static void openFind() {
@@ -284,6 +293,20 @@ class _RawKeyboardEventsState extends State<RawKeyboardEvents> {
       case LogicalKeyboardKey.f8:
         if (isKeyDown && providerContainer.read(clientViewModeStateProvider).state.controlKey) {
           GlobalShortcuts.showNextProblem();
+          return true;
+        }
+        break;
+
+      case LogicalKeyboardKey.arrowLeft:
+        if (isKeyDown && (HardwareKeyboard.instance.isAltPressed || providerContainer.read(clientViewModeStateProvider).state.altKey)) {
+          GlobalShortcuts.navigateBack();
+          return true;
+        }
+        break;
+
+      case LogicalKeyboardKey.arrowRight:
+        if (isKeyDown && (HardwareKeyboard.instance.isAltPressed || providerContainer.read(clientViewModeStateProvider).state.altKey)) {
+          GlobalShortcuts.navigateForward();
           return true;
         }
         break;

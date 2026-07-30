@@ -12,6 +12,7 @@ import '../../components/global_shortcuts.dart';
 import '../../consts/consts.dart';
 import '../../consts/loc.dart';
 import '../../utils/utils.dart';
+import 'client_navigation_history_state.dart';
 import 'client_problems_state.dart';
 import 'client_view_mode_state.dart';
 
@@ -27,6 +28,10 @@ final menubarStateProvider = ChangeNotifierProvider((ref) {
   });
 
   ref.read(tableSelectionStateProvider).addListener(() {
+    notifier.refresh();
+  });
+
+  ref.read(clientNavigationHistoryStateProvider).addListener(() {
     notifier.refresh();
   });
 
@@ -55,6 +60,8 @@ class MenubarStateNotifier extends ChangeNotifier {
 
     nextUndoCommand() => providerContainer.read(clientOwnCommandsStateProvider).state.nextUndoCommand;
     nextRedoCommand() => providerContainer.read(clientOwnCommandsStateProvider).state.nextRedoCommand;
+    canGoBack() => providerContainer.read(clientNavigationHistoryStateProvider).canGoBack;
+    canGoForward() => providerContainer.read(clientNavigationHistoryStateProvider).canGoForward;
     hasNextProblem() => providerContainer.read(clientProblemsStateProvider).state.problems.length > 1;
     hasSelectedItem() => providerContainer.read(tableSelectionStateProvider).state.canBeDeselected();
 
@@ -120,6 +127,24 @@ class MenubarStateNotifier extends ChangeNotifier {
                               ),
                               onTap: nextRedoCommand() != null ? GlobalShortcuts.redo : null,
                               shortcutText: 'Ctrl+Y',
+                              shortcutStyle: _styleShortcut(),
+                            ),
+                            MenuButton(
+                              text: Text(
+                                Loc.get.menubarBack,
+                                style: canGoBack() ? _styleMenuActive() : _styleMenuInactive(),
+                              ),
+                              onTap: canGoBack() ? GlobalShortcuts.navigateBack : null,
+                              shortcutText: 'Alt+Left',
+                              shortcutStyle: _styleShortcut(),
+                            ),
+                            MenuButton(
+                              text: Text(
+                                Loc.get.menubarForward,
+                                style: canGoForward() ? _styleMenuActive() : _styleMenuInactive(),
+                              ),
+                              onTap: canGoForward() ? GlobalShortcuts.navigateForward : null,
+                              shortcutText: 'Alt+Right',
                               shortcutStyle: _styleShortcut(),
                             ),
                             MenuButton(

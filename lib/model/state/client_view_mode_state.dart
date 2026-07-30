@@ -15,6 +15,7 @@ class ClientViewModeState {
   bool get actionsMode => _controlKey || _altKey || _expandedMode;
 
   bool get controlKey => _controlKey;
+  bool get altKey => _altKey;
   bool get shiftKey => _shiftKey;
 
   ClientViewModeState() {
