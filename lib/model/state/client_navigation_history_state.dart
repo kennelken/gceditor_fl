@@ -35,11 +35,13 @@ class NavigationHistoryEntry {
   final String? tableId;
   final String? entityId;
   final String? fieldId;
+  Offset? scrollPosition;
 
-  const NavigationHistoryEntry({
+  NavigationHistoryEntry({
     this.tableId,
     this.entityId,
     this.fieldId,
+    this.scrollPosition,
   });
 
   @override
@@ -60,6 +62,9 @@ class ClientNavigationHistoryState {
   int currentIndex = -1;
   final Map<String, Offset> tableScrollPositions = {};
 
+  String? pendingHistoryScrollTableId;
+  Offset? pendingHistoryScrollRestore;
+
   bool get canGoBack => currentIndex > 0;
   bool get canGoForward => history.isNotEmpty && currentIndex < history.length - 1;
 }
@@ -73,12 +78,28 @@ class ClientNavigationHistoryStateNotifier extends ChangeNotifier {
   bool get canGoBack => state.canGoBack;
   bool get canGoForward => state.canGoForward;
 
-  void setTableScrollPosition(String tableId, Offset offset) {
+  void updateCurrentScrollPosition(String tableId, Offset offset) {
     state.tableScrollPositions[tableId] = offset;
+    if (state.currentIndex >= 0 && state.currentIndex < state.history.length) {
+      final currentEntry = state.history[state.currentIndex];
+      if (currentEntry.tableId == tableId) {
+        currentEntry.scrollPosition = offset;
+      }
+    }
   }
 
   Offset? getTableScrollPosition(String tableId) {
     return state.tableScrollPositions[tableId];
+  }
+
+  Offset? consumePendingHistoryScrollRestore(String tableId) {
+    if (state.pendingHistoryScrollTableId == tableId && state.pendingHistoryScrollRestore != null) {
+      final offset = state.pendingHistoryScrollRestore;
+      state.pendingHistoryScrollRestore = null;
+      state.pendingHistoryScrollTableId = null;
+      return offset;
+    }
+    return null;
   }
 
   void onSelectionChanged({
@@ -92,10 +113,23 @@ class ClientNavigationHistoryStateNotifier extends ChangeNotifier {
     if (tableId == null && entityId == null && fieldId == null) //
       return;
 
+    if (state.currentIndex >= 0 && state.currentIndex < state.history.length) {
+      final prevEntry = state.history[state.currentIndex];
+      if (prevEntry.tableId != null && state.tableScrollPositions.containsKey(prevEntry.tableId)) {
+        prevEntry.scrollPosition = state.tableScrollPositions[prevEntry.tableId];
+      }
+    }
+
+    Offset? currentScroll;
+    if (tableId != null) {
+      currentScroll = state.tableScrollPositions[tableId];
+    }
+
     final newEntry = NavigationHistoryEntry(
       tableId: tableId,
       entityId: entityId,
       fieldId: fieldId,
+      scrollPosition: currentScroll,
     );
 
     if (state.history.isNotEmpty && state.currentIndex >= 0 && state.currentIndex < state.history.length) {
@@ -122,8 +156,13 @@ class ClientNavigationHistoryStateNotifier extends ChangeNotifier {
     if (!canGoBack) //
       return;
 
+    _saveCurrentStepScroll();
     state.currentIndex--;
-    _applyHistoryEntry(state.history[state.currentIndex]);
+    final targetEntry = state.history[state.currentIndex];
+    state.pendingHistoryScrollTableId = targetEntry.tableId;
+    state.pendingHistoryScrollRestore = targetEntry.scrollPosition;
+
+    _applyHistoryEntry(targetEntry);
     notifyListeners();
   }
 
@@ -131,9 +170,23 @@ class ClientNavigationHistoryStateNotifier extends ChangeNotifier {
     if (!canGoForward) //
       return;
 
+    _saveCurrentStepScroll();
     state.currentIndex++;
-    _applyHistoryEntry(state.history[state.currentIndex]);
+    final targetEntry = state.history[state.currentIndex];
+    state.pendingHistoryScrollTableId = targetEntry.tableId;
+    state.pendingHistoryScrollRestore = targetEntry.scrollPosition;
+
+    _applyHistoryEntry(targetEntry);
     notifyListeners();
+  }
+
+  void _saveCurrentStepScroll() {
+    if (state.currentIndex >= 0 && state.currentIndex < state.history.length) {
+      final currentEntry = state.history[state.currentIndex];
+      if (currentEntry.tableId != null && state.tableScrollPositions.containsKey(currentEntry.tableId)) {
+        currentEntry.scrollPosition = state.tableScrollPositions[currentEntry.tableId];
+      }
+    }
   }
 
   void _applyHistoryEntry(NavigationHistoryEntry entry) {
@@ -172,6 +225,8 @@ class ClientNavigationHistoryStateNotifier extends ChangeNotifier {
     state.history.clear();
     state.currentIndex = -1;
     state.tableScrollPositions.clear();
+    state.pendingHistoryScrollTableId = null;
+    state.pendingHistoryScrollRestore = null;
     notifyListeners();
   }
 }

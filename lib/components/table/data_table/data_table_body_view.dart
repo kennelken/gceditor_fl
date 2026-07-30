@@ -71,7 +71,7 @@ class _DataTableBodyViewState extends State<DataTableBodyView> {
 
   void _saveScrollPosition(String tableId) {
     if (_rowsControllerVertical.hasClients && widget.horizontalScrollController.hasClients) {
-      providerContainer.read(clientNavigationHistoryStateProvider).setTableScrollPosition(
+      providerContainer.read(clientNavigationHistoryStateProvider).updateCurrentScrollPosition(
             tableId,
             Offset(widget.horizontalScrollController.offset, _rowsControllerVertical.offset),
           );
@@ -86,7 +86,10 @@ class _DataTableBodyViewState extends State<DataTableBodyView> {
     if (navigationData != null) //
       return;
 
-    final savedOffset = providerContainer.read(clientNavigationHistoryStateProvider).getTableScrollPosition(widget.table.id);
+    final historyNotifier = providerContainer.read(clientNavigationHistoryStateProvider.notifier);
+    var savedOffset = historyNotifier.consumePendingHistoryScrollRestore(widget.table.id);
+    savedOffset ??= historyNotifier.getTableScrollPosition(widget.table.id);
+
     if (savedOffset == null) //
       return;
 
@@ -96,13 +99,13 @@ class _DataTableBodyViewState extends State<DataTableBodyView> {
 
       if (_rowsControllerVertical.hasClients) {
         final maxY = _rowsControllerVertical.position.maxScrollExtent;
-        final targetY = savedOffset.dy.clamp(0.0, maxY);
+        final targetY = savedOffset!.dy.clamp(0.0, maxY);
         _rowsControllerVertical.jumpTo(targetY);
       }
 
       if (widget.horizontalScrollController.hasClients) {
         final maxX = widget.horizontalScrollController.position.maxScrollExtent;
-        final targetX = savedOffset.dx.clamp(0.0, maxX);
+        final targetX = savedOffset!.dx.clamp(0.0, maxX);
         widget.horizontalScrollController.jumpTo(targetX);
       }
     });
