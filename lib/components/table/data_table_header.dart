@@ -132,7 +132,7 @@ class DataTableHeader extends ConsumerWidget {
       final currentClass = selfAndParents[i];
       result.add(
         Text(
-          i == 0 ? ':' : '>',
+          i == 0 ? ' : ' : ' > ',
           style: kStyle.kTextExtraSmallInactive,
           maxLines: 1,
           overflow: TextOverflow.clip,
