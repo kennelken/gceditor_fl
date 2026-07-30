@@ -21,40 +21,38 @@ class BaseTreeView extends ConsumerWidget {
     ref.watch(clientStateProvider);
 
     final newRoots = data();
-    if (treeController.roots != newRoots) {
-      final hadChildrenBefore = treeController.roots.isNotEmpty;
-      final expandedIds = treeController.toggledNodes.map((e) => e.id).where((id) => id.isNotEmpty).toSet();
+    final hadChildrenBefore = treeController.roots.isNotEmpty;
+    final expandedIds = treeController.toggledNodes.map((e) => e.id).where((id) => id.isNotEmpty).toSet();
 
-      treeController.roots = newRoots;
-      treeController.toggledNodes.clear();
+    treeController.roots = List.of(newRoots);
+    treeController.toggledNodes.clear();
 
-      if (!hadChildrenBefore) {
-        void expandAllNodes(Iterable<IIdentifiable> nodes) {
-          for (final node in nodes) {
-            treeController.setExpansionState(node, true);
-            final group = node.safeAs<IMetaGroup>();
-            if (group != null) {
-              expandAllNodes(group.entries.cast<IIdentifiable>());
-            }
+    if (!hadChildrenBefore) {
+      void expandAllNodes(Iterable<IIdentifiable> nodes) {
+        for (final node in nodes) {
+          treeController.setExpansionState(node, true);
+          final group = node.safeAs<IMetaGroup>();
+          if (group != null) {
+            expandAllNodes(group.entries.cast<IIdentifiable>());
           }
         }
-
-        expandAllNodes(newRoots);
-      } else {
-        void restoreExpanded(Iterable<IIdentifiable> nodes) {
-          for (final node in nodes) {
-            if (expandedIds.contains(node.id)) {
-              treeController.setExpansionState(node, true);
-            }
-            final group = node.safeAs<IMetaGroup>();
-            if (group != null) {
-              restoreExpanded(group.entries.cast<IIdentifiable>());
-            }
-          }
-        }
-
-        restoreExpanded(newRoots);
       }
+
+      expandAllNodes(newRoots);
+    } else {
+      void restoreExpanded(Iterable<IIdentifiable> nodes) {
+        for (final node in nodes) {
+          if (expandedIds.contains(node.id)) {
+            treeController.setExpansionState(node, true);
+          }
+          final group = node.safeAs<IMetaGroup>();
+          if (group != null) {
+            restoreExpanded(group.entries.cast<IIdentifiable>());
+          }
+        }
+      }
+
+      restoreExpanded(newRoots);
     }
 
     final clientStateVersion = ref.watch(clientStateProvider).state.version;

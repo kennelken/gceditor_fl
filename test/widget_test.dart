@@ -128,4 +128,67 @@ void main() {
     expect(controller.getExpansionState(reinitGroup1), isTrue);
     expect(controller.getExpansionState(reinitGroup2), isFalse);
   });
+
+  test('tree controller updates roots when items are added or removed from same list instance', () {
+    final controller = getTreeController();
+    final modelRoots = <IIdentifiable>[];
+
+    void updateTreeRoots(TreeController<IIdentifiable> treeController, List<IIdentifiable> newRoots) {
+      final hadChildrenBefore = treeController.roots.isNotEmpty;
+      final expandedIds = treeController.toggledNodes.map((e) => e.id).where((id) => id.isNotEmpty).toSet();
+
+      treeController.roots = List.of(newRoots);
+      treeController.toggledNodes.clear();
+
+      if (!hadChildrenBefore) {
+        void expandAllNodes(Iterable<IIdentifiable> nodes) {
+          for (final node in nodes) {
+            treeController.setExpansionState(node, true);
+            final group = node.safeAs<IMetaGroup>();
+            if (group != null) {
+              expandAllNodes(group.entries.cast<IIdentifiable>());
+            }
+          }
+        }
+
+        expandAllNodes(newRoots);
+      } else {
+        void restoreExpanded(Iterable<IIdentifiable> nodes) {
+          for (final node in nodes) {
+            if (expandedIds.contains(node.id)) {
+              treeController.setExpansionState(node, true);
+            }
+            final group = node.safeAs<IMetaGroup>();
+            if (group != null) {
+              restoreExpanded(group.entries.cast<IIdentifiable>());
+            }
+          }
+        }
+
+        restoreExpanded(newRoots);
+      }
+    }
+
+    final table1 = TableMetaEntity()..id = 'table1';
+    modelRoots.add(table1);
+
+    updateTreeRoots(controller, modelRoots);
+    expect(controller.roots.length, 1);
+    expect(controller.roots.first.id, 'table1');
+
+    // Add table2 to the same modelRoots list instance
+    final table2 = TableMetaEntity()..id = 'table2';
+    modelRoots.add(table2);
+
+    updateTreeRoots(controller, modelRoots);
+    expect(controller.roots.length, 2);
+    expect(controller.roots.last.id, 'table2');
+
+    // Delete table1 from the modelRoots list
+    modelRoots.remove(table1);
+
+    updateTreeRoots(controller, modelRoots);
+    expect(controller.roots.length, 1);
+    expect(controller.roots.first.id, 'table2');
+  });
 }
