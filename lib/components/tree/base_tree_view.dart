@@ -21,44 +21,51 @@ class BaseTreeView extends ConsumerWidget {
     ref.watch(clientStateProvider);
 
     final newRoots = data();
-    final hadChildrenBefore = treeController.roots.isNotEmpty;
-    final expandedIds = treeController.toggledNodes.map((e) => e.id).where((id) => id.isNotEmpty).toSet();
 
-    treeController.roots = List.of(newRoots);
-    treeController.toggledNodes.clear();
+    if (!_areRootsEqual(treeController.roots, newRoots)) {
+      final hadChildrenBefore = treeController.roots.isNotEmpty;
 
-    if (!hadChildrenBefore) {
-      void expandAllNodes(Iterable<IIdentifiable> nodes) {
-        for (final node in nodes) {
-          treeController.setExpansionState(node, true);
-          final group = node.safeAs<IMetaGroup>();
-          if (group != null) {
-            expandAllNodes(group.entries.cast<IIdentifiable>());
+      if (!hadChildrenBefore) {
+        treeController.roots = List.of(newRoots);
+        treeController.expandAll();
+      } else {
+        final collapsedIds = <String>{};
+        void collectCollapsed(Iterable<IIdentifiable> nodes) {
+          for (final node in nodes) {
+            if (!treeController.getExpansionState(node) && node.id.isNotEmpty) {
+              collapsedIds.add(node.id);
+            }
+            final group = node.safeAs<IMetaGroup>();
+            if (group != null) {
+              collectCollapsed(group.entries.cast<IIdentifiable>());
+            }
           }
         }
-      }
 
-      expandAllNodes(newRoots);
-    } else {
-      void restoreExpanded(Iterable<IIdentifiable> nodes) {
-        for (final node in nodes) {
-          if (expandedIds.contains(node.id)) {
-            treeController.setExpansionState(node, true);
-          }
-          final group = node.safeAs<IMetaGroup>();
-          if (group != null) {
-            restoreExpanded(group.entries.cast<IIdentifiable>());
+        collectCollapsed(treeController.roots);
+
+        treeController.roots = List.of(newRoots);
+        treeController.toggledNodes.clear();
+
+        void restoreCollapsed(Iterable<IIdentifiable> nodes) {
+          for (final node in nodes) {
+            if (collapsedIds.contains(node.id)) {
+              treeController.setExpansionState(node, false);
+            } else {
+              treeController.setExpansionState(node, true);
+            }
+            final group = node.safeAs<IMetaGroup>();
+            if (group != null) {
+              restoreCollapsed(group.entries.cast<IIdentifiable>());
+            }
           }
         }
-      }
 
-      restoreExpanded(newRoots);
+        restoreCollapsed(newRoots);
+      }
     }
 
-    final clientStateVersion = ref.watch(clientStateProvider).state.version;
-
     return AnimatedTreeView<IIdentifiable>(
-      key: ValueKey(clientStateVersion),
       treeController: treeController,
       padding: const EdgeInsets.only(left: 3, top: 0, right: 3, bottom: 3),
       duration: Durations.short1,
@@ -71,10 +78,21 @@ class BaseTreeView extends ConsumerWidget {
       },
     );
   }
+
+  bool _areRootsEqual(Iterable<IIdentifiable> a, List<IIdentifiable> b) {
+    if (identical(a, b)) return true;
+    if (a.length != b.length) return false;
+    final aList = a.toList();
+    for (var i = 0; i < aList.length; i++) {
+      if (!identical(aList[i], b[i])) return false;
+    }
+    return true;
+  }
 }
 
 TreeController<IIdentifiable> getTreeController() => TreeController<IIdentifiable>(
       roots: [],
       childrenProvider: (n) => n.safeAs<IMetaGroup>()?.entries.cast<IIdentifiable>() ?? [],
       parentProvider: (n) => clientModel.cache.getParent(n).safeAs<IIdentifiable>(),
+      defaultExpansionState: true,
     );
