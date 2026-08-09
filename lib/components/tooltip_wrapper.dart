@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:gceditor/consts/consts.dart';
@@ -138,15 +139,15 @@ class _TooltipWrapperState extends State<TooltipWrapper> {
           ),
         );
 
-        double top = currentTarget.dy + size.height + 4;
-        if (top > screenSize.height - 80) {
-          top = (currentTarget.dy - 40).clamp(8.0, screenSize.height - 40);
-        }
-        double left = currentTarget.dx.clamp(8.0, (screenSize.width - 220).clamp(8.0, screenSize.width));
+        final verticalMargin = math.max(40.0, 40.0 * kStyle.globalScale);
 
-        return Positioned(
-          left: left,
-          top: top,
+        return CustomSingleChildLayout(
+          delegate: _TooltipPositionDelegate(
+            targetOffset: currentTarget,
+            targetSize: size,
+            screenMargin: const EdgeInsets.all(8.0),
+            verticalMargin: verticalMargin,
+          ),
           child: IgnorePointer(
             child: Material(
               color: Colors.transparent,
@@ -240,3 +241,60 @@ class _LazyTooltipText extends StatelessWidget {
     );
   }
 }
+
+class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
+  final Offset targetOffset;
+  final Size targetSize;
+  final EdgeInsets screenMargin;
+  final double verticalMargin;
+
+  _TooltipPositionDelegate({
+    required this.targetOffset,
+    required this.targetSize,
+    this.screenMargin = const EdgeInsets.all(8.0),
+    this.verticalMargin = 40.0,
+  });
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    return constraints.deflate(screenMargin).loosen();
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final unflippedVerticalMargin = verticalMargin * 0.15;
+
+    double top = targetOffset.dy + targetSize.height + unflippedVerticalMargin;
+
+    final fitsBelow = (top + childSize.height) <= (size.height - screenMargin.bottom);
+
+    if (!fitsBelow) {
+      top = targetOffset.dy - verticalMargin - childSize.height;
+    }
+
+    final maxTop = math.max(screenMargin.top, size.height - screenMargin.bottom - childSize.height);
+    top = top.clamp(screenMargin.top, maxTop);
+
+    double left = targetOffset.dx;
+
+    final fitsRight = (left + childSize.width) <= (size.width - screenMargin.right);
+
+    if (!fitsRight) {
+      left = size.width - screenMargin.right - childSize.width;
+    }
+
+    final maxLeft = math.max(screenMargin.left, size.width - screenMargin.right - childSize.width);
+    left = left.clamp(screenMargin.left, maxLeft);
+
+    return Offset(left, top);
+  }
+
+  @override
+  bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
+    return targetOffset != oldDelegate.targetOffset ||
+        targetSize != oldDelegate.targetSize ||
+        screenMargin != oldDelegate.screenMargin ||
+        verticalMargin != oldDelegate.verticalMargin;
+  }
+}
+
