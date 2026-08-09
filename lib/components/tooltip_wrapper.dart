@@ -32,6 +32,7 @@ class TooltipWrapper extends StatefulWidget {
 class _TooltipWrapperState extends State<TooltipWrapper> {
   OverlayEntry? _entry;
   Timer? _timer;
+  Offset? _pointerOffset;
 
   void _hideTooltip() {
     _timer?.cancel();
@@ -73,20 +74,26 @@ class _TooltipWrapperState extends State<TooltipWrapper> {
     _entry = OverlayEntry(
       builder: (context) {
         if (!mounted) return const SizedBox();
-        final currentBox = this.context.findRenderObject() as RenderBox?;
-        if (currentBox == null || !currentBox.attached) {
-          return const SizedBox();
-        }
 
         Offset currentTarget;
-        try {
-          currentTarget = currentBox.localToGlobal(Offset.zero);
-        } catch (_) {
-          return const SizedBox();
-        }
+        Size targetSize;
 
-        final size = currentBox.size;
-        final screenSize = MediaQuery.of(context).size;
+        if (_pointerOffset != null) {
+          currentTarget = _pointerOffset!;
+          targetSize = Size.zero;
+        } else {
+          final currentBox = this.context.findRenderObject() as RenderBox?;
+          if (currentBox == null || !currentBox.attached) {
+            return const SizedBox();
+          }
+
+          try {
+            currentTarget = currentBox.localToGlobal(Offset.zero);
+            targetSize = currentBox.size;
+          } catch (_) {
+            return const SizedBox();
+          }
+        }
 
         final showImage = widget.imagePath != null &&
             (widget.imagePath!.endsWith('.png') ||
@@ -144,7 +151,7 @@ class _TooltipWrapperState extends State<TooltipWrapper> {
         return CustomSingleChildLayout(
           delegate: _TooltipPositionDelegate(
             targetOffset: currentTarget,
-            targetSize: size,
+            targetSize: targetSize,
             screenMargin: const EdgeInsets.all(8.0),
             verticalMargin: verticalMargin,
           ),
@@ -183,10 +190,25 @@ class _TooltipWrapperState extends State<TooltipWrapper> {
     }
 
     return Listener(
-      onPointerDown: (_) => _hideTooltip(),
+      onPointerDown: (_) {
+        _pointerOffset = null;
+        _hideTooltip();
+      },
       child: MouseRegion(
-        onEnter: (_) => _scheduleShow(),
-        onExit: (_) => _hideTooltip(),
+        onEnter: (event) {
+          _pointerOffset = event.position;
+          _scheduleShow();
+        },
+        onHover: (event) {
+          _pointerOffset = event.position;
+          if (_entry != null && _entry!.mounted) {
+            _entry!.markNeedsBuild();
+          }
+        },
+        onExit: (_) {
+          _pointerOffset = null;
+          _hideTooltip();
+        },
         child: widget.child,
       ),
     );

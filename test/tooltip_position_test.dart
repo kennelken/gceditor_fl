@@ -139,4 +139,52 @@ void main() {
     expect(tooltipRect.right, lessThanOrEqualTo(800.0 - 8.0));
     expect(tooltipRect.left, greaterThanOrEqualTo(8.0));
   });
+
+  testWidgets('TooltipWrapper follows mouse cursor movement', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Stack(
+            children: [
+              Positioned(
+                left: 100,
+                top: 100,
+                child: TooltipWrapper(
+                  message: 'Following Tooltip',
+                  child: SizedBox(
+                    width: 200,
+                    height: 200,
+                    child: Text('Large Target'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+
+    await gesture.moveTo(const Offset(120, 120));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    final tooltipTextFinder = find.text('Following Tooltip');
+    expect(tooltipTextFinder, findsOneWidget);
+    final rect1 = tester.getRect(tooltipTextFinder);
+
+    await gesture.moveTo(const Offset(180, 180));
+    await tester.pump();
+
+    final rect2 = tester.getRect(tooltipTextFinder);
+    expect(rect2.left, greaterThan(rect1.left));
+    expect(rect2.top, greaterThan(rect1.top));
+  });
 }
