@@ -23,6 +23,7 @@ class DataTableHeadView extends StatelessWidget {
   Widget build(BuildContext context) {
     final classEntity = clientModel.cache.getClass<ClassMetaEntity>(table.classId);
     final columns = clientModel.cache.getAllFields(classEntity!);
+    final width = DbModelUtils.getTableWidth(clientModel, table, false);
 
     return SizedBox(
       height: kStyle.kDataTableRowHeight,
@@ -37,14 +38,15 @@ class DataTableHeadView extends StatelessWidget {
           ),
           Expanded(
             child: ScrollConfiguration(
-              behavior: kScrollDraggable,
-              child: Scrollbar(
-                scrollbarOrientation: ScrollbarOrientation.bottom,
+              behavior: kScrollDraggableNoScrollBar,
+              child: SingleChildScrollView(
                 controller: scrollController,
-                child: ListView(
-                  controller: scrollController,
-                  scrollDirection: Axis.horizontal,
-                  children: _getColumnItems(columns),
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: width,
+                  child: Row(
+                    children: _getColumnItems(columns),
+                  ),
                 ),
               ),
             ),

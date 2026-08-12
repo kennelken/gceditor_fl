@@ -118,6 +118,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
               items: items,
               onValueChanged: _handleValueChanged,
               selectedItem: selectedItem,
+              classEntity: classEntity,
               addNull: classEntity is ClassMetaEntity,
               isEnabled: (_) => true,
               showTooltip: false,

@@ -15,6 +15,7 @@ import 'package:gceditor/components/properties/primitives/icon_button_transparen
 import 'package:gceditor/components/table/context_menu_button.dart';
 import 'package:gceditor/components/table/data_table/data_table_view.dart';
 import 'package:gceditor/components/table/data_table_header.dart';
+import 'package:gceditor/components/table/opened_table_tabs_view.dart';
 import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/components/tree/table_classes_view.dart';
 import 'package:gceditor/components/tree/table_tables_view.dart';
@@ -394,6 +395,7 @@ class TableView extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const OpenedTableTabsView(),
                 Container(
                   padding: EdgeInsets.all(kStyle.kLabelPadding),
                   alignment: Alignment.centerLeft,

@@ -504,6 +504,14 @@
 	"@closeSelectedItem": {
 		"description": ""
 	},
+	"closeActiveTab": "Close Active Tab",
+	"@closeActiveTab": {
+		"description": ""
+	},
+	"editMetadataTooltip": "Edit metadata",
+	"@editMetadataTooltip": {
+		"description": ""
+	},
 	"menubarView": "View",
 	"@menubarView": {
 		"description": ""

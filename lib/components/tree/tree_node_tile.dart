@@ -4,10 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/consts.dart';
+import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/class_meta_entity_enum.dart';
+import 'package:gceditor/model/db/class_meta_field_description.dart';
+import 'package:gceditor/model/db/class_meta_group.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/db/table_meta_entity.dart';
+import 'package:gceditor/model/db/table_meta_group.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_reorder_meta_entity.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/client_state.dart';
@@ -30,7 +34,14 @@ class TreeNodeTile extends ConsumerWidget {
   @override
   Widget build(context, ref) {
     final node = entry.node;
-    final isSelected = ref.watch(tableSelectionStateProvider).state.selectedId == node.id;
+    final selectionState = ref.watch(tableSelectionStateProvider).state;
+    final isSelected = node is TableMetaEntity //
+        ? (selectionState.selectedTableId == node.id)
+        : node is ClassMetaFieldDescription
+            ? (selectionState.selectedFieldId == node.id)
+            : node is ClassMeta
+                ? (selectionState.selectedEntity?.id == node.id)
+                : false;
     ref.watch(styleStateProvider);
 
     final indentGuide = DefaultIndentGuide.of(context);
@@ -121,9 +132,7 @@ class TreeNodeTile extends ConsumerWidget {
                   Expanded(
                     child: InkWell(
                       splashColor: kColorPrimaryLightTransparent3,
-                      onTap: () {
-                        providerContainer.read(tableSelectionStateProvider).setSelectedEntity(entity: isSelected ? null : node);
-                      },
+                      onTap: () => _handleNodeTap(node),
                       child: Builder(
                         builder: (context) {
                           return Column(
@@ -161,6 +170,10 @@ class TreeNodeTile extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  if (_hasEditButton(node)) ...[
+                    _EditMetaButton(node: node),
+                    SizedBox(width: 2 * kScale),
+                  ],
                   MouseRegion(
                     cursor: SystemMouseCursors.move,
                     child: SizedBox(
@@ -194,6 +207,33 @@ class TreeNodeTile extends ConsumerWidget {
       ),
     );
   }
+
+  void _handleNodeTap(IIdentifiable node) {
+    if (node is TableMetaEntity) {
+      providerContainer.read(tableSelectionStateProvider).setSelectedTable(table: node);
+    } else if (node is TableMetaGroup) {
+      onFolderPressed(entry);
+    } else if (node is ClassMeta) {
+      final selectionNotifier = providerContainer.read(tableSelectionStateProvider);
+      final isEditing = selectionNotifier.state.selectedEntity?.id == node.id;
+      if (isEditing) {
+        selectionNotifier.setSelectedEntity(entity: null);
+      } else {
+        selectionNotifier.setSelectedEntity(entity: node);
+      }
+    } else if (node is ClassMetaFieldDescription) {
+      final currentSelectedFieldId = providerContainer.read(tableSelectionStateProvider).state.selectedFieldId;
+      providerContainer.read(tableSelectionStateProvider).setSelectedField(
+            field: currentSelectedFieldId == node.id ? null : node,
+          );
+    } else {
+      providerContainer.read(tableSelectionStateProvider).setSelectedEntity(
+            entity: node,
+          );
+    }
+  }
+
+  bool _hasEditButton(IIdentifiable node) => node is TableMeta || node is ClassMeta;
 
   bool _canDrop(TreeDragAndDropDetails<IIdentifiable>? details) {
     if (details == null) //
@@ -299,6 +339,56 @@ class TreeNodeTile extends ConsumerWidget {
     return dropPosition;
   }
 }
+
+class _EditMetaButton extends ConsumerWidget {
+  final IIdentifiable node;
+
+  const _EditMetaButton({required this.node});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isEditing = ref.watch(tableSelectionStateProvider).state.selectedEntity?.id == node.id;
+    final tooltipMessage = _getEditTooltip(node);
+
+    return TooltipWrapper(
+      message: tooltipMessage,
+      child: Material(
+        color: kColorTransparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(4 * kScale),
+          hoverColor: isEditing ? kColorAccentBlue.withAlpha(60) : kColorPrimaryLighter,
+          splashColor: kColorPrimaryLightTransparent3,
+          onTap: () {
+            final selectionNotifier = providerContainer.read(tableSelectionStateProvider);
+            if (isEditing) {
+              selectionNotifier.setSelectedEntity(entity: null);
+            } else {
+              selectionNotifier.setSelectedEntity(entity: node);
+            }
+          },
+          child: Container(
+            padding: EdgeInsets.all(3 * kScale),
+            decoration: BoxDecoration(
+              color: isEditing ? kColorAccentBlue.withAlpha(45) : kColorTransparent,
+              borderRadius: BorderRadius.circular(4 * kScale),
+              border: Border.all(
+                color: isEditing ? kColorAccentBlue : kColorTransparent,
+                width: 1 * kScale,
+              ),
+            ),
+            child: Icon(
+              FontAwesomeIcons.penToSquare,
+              size: 11 * kScale,
+              color: isEditing ? kColorAccentBlue : kColorPrimaryLight,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+String _getEditTooltip(IIdentifiable node) => Loc.get.editMetadataTooltip;
 
 extension on TreeDragAndDropDetails<IIdentifiable> {
   /// Splits the target node's height in three and checks the vertical offset

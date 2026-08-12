@@ -19,23 +19,32 @@ class DataTableView extends StatefulWidget {
 }
 
 class _DataTableViewState extends State<DataTableView> {
-  late final LinkedScrollControllerGroup _controllersHorizontal;
-  late final ScrollController _headControllerHorizontal;
-  late final ScrollController _bodyControllerHorizontal;
+  late LinkedScrollControllerGroup _controllersHorizontal;
+  late ScrollController _headControllerHorizontal;
+  late ScrollController _bodyControllerHorizontal;
+  String? _activeTableId;
 
   @override
   void initState() {
     super.initState();
+    _initControllers();
+  }
+
+  void _initControllers() {
     _controllersHorizontal = LinkedScrollControllerGroup();
     _headControllerHorizontal = _controllersHorizontal.addAndGet();
     _bodyControllerHorizontal = _controllersHorizontal.addAndGet();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  void _disposeControllers() {
     _headControllerHorizontal.dispose();
     _bodyControllerHorizontal.dispose();
+  }
+
+  @override
+  void dispose() {
+    _disposeControllers();
+    super.dispose();
   }
 
   @override
@@ -48,6 +57,7 @@ class _DataTableViewState extends State<DataTableView> {
         ref.watch(columnSizeChangedProvider);
 
         if (table == null || table.classId.isEmpty) {
+          _activeTableId = null;
           return Expanded(
             child: Center(
               child: Text(
@@ -59,16 +69,24 @@ class _DataTableViewState extends State<DataTableView> {
           );
         }
 
+        if (_activeTableId != table.id) {
+          _activeTableId = table.id;
+          _disposeControllers();
+          _initControllers();
+        }
+
         return Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               DataTableHeadView(
+                key: ValueKey('head_${table.id}'),
                 scrollController: _headControllerHorizontal,
                 table: table,
               ),
               Expanded(
                 child: DataTableBodyView(
+                  key: ValueKey('body_${table.id}'),
                   table: table,
                   horizontalScrollController: _bodyControllerHorizontal,
                 ),

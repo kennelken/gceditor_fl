@@ -13,6 +13,7 @@ import '../../consts/consts.dart';
 import '../../consts/loc.dart';
 import '../../utils/utils.dart';
 import 'client_navigation_history_state.dart';
+import 'client_opened_tabs_state.dart';
 import 'client_problems_state.dart';
 import 'client_view_mode_state.dart';
 
@@ -32,6 +33,10 @@ final menubarStateProvider = ChangeNotifierProvider((ref) {
   });
 
   ref.read(clientNavigationHistoryStateProvider).addListener(() {
+    notifier.refresh();
+  });
+
+  ref.read(clientOpenedTabsStateProvider).addListener(() {
     notifier.refresh();
   });
 
@@ -64,6 +69,7 @@ class MenubarStateNotifier extends ChangeNotifier {
     canGoForward() => providerContainer.read(clientNavigationHistoryStateProvider).canGoForward;
     hasNextProblem() => providerContainer.read(clientProblemsStateProvider).state.problems.length > 1;
     hasSelectedItem() => providerContainer.read(tableSelectionStateProvider).state.canBeDeselected();
+    hasActiveTab() => providerContainer.read(clientOpenedTabsStateProvider).state.activeTableId != null;
 
     state.menubar = (app) => Overlay(
           initialEntries: [
@@ -127,6 +133,15 @@ class MenubarStateNotifier extends ChangeNotifier {
                               ),
                               onTap: nextRedoCommand() != null ? GlobalShortcuts.redo : null,
                               shortcutText: 'Ctrl+Y',
+                              shortcutStyle: _styleShortcut(),
+                            ),
+                            MenuButton(
+                              text: Text(
+                                Loc.get.closeActiveTab,
+                                style: hasActiveTab() ? _styleMenuActive() : _styleMenuInactive(),
+                              ),
+                              onTap: hasActiveTab() ? GlobalShortcuts.closeActiveTab : null,
+                              shortcutText: 'Ctrl+W',
                               shortcutStyle: _styleShortcut(),
                             ),
                             MenuButton(
