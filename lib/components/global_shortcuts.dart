@@ -10,6 +10,7 @@ import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/app_state.dart';
 import 'package:gceditor/model/state/client_find_state.dart';
 import 'package:gceditor/model/state/client_navigation_history_state.dart';
+import 'package:gceditor/model/state/client_opened_tabs_state.dart';
 import 'package:gceditor/model/state/client_problems_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/client_view_mode_state.dart';
@@ -38,6 +39,13 @@ class GlobalShortcuts {
 
     providerContainer.read(clientFindStateProvider).toggleVisibility(false);
     providerContainer.read(clientDataSelectionStateProvider).clear(false);
+  }
+
+  static void closeActiveTab() {
+    final activeTableId = providerContainer.read(clientOpenedTabsStateProvider).state.activeTableId;
+    if (activeTableId != null) {
+      providerContainer.read(clientOpenedTabsStateProvider.notifier).closeTable(activeTableId);
+    }
   }
 
   static void undo() {
@@ -237,6 +245,13 @@ class _RawKeyboardEventsState extends State<RawKeyboardEvents> {
       case LogicalKeyboardKey.keyZ:
         if (isKeyDown && providerContainer.read(clientViewModeStateProvider).state.controlKey) {
           GlobalShortcuts.undo();
+          return true;
+        }
+        break;
+
+      case LogicalKeyboardKey.keyW:
+        if (isKeyDown && providerContainer.read(clientViewModeStateProvider).state.controlKey) {
+          GlobalShortcuts.closeActiveTab();
           return true;
         }
         break;

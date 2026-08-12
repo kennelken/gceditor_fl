@@ -390,6 +390,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get closeSelectedItem => 'Close Selected Item';
 
   @override
+  String get closeActiveTab => 'Close Active Tab';
+
+  @override
   String get menubarView => 'View';
 
   @override

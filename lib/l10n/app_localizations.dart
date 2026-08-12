@@ -733,6 +733,12 @@ abstract class AppLocalizations {
   ///
   ///
   /// In en, this message translates to:
+  /// **'Close Active Tab'**
+  String get closeActiveTab;
+
+  ///
+  ///
+  /// In en, this message translates to:
   /// **'View'**
   String get menubarView;
 

@@ -504,6 +504,10 @@
 	"@closeSelectedItem": {
 		"description": ""
 	},
+	"closeActiveTab": "Close Active Tab",
+	"@closeActiveTab": {
+		"description": ""
+	},
 	"menubarView": "View",
 	"@menubarView": {
 		"description": ""
