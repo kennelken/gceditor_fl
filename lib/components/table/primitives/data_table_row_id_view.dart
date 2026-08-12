@@ -58,12 +58,25 @@ class DataTableRowIdView extends ConsumerWidget {
     ref.watch(columnSizeChangedProvider);
     final width = DbModelUtils.getTableIdsColumnWidth(table);
 
-    return Container(
-      decoration: DbModelUtils.getDataTableIdBoxDecoration(
-        coordinates,
-        ref.watch(clientFindStateProvider).state,
-        ref.watch(clientNavigationServiceProvider).state,
-      ),
+    final navData = ref.watch(clientNavigationServiceProvider).state.navigationData;
+    final isNavHighlighted = navData != null && navData.tableId == table.id && navData.rowIndex == index;
+
+    final defaultDecoration = DbModelUtils.getDataTableIdBoxDecoration(
+      coordinates,
+      ref.watch(clientFindStateProvider).state,
+      ref.watch(clientNavigationServiceProvider).state,
+    );
+
+    final effectiveDecoration = isNavHighlighted
+        ? defaultDecoration.copyWith(
+            color: const Color(0xFFE5C07B),
+          )
+        : defaultDecoration;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOut,
+      decoration: effectiveDecoration,
       width: width,
       height: height,
       child: _getBody(ref),

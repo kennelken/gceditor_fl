@@ -85,7 +85,5 @@ class DataTableRowsView extends StatelessWidget {
         curve: Curves.easeInOut,
       );
     }
-
-    providerContainer.read(clientNavigationServiceProvider).state.navigationData = null;
   }
 }

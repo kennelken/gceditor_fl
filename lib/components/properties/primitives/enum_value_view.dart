@@ -72,6 +72,11 @@ class _EnumValueViewState extends State<EnumValueView> {
 
       final absolutePath = Utils.getAbsolutePath(ref.watch(appStateProvider).state.projectFile, widget.data.fullPath);
 
+      final navData = ref.watch(clientNavigationServiceProvider).state.navigationData;
+      final isNavHighlighted = navData != null &&
+          navData.classId == widget.entity.id &&
+          navData.enumValueId == widget.data.id;
+
       final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
         MetaValueCoordinates(classId: widget.entity.id, enumId: widget.data.id),
         ref.watch(clientFindStateProvider).state,
@@ -79,11 +84,19 @@ class _EnumValueViewState extends State<EnumValueView> {
         defaultInputDecoration: kStyle.kInputTextStyleProperties,
       );
 
+      final defaultFillColor = idInputDecoration.fillColor ?? kStyle.kInputTextStyleProperties.fillColor ?? kColorAccentBlue1_5;
+
       return SizedBox(
         height: 38 * kScale,
         child: Row(
           children: [
-            SizedBox(
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeOut,
+              decoration: BoxDecoration(
+                color: isNavHighlighted ? const Color(0xFFE5C07B) : defaultFillColor,
+                borderRadius: kCardBorder,
+              ),
               width: _clampedValueWidth() * kScale,
               child: TextField(
                 controller: _idController,
@@ -91,6 +104,9 @@ class _EnumValueViewState extends State<EnumValueView> {
                 inputFormatters: Config.filterId,
                 readOnly: widget.entity.autoByFile,
                 decoration: idInputDecoration.copyWith(
+                  fillColor: kColorTransparent,
+                  focusColor: kColorTransparent,
+                  hoverColor: kColorTransparent,
                   enabled: !widget.entity.autoByFile,
                 ),
               ),

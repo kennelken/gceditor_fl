@@ -1,14 +1,23 @@
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gceditor/components/properties/primitives/clickable_reference_text.dart';
 import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/loc.dart';
+import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
+import 'package:gceditor/model/model_root.dart';
+import 'package:gceditor/model/state/client_state.dart';
+import 'package:gceditor/model/state/client_view_mode_state.dart';
+import 'package:gceditor/model/state/service/client_navigation_service.dart';
 import 'package:gceditor/model/state/style_state.dart';
 
 import '../../../consts/consts.dart';
 
-class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
+class DropDownSelector<T extends IIdentifiable?> extends ConsumerWidget {
   final String label;
   late final List<T?> items;
   final T? selectedItem;
@@ -18,6 +27,8 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
   final InputDecoration? inputDecoration;
   final String? nullValueLabel;
   final bool showTooltip;
+  final ClassMeta? classEntity;
+  final void Function(T? item)? onJumpToDefinition;
 
   DropDownSelector({
     super.key,
@@ -30,25 +41,56 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
     this.inputDecoration,
     this.nullValueLabel,
     this.showTooltip = true,
+    this.classEntity,
+    this.onJumpToDefinition,
   }) {
     this.items = addNull ? [null, ...items] : items;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final model = clientModel;
+    final navService = ref.read(clientNavigationServiceProvider);
+
+    bool canJump(T? item) {
+      if (item == null) return false;
+      return navService.canJumpToDefinition(model, item, classEntity: classEntity);
+    }
+
+    void doJump(T? item) {
+      if (item == null) return;
+      if (onJumpToDefinition != null) {
+        onJumpToDefinition!(item);
+      } else {
+        navService.jumpToDefinition(model, item, classEntity: classEntity);
+      }
+    }
+
     return SizedBox(
       height: kStyle.kTableTopRowHeight,
       child: DropdownSearch<T?>(
         items: (filter, loadProps) => items,
+        onBeforePopupOpening: (selectedItem) async {
+          final isControlPressed = ref.read(clientViewModeStateProvider).state.controlKey ||
+              HardwareKeyboard.instance.isControlPressed;
+          if (isControlPressed && selectedItem != null && canJump(selectedItem)) {
+            doJump(selectedItem);
+            return false;
+          }
+          return true;
+        },
         dropdownBuilder: (context, selectedItem) {
           if (selectedItem == null) return const SizedBox();
+          final itemName = _getItemName(selectedItem);
+          final jumpable = canJump(selectedItem);
+
           return TooltipWrapper(
             message: showTooltip && (selectedItem is IDescribable) ? (selectedItem as IDescribable).description : null,
-            child: Text(
-              _getItemName(selectedItem),
+            child: ClickableReferenceText(
+              text: itemName,
               style: kStyle.kTextExtraSmall,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              canJump: jumpable,
+              onJumpToDefinition: jumpable ? () => doJump(selectedItem) : null,
             ),
           );
         },
@@ -68,14 +110,39 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
           ),
           itemBuilder: (context, item, isDisabled, isSelected) {
             final enabled = _isEnabled(item);
+            final itemName = item?.id ?? Loc.get.nullValue;
+            final jumpable = canJump(item);
+            final textStyle = isSelected
+                ? kStyle.kTextExtraSmallSelected
+                : (enabled ? kStyle.kTextExtraSmall : kStyle.kTextExtraSmallInactive);
+
             return TooltipWrapper(
               message: (item is IDescribable) ? (item as IDescribable).description : null,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5 * kScale, vertical: 2 * kScale),
-                child: Text(
-                  item?.id ?? Loc.get.nullValue,
-                  maxLines: 1,
-                  style: isSelected ? kStyle.kTextExtraSmallSelected : (enabled ? kStyle.kTextExtraSmall : kStyle.kTextExtraSmallInactive),
+              child: Listener(
+                behavior: HitTestBehavior.translucent,
+                onPointerDown: (event) {
+                  if (event.buttons == kPrimaryButton) {
+                    final isControlPressed = ref.read(clientViewModeStateProvider).state.controlKey ||
+                        HardwareKeyboard.instance.isControlPressed;
+                    if (isControlPressed && item != null && jumpable) {
+                      Navigator.of(context, rootNavigator: true).pop();
+                      doJump(item);
+                    }
+                  }
+                },
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 5 * kScale, vertical: 2 * kScale),
+                  child: ClickableReferenceText(
+                    text: itemName,
+                    style: textStyle,
+                    canJump: jumpable,
+                    onJumpToDefinition: jumpable
+                        ? () {
+                            Navigator.of(context, rootNavigator: true).pop();
+                            doJump(item);
+                          }
+                        : null,
+                  ),
                 ),
               ),
             );
@@ -116,15 +183,7 @@ class DropDownSelector<T extends IIdentifiable?> extends StatelessWidget {
             hintText: selectedItem == null ? (nullValueLabel ?? label) : '',
           ),
         ),
-/*      maxHeight: kStyle.dropDownSelectorHeight, */
-/*      showAsSuffixIcons: true,*/
         compareFn: (a, b) => a == b,
-/*      clearButton: Icon(
-          FontAwesomeIcons.times,
-          color: kColorPrimaryLight,
-          size: 15 * kScale,
-        ),
-        */
         onSelected: onValueChanged,
         selectedItem: selectedItem,
         itemAsString: _getItemName,
