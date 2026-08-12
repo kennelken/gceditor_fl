@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/client_state.dart';
+import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/state/table_selection_state.dart';
 
 final clientOpenedTabsStateProvider = ChangeNotifierProvider((ref) {
@@ -54,12 +55,11 @@ class ClientOpenedTabsStateNotifier extends ChangeNotifier {
         final nextTableId = state.openedTableIds[nextIndex];
         state.activeTableId = nextTableId;
         final model = _ref.read(clientStateProvider).state.model;
-        final table = model.cache.getTable(nextTableId);
-        _ref.read(tableSelectionStateProvider).setSelectedEntity(entity: table);
+        final table = model.cache.getTable<TableMetaEntity>(nextTableId);
+        _ref.read(tableSelectionStateProvider).setSelectedTable(table: table);
       } else {
         state.activeTableId = null;
         _ref.read(tableSelectionStateProvider).setSelectedTable(table: null, id: null);
-        _ref.read(tableSelectionStateProvider).setSelectedEntity(entity: null, id: null);
       }
     } else {
       notifyListeners();
@@ -73,11 +73,10 @@ class ClientOpenedTabsStateNotifier extends ChangeNotifier {
     if (state.activeTableId != null && model.cache.getTable(state.activeTableId!) == null) {
       state.activeTableId = state.openedTableIds.isNotEmpty ? state.openedTableIds.last : null;
       if (state.activeTableId != null) {
-        final table = model.cache.getTable(state.activeTableId!);
-        _ref.read(tableSelectionStateProvider).setSelectedEntity(entity: table);
+        final table = model.cache.getTable<TableMetaEntity>(state.activeTableId!);
+        _ref.read(tableSelectionStateProvider).setSelectedTable(table: table);
       } else {
         _ref.read(tableSelectionStateProvider).setSelectedTable(table: null, id: null);
-        _ref.read(tableSelectionStateProvider).setSelectedEntity(entity: null, id: null);
       }
     } else {
       notifyListeners();

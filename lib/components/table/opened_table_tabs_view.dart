@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/consts.dart';
+import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/client_opened_tabs_state.dart';
 import 'package:gceditor/model/state/client_state.dart';
@@ -37,7 +38,7 @@ class OpenedTableTabsView extends ConsumerWidget {
             final tableId = openedTabsState.openedTableIds[index];
             final isActive = tableId == activeTableId;
             final model = ref.watch(clientStateProvider).state.model;
-            final table = model.cache.getTable(tableId);
+            final table = model.cache.getTable<TableMetaEntity>(tableId);
             final title = table?.id ?? tableId;
             final description = table?.description;
 
@@ -56,7 +57,7 @@ class OpenedTableTabsView extends ConsumerWidget {
                     hoverColor: isActive ? kColorPrimaryDarker : kColorPrimaryLighter,
                     onTap: () {
                       if (table != null) {
-                        providerContainer.read(tableSelectionStateProvider).setSelectedEntity(entity: table);
+                        providerContainer.read(tableSelectionStateProvider).setSelectedTable(table: table);
                       }
                     },
                     child: Container(

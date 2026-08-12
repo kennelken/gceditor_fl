@@ -393,6 +393,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get closeActiveTab => 'Close Active Tab';
 
   @override
+  String get editMetadataTooltip => 'Edit metadata';
+
+  @override
   String get menubarView => 'View';
 
   @override

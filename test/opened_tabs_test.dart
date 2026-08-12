@@ -28,17 +28,17 @@ void main() {
     expect(tabsNotifier.state.activeTableId, isNull);
 
     // Select table 1 -> tab opens and becomes active
-    selectionNotifier.setSelectedEntity(entity: table1);
+    selectionNotifier.setSelectedTable(table: table1);
     expect(tabsNotifier.state.openedTableIds, equals(['table_a']));
     expect(tabsNotifier.state.activeTableId, equals('table_a'));
 
     // Select table 2 -> second tab opens and becomes active
-    selectionNotifier.setSelectedEntity(entity: table2);
+    selectionNotifier.setSelectedTable(table: table2);
     expect(tabsNotifier.state.openedTableIds, equals(['table_a', 'table_b']));
     expect(tabsNotifier.state.activeTableId, equals('table_b'));
 
     // Re-select table 1 -> active tab switches to table 1 without duplicating tab
-    selectionNotifier.setSelectedEntity(entity: table1);
+    selectionNotifier.setSelectedTable(table: table1);
     expect(tabsNotifier.state.openedTableIds, equals(['table_a', 'table_b']));
     expect(tabsNotifier.state.activeTableId, equals('table_a'));
 
@@ -78,8 +78,8 @@ void main() {
     final tabsNotifier = container.read(clientOpenedTabsStateProvider.notifier);
     final selectionNotifier = container.read(tableSelectionStateProvider.notifier);
 
-    selectionNotifier.setSelectedEntity(entity: table1);
-    selectionNotifier.setSelectedEntity(entity: table2);
+    selectionNotifier.setSelectedTable(table: table1);
+    selectionNotifier.setSelectedTable(table: table2);
     expect(tabsNotifier.state.activeTableId, equals('t2'));
 
     final activeId = tabsNotifier.state.activeTableId;
@@ -104,8 +104,8 @@ void main() {
     final tabsNotifier = container.read(clientOpenedTabsStateProvider.notifier);
     final selectionNotifier = container.read(tableSelectionStateProvider.notifier);
 
-    selectionNotifier.setSelectedEntity(entity: table1);
-    selectionNotifier.setSelectedEntity(entity: table2);
+    selectionNotifier.setSelectedTable(table: table1);
+    selectionNotifier.setSelectedTable(table: table2);
     expect(tabsNotifier.state.openedTableIds, equals(['t1', 't2']));
     expect(tabsNotifier.state.activeTableId, equals('t2'));
 
@@ -117,5 +117,27 @@ void main() {
     expect(tabsNotifier.state.openedTableIds, equals(['t1']));
     expect(tabsNotifier.state.activeTableId, equals('t1'));
     expect(selectionNotifier.state.selectedTable?.id, equals('t1'));
+  });
+
+  test('editing table metadata opens selectedEntity without changing active selectedTable', () {
+    final container = ProviderContainer();
+    final dbModel = DbModel();
+    final table1 = TableMetaEntity()..id = 't1';
+    final table2 = TableMetaEntity()..id = 't2';
+    dbModel.tables.addAll([table1, table2]);
+    dbModel.cache.invalidate();
+    container.read(clientStateProvider.notifier).state.model = dbModel;
+
+    final selectionNotifier = container.read(tableSelectionStateProvider.notifier);
+
+    // Open table 1 data view
+    selectionNotifier.setSelectedTable(table: table1);
+    expect(selectionNotifier.state.selectedTable, equals(table1));
+    expect(selectionNotifier.state.selectedEntity, isNull);
+
+    // Edit table 2 metadata without switching active data table
+    selectionNotifier.setSelectedEntity(entity: table2);
+    expect(selectionNotifier.state.selectedEntity, equals(table2));
+    expect(selectionNotifier.state.selectedTable, equals(table1));
   });
 }

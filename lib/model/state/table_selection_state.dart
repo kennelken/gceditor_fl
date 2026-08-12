@@ -75,10 +75,6 @@ class TableSelectionStateNotifier extends ChangeNotifier {
     if (entity != null) {
       state.selectedEntity = entity;
       state.selectedId = entity.id;
-
-      if (entity is TableMetaEntity) {
-        setSelectedTable(table: entity);
-      }
     } else {
       state.selectedEntity = null;
       state.selectedId = id;

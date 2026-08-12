@@ -508,6 +508,10 @@
 	"@closeActiveTab": {
 		"description": ""
 	},
+	"editMetadataTooltip": "Edit metadata",
+	"@editMetadataTooltip": {
+		"description": ""
+	},
 	"menubarView": "View",
 	"@menubarView": {
 		"description": ""
