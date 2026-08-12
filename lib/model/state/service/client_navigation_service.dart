@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
+import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/client_find_state.dart';
 import 'package:gceditor/model/state/client_problems_state.dart';
@@ -30,10 +31,12 @@ class ClientNavigationServiceStateNotifier extends ChangeNotifier {
     state.longLastingNavigationData = data;
     state.longLastingFindResult = findResultItem;
 
-    if (data.tableId != null && data.fieldId != null) {
-      providerContainer.read(tableSelectionStateProvider).setSelectedTable(table: model.cache.getTable(data.tableId), id: data.tableId);
-    } else if (data.tableId != null) {
-      providerContainer.read(tableSelectionStateProvider).setSelectedEntity(entity: model.cache.getTable(data.tableId), id: data.tableId);
+    if (data.tableId != null) {
+      final table = model.cache.getTable<TableMetaEntity>(data.tableId);
+      providerContainer.read(tableSelectionStateProvider).setSelectedTable(table: table, id: data.tableId);
+      if (data.fieldId == null) {
+        providerContainer.read(tableSelectionStateProvider).setSelectedEntity(entity: table, id: data.tableId);
+      }
     } else if (data.classId != null && data.fieldId != null && findResultItem?.metaItem?.fieldValueType != null) {
       final classEntity = model.cache.getClass<ClassMetaEntity>(data.classId);
       providerContainer.read(tableSelectionStateProvider).setSelectedField(field: model.cache.getField(data.fieldId!, classEntity), id: data.fieldId);
