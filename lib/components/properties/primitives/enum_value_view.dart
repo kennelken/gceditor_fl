@@ -92,7 +92,7 @@ class _EnumValueViewState extends State<EnumValueView> {
               duration: const Duration(milliseconds: 500),
               curve: Curves.easeOut,
               decoration: BoxDecoration(
-                color: isNavHighlighted ? const Color(0xFFE5C07B) : defaultFillColor,
+                color: isNavHighlighted ? kColorAccentOrange : defaultFillColor,
                 borderRadius: kCardBorder,
               ),
               width: _clampedValueWidth() * kScale,

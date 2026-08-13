@@ -70,7 +70,7 @@ class DataTableRowIdView extends ConsumerWidget {
 
     final effectiveDecoration = isNavHighlighted
         ? defaultDecoration.copyWith(
-            color: const Color(0xFFE5C07B),
+            color: kColorAccentOrange,
           )
         : defaultDecoration;
 
