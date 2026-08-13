@@ -190,7 +190,7 @@ class TableView extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
+                              FaIcon(
                                 FontAwesomeIcons.triangleExclamation,
                                 size: 13 * kScale,
                                 color: kColorAccentRed2,
@@ -201,7 +201,7 @@ class TableView extends ConsumerWidget {
                                 style: kStyle.kTextSmall,
                               ),
                               SizedBox(width: 15 * kScale),
-                              Icon(
+                              FaIcon(
                                 FontAwesomeIcons.triangleExclamation,
                                 size: 13 * kScale,
                                 color: kColorAccentYellow,
@@ -258,7 +258,7 @@ class TableView extends ConsumerWidget {
                         message: Loc.get.gitRefreshTooltip,
                         child: IconButtonTransparent(
                           size: 32 * kScale,
-                          icon: Icon(
+                          icon: FaIcon(
                             FontAwesomeIcons.rotate,
                             color: gitState.isProcessing ? kColorAccentBlueInactive : kColorAccentBlue,
                             size: 15 * kScale,
@@ -271,7 +271,7 @@ class TableView extends ConsumerWidget {
                         message: Loc.get.gitCommitTooltip,
                         child: IconButtonTransparent(
                           size: 32 * kScale,
-                          icon: Icon(
+                          icon: FaIcon(
                             FontAwesomeIcons.floppyDisk,
                             color: gitState.isProcessing || gitState.selectedItems.isEmpty ? kColorAccentBlueInactive : kColorAccentBlue,
                             size: 15 * kScale,
@@ -284,7 +284,7 @@ class TableView extends ConsumerWidget {
                         message: Loc.get.gitPushTooltip,
                         child: IconButtonTransparent(
                           size: 32 * kScale,
-                          icon: Icon(
+                          icon: FaIcon(
                             FontAwesomeIcons.circleArrowUp,
                             color: gitState.isProcessing || gitState.selectedItems.isEmpty ? kColorAccentBlueInactive : kColorAccentBlue,
                             size: 15 * kScale,
@@ -297,7 +297,7 @@ class TableView extends ConsumerWidget {
                         message: Loc.get.gitPullTooltip,
                         child: IconButtonTransparent(
                           size: 32 * kScale,
-                          icon: Icon(
+                          icon: FaIcon(
                             FontAwesomeIcons.circleArrowDown,
                             color: gitState.isProcessing || gitState.selectedItems.isEmpty ? kColorAccentBlueInactive : kColorAccentBlue,
                             size: 15 * kScale,
@@ -360,7 +360,7 @@ class TableView extends ConsumerWidget {
                         message: Loc.get.historyRefreshTooltip,
                         child: IconButtonTransparent(
                           size: 32 * kScale,
-                          icon: Icon(
+                          icon: FaIcon(
                             FontAwesomeIcons.rotate,
                             color: historyState.isProcessing ? kColorAccentBlueInactive : kColorAccentBlue,
                             size: 15 * kScale,

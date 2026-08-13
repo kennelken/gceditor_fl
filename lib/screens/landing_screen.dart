@@ -246,7 +246,7 @@ class LandingScreenState extends State<LandingScreen> {
                                                                   message: Loc.get.remove,
                                                                   child: IconButtonTransparent(
                                                                     size: 20 * kScale,
-                                                                    icon: Icon(
+                                                                    icon: FaIcon(
                                                                       FontAwesomeIcons.trashCan,
                                                                       size: 10 * kScale,
                                                                       color: kColorAccentRed,

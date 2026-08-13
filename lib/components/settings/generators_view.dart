@@ -55,69 +55,69 @@ class GeneratorsViewState extends State<GeneratorsView> {
         height: 182 * kScale,
         child: Padding(
           padding: EdgeInsets.all(8.0 * kScale),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 30 * kScale,
-              child: Row(
-                children: [
-                  Text(
-                    Loc.get.projectSettingsGeneratorsTitle,
-                    style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
-                  ),
-                  TooltipWrapper(
-                    message: Loc.get.runGenerators,
-                    child: IconButtonTransparent(
-                      size: 35 * kScale,
-                      icon: Icon(
-                        FontAwesomeIcons.forward,
-                        size: 14 * kScale,
-                        color: kColorAccentBlue,
+          child: Column(
+            children: [
+              SizedBox(
+                height: 30 * kScale,
+                child: Row(
+                  children: [
+                    Text(
+                      Loc.get.projectSettingsGeneratorsTitle,
+                      style: kStyle.kTextRegular.copyWith(color: kTextColorLight),
+                    ),
+                    TooltipWrapper(
+                      message: Loc.get.runGenerators,
+                      child: IconButtonTransparent(
+                        size: 35 * kScale,
+                        icon: FaIcon(
+                          FontAwesomeIcons.forward,
+                          size: 14 * kScale,
+                          color: kColorAccentBlue,
+                        ),
+                        onClick: _handleRunGenerators,
                       ),
-                      onClick: _handleRunGenerators,
                     ),
-                  ),
-                  const Expanded(child: SizedBox()),
-                  TooltipWrapper(
-                    message: Loc.get.createNewGeneratorTooltip,
-                    child: ContextMenuButton(
-                      buttons: GeneratorType.values
-                          .where((e) => e != GeneratorType.undefined)
-                          .map((e) => ContextMenuChildButtonData(e.name, () => _handleAddNewGenerator(e)))
-                          .toList(),
-                      controller: _addNewGeneratorPopupController,
+                    const Expanded(child: SizedBox()),
+                    TooltipWrapper(
+                      message: Loc.get.createNewGeneratorTooltip,
+                      child: ContextMenuButton(
+                        buttons: GeneratorType.values
+                            .where((e) => e != GeneratorType.undefined)
+                            .map((e) => ContextMenuChildButtonData(e.name, () => _handleAddNewGenerator(e)))
+                            .toList(),
+                        controller: _addNewGeneratorPopupController,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: Theme(
-                data: kStyle.kReorderableListThemeInvisibleScrollbars,
-                child: ScrollConfiguration(
-                  behavior: kScrollDraggable,
-                  child: ReorderableListView.builder(
-                    scrollController: _listScrollController,
-                    scrollDirection: Axis.vertical,
-                    itemCount: generators.length,
-                    onReorder: _handleGeneratorsReorder,
-                    itemBuilder: (context, index) {
-                      return GeneratorsItemView(
-                        key: ValueKey(generators[index].hashCode),
-                        generator: generators[index],
-                        index: index,
-                        onChange: (generator) => _handleGeneratorChanged(index, generator),
-                        onDelete: () => _handleGeneratorDelete(index),
-                      );
-                    },
+              Expanded(
+                child: Theme(
+                  data: kStyle.kReorderableListThemeInvisibleScrollbars,
+                  child: ScrollConfiguration(
+                    behavior: kScrollDraggable,
+                    child: ReorderableListView.builder(
+                      scrollController: _listScrollController,
+                      scrollDirection: Axis.vertical,
+                      itemCount: generators.length,
+                      onReorder: _handleGeneratorsReorder,
+                      itemBuilder: (context, index) {
+                        return GeneratorsItemView(
+                          key: ValueKey(generators[index].hashCode),
+                          generator: generators[index],
+                          index: index,
+                          onChange: (generator) => _handleGeneratorChanged(index, generator),
+                          onDelete: () => _handleGeneratorDelete(index),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 

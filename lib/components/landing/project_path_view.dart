@@ -57,7 +57,7 @@ class ProjectPathView extends StatelessWidget {
             child: ElevatedButton(
               style: kButtonContextMenu,
               onPressed: () => _handleBrowsePath(),
-              child: Icon(
+              child: FaIcon(
                 FontAwesomeIcons.file,
                 size: 20 * kScale,
                 color: kTextColorLightest,
@@ -73,7 +73,7 @@ class ProjectPathView extends StatelessWidget {
             child: ElevatedButton(
               style: targetPath == null ? kButtonContextMenuInactive : kButtonContextMenu,
               onPressed: targetPath == null ? null : () => _handleResetPath(),
-              child: Icon(
+              child: FaIcon(
                 FontAwesomeIcons.rotateLeft,
                 size: 20 * kScale,
                 color: targetPath == null ? kTextColorLight3 : kTextColorLightest,
@@ -88,7 +88,7 @@ class ProjectPathView extends StatelessWidget {
           child: ElevatedButton(
             style: kButtonContextMenu,
             onPressed: () => _handleBrowseDirectory(),
-            child: Icon(
+            child: FaIcon(
               FontAwesomeIcons.folder,
               size: 20 * kScale,
               color: kTextColorLightest,

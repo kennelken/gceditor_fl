@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -8,8 +9,8 @@ import 'package:gceditor/components/table/primitives/data_table_cell_view.dart';
 import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
-import 'package:gceditor/model/db/data_table_row.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
+import 'package:gceditor/model/db/data_table_row.dart';
 import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_delete_data_row.dart';
 import 'package:gceditor/model/db_cmd/db_cmd_edit_table_row_id.dart';
@@ -96,11 +97,13 @@ class DataTableRowIdView extends ConsumerWidget {
     final selectionState = ref.watch(clientDataSelectionStateProvider).state;
     final isSelected = selectionState.selectionTable == table && selectionState.selectedItems.contains(index);
 
-    final tooltipMessageBuilder = row != null ? () {
-      final model = clientModel;
-      final jsonMap = DbModelUtils.rowToJson(model, table, row!);
-      return const JsonEncoder.withIndent('  ').convert(jsonMap);
-    } : null;
+    final tooltipMessageBuilder = row != null
+        ? () {
+            final model = clientModel;
+            final jsonMap = DbModelUtils.rowToJson(model, table, row!);
+            return const JsonEncoder.withIndent('  ').convert(jsonMap);
+          }
+        : null;
 
     String? tooltipHeaderBuilder() {
       final className = clientModel.cache.getClass<ClassMetaEntity>(table.classId)?.id ?? table.classId;
@@ -152,7 +155,7 @@ class DataTableRowIdView extends ConsumerWidget {
                 message: Loc.get.findReferencesTooltip,
                 child: IconButtonTransparent(
                   size: 22 * kScale,
-                  icon: Icon(
+                  icon: FaIcon(
                     FontAwesomeIcons.magnifyingGlass,
                     color: kColorPrimaryLight,
                     size: 12 * kScale,
@@ -165,7 +168,7 @@ class DataTableRowIdView extends ConsumerWidget {
                   message: Loc.get.pinItemTooltip,
                   child: IconButtonTransparent(
                     size: 22 * kScale,
-                    icon: Icon(
+                    icon: FaIcon(
                       FontAwesomeIcons.mapPin,
                       color: kColorPrimaryLight,
                       size: 12 * kScale,
@@ -178,7 +181,7 @@ class DataTableRowIdView extends ConsumerWidget {
                   message: Loc.get.unpinItemTooltip,
                   child: IconButtonTransparent(
                     size: 22 * kScale,
-                    icon: Icon(
+                    icon: FaIcon(
                       FontAwesomeIcons.xmark,
                       color: kColorPrimaryLight,
                       size: 12 * kScale,

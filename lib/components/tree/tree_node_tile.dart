@@ -8,7 +8,6 @@ import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/class_meta_entity_enum.dart';
 import 'package:gceditor/model/db/class_meta_field_description.dart';
-import 'package:gceditor/model/db/class_meta_group.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/db/table_meta_group.dart';
@@ -316,7 +315,7 @@ class TreeNodeTile extends ConsumerWidget {
           onTap: () {
             pressCallback?.call();
           },
-          child: Icon(
+          child: FaIcon(
             icon,
             size: 12 * kScale,
             color: kColorPrimaryLight,
@@ -376,7 +375,7 @@ class _EditMetaButton extends ConsumerWidget {
                 width: 1 * kScale,
               ),
             ),
-            child: Icon(
+            child: FaIcon(
               FontAwesomeIcons.penToSquare,
               size: 11 * kScale,
               color: isEditing ? kColorAccentBlue : kColorPrimaryLight,

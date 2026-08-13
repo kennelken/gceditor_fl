@@ -103,7 +103,7 @@ class TablePropertiesView extends ConsumerWidget {
                             child: MaterialButton(
                               shape: const RoundedRectangleBorder(borderRadius: kCardBorder),
                               onPressed: () => _handleBackButton(selectedEntity),
-                              child: Icon(
+                              child: FaIcon(
                                 FontAwesomeIcons.xmark,
                                 color: kColorPrimaryLight,
                                 size: 20 * kScale,

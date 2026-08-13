@@ -231,7 +231,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           message: Loc.get.save,
                           child: IconButtonTransparent(
                             size: 30 * kScale,
-                            icon: Icon(
+                            icon: FaIcon(
                               FontAwesomeIcons.floppyDisk,
                               size: 12 * kScale,
                               color: kColorAccentBlue,
@@ -266,7 +266,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           message: Loc.get.save,
                           child: IconButtonTransparent(
                             size: 30 * kScale,
-                            icon: Icon(
+                            icon: FaIcon(
                               FontAwesomeIcons.floppyDisk,
                               size: 12 * kScale,
                               color: kColorAccentBlue,
@@ -301,7 +301,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           message: Loc.get.save,
                           child: IconButtonTransparent(
                             size: 30 * kScale,
-                            icon: Icon(
+                            icon: FaIcon(
                               FontAwesomeIcons.floppyDisk,
                               size: 12 * kScale,
                               color: kColorAccentBlue,
@@ -346,7 +346,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           child: IconButtonTransparent(
                             size: 30 * kScale,
                             enabled: _isAppFilesPathValid,
-                            icon: Icon(
+                            icon: FaIcon(
                               FontAwesomeIcons.floppyDisk,
                               size: 12 * kScale,
                               color: _isAppFilesPathValid ? kColorAccentBlue : kColorAccentBlue.withValues(alpha: 0.3),
@@ -391,7 +391,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                           child: IconButtonTransparent(
                             size: 30 * kScale,
                             enabled: _isAppFilesPathExcludeRegexValid,
-                            icon: Icon(
+                            icon: FaIcon(
                               FontAwesomeIcons.floppyDisk,
                               size: 12 * kScale,
                               color: _isAppFilesPathExcludeRegexValid ? kColorAccentBlue : kColorAccentBlue.withValues(alpha: 0.3),
@@ -453,7 +453,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                                     message: Loc.get.buttonRegisterNewLogin,
                                     child: IconButtonTransparent(
                                       size: 35 * kScale,
-                                      icon: Icon(
+                                      icon: FaIcon(
                                         FontAwesomeIcons.plus,
                                         size: 14 * kScale,
                                         color: kColorAccentBlue,
@@ -492,7 +492,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
                                                     message: Loc.get.buttonUnregisterLogin,
                                                     child: IconButtonTransparent(
                                                       size: 28 * kScale,
-                                                      icon: Icon(
+                                                      icon: FaIcon(
                                                         FontAwesomeIcons.trashCan,
                                                         size: 12 * kScale,
                                                         color: kColorAccentRed,
@@ -643,9 +643,7 @@ class SettingsViewState extends ConsumerState<SettingsView> {
       return;
 
     if (newTooltipDelay > Config.maxTooltipDelay) {
-      providerContainer
-          .read(logStateProvider)
-          .addMessage(LogEntry(LogLevel.error, Loc.get.tooltipDelayTooBig(Config.maxTooltipDelay.toString())));
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, Loc.get.tooltipDelayTooBig(Config.maxTooltipDelay.toString())));
       providerContainer.read(clientStateProvider).dispatchChange();
       return;
     }

@@ -7,9 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gceditor/components/properties/primitives/clickable_reference_text.dart';
 import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/loc.dart';
-import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
-import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/client_view_mode_state.dart';
 import 'package:gceditor/model/state/service/client_navigation_service.dart';
@@ -71,8 +69,7 @@ class DropDownSelector<T extends IIdentifiable?> extends ConsumerWidget {
       child: DropdownSearch<T?>(
         items: (filter, loadProps) => items,
         onBeforePopupOpening: (selectedItem) async {
-          final isControlPressed = ref.read(clientViewModeStateProvider).state.controlKey ||
-              HardwareKeyboard.instance.isControlPressed;
+          final isControlPressed = ref.read(clientViewModeStateProvider).state.controlKey || HardwareKeyboard.instance.isControlPressed;
           if (isControlPressed && selectedItem != null && canJump(selectedItem)) {
             doJump(selectedItem);
             return false;
@@ -112,9 +109,7 @@ class DropDownSelector<T extends IIdentifiable?> extends ConsumerWidget {
             final enabled = _isEnabled(item);
             final itemName = item?.id ?? Loc.get.nullValue;
             final jumpable = canJump(item);
-            final textStyle = isSelected
-                ? kStyle.kTextExtraSmallSelected
-                : (enabled ? kStyle.kTextExtraSmall : kStyle.kTextExtraSmallInactive);
+            final textStyle = isSelected ? kStyle.kTextExtraSmallSelected : (enabled ? kStyle.kTextExtraSmall : kStyle.kTextExtraSmallInactive);
 
             return TooltipWrapper(
               message: (item is IDescribable) ? (item as IDescribable).description : null,
@@ -122,8 +117,7 @@ class DropDownSelector<T extends IIdentifiable?> extends ConsumerWidget {
                 behavior: HitTestBehavior.translucent,
                 onPointerDown: (event) {
                   if (event.buttons == kPrimaryButton) {
-                    final isControlPressed = ref.read(clientViewModeStateProvider).state.controlKey ||
-                        HardwareKeyboard.instance.isControlPressed;
+                    final isControlPressed = ref.read(clientViewModeStateProvider).state.controlKey || HardwareKeyboard.instance.isControlPressed;
                     if (isControlPressed && item != null && jumpable) {
                       Navigator.of(context, rootNavigator: true).pop();
                       doJump(item);
@@ -174,7 +168,7 @@ class DropDownSelector<T extends IIdentifiable?> extends ConsumerWidget {
             iconSize: 15 * kScale,
             constraints: BoxConstraints.tightFor(width: 35 * kScale, height: 25),
             splashRadius: 20 * kScale,
-            iconClosed: const Icon(FontAwesomeIcons.caretDown),
+            iconClosed: const FaIcon(FontAwesomeIcons.caretDown),
           ),
         ),
         decoratorProps: DropDownDecoratorProps(

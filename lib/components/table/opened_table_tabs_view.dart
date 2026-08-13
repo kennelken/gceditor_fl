@@ -90,7 +90,7 @@ class OpenedTableTabsView extends ConsumerWidget {
                             },
                             child: Padding(
                               padding: EdgeInsets.all(2 * kScale),
-                              child: Icon(
+                              child: FaIcon(
                                 FontAwesomeIcons.xmark,
                                 size: 10 * kScale,
                                 color: isActive ? kColorPrimaryLight : kColorPrimaryLightTransparent,

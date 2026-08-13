@@ -91,7 +91,7 @@ class _FindPanelState extends State<FindPanel> {
                   message: Loc.get.findTooltip,
                   child: IconButtonTransparent(
                     size: 35 * kScale,
-                    icon: Icon(
+                    icon: FaIcon(
                       FontAwesomeIcons.magnifyingGlass,
                       color: kColorAccentBlue,
                       size: 20 * kScale,
@@ -170,7 +170,7 @@ class _FindPanelState extends State<FindPanel> {
                   message: Loc.get.findCloseTooltip,
                   child: IconButtonTransparent(
                     size: 35 * kScale,
-                    icon: Icon(
+                    icon: FaIcon(
                       FontAwesomeIcons.xmark,
                       color: kColorPrimaryLight,
                       size: 20 * kScale,

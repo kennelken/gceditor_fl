@@ -234,45 +234,45 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                 child: Padding(
                   padding: EdgeInsets.only(left: 5 * kScale, top: 5 * kScale, bottom: 5 * kScale),
                   child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Flexible(
-                      fit: FlexFit.loose,
-                      child: Theme(
-                        data: kStyle.kReorderableListTheme,
-                        child: ScrollConfiguration(
-                          behavior: kScrollNoScroll,
-                          child: ReorderableListView.builder(
-                            buildDefaultDragHandles: !widget.data.autoByFile,
-                            shrinkWrap: true,
-                            itemCount: values.length,
-                            onReorder: _handleValuesReorder,
-                            header: Padding(
-                              padding: EdgeInsets.only(left: 10 * kScale),
-                              child: PropertyTitle(
-                                title: Loc.get.enumsListTitle,
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: Theme(
+                          data: kStyle.kReorderableListTheme,
+                          child: ScrollConfiguration(
+                            behavior: kScrollNoScroll,
+                            child: ReorderableListView.builder(
+                              buildDefaultDragHandles: !widget.data.autoByFile,
+                              shrinkWrap: true,
+                              itemCount: values.length,
+                              onReorder: _handleValuesReorder,
+                              header: Padding(
+                                padding: EdgeInsets.only(left: 10 * kScale),
+                                child: PropertyTitle(
+                                  title: Loc.get.enumsListTitle,
+                                ),
                               ),
+                              itemBuilder: (context, index) {
+                                return EnumValueView(
+                                  key: ValueKey('${values[index].hashCode}_${values[index].id}_$clientState'),
+                                  entity: widget.data,
+                                  data: values[index],
+                                );
+                              },
                             ),
-                            itemBuilder: (context, index) {
-                              return EnumValueView(
-                                key: ValueKey('${values[index].hashCode}_${values[index].id}_$clientState'),
-                                entity: widget.data,
-                                data: values[index],
-                              );
-                            },
                           ),
                         ),
                       ),
-                    ),
-                    if (!widget.data.autoByFile)
-                      AddNewEnumValueButton(
-                        onClick: _handleAddNewValue,
-                      ),
-                  ],
+                      if (!widget.data.autoByFile)
+                        AddNewEnumValueButton(
+                          onClick: _handleAddNewValue,
+                        ),
+                    ],
+                  ),
                 ),
               ),
-            ),
             ),
             kStyle.kPropertiesVerticalDivider,
             ClipRRect(
@@ -281,282 +281,302 @@ class _ClassMetaEnumPropertiesViewPropertiesState extends State<ClassMetaEnumPro
                 color: kColorBlueMetaPropertiesGroup,
                 width: 9999,
                 padding: EdgeInsets.symmetric(horizontal: 10 * kScale, vertical: 10 * kScale),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  PropertyTitle(
-                    title: Loc.get.autoByFileSettings,
-                  ),
-                  kStyle.kPropertiesVerticalDivider,
-                  TooltipWrapper(
-                    message: Loc.get.autoByFileTooltip,
-                    child: SizedBox(
-                      height: 30 * kScale,
-                      child: Row(
-                        children: [
-                          kStyle.wrapCheckbox(
-                            Checkbox(
-                              value: _autoByFile,
-                              onChanged: (val) {
-                                final enabled = val ?? false;
-                                if (enabled) {
-                                  setState(() {
-                                    _autoByFile = true;
-                                    _showSettings = true;
-                                  });
-                                } else {
-                                  setState(() {
-                                    _autoByFile = false;
-                                    _showSettings = false;
-                                  });
-                                  providerContainer.read(clientOwnCommandsStateProvider).addCommand(
-                                        DbCmdEditEnumFileSettings.values(
-                                          entityId: widget.data.id,
-                                          autoByFile: false,
-                                        ),
-                                      );
-                                }
-                              },
-                            ),
-                          ),
-                          Text(
-                            Loc.get.autoByFile,
-                            style: kStyle.kTextExtraSmallPropertyHeader,
-                          ),
-                        ],
-                      ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    PropertyTitle(
+                      title: Loc.get.autoByFileSettings,
                     ),
-                  ),
-                  if (_autoByFile) ...[
-                    SizedBox(height: 2 * kScale),
-                    Row(
-                      children: [
-                        TooltipWrapper(
-                          message: Loc.get.autoByFileSettingsTooltip,
-                          child: IconButtonTransparent(
-                            size: 35 * kScale,
-                            onClick: () {
-                              setState(() {
-                                _showSettings = !_showSettings;
-                              });
-                            },
-                            icon: Icon(
-                              FontAwesomeIcons.gear,
-                              color: _showSettings ? kColorAccentBlue : Colors.white,
-                              size: 20 * kScale,
+                    kStyle.kPropertiesVerticalDivider,
+                    TooltipWrapper(
+                      message: Loc.get.autoByFileTooltip,
+                      child: SizedBox(
+                        height: 30 * kScale,
+                        child: Row(
+                          children: [
+                            kStyle.wrapCheckbox(
+                              Checkbox(
+                                value: _autoByFile,
+                                onChanged: (val) {
+                                  final enabled = val ?? false;
+                                  if (enabled) {
+                                    setState(() {
+                                      _autoByFile = true;
+                                      _showSettings = true;
+                                    });
+                                  } else {
+                                    setState(() {
+                                      _autoByFile = false;
+                                      _showSettings = false;
+                                    });
+                                    providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+                                          DbCmdEditEnumFileSettings.values(
+                                            entityId: widget.data.id,
+                                            autoByFile: false,
+                                          ),
+                                        );
+                                  }
+                                },
+                              ),
                             ),
-                          ),
+                            Text(
+                              Loc.get.autoByFile,
+                              style: kStyle.kTextExtraSmallPropertyHeader,
+                            ),
+                          ],
                         ),
-                        SizedBox(width: 10 * kScale),
-                        TooltipWrapper(
-                          message: Loc.get.runTooltip,
-                          child: IconButtonTransparent(
-                            size: 35 * kScale,
-                            enabled: !_showSettings && _validateDbSettings(),
-                            onClick: () {
-                              providerContainer.read(clientOwnCommandsStateProvider).addCommand(
-                                    DbCmdGenerateEnumValuesFromFiles.values(
-                                      entityId: widget.data.id,
-                                    ),
-                                  );
-                            },
-                            icon: Icon(
-                              FontAwesomeIcons.play,
-                              color: (_showSettings || !_validateDbSettings())
-                                  ? Colors.white.withValues(alpha: 0.3)
-                                  : kColorAccentGreen,
-                              size: 20 * kScale,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                  if (_autoByFile && _showSettings) ...[
-                    kStyle.kPropertiesVerticalDivider,
-                    TooltipWrapper(
-                      message: Loc.get.filePathRegexTooltip,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              decoration: kStyle.kInputTextStyleProperties.copyWith(
-                                fillColor: _isRegExpPatternValid(_filePathRegexController.text, isMandatory: true) ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                focusColor: _isRegExpPatternValid(_filePathRegexController.text, isMandatory: true) ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                hoverColor: _isRegExpPatternValid(_filePathRegexController.text, isMandatory: true) ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                label: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      Loc.get.filePathRegex,
-                                      style: kStyle.kTextSmall,
-                                    ),
-                                    Text(
-                                      ' *',
-                                      style: kStyle.kTextSmall.copyWith(color: kColorAccentRed, fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              controller: _filePathRegexController,
-                              onChanged: (_) => setState(() {}),
-                            ),
-                          ),
-                        ],
                       ),
                     ),
-                    kStyle.kPropertiesVerticalDivider,
-                    TooltipWrapper(
-                      message: Loc.get.filePathRegexExcludeTooltip,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              decoration: kStyle.kInputTextStyleProperties.copyWith(
-                                fillColor: _isRegExpPatternValid(_filePathRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                focusColor: _isRegExpPatternValid(_filePathRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                hoverColor: _isRegExpPatternValid(_filePathRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                labelText: Loc.get.filePathRegexExclude,
-                              ),
-                              controller: _filePathRegexExcludeController,
-                              onChanged: (_) => setState(() {}),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    kStyle.kPropertiesVerticalDivider,
-                    TooltipWrapper(
-                      message: Loc.get.fileContentRegexIncludeTooltip,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              decoration: kStyle.kInputTextStyleProperties.copyWith(
-                                fillColor: _isRegExpPatternValid(_fileContentRegexIncludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                focusColor: _isRegExpPatternValid(_fileContentRegexIncludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                hoverColor: _isRegExpPatternValid(_fileContentRegexIncludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                labelText: Loc.get.fileContentRegexInclude,
-                              ),
-                              controller: _fileContentRegexIncludeController,
-                              onChanged: (_) => setState(() {}),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    kStyle.kPropertiesVerticalDivider,
-                    TooltipWrapper(
-                      message: Loc.get.fileContentRegexExcludeTooltip,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              decoration: kStyle.kInputTextStyleProperties.copyWith(
-                                fillColor: _isRegExpPatternValid(_fileContentRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                focusColor: _isRegExpPatternValid(_fileContentRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                hoverColor: _isRegExpPatternValid(_fileContentRegexExcludeController.text, isMandatory: false) ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                labelText: Loc.get.fileContentRegexExclude,
-                              ),
-                              controller: _fileContentRegexExcludeController,
-                              onChanged: (_) => setState(() {}),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    kStyle.kPropertiesVerticalDivider,
-                    TooltipWrapper(
-                      message: Loc.get.enumNameFromRegexTooltip,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              decoration: kStyle.kInputTextStyleProperties.copyWith(
-                                fillColor: _isEnumNameFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                focusColor: _isEnumNameFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                hoverColor: _isEnumNameFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                label: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      Loc.get.enumNameFromRegex,
-                                      style: kStyle.kTextSmall,
-                                    ),
-                                    Text(
-                                      ' *',
-                                      style: kStyle.kTextSmall.copyWith(color: kColorAccentRed, fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              controller: _enumNameFromRegexController,
-                              onChanged: (_) => setState(() {}),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    kStyle.kPropertiesVerticalDivider,
-                    TooltipWrapper(
-                      message: Loc.get.pathValueFromRegexTooltip,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              decoration: kStyle.kInputTextStyleProperties.copyWith(
-                                fillColor: _isPathValueFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                focusColor: _isPathValueFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                hoverColor: _isPathValueFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
-                                labelText: Loc.get.pathValueFromRegex,
-                              ),
-                              controller: _pathValueFromRegexController,
-                              onChanged: (_) => setState(() {}),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (_hasAnyChanges()) ...[
-                      kStyle.kPropertiesVerticalDivider,
+                    if (_autoByFile) ...[
+                      SizedBox(height: 2 * kScale),
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          IconButtonTransparent(
-                            size: 35 * kScale,
-                            enabled: _validateLocalSettings(),
-                            onClick: () {
-                              _saveSettings();
-                            },
-                            icon: Icon(
-                              FontAwesomeIcons.check,
-                              color: !_validateLocalSettings()
-                                  ? kColorAccentGreen.withValues(alpha: 0.3)
-                                  : kColorAccentGreen,
-                              size: 20 * kScale,
+                          TooltipWrapper(
+                            message: Loc.get.autoByFileSettingsTooltip,
+                            child: IconButtonTransparent(
+                              size: 35 * kScale,
+                              onClick: () {
+                                setState(() {
+                                  _showSettings = !_showSettings;
+                                });
+                              },
+                              icon: FaIcon(
+                                FontAwesomeIcons.gear,
+                                color: _showSettings ? kColorAccentBlue : Colors.white,
+                                size: 20 * kScale,
+                              ),
                             ),
                           ),
-                          IconButtonTransparent(
-                            size: 35 * kScale,
-                            onClick: () {
-                              setState(() {
-                                _initControllers();
-                              });
-                            },
-                            icon: Icon(
-                              FontAwesomeIcons.xmark,
-                              color: kColorAccentRed,
-                              size: 27 * kScale,
+                          SizedBox(width: 10 * kScale),
+                          TooltipWrapper(
+                            message: Loc.get.runTooltip,
+                            child: IconButtonTransparent(
+                              size: 35 * kScale,
+                              enabled: !_showSettings && _validateDbSettings(),
+                              onClick: () {
+                                providerContainer.read(clientOwnCommandsStateProvider).addCommand(
+                                      DbCmdGenerateEnumValuesFromFiles.values(
+                                        entityId: widget.data.id,
+                                      ),
+                                    );
+                              },
+                              icon: FaIcon(
+                                FontAwesomeIcons.play,
+                                color: (_showSettings || !_validateDbSettings()) ? Colors.white.withValues(alpha: 0.3) : kColorAccentGreen,
+                                size: 20 * kScale,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ],
+                    if (_autoByFile && _showSettings) ...[
+                      kStyle.kPropertiesVerticalDivider,
+                      TooltipWrapper(
+                        message: Loc.get.filePathRegexTooltip,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                decoration: kStyle.kInputTextStyleProperties.copyWith(
+                                  fillColor: _isRegExpPatternValid(_filePathRegexController.text, isMandatory: true)
+                                      ? null
+                                      : kColorAccentRed.withValues(alpha: 0.15),
+                                  focusColor: _isRegExpPatternValid(_filePathRegexController.text, isMandatory: true)
+                                      ? null
+                                      : kColorAccentRed.withValues(alpha: 0.15),
+                                  hoverColor: _isRegExpPatternValid(_filePathRegexController.text, isMandatory: true)
+                                      ? null
+                                      : kColorAccentRed.withValues(alpha: 0.15),
+                                  label: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        Loc.get.filePathRegex,
+                                        style: kStyle.kTextSmall,
+                                      ),
+                                      Text(
+                                        ' *',
+                                        style: kStyle.kTextSmall.copyWith(color: kColorAccentRed, fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                controller: _filePathRegexController,
+                                onChanged: (_) => setState(() {}),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      kStyle.kPropertiesVerticalDivider,
+                      TooltipWrapper(
+                        message: Loc.get.filePathRegexExcludeTooltip,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                decoration: kStyle.kInputTextStyleProperties.copyWith(
+                                  fillColor: _isRegExpPatternValid(_filePathRegexExcludeController.text, isMandatory: false)
+                                      ? null
+                                      : kColorAccentRed.withValues(alpha: 0.15),
+                                  focusColor: _isRegExpPatternValid(_filePathRegexExcludeController.text, isMandatory: false)
+                                      ? null
+                                      : kColorAccentRed.withValues(alpha: 0.15),
+                                  hoverColor: _isRegExpPatternValid(_filePathRegexExcludeController.text, isMandatory: false)
+                                      ? null
+                                      : kColorAccentRed.withValues(alpha: 0.15),
+                                  labelText: Loc.get.filePathRegexExclude,
+                                ),
+                                controller: _filePathRegexExcludeController,
+                                onChanged: (_) => setState(() {}),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      kStyle.kPropertiesVerticalDivider,
+                      TooltipWrapper(
+                        message: Loc.get.fileContentRegexIncludeTooltip,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                decoration: kStyle.kInputTextStyleProperties.copyWith(
+                                  fillColor: _isRegExpPatternValid(_fileContentRegexIncludeController.text, isMandatory: false)
+                                      ? null
+                                      : kColorAccentRed.withValues(alpha: 0.15),
+                                  focusColor: _isRegExpPatternValid(_fileContentRegexIncludeController.text, isMandatory: false)
+                                      ? null
+                                      : kColorAccentRed.withValues(alpha: 0.15),
+                                  hoverColor: _isRegExpPatternValid(_fileContentRegexIncludeController.text, isMandatory: false)
+                                      ? null
+                                      : kColorAccentRed.withValues(alpha: 0.15),
+                                  labelText: Loc.get.fileContentRegexInclude,
+                                ),
+                                controller: _fileContentRegexIncludeController,
+                                onChanged: (_) => setState(() {}),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      kStyle.kPropertiesVerticalDivider,
+                      TooltipWrapper(
+                        message: Loc.get.fileContentRegexExcludeTooltip,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                decoration: kStyle.kInputTextStyleProperties.copyWith(
+                                  fillColor: _isRegExpPatternValid(_fileContentRegexExcludeController.text, isMandatory: false)
+                                      ? null
+                                      : kColorAccentRed.withValues(alpha: 0.15),
+                                  focusColor: _isRegExpPatternValid(_fileContentRegexExcludeController.text, isMandatory: false)
+                                      ? null
+                                      : kColorAccentRed.withValues(alpha: 0.15),
+                                  hoverColor: _isRegExpPatternValid(_fileContentRegexExcludeController.text, isMandatory: false)
+                                      ? null
+                                      : kColorAccentRed.withValues(alpha: 0.15),
+                                  labelText: Loc.get.fileContentRegexExclude,
+                                ),
+                                controller: _fileContentRegexExcludeController,
+                                onChanged: (_) => setState(() {}),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      kStyle.kPropertiesVerticalDivider,
+                      TooltipWrapper(
+                        message: Loc.get.enumNameFromRegexTooltip,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                decoration: kStyle.kInputTextStyleProperties.copyWith(
+                                  fillColor: _isEnumNameFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                  focusColor: _isEnumNameFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                  hoverColor: _isEnumNameFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                  label: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        Loc.get.enumNameFromRegex,
+                                        style: kStyle.kTextSmall,
+                                      ),
+                                      Text(
+                                        ' *',
+                                        style: kStyle.kTextSmall.copyWith(color: kColorAccentRed, fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                controller: _enumNameFromRegexController,
+                                onChanged: (_) => setState(() {}),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      kStyle.kPropertiesVerticalDivider,
+                      TooltipWrapper(
+                        message: Loc.get.pathValueFromRegexTooltip,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                decoration: kStyle.kInputTextStyleProperties.copyWith(
+                                  fillColor: _isPathValueFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                  focusColor: _isPathValueFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                  hoverColor: _isPathValueFromRegexValid() ? null : kColorAccentRed.withValues(alpha: 0.15),
+                                  labelText: Loc.get.pathValueFromRegex,
+                                ),
+                                controller: _pathValueFromRegexController,
+                                onChanged: (_) => setState(() {}),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (_hasAnyChanges()) ...[
+                        kStyle.kPropertiesVerticalDivider,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            IconButtonTransparent(
+                              size: 35 * kScale,
+                              enabled: _validateLocalSettings(),
+                              onClick: () {
+                                _saveSettings();
+                              },
+                              icon: FaIcon(
+                                FontAwesomeIcons.check,
+                                color: !_validateLocalSettings() ? kColorAccentGreen.withValues(alpha: 0.3) : kColorAccentGreen,
+                                size: 20 * kScale,
+                              ),
+                            ),
+                            IconButtonTransparent(
+                              size: 35 * kScale,
+                              onClick: () {
+                                setState(() {
+                                  _initControllers();
+                                });
+                              },
+                              icon: FaIcon(
+                                FontAwesomeIcons.xmark,
+                                color: kColorAccentRed,
+                                size: 27 * kScale,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
             ),
           ],
         );

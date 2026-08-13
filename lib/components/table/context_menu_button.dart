@@ -61,7 +61,7 @@ class IconPlus extends StatelessWidget {
     return Consumer(
       builder: (context, ref, child) {
         ref.watch(styleStateProvider);
-        return Icon(
+        return FaIcon(
           FontAwesomeIcons.plus,
           color: kColorAccentBlue,
           size: 18 * kScale,

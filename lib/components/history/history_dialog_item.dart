@@ -61,7 +61,7 @@ class HistoryDialogItem extends StatelessWidget {
               IconButtonTransparent(
                 size: 35 * kScale,
                 onClick: _handleCopyClicked,
-                icon: Icon(
+                icon: FaIcon(
                   FontAwesomeIcons.copy,
                   size: 19 * kScale,
                   color: kColorPrimaryLight,
@@ -70,12 +70,12 @@ class HistoryDialogItem extends StatelessWidget {
               SizedBox(width: 15 * kScale),
               if (executionResult == true) //
                 ...[
-                Icon(FontAwesomeIcons.circleCheck, size: 20 * kScale, color: kColorAccentTeal),
+                FaIcon(FontAwesomeIcons.circleCheck, size: 20 * kScale, color: kColorAccentTeal),
                 SizedBox(width: 15 * kScale),
               ],
               if (executionResult == false) //
                 ...[
-                Icon(FontAwesomeIcons.circleXmark, size: 20 * kScale, color: kColorAccentRed),
+                FaIcon(FontAwesomeIcons.circleXmark, size: 20 * kScale, color: kColorAccentRed),
                 SizedBox(width: 15 * kScale),
               ],
             ],

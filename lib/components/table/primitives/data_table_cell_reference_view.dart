@@ -140,7 +140,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
                   if (actionsMode)
                     IconButtonTransparent(
                       size: 22 * kScale,
-                      icon: Icon(
+                      icon: FaIcon(
                         FontAwesomeIcons.magnifyingGlass,
                         color: kColorPrimaryLight,
                         size: 12 * kScale,
@@ -153,7 +153,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
                       imagePath: absolutePath,
                       child: IconButtonTransparent(
                         size: 22 * kScale,
-                        icon: Icon(
+                        icon: FaIcon(
                           FontAwesomeIcons.folderOpen,
                           color: kColorPrimaryLight,
                           size: 12 * kScale,
@@ -166,7 +166,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
                       imagePath: absolutePath,
                       child: IconButtonTransparent(
                         size: 22 * kScale,
-                        icon: Icon(
+                        icon: FaIcon(
                           FontAwesomeIcons.arrowUpRightFromSquare,
                           color: kColorPrimaryLight,
                           size: 12 * kScale,
@@ -178,7 +178,7 @@ class DataTableCellReferenceView extends ConsumerWidget {
                   if (actionsMode && selectedItem is DataTableRow)
                     IconButtonTransparent(
                       size: 22 * kScale,
-                      icon: Icon(
+                      icon: FaIcon(
                         FontAwesomeIcons.mapPin,
                         color: kColorPrimaryLight,
                         size: 12 * kScale,

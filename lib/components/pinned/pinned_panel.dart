@@ -61,7 +61,7 @@ class _PinnedPanelState extends State<PinnedPanel> {
                   children: [
                     SizedBox(
                       width: 25 * kScale,
-                      child: Icon(
+                      child: FaIcon(
                         FontAwesomeIcons.mapPin,
                         color: kColorPrimaryLight,
                         size: 14 * kScale,
@@ -77,7 +77,7 @@ class _PinnedPanelState extends State<PinnedPanel> {
                       message: Loc.get.closePinnedItemsTooltip,
                       child: IconButtonTransparent(
                         size: 35 * kScale,
-                        icon: Icon(
+                        icon: FaIcon(
                           FontAwesomeIcons.xmark,
                           color: kColorPrimaryLight,
                           size: 20 * kScale,
