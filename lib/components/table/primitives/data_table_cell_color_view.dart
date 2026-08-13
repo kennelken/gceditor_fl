@@ -72,49 +72,46 @@ class DataTableCellColorView extends ConsumerWidget {
       context: popupContext!,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: kTextColorLightest,
+          backgroundColor: kColorPrimaryDarker,
           content: SingleChildScrollView(
             child: Column(
               children: [
-                Theme(
-                  data: kStyle.kInputThemeLight,
-                  child: ColorPicker(
-                    pickerColor: pickerColor,
-                    onColorChanged: (color) {
-                      pickerColor = color;
-                    },
-                    colorPickerWidth: 300 * kScale,
-                    pickerAreaHeightPercent: 0.7,
-                    enableAlpha: true,
-                    displayThumbColor: true,
-                    paletteType: PaletteType.hslWithHue,
-                    labelTypes: const [ColorLabelType.rgb, ColorLabelType.hex, ColorLabelType.hsl, ColorLabelType.hsv],
-                    pickerAreaBorderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(2 * kScale),
-                      topRight: Radius.circular(2 * kScale),
-                    ),
-                    hexInputBar: false,
-                    hexInputController: textController,
-                    portraitOnly: true,
+                ColorPicker(
+                  pickerColor: pickerColor,
+                  onColorChanged: (color) {
+                    pickerColor = color;
+                  },
+                  colorPickerWidth: 300 * kScale,
+                  pickerAreaHeightPercent: 0.7,
+                  enableAlpha: true,
+                  displayThumbColor: true,
+                  paletteType: PaletteType.hslWithHue,
+                  labelTypes: const [ColorLabelType.rgb, ColorLabelType.hex, ColorLabelType.hsl, ColorLabelType.hsv],
+                  pickerAreaBorderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(2 * kScale),
+                    topRight: Radius.circular(2 * kScale),
                   ),
+                  hexInputBar: false,
+                  hexInputController: textController,
+                  portraitOnly: true,
                 ),
-                Theme(
-                  data: kStyle.kInputThemeLight,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 16 * kScale, top: 0 * kScale, right: 16 * kScale, bottom: 16 * kScale),
-                    child: TextField(
-                      textAlign: TextAlign.center,
-                      controller: textController,
-                      focusNode: focusNode,
-                      autofocus: true,
-                      maxLength: 9,
-                      inputFormatters: [
-                        UpperCaseTextFormatter(),
-                        FilteringTextInputFormatter.allow(RegExp(kValidHexPattern)),
-                      ],
-                      decoration: const InputDecoration(counter: SizedBox()),
-                      style: kStyle.kTextSmall.copyWith(color: kColorPrimaryLighter),
+                Padding(
+                  padding: EdgeInsets.only(left: 16 * kScale, top: 0 * kScale, right: 16 * kScale, bottom: 16 * kScale),
+                  child: TextField(
+                    textAlign: TextAlign.center,
+                    controller: textController,
+                    focusNode: focusNode,
+                    autofocus: true,
+                    maxLength: 9,
+                    inputFormatters: [
+                      UpperCaseTextFormatter(),
+                      FilteringTextInputFormatter.allow(RegExp(kValidHexPattern)),
+                    ],
+                    decoration: kStyle.kInputTextStylePropertiesDark.copyWith(
+                      counter: const SizedBox(),
+                      fillColor: kColorPrimaryDarker2,
                     ),
+                    style: kStyle.kTextSmall.copyWith(color: kTextColorLightest),
                   ),
                 )
               ],
@@ -130,7 +127,7 @@ class DataTableCellColorView extends ConsumerWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   Loc.get.buttonCancel,
-                  style: kStyle.kTextSmall.copyWith(color: kColorPrimary, fontWeight: FontWeight.bold),
+                  style: kStyle.kTextSmall.copyWith(color: kTextColorLight, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -144,7 +141,7 @@ class DataTableCellColorView extends ConsumerWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   Loc.get.buttonApply,
-                  style: kStyle.kTextSmall.copyWith(color: kColorPrimary, fontWeight: FontWeight.bold),
+                  style: kStyle.kTextSmall.copyWith(color: kColorAccentBlue, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
