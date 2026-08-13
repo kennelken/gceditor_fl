@@ -25,7 +25,7 @@ class InfoButton extends StatelessWidget {
           elevation: 0,
           shape: const CircleBorder(),
           color: kColorTransparent,
-          child: Icon(
+          child: FaIcon(
             FontAwesomeIcons.circleInfo,
             color: color ?? kTextColorLight,
             size: 20 * kScale,

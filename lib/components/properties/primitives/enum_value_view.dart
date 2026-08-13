@@ -73,9 +73,7 @@ class _EnumValueViewState extends State<EnumValueView> {
       final absolutePath = Utils.getAbsolutePath(ref.watch(appStateProvider).state.projectFile, widget.data.fullPath);
 
       final navData = ref.watch(clientNavigationServiceProvider).state.navigationData;
-      final isNavHighlighted = navData != null &&
-          navData.classId == widget.entity.id &&
-          navData.enumValueId == widget.data.id;
+      final isNavHighlighted = navData != null && navData.classId == widget.entity.id && navData.enumValueId == widget.data.id;
 
       final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
         MetaValueCoordinates(classId: widget.entity.id, enumId: widget.data.id),
@@ -142,7 +140,7 @@ class _EnumValueViewState extends State<EnumValueView> {
                 imagePath: absolutePath,
                 child: IconButtonTransparent(
                   size: 22 * kScale,
-                  icon: Icon(
+                  icon: FaIcon(
                     FontAwesomeIcons.folderOpen,
                     color: kColorPrimaryLight,
                     size: 12 * kScale,
@@ -155,7 +153,7 @@ class _EnumValueViewState extends State<EnumValueView> {
                 imagePath: absolutePath,
                 child: IconButtonTransparent(
                   size: 22 * kScale,
-                  icon: Icon(
+                  icon: FaIcon(
                     FontAwesomeIcons.arrowUpRightFromSquare,
                     color: kColorPrimaryLight,
                     size: 12 * kScale,
@@ -169,7 +167,7 @@ class _EnumValueViewState extends State<EnumValueView> {
                 message: Loc.get.findReferencesTooltip,
                 child: IconButtonTransparent(
                   size: 22 * kScale,
-                  icon: Icon(
+                  icon: FaIcon(
                     FontAwesomeIcons.magnifyingGlass,
                     color: kColorPrimaryLight,
                     size: 12 * kScale,

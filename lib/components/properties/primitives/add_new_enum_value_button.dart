@@ -19,7 +19,7 @@ class AddNewEnumValueButton extends StatelessWidget {
       child: TextButton.icon(
         style: kButtonTransparent.copyWith(alignment: Alignment.centerLeft),
         onPressed: onClick,
-        icon: Icon(
+        icon: FaIcon(
           FontAwesomeIcons.plus,
           color: kColorAccentBlue,
           size: 20 * kScale,

@@ -10,7 +10,7 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  exclude: [build/**, lib/main.mapper.g.dart, lib/r.dart]
+  exclude: [build/**, lib/main.mapper.g.dart, lib/r.dart, android/**, ios/**, web/**, windows/**, macos/**, linux/**]
   #language:
   #  strict-raw-types: true
   #strong-mode:

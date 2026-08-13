@@ -84,7 +84,7 @@ class _PropertyStringViewState extends State<PropertyStringView> {
             message: Loc.get.findReferencesTooltip,
             child: IconButtonTransparent(
               size: 22 * kScale,
-              icon: Icon(
+              icon: FaIcon(
                 FontAwesomeIcons.magnifyingGlass,
                 color: kColorPrimaryLight,
                 size: 12 * kScale,

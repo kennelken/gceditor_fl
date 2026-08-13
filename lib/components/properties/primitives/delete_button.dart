@@ -33,7 +33,7 @@ class DeleteButton extends StatelessWidget {
           onPressed: () => PopupMessages.show(PopupMessageData(message: Loc.get.longTapToDelete)),
           onLongPress: onAction,
           child: FittedBox(
-            child: Icon(
+            child: FaIcon(
               FontAwesomeIcons.trashCan,
               color: color ?? kColorAccentRed2,
               size: (size ?? 20) * kScale,

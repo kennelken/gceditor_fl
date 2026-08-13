@@ -88,7 +88,7 @@ class DataTableColumnHeadView extends ConsumerWidget {
                         message: Loc.get.buttonFillColumnTooltip,
                         child: IconButtonTransparent(
                           onClick: () => _openFillColumnDialog(index),
-                          icon: Icon(
+                          icon: FaIcon(
                             FontAwesomeIcons.fillDrip,
                             size: 12.0 * kScale,
                             color: kColorAccentBlue,

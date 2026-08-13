@@ -93,7 +93,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                   child: IconButtonTransparent(
                     size: 35 * kScale,
                     enabled: _isCopyFromClipboardAvailable,
-                    icon: Icon(
+                    icon: FaIcon(
                       FontAwesomeIcons.fileImport,
                       color: kColorAccentBlue.withAlpha(_isCopyFromClipboardAvailable ? kIconActiveAlpha : kIconInactiveAlpha),
                       size: 17 * kScale,
@@ -106,7 +106,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                   child: IconButtonTransparent(
                     size: 35 * kScale,
                     enabled: _isCopyAvailable,
-                    icon: Icon(
+                    icon: FaIcon(
                       FontAwesomeIcons.copy,
                       color: kColorAccentBlue.withAlpha(_isCopyAvailable ? kIconActiveAlpha : kIconInactiveAlpha),
                       size: 17 * kScale,
@@ -118,7 +118,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                   message: Loc.get.cut,
                   child: IconButtonTransparent(
                     size: 35 * kScale,
-                    icon: Icon(
+                    icon: FaIcon(
                       FontAwesomeIcons.scissors,
                       color: kColorAccentOrange.withAlpha(_isCopyAvailable ? kIconActiveAlpha : kIconInactiveAlpha),
                       size: 17 * kScale,
@@ -136,7 +136,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                     ),
                     child: ContextMenuButton(
                       controller: _pastePopupController,
-                      icon: Icon(
+                      icon: FaIcon(
                         FontAwesomeIcons.paste,
                         color: kColorAccentBlue.withAlpha(_isPasteAvailable ? kIconActiveAlpha : kIconInactiveAlpha),
                         size: 17 * kScale,
@@ -161,7 +161,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
                   message: Loc.get.deselect,
                   child: IconButtonTransparent(
                     size: 35 * kScale,
-                    icon: Icon(
+                    icon: FaIcon(
                       FontAwesomeIcons.xmark,
                       color: kColorPrimaryLight,
                       size: 20 * kScale,
@@ -320,9 +320,7 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
 
     final rows = clipboardText!.text!.split(ClientDataSelectionStateNotifier.rowsDelimiterPattern);
     if (rows.length < 2) {
-      providerContainer
-          .read(logStateProvider)
-          .addMessage(LogEntry(LogLevel.error, Loc.get.atLeastTwoRows));
+      providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error, Loc.get.atLeastTwoRows));
       return;
     }
 
@@ -342,8 +340,9 @@ class _DataSelectionPanelState extends State<DataSelectionPanel> {
         }
 
         if (rowData[0] != ClientDataSelectionStateNotifier.idColumnName) {
-          providerContainer.read(logStateProvider).addMessage(LogEntry(LogLevel.error,
-              Loc.get.firstRowShouldContain(ClientDataSelectionStateNotifier.idColumnName)));
+          providerContainer
+              .read(logStateProvider)
+              .addMessage(LogEntry(LogLevel.error, Loc.get.firstRowShouldContain(ClientDataSelectionStateNotifier.idColumnName)));
           return;
         }
 

@@ -162,51 +162,16 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 10 * kScale, horizontal: 5 * kScale),
               color: kColorBlueMetaPropertiesGroup,
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    if (!_needClassSelector(type)) ...[
-                      Expanded(child: _getTypeDropDownSelector(classFieldTypes))
-                    ] else ...[
-                      SizedBox(
-                        width: 150 * kScale,
-                        child: _getTypeDropDownSelector(classFieldTypes),
-                      ),
-                      _getHorizontalDivider(),
-                      Expanded(
-                        child: Builder(builder: (context) {
-                          final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
-                            MetaValueCoordinates(
-                              classId: classEntity.id,
-                              fieldId: widget.data.id,
-                              fieldValueType: FindResultFieldDefinitionValueType.simple,
-                            ),
-                            ref.watch(clientFindStateProvider).state,
-                            ref.watch(clientNavigationServiceProvider).state,
-                          );
-
-                          return _getReferenceClassSelector(
-                            classes: allClasses,
-                            selectedItem: model.cache.getClass(typeRefId),
-                            onValueSelected: _handleTypeRefSelected,
-                            inputDecoration: idInputDecoration,
-                          );
-                        }),
-                      ),
-                    ],
-                  ],
-                ),
-                if (type.hasKeyType()) ...[
-                  kStyle.kPropertiesVerticalDivider,
+              child: Column(
+                children: [
                   Row(
                     children: [
-                      if (!_needClassSelector(keyType)) ...[
-                        Expanded(child: _getKeyTypeDropDownSelector(simpleClassFieldTypes))
+                      if (!_needClassSelector(type)) ...[
+                        Expanded(child: _getTypeDropDownSelector(classFieldTypes))
                       ] else ...[
                         SizedBox(
                           width: 150 * kScale,
-                          child: _getKeyTypeDropDownSelector(simpleClassFieldTypes),
+                          child: _getTypeDropDownSelector(classFieldTypes),
                         ),
                         _getHorizontalDivider(),
                         Expanded(
@@ -215,7 +180,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                               MetaValueCoordinates(
                                 classId: classEntity.id,
                                 fieldId: widget.data.id,
-                                fieldValueType: FindResultFieldDefinitionValueType.key,
+                                fieldValueType: FindResultFieldDefinitionValueType.simple,
                               ),
                               ref.watch(clientFindStateProvider).state,
                               ref.watch(clientNavigationServiceProvider).state,
@@ -223,8 +188,8 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
 
                             return _getReferenceClassSelector(
                               classes: allClasses,
-                              selectedItem: model.cache.getClass(keyTypeRefId),
-                              onValueSelected: _handleKeyTypeRefSelected,
+                              selectedItem: model.cache.getClass(typeRefId),
+                              onValueSelected: _handleTypeRefSelected,
                               inputDecoration: idInputDecoration,
                             );
                           }),
@@ -232,17 +197,85 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                       ],
                     ],
                   ),
-                ],
-                if (type.hasValueType()) ...[
-                  kStyle.kPropertiesVerticalDivider,
-                  Row(
-                    children: [
-                      if (!_needClassSelector(valueType)) ...[
-                        Expanded(child: _getValueTypeDropDownSelector(simpleClassFieldTypes))
-                      ] else ...[
+                  if (type.hasKeyType()) ...[
+                    kStyle.kPropertiesVerticalDivider,
+                    Row(
+                      children: [
+                        if (!_needClassSelector(keyType)) ...[
+                          Expanded(child: _getKeyTypeDropDownSelector(simpleClassFieldTypes))
+                        ] else ...[
+                          SizedBox(
+                            width: 150 * kScale,
+                            child: _getKeyTypeDropDownSelector(simpleClassFieldTypes),
+                          ),
+                          _getHorizontalDivider(),
+                          Expanded(
+                            child: Builder(builder: (context) {
+                              final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
+                                MetaValueCoordinates(
+                                  classId: classEntity.id,
+                                  fieldId: widget.data.id,
+                                  fieldValueType: FindResultFieldDefinitionValueType.key,
+                                ),
+                                ref.watch(clientFindStateProvider).state,
+                                ref.watch(clientNavigationServiceProvider).state,
+                              );
+
+                              return _getReferenceClassSelector(
+                                classes: allClasses,
+                                selectedItem: model.cache.getClass(keyTypeRefId),
+                                onValueSelected: _handleKeyTypeRefSelected,
+                                inputDecoration: idInputDecoration,
+                              );
+                            }),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                  if (type.hasValueType()) ...[
+                    kStyle.kPropertiesVerticalDivider,
+                    Row(
+                      children: [
+                        if (!_needClassSelector(valueType)) ...[
+                          Expanded(child: _getValueTypeDropDownSelector(simpleClassFieldTypes))
+                        ] else ...[
+                          SizedBox(
+                            width: 150 * kScale,
+                            child: _getValueTypeDropDownSelector(simpleClassFieldTypes),
+                          ),
+                          _getHorizontalDivider(),
+                          Expanded(
+                            child: Builder(builder: (context) {
+                              final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
+                                MetaValueCoordinates(
+                                  classId: classEntity.id,
+                                  fieldId: widget.data.id,
+                                  fieldValueType: FindResultFieldDefinitionValueType.value,
+                                ),
+                                ref.watch(clientFindStateProvider).state,
+                                ref.watch(clientNavigationServiceProvider).state,
+                              );
+
+                              return _getReferenceClassSelector(
+                                classes: allClasses,
+                                selectedItem: model.cache.getClass(valueTypeRefId),
+                                onValueSelected: _handleValueTypeRefSelected,
+                                inputDecoration: idInputDecoration,
+                              );
+                            }),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                  if (type.hasMultiValueType()) ...[
+                    kStyle.kPropertiesVerticalDivider,
+                    Row(
+                      children: [
                         SizedBox(
                           width: 150 * kScale,
-                          child: _getValueTypeDropDownSelector(simpleClassFieldTypes),
+                          child: _getValueTypeDropDownSelector(multiValueFieldTypes),
                         ),
                         _getHorizontalDivider(),
                         Expanded(
@@ -258,7 +291,7 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                             );
 
                             return _getReferenceClassSelector(
-                              classes: allClasses,
+                              classes: allNonAbstractClasses,
                               selectedItem: model.cache.getClass(valueTypeRefId),
                               onValueSelected: _handleValueTypeRefSelected,
                               inputDecoration: idInputDecoration,
@@ -266,87 +299,54 @@ class _ClassMetaClassFieldPropertiesViewPropertiesState extends State<ClassMetaC
                           }),
                         ),
                       ],
-                    ],
-                  ),
-                ],
-                if (type.hasMultiValueType()) ...[
-                  kStyle.kPropertiesVerticalDivider,
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 150 * kScale,
-                        child: _getValueTypeDropDownSelector(multiValueFieldTypes),
-                      ),
-                      _getHorizontalDivider(),
-                      Expanded(
-                        child: Builder(builder: (context) {
-                          final idInputDecoration = DbModelUtils.getMetaFieldInputDecoration(
-                            MetaValueCoordinates(
-                              classId: classEntity.id,
-                              fieldId: widget.data.id,
-                              fieldValueType: FindResultFieldDefinitionValueType.value,
-                            ),
-                            ref.watch(clientFindStateProvider).state,
-                            ref.watch(clientNavigationServiceProvider).state,
-                          );
-
-                          return _getReferenceClassSelector(
-                            classes: allNonAbstractClasses,
-                            selectedItem: model.cache.getClass(valueTypeRefId),
-                            onValueSelected: _handleValueTypeRefSelected,
-                            inputDecoration: idInputDecoration,
-                          );
-                        }),
-                      ),
-                    ],
-                  ),
-                ],
-                kStyle.kPropertiesVerticalDivider,
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: defaultValueController,
-                        decoration: kStyle.kInputTextStyleProperties.copyWith(labelText: Loc.get.defaultValueTitle),
-                      ),
-                    ),
-                    _getHorizontalDivider(),
-                    _getHorizontalDivider(),
-                    InfoButton(
-                      text: Loc.get.defaultFieldInfo,
                     ),
                   ],
-                ),
-                if (_hasAnyChanges()) ...[
                   kStyle.kPropertiesVerticalDivider,
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      IconButtonTransparent(
-                        size: 35 * kScale,
-                        onClick: _applyTypes,
-                        icon: Icon(
-                          FontAwesomeIcons.check,
-                          color: kColorAccentGreen,
-                          size: 20 * kScale,
+                      Expanded(
+                        child: TextField(
+                          controller: defaultValueController,
+                          decoration: kStyle.kInputTextStyleProperties.copyWith(labelText: Loc.get.defaultValueTitle),
                         ),
                       ),
-                      IconButtonTransparent(
-                        size: 35 * kScale,
-                        onClick: _revertTypes,
-                        icon: Icon(
-                          FontAwesomeIcons.xmark,
-                          color: kColorAccentRed,
-                          size: 27 * kScale,
-                        ),
+                      _getHorizontalDivider(),
+                      _getHorizontalDivider(),
+                      InfoButton(
+                        text: Loc.get.defaultFieldInfo,
                       ),
                     ],
                   ),
+                  if (_hasAnyChanges()) ...[
+                    kStyle.kPropertiesVerticalDivider,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        IconButtonTransparent(
+                          size: 35 * kScale,
+                          onClick: _applyTypes,
+                          icon: FaIcon(
+                            FontAwesomeIcons.check,
+                            color: kColorAccentGreen,
+                            size: 20 * kScale,
+                          ),
+                        ),
+                        IconButtonTransparent(
+                          size: 35 * kScale,
+                          onClick: _revertTypes,
+                          icon: FaIcon(
+                            FontAwesomeIcons.xmark,
+                            color: kColorAccentRed,
+                            size: 27 * kScale,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
           ),
           kStyle.kPropertiesVerticalDivider,
         ]);

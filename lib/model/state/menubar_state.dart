@@ -202,7 +202,7 @@ class MenubarStateNotifier extends ChangeNotifier {
                               text: Text(Loc.get.expandedViewMenu, style: _styleMenuActive()),
                               onTap: GlobalShortcuts.toggleActions,
                               shortcutStyle: _styleShortcut(),
-                              icon: Icon(
+                              icon: FaIcon(
                                 providerContainer.read(clientViewModeStateProvider).state.actionsMode
                                     ? FontAwesomeIcons.squareCheck
                                     : FontAwesomeIcons.square,
