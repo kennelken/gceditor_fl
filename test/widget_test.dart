@@ -9,6 +9,7 @@ import 'package:gceditor/model/db/data_table_row.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/db/table_meta_entity.dart';
+import 'package:gceditor/model/db/table_meta_group.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:gceditor/components/tree/base_tree_view.dart';
 import 'package:gceditor/model/db/class_meta_group.dart';
@@ -253,5 +254,105 @@ void main() {
 
     // Verify scroll position is still 150.0 and has not reset to 0.0
     expect(scrollableState.position.pixels, 150.0);
+  });
+
+  testWidgets('BaseTreeView updates hierarchy when a class definition is moved inside a folder', (WidgetTester tester) async {
+    final controller = getTreeController();
+    final group = ClassMetaGroup()..id = 'Folder1';
+    final class1 = ClassMetaEntity()..id = 'Class1';
+    final class2 = ClassMetaEntity()..id = 'Class2';
+    group.entries.addAll([class1, class2]);
+
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    final clientNotifier = container.read(clientStateProvider);
+    clientNotifier.setModel(DbModel());
+    clientNotifier.state.model.classes.add(group);
+    clientNotifier.state.isInitialized = true;
+    clientNotifier.state.model.cache.invalidate();
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              height: 500,
+              child: BaseTreeView(
+                treeController: controller,
+                data: () => clientNotifier.state.model.classes,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify initial order: Folder1 -> Class1 -> Class2
+    final textsBefore = find.byType(Text).evaluate().map((e) => (e.widget as Text).data).where((t) => t != null && t.isNotEmpty && !t.startsWith('(')).toList();
+    expect(textsBefore, containsAllInOrder(['Folder1', 'Class1', 'Class2']));
+
+    // Move Class2 before Class1 inside Folder1
+    group.entries.clear();
+    group.entries.addAll([class2, class1]);
+    clientNotifier.state.model.cache.invalidate();
+    clientNotifier.incrementVersion();
+
+    await tester.pumpAndSettle();
+
+    // Verify updated order: Folder1 -> Class2 -> Class1
+    final textsAfter = find.byType(Text).evaluate().map((e) => (e.widget as Text).data).where((t) => t != null && t.isNotEmpty && !t.startsWith('(')).toList();
+    expect(textsAfter, containsAllInOrder(['Folder1', 'Class2', 'Class1']));
+  });
+
+  testWidgets('BaseTreeView updates hierarchy when a table is moved between folders', (WidgetTester tester) async {
+    final controller = getTreeController();
+    final group1 = TableMetaGroup()..id = 'FolderA';
+    final group2 = TableMetaGroup()..id = 'FolderB';
+    final table1 = TableMetaEntity()..id = 'Table1';
+    final table2 = TableMetaEntity()..id = 'Table2';
+    group1.entries.add(table1);
+    group2.entries.add(table2);
+
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    final clientNotifier = container.read(clientStateProvider);
+    clientNotifier.setModel(DbModel());
+    clientNotifier.state.model.tables.addAll([group1, group2]);
+    clientNotifier.state.isInitialized = true;
+    clientNotifier.state.model.cache.invalidate();
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              height: 500,
+              child: BaseTreeView(
+                treeController: controller,
+                data: () => clientNotifier.state.model.tables,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Move Table1 from FolderA to FolderB
+    group1.entries.remove(table1);
+    group2.entries.insert(0, table1);
+    clientNotifier.state.model.cache.invalidate();
+    clientNotifier.incrementVersion();
+
+    await tester.pumpAndSettle();
+
+    // Verify updated order: FolderA -> FolderB -> Table1 -> Table2
+    final texts = find.byType(Text).evaluate().map((e) => (e.widget as Text).data).where((t) => t != null && t.isNotEmpty && !t.startsWith('(')).toList();
+    expect(texts, containsAllInOrder(['FolderA', 'FolderB', 'Table1', 'Table2']));
   });
 }

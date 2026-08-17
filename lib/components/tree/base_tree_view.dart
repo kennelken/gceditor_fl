@@ -22,47 +22,46 @@ class BaseTreeView extends ConsumerWidget {
 
     final newRoots = data();
 
-    if (!_areRootsEqual(treeController.roots, newRoots)) {
-      final hadChildrenBefore = treeController.roots.isNotEmpty;
+    final hadChildrenBefore = treeController.roots.isNotEmpty;
 
-      if (!hadChildrenBefore) {
-        treeController.roots = List.of(newRoots);
-        treeController.expandAll();
-      } else {
-        final collapsedIds = <String>{};
-        void collectCollapsed(Iterable<IIdentifiable> nodes) {
-          for (final node in nodes) {
-            if (!treeController.getExpansionState(node) && node.id.isNotEmpty) {
-              collapsedIds.add(node.id);
-            }
-            final group = node.safeAs<IMetaGroup>();
-            if (group != null) {
-              collectCollapsed(group.entries.cast<IIdentifiable>());
-            }
+    if (!hadChildrenBefore) {
+      treeController.roots = List.of(newRoots);
+      treeController.expandAll();
+    } else {
+      final collapsedIds = <String>{};
+      void collectCollapsed(Iterable<IIdentifiable> nodes) {
+        for (final node in nodes) {
+          if (!treeController.getExpansionState(node) && node.id.isNotEmpty) {
+            collapsedIds.add(node.id);
+          }
+          final group = node.safeAs<IMetaGroup>();
+          if (group != null) {
+            collectCollapsed(group.entries.cast<IIdentifiable>());
           }
         }
-
-        collectCollapsed(treeController.roots);
-
-        treeController.roots = List.of(newRoots);
-        treeController.toggledNodes.clear();
-
-        void restoreCollapsed(Iterable<IIdentifiable> nodes) {
-          for (final node in nodes) {
-            if (collapsedIds.contains(node.id)) {
-              treeController.setExpansionState(node, false);
-            } else {
-              treeController.setExpansionState(node, true);
-            }
-            final group = node.safeAs<IMetaGroup>();
-            if (group != null) {
-              restoreCollapsed(group.entries.cast<IIdentifiable>());
-            }
-          }
-        }
-
-        restoreCollapsed(newRoots);
       }
+
+      collectCollapsed(treeController.roots);
+
+      treeController.roots = List.of(newRoots);
+      treeController.toggledNodes.clear();
+
+      void restoreCollapsed(Iterable<IIdentifiable> nodes) {
+        for (final node in nodes) {
+          if (collapsedIds.contains(node.id)) {
+            treeController.setExpansionState(node, false);
+          } else {
+            treeController.setExpansionState(node, true);
+          }
+          final group = node.safeAs<IMetaGroup>();
+          if (group != null) {
+            restoreCollapsed(group.entries.cast<IIdentifiable>());
+          }
+        }
+      }
+
+      restoreCollapsed(newRoots);
+      treeController.rebuild();
     }
 
     return AnimatedTreeView<IIdentifiable>(
@@ -77,16 +76,6 @@ class BaseTreeView extends ConsumerWidget {
         );
       },
     );
-  }
-
-  bool _areRootsEqual(Iterable<IIdentifiable> a, List<IIdentifiable> b) {
-    if (identical(a, b)) return true;
-    if (a.length != b.length) return false;
-    final aList = a.toList();
-    for (var i = 0; i < aList.length; i++) {
-      if (!identical(aList[i], b[i])) return false;
-    }
-    return true;
   }
 }
 
