@@ -37,6 +37,7 @@ class DataTableRowIdView extends ConsumerWidget {
   late final FocusNode _focusNode;
   late final bool isPinnedItem;
   late final DataTableValueCoordinates? coordinates;
+  bool _hadFocus = false;
 
   DataTableRowIdView({
     super.key,
@@ -60,7 +61,7 @@ class DataTableRowIdView extends ConsumerWidget {
     final width = DbModelUtils.getTableIdsColumnWidth(table);
 
     final navData = ref.watch(clientNavigationServiceProvider).state.navigationData;
-    final isNavHighlighted = navData != null && navData.tableId == table.id && navData.rowIndex == index;
+    final isNavHighlighted = row != null && navData != null && navData.tableId == table.id && navData.rowIndex == index;
 
     final defaultDecoration = DbModelUtils.getDataTableIdBoxDecoration(
       coordinates,
@@ -74,13 +75,15 @@ class DataTableRowIdView extends ConsumerWidget {
           )
         : defaultDecoration;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOut,
-      decoration: effectiveDecoration,
+    return Container(
       width: width,
       height: height,
-      child: _getBody(ref),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+        decoration: effectiveDecoration,
+        child: _getBody(ref),
+      ),
     );
   }
 
@@ -216,9 +219,13 @@ class DataTableRowIdView extends ConsumerWidget {
 
   void _handleFocusChanged() {
     if (_focusNode.hasFocus) {
-      DbModelUtils.selectAllIfDefaultId(_controller);
+      if (!_hadFocus) {
+        _hadFocus = true;
+        DbModelUtils.selectAll(_controller);
+      }
       return;
     }
+    _hadFocus = false;
 
     if (_controller.text == row!.id) //
       return;

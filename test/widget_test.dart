@@ -15,6 +15,18 @@ import 'package:gceditor/components/tree/base_tree_view.dart';
 import 'package:gceditor/model/db/class_meta_group.dart';
 import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
+import 'package:gceditor/model/model_root.dart';
+import 'package:gceditor/components/table/context_menu_button.dart';
+import 'package:gceditor/components/table/primitives/data_table_cell_list_inline_view.dart';
+import 'package:gceditor/components/table/primitives/data_table_cell_text_view.dart';
+import 'package:gceditor/components/table/primitives/data_table_cell_view.dart';
+import 'package:gceditor/components/table/primitives/data_table_row_id_view.dart';
+import 'package:gceditor/main.dart';
+import 'package:gceditor/consts/consts.dart';
+import 'package:gceditor/components/table/data_table/data_table_head_view.dart';
+import 'package:gceditor/components/table/data_table/data_table_ids_view.dart';
+import 'package:gceditor/model/state/service/client_navigation_service.dart';
+import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/utils/utils.dart';
 
 void main() {
@@ -354,5 +366,320 @@ void main() {
     // Verify updated order: FolderA -> FolderB -> Table1 -> Table2
     final texts = find.byType(Text).evaluate().map((e) => (e.widget as Text).data).where((t) => t != null && t.isNotEmpty && !t.startsWith('(')).toList();
     expect(texts, containsAllInOrder(['FolderA', 'FolderB', 'Table1', 'Table2']));
+  });
+
+  testWidgets('DataTableCellListInlineView sets field default values for newly added inline items', (tester) async {
+    final dbModel = DbModel();
+    final inlineClass = ClassMetaEntity()
+      ..id = 'InlineItem'
+      ..fields = [
+        ClassMetaFieldDescription()
+          ..id = 'count'
+          ..defaultValue = '42'
+          ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.int),
+        ClassMetaFieldDescription()
+          ..id = 'name'
+          ..defaultValue = 'default_name'
+          ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.string),
+      ];
+
+    final mainClass = ClassMetaEntity()
+      ..id = 'MainClass'
+      ..fields = [
+        ClassMetaFieldDescription()
+          ..id = 'items'
+          ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.listInline)
+          ..valueTypeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.reference, classId: 'InlineItem'),
+      ];
+
+    final table = TableMetaEntity()
+      ..id = 'mainTable'
+      ..classId = 'MainClass';
+
+    final row = DataTableRow()
+      ..id = 'r1'
+      ..values = [
+        DataTableCellValue.listInline([]),
+      ];
+    table.rows.add(row);
+
+    dbModel.classes.addAll([inlineClass, mainClass]);
+    dbModel.tables.add(table);
+    dbModel.cache.invalidate();
+
+    providerContainer.read(clientStateProvider).setModel(dbModel);
+
+    DataTableCellValue? updatedValue;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: providerContainer,
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          home: Scaffold(
+            body: DataTableCellListInlineView(
+              coordinates: DataTableValueCoordinates(table: table, field: mainClass.fields[0], rowIndex: 0),
+              fieldType: mainClass.fields[0].typeInfo,
+              valueFieldType: mainClass.fields[0].valueTypeInfo!,
+              value: row.values[0],
+              cellFactory: ({
+                Key? key,
+                required DataTableValueCoordinates coordinates,
+                required ClassFieldDescriptionDataInfo fieldInfo,
+                required dynamic value,
+                dynamic defaultValue,
+                required ValueChanged<dynamic> onValueChanged,
+              }) => const SizedBox(),
+              onValueChanged: (val) {
+                updatedValue = val;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Tap the plus icon button to add an inline item
+    await tester.tap(find.byType(IconPlus));
+    await tester.pumpAndSettle();
+
+    expect(updatedValue, isNotNull);
+    final inlineItems = updatedValue!.listInlineCellValues()!;
+    expect(inlineItems.length, 1);
+    expect(inlineItems[0].values, [42, 'default_name']);
+  });
+
+  test('DbModelUtils.selectAll selects entire text', () {
+    final controller = TextEditingController(text: 'hello world');
+    expect(controller.selection, const TextSelection.collapsed(offset: -1));
+
+    DbModelUtils.selectAll(controller);
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 11));
+  });
+
+  testWidgets('selecting field inside cell selects current textual value', (tester) async {
+    final dbModel = DbModel();
+    final classEntity = ClassMetaEntity()
+      ..id = 'Item'
+      ..fields = [
+        ClassMetaFieldDescription()
+          ..id = 'title'
+          ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.string),
+      ];
+    final table = TableMetaEntity()
+      ..id = 'items'
+      ..classId = 'Item';
+    final row = DataTableRow()
+      ..id = 'row_01'
+      ..values = [DataTableCellValue.simple('My Title')];
+    table.rows.add(row);
+    dbModel.classes.add(classEntity);
+    dbModel.tables.add(table);
+    dbModel.cache.invalidate();
+    providerContainer.read(clientStateProvider).setModel(dbModel);
+
+    // Test DataTableCellTextView
+    dynamic changedVal;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: providerContainer,
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          home: Scaffold(
+            body: DataTableCellTextView(
+              coordinates: DataTableValueCoordinates(table: table, field: classEntity.fields[0], rowIndex: 0),
+              fieldType: classEntity.fields[0].typeInfo,
+              value: 'My Title',
+              defaultValue: '',
+              onValueChanged: (v) => changedVal = v,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final cellTextFieldFinder = find.byType(TextField);
+    final TextField cellTextField = tester.widget(cellTextFieldFinder);
+    expect(cellTextField.controller!.selection, const TextSelection.collapsed(offset: -1));
+
+    // Tap to select field
+    await tester.tap(cellTextFieldFinder);
+    await tester.pumpAndSettle();
+
+    expect(cellTextField.controller!.selection, const TextSelection(baseOffset: 0, extentOffset: 8));
+
+    // Test DataTableRowIdView
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: providerContainer,
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 200,
+                height: 50,
+                child: DataTableRowIdView(
+                  table: table,
+                  row: row,
+                  index: 0,
+                  isPinnedItem: false,
+                  coordinates: DataTableValueCoordinates(table: table, field: null, rowIndex: 0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final idTextFieldFinder = find.byType(TextField);
+    final TextField idTextField = tester.widget(idTextFieldFinder);
+
+    await tester.tap(idTextFieldFinder);
+    await tester.pumpAndSettle();
+
+    expect(idTextField.controller!.selection, const TextSelection(baseOffset: 0, extentOffset: 6));
+  });
+
+  testWidgets('DataTableRowIdView container width is fixed and child AnimatedContainer does not animate width', (tester) async {
+    final dbModel = DbModel();
+    final classEntity = ClassMetaEntity()
+      ..id = 'Item'
+      ..fields = [];
+    final table = TableMetaEntity()
+      ..id = 'items'
+      ..classId = 'Item';
+    table.idsColumnWidth = 150;
+    final row = DataTableRow()..id = 'row_01';
+    table.rows.add(row);
+    dbModel.classes.add(classEntity);
+    dbModel.tables.add(table);
+    dbModel.cache.invalidate();
+    providerContainer.read(clientStateProvider).setModel(dbModel);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: providerContainer,
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 200,
+                height: 50,
+                child: DataTableRowIdView(
+                  table: table,
+                  row: row,
+                  index: 0,
+                  isPinnedItem: false,
+                  coordinates: DataTableValueCoordinates(table: table, field: null, rowIndex: 0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final outerContainer = tester.widget<Container>(find.descendant(of: find.byType(DataTableRowIdView), matching: find.byType(Container)).first);
+    expect(outerContainer.constraints?.minWidth, 150.0 * kScale);
+    expect(outerContainer.constraints?.maxWidth, 150.0 * kScale);
+
+    final animatedContainer = tester.widget<AnimatedContainer>(find.byType(AnimatedContainer));
+    expect(animatedContainer.constraints, isNull);
+  });
+
+  test('text selection color is set to dark/less bright selection color for readability', () {
+    providerContainer.read(styleStateProvider).init();
+    expect(kStyle.kAppTheme.textSelectionTheme.selectionColor, kColorTextSelection);
+    expect(kStyle.kAppTheme.textSelectionTheme.selectionColor, isNot(kColorPrimaryLight));
+    expect(kStyle.kInputThemeLight.textSelectionTheme.selectionColor, kColorTextSelection);
+  });
+
+  testWidgets('navigating to row 0 highlights row item and does not highlight table header (0:0 corner cell)', (tester) async {
+    final dbModel = DbModel();
+    final classEntity = ClassMetaEntity()
+      ..id = 'Item'
+      ..fields = [
+        ClassMetaFieldDescription()
+          ..id = 'title'
+          ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.string),
+      ];
+    final table = TableMetaEntity()
+      ..id = 'items'
+      ..classId = 'Item';
+    final row0 = DataTableRow()..id = 'row_0';
+    final row1 = DataTableRow()..id = 'row_1';
+    table.rows.addAll([row0, row1]);
+    dbModel.classes.add(classEntity);
+    dbModel.tables.add(table);
+    dbModel.cache.invalidate();
+    providerContainer.read(clientStateProvider).setModel(dbModel);
+
+    final scrollControllerHorizontal = ScrollController();
+    final scrollControllerVertical = ScrollController();
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: providerContainer,
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          home: Scaffold(
+            body: Column(
+              children: [
+                DataTableHeadView(
+                  table: table,
+                  scrollController: scrollControllerHorizontal,
+                ),
+                Expanded(
+                  child: DataTableIdsView(
+                    table: table,
+                    scrollController: scrollControllerVertical,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Focus on row 0 in table 'items'
+    providerContainer.read(clientNavigationServiceProvider).focusOn(
+          NavigationData.toTable(tableId: table.id, fieldId: null, rowIndex: 0),
+        );
+    await tester.pump();
+
+    final idViews = tester.widgetList<DataTableRowIdView>(find.byType(DataTableRowIdView)).toList();
+    expect(idViews.length, 3);
+    expect(idViews[0].row, isNull);
+    expect(idViews[1].row?.id, 'row_0');
+    expect(idViews[2].row?.id, 'row_1');
+
+    final headerContainer = tester.widget<AnimatedContainer>(
+      find.descendant(
+        of: find.byWidget(idViews[0]),
+        matching: find.byType(AnimatedContainer),
+      ),
+    );
+    final row0Container = tester.widget<AnimatedContainer>(
+      find.descendant(
+        of: find.byWidget(idViews[1]),
+        matching: find.byType(AnimatedContainer),
+      ),
+    );
+
+    final headerBoxDec = headerContainer.decoration as BoxDecoration;
+    final row0BoxDec = row0Container.decoration as BoxDecoration;
+
+    // Header 0:0 cell must NOT be orange
+    expect(headerBoxDec.color, isNot(kColorAccentOrange));
+
+    // Row 0 cell MUST be orange
+    expect(row0BoxDec.color, kColorAccentOrange);
+
+    // Let the 500ms highlight clear timer complete
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pumpAndSettle();
   });
 }

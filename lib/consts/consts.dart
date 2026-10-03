@@ -35,6 +35,7 @@ const Color kColorTransparent = Color.fromARGB(0, 0, 0, 0);
 const Color kColorDarken = Color(0x44000000);
 const Color kColorDataTableLine = Color(0xFF3E4452);
 const Color kColorDataTableBackground = Color(0x005E7F97);
+const Color kColorTextSelection = Color(0xFF264F78);
 
 const Color kColorTextButton = kTextColorDark;
 
