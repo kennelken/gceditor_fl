@@ -279,7 +279,7 @@ class _DataTableCellListInlineViewState extends State<DataTableCellListInlineVie
         final valuesListCopy = _cellValue.copy();
 
         final columns = DbModelUtils.getListInlineColumns(clientModel, widget.coordinates.field!.valueTypeInfo!)!;
-        final defaultValues = columns.map((e) => DbModelUtils.getDefaultValue(e.typeInfo.type).simpleValue).toList();
+        final defaultValues = columns.map((e) => DbModelUtils.parseDefaultValueByFieldOrDefault(clientModel, e, e.defaultValue).simpleValue).toList();
 
         valuesListCopy.listCellValues!.add(
           DataTableCellListInlineItem.values(

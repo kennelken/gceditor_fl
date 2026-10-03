@@ -15,6 +15,11 @@ import 'package:gceditor/components/tree/base_tree_view.dart';
 import 'package:gceditor/model/db/class_meta_group.dart';
 import 'package:gceditor/model/state/client_state.dart';
 import 'package:gceditor/model/state/db_model_extensions.dart';
+import 'package:gceditor/model/model_root.dart';
+import 'package:gceditor/components/table/context_menu_button.dart';
+import 'package:gceditor/components/table/primitives/data_table_cell_list_inline_view.dart';
+import 'package:gceditor/components/table/primitives/data_table_cell_view.dart';
+import 'package:gceditor/main.dart';
 import 'package:gceditor/utils/utils.dart';
 
 void main() {
@@ -354,5 +359,85 @@ void main() {
     // Verify updated order: FolderA -> FolderB -> Table1 -> Table2
     final texts = find.byType(Text).evaluate().map((e) => (e.widget as Text).data).where((t) => t != null && t.isNotEmpty && !t.startsWith('(')).toList();
     expect(texts, containsAllInOrder(['FolderA', 'FolderB', 'Table1', 'Table2']));
+  });
+
+  testWidgets('DataTableCellListInlineView sets field default values for newly added inline items', (tester) async {
+    final dbModel = DbModel();
+    final inlineClass = ClassMetaEntity()
+      ..id = 'InlineItem'
+      ..fields = [
+        ClassMetaFieldDescription()
+          ..id = 'count'
+          ..defaultValue = '42'
+          ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.int),
+        ClassMetaFieldDescription()
+          ..id = 'name'
+          ..defaultValue = 'default_name'
+          ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.string),
+      ];
+
+    final mainClass = ClassMetaEntity()
+      ..id = 'MainClass'
+      ..fields = [
+        ClassMetaFieldDescription()
+          ..id = 'items'
+          ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.listInline)
+          ..valueTypeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.reference, classId: 'InlineItem'),
+      ];
+
+    final table = TableMetaEntity()
+      ..id = 'mainTable'
+      ..classId = 'MainClass';
+
+    final row = DataTableRow()
+      ..id = 'r1'
+      ..values = [
+        DataTableCellValue.listInline([]),
+      ];
+    table.rows.add(row);
+
+    dbModel.classes.addAll([inlineClass, mainClass]);
+    dbModel.tables.add(table);
+    dbModel.cache.invalidate();
+
+    providerContainer.read(clientStateProvider).setModel(dbModel);
+
+    DataTableCellValue? updatedValue;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: providerContainer,
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          home: Scaffold(
+            body: DataTableCellListInlineView(
+              coordinates: DataTableValueCoordinates(table: table, field: mainClass.fields[0], rowIndex: 0),
+              fieldType: mainClass.fields[0].typeInfo,
+              valueFieldType: mainClass.fields[0].valueTypeInfo!,
+              value: row.values[0],
+              cellFactory: ({
+                Key? key,
+                required DataTableValueCoordinates coordinates,
+                required ClassFieldDescriptionDataInfo fieldInfo,
+                required dynamic value,
+                dynamic defaultValue,
+                required ValueChanged<dynamic> onValueChanged,
+              }) => const SizedBox(),
+              onValueChanged: (val) {
+                updatedValue = val;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Tap the plus icon button to add an inline item
+    await tester.tap(find.byType(IconPlus));
+    await tester.pumpAndSettle();
+
+    expect(updatedValue, isNotNull);
+    final inlineItems = updatedValue!.listInlineCellValues()!;
+    expect(inlineItems.length, 1);
+    expect(inlineItems[0].values, [42, 'default_name']);
   });
 }
