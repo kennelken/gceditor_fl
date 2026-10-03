@@ -531,15 +531,19 @@ class DbModelUtils {
     return Config.defaultIdFormat.hasMatch(value);
   }
 
+  static void selectAll(TextEditingController controller) {
+    controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+  }
+
   static void selectAllIfDefaultId(TextEditingController controller) {
     if (isDefaultId(controller.text)) {
-      controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+      selectAll(controller);
     }
   }
 
   static void selectAllIfDefault(TextEditingController controller, String? defaultValue) {
     if (controller.text == defaultValue) {
-      controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+      selectAll(controller);
     }
   }
 

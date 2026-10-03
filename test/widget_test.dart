@@ -18,7 +18,9 @@ import 'package:gceditor/model/state/db_model_extensions.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/components/table/context_menu_button.dart';
 import 'package:gceditor/components/table/primitives/data_table_cell_list_inline_view.dart';
+import 'package:gceditor/components/table/primitives/data_table_cell_text_view.dart';
 import 'package:gceditor/components/table/primitives/data_table_cell_view.dart';
+import 'package:gceditor/components/table/primitives/data_table_row_id_view.dart';
 import 'package:gceditor/main.dart';
 import 'package:gceditor/utils/utils.dart';
 
@@ -439,5 +441,98 @@ void main() {
     final inlineItems = updatedValue!.listInlineCellValues()!;
     expect(inlineItems.length, 1);
     expect(inlineItems[0].values, [42, 'default_name']);
+  });
+
+  test('DbModelUtils.selectAll selects entire text', () {
+    final controller = TextEditingController(text: 'hello world');
+    expect(controller.selection, const TextSelection.collapsed(offset: -1));
+
+    DbModelUtils.selectAll(controller);
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 11));
+  });
+
+  testWidgets('selecting field inside cell selects current textual value', (tester) async {
+    final dbModel = DbModel();
+    final classEntity = ClassMetaEntity()
+      ..id = 'Item'
+      ..fields = [
+        ClassMetaFieldDescription()
+          ..id = 'title'
+          ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.string),
+      ];
+    final table = TableMetaEntity()
+      ..id = 'items'
+      ..classId = 'Item';
+    final row = DataTableRow()
+      ..id = 'row_01'
+      ..values = [DataTableCellValue.simple('My Title')];
+    table.rows.add(row);
+    dbModel.classes.add(classEntity);
+    dbModel.tables.add(table);
+    dbModel.cache.invalidate();
+    providerContainer.read(clientStateProvider).setModel(dbModel);
+
+    // Test DataTableCellTextView
+    dynamic changedVal;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: providerContainer,
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          home: Scaffold(
+            body: DataTableCellTextView(
+              coordinates: DataTableValueCoordinates(table: table, field: classEntity.fields[0], rowIndex: 0),
+              fieldType: classEntity.fields[0].typeInfo,
+              value: 'My Title',
+              defaultValue: '',
+              onValueChanged: (v) => changedVal = v,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final cellTextFieldFinder = find.byType(TextField);
+    final TextField cellTextField = tester.widget(cellTextFieldFinder);
+    expect(cellTextField.controller!.selection, const TextSelection.collapsed(offset: -1));
+
+    // Tap to select field
+    await tester.tap(cellTextFieldFinder);
+    await tester.pumpAndSettle();
+
+    expect(cellTextField.controller!.selection, const TextSelection(baseOffset: 0, extentOffset: 8));
+
+    // Test DataTableRowIdView
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: providerContainer,
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 200,
+                height: 50,
+                child: DataTableRowIdView(
+                  table: table,
+                  row: row,
+                  index: 0,
+                  isPinnedItem: false,
+                  coordinates: DataTableValueCoordinates(table: table, field: null, rowIndex: 0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final idTextFieldFinder = find.byType(TextField);
+    final TextField idTextField = tester.widget(idTextFieldFinder);
+
+    await tester.tap(idTextFieldFinder);
+    await tester.pumpAndSettle();
+
+    expect(idTextField.controller!.selection, const TextSelection(baseOffset: 0, extentOffset: 6));
   });
 }

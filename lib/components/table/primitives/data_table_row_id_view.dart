@@ -37,6 +37,7 @@ class DataTableRowIdView extends ConsumerWidget {
   late final FocusNode _focusNode;
   late final bool isPinnedItem;
   late final DataTableValueCoordinates? coordinates;
+  bool _hadFocus = false;
 
   DataTableRowIdView({
     super.key,
@@ -216,9 +217,13 @@ class DataTableRowIdView extends ConsumerWidget {
 
   void _handleFocusChanged() {
     if (_focusNode.hasFocus) {
-      DbModelUtils.selectAllIfDefaultId(_controller);
+      if (!_hadFocus) {
+        _hadFocus = true;
+        DbModelUtils.selectAll(_controller);
+      }
       return;
     }
+    _hadFocus = false;
 
     if (_controller.text == row!.id) //
       return;

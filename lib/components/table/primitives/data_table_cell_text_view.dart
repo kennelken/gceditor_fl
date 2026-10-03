@@ -37,6 +37,7 @@ class DataTableCellTextView extends StatefulWidget {
 class _DataTableCellTextViewState extends State<DataTableCellTextView> {
   late final TextEditingController _textController;
   late final FocusNode _focusNode;
+  bool _hadFocus = false;
 
   @override
   void initState() {
@@ -141,8 +142,14 @@ class _DataTableCellTextViewState extends State<DataTableCellTextView> {
   }
 
   void _handleFocusChange() {
-    if (_focusNode.hasFocus) //
+    if (_focusNode.hasFocus) {
+      if (!_hadFocus) {
+        _hadFocus = true;
+        DbModelUtils.selectAll(_textController);
+      }
       return;
+    }
+    _hadFocus = false;
 
     var newValue = DbModelUtils.parseDefaultValue(clientModel, widget.fieldType, null, null, _textController.text)?.simpleValue;
 
