@@ -1131,9 +1131,9 @@ ${_makeSummary('</summary>', indentDepth)}''';
 // When used in Unity, https://www.newtonsoft.com/json is required for this parser to work
 //
 // Usage:
-// var config = {${_paramPrefix}}Root{${_paramPostfix}}Parser.Parse(JSON_TEXT_FILE_GENERATED_BY_GCEDITOR)
+// var config = {${_paramPrefix}}Root{${_paramPostfix}}.Parse(JSON_TEXT_FILE_GENERATED_BY_GCEDITOR)
 // Example:
-// var config = {${_paramPrefix}}Root{${_paramPostfix}}Parser.Parse(_config.text)
+// var config = {${_paramPrefix}}Root{${_paramPostfix}}.Parse(_config.text)
 // use 'config' as a source of config data
 
 #pragma warning disable 0414, 0168, 0219, 1998, 0109, all
@@ -1667,7 +1667,7 @@ using Rectangle = System.Drawing.RectangleF;
 
         public ParserContext(Action<ErrorData> onError = null)
         {
-            OnError = onError ?? {${_paramPrefix}}Root{${_paramPostfix}}Parser.DefaultOnError;
+            OnError = onError ?? {${_paramPrefix}}Root{${_paramPostfix}}.DefaultOnError;
         }
 
         public void LogError(string message, IIdentifiable entity = null, Exception exception = null)
@@ -1676,7 +1676,7 @@ using Rectangle = System.Drawing.RectangleF;
         }
     }
 
-    public static partial class {${_paramPrefix}}Root{${_paramPostfix}}Parser
+    public partial class {${_paramPrefix}}Root{${_paramPostfix}}
     {
         public static void DefaultOnError(ErrorData error)
         {

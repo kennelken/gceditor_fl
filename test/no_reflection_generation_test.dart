@@ -11,6 +11,7 @@ import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/db/generator_csharp.dart';
 import 'package:gceditor/model/db/generator_java.dart';
+import 'package:gceditor/model/state/db_model_factory.dart';
 import 'package:gceditor/server/generators/generator_csharp_runner.dart';
 import 'package:gceditor/server/generators/generator_java_runner.dart';
 import 'package:gceditor/server/generators/generators_job.dart';
@@ -152,6 +153,7 @@ void main() {
       );
 
       // Check exception-free C# parser and public ParserContext dependency parameter
+      expect(csCode.contains('GameRootDataParser'), isFalse);
       expect(csCode.contains('public class ParserContext'), isTrue);
       expect(csCode.contains('public Action<ErrorData> OnError { get; set; }'), isTrue);
       expect(csCode.contains('public static GameRootData Parse(string jsonText, GameRootData root = null, Action<ErrorData> onError = null, ParserContext context = null)'), isTrue);
@@ -235,5 +237,14 @@ void main() {
     } finally {
       tempDir.deleteSync(recursive: true);
     }
+  });
+
+  test('Newly created generators have default name ModelRoot', () {
+    final cs = DbModelFactory.generator(GeneratorType.csharp);
+    final java = DbModelFactory.generator(GeneratorType.java);
+    final json = DbModelFactory.generator(GeneratorType.json);
+    expect(cs.fileName, 'ModelRoot');
+    expect(java.fileName, 'ModelRoot');
+    expect(json.fileName, 'ModelRoot');
   });
 }

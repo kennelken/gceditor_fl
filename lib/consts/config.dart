@@ -22,7 +22,7 @@ class Config {
   static const String defaultNewLogin = 'admin';
   static const String defaultNewSecret = 'admin';
   static const String defaultPassword = 'admin';
-  static const String defaultGeneratorName = 'Model';
+  static const String defaultGeneratorName = 'ModelRoot';
   static const String defaultGeneratorJsonFileExtension = 'json';
   static const String defaultGeneratorJsonIndentation = '\t';
   static const String defaultGeneratorCsharpFileExtension = 'cs';
