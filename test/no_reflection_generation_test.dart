@@ -1,14 +1,17 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gceditor/model/db/class_field_description_data_info.dart';
 import 'package:gceditor/model/db/class_meta_entity.dart';
 import 'package:gceditor/model/db/class_meta_entity_enum.dart';
+import 'package:gceditor/model/db/class_meta_field_description.dart';
 import 'package:gceditor/model/db/enum_value.dart';
 import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/db/db_model.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/db/generator_csharp.dart';
 import 'package:gceditor/model/db/generator_java.dart';
+import 'package:gceditor/model/state/db_model_factory.dart';
 import 'package:gceditor/server/generators/generator_csharp_runner.dart';
 import 'package:gceditor/server/generators/generator_java_runner.dart';
 import 'package:gceditor/server/generators/generators_job.dart';
@@ -32,17 +35,15 @@ void main() {
         ..interfaces = ['Character'];
       dbModel.classes.add(baseClass);
 
-      // Derived class
-      final heroClass = ClassMetaEntity()
-        ..id = 'Hero'
-        ..classType = ClassType.referenceType
-        ..parent = 'Unit';
-      dbModel.classes.add(heroClass);
-
       // Value type (struct)
       final structClass = ClassMetaEntity()
         ..id = 'StatMod'
-        ..classType = ClassType.valueType;
+        ..classType = ClassType.valueType
+        ..fields = [
+          ClassMetaFieldDescription()
+            ..id = 'amount'
+            ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.int),
+        ];
       dbModel.classes.add(structClass);
 
       // Enum
@@ -53,6 +54,40 @@ void main() {
           EnumValue()..id = 'Water',
         ];
       dbModel.classes.add(enumEntity);
+
+      // Derived class
+      final heroClass = ClassMetaEntity()
+        ..id = 'Hero'
+        ..classType = ClassType.referenceType
+        ..parent = 'Unit'
+        ..fields = [
+          ClassMetaFieldDescription()
+            ..id = 'level'
+            ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.int),
+          ClassMetaFieldDescription()
+            ..id = 'name'
+            ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.string),
+          ClassMetaFieldDescription()
+            ..id = 'element'
+            ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.reference, classId: 'Element'),
+          ClassMetaFieldDescription()
+            ..id = 'target'
+            ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.reference, classId: 'Hero'),
+          ClassMetaFieldDescription()
+            ..id = 'scores'
+            ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.list)
+            ..valueTypeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.int),
+          ClassMetaFieldDescription()
+            ..id = 'modifiers'
+            ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.listInline)
+            ..valueTypeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.reference, classId: 'StatMod'),
+          ClassMetaFieldDescription()
+            ..id = 'dict'
+            ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.dictionary)
+            ..keyTypeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.string)
+            ..valueTypeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.int),
+        ];
+      dbModel.classes.add(heroClass);
 
       // Table
       final table = TableMetaEntity()
@@ -89,6 +124,10 @@ void main() {
       expect(csCode.contains('item.GetType()'), isFalse);
       expect(csCode.contains('System.Reflection'), isFalse);
 
+      // Check that logger is NOT static in C#
+      expect(csCode.contains('[ThreadStatic]'), isFalse);
+      expect(csCode.contains('static Action<string> _logError'), isFalse);
+
       // Check positive constructs in C#
       expect(csCode.contains('bool IsValueType { get; }'), isTrue);
       expect(csCode.contains('IReadOnlyList<Type> ParentTypes { get; }'), isTrue);
@@ -112,6 +151,20 @@ void main() {
         ),
         isTrue,
       );
+
+      // Check exception-free C# parser and public ParserContext dependency parameter
+      expect(csCode.contains('GameRootDataParser'), isFalse);
+      expect(csCode.contains('public class ParserContext'), isTrue);
+      expect(csCode.contains('public Action<ErrorData> OnError { get; set; }'), isTrue);
+      expect(csCode.contains('public static GameRootData Parse(string jsonText, GameRootData root = null, Action<ErrorData> onError = null, ParserContext context = null)'), isTrue);
+      expect(csCode.contains('Debug.LogError(message);'), isTrue);
+      expect(csCode.contains('throw new Exception(\$"Can not create a new instance of an unexpected class'), isFalse);
+      expect(csCode.contains('throw new Exception(\$"Unknown table'), isFalse);
+      expect(csCode.contains('ParseInt(valuesById["level"], context)'), isTrue);
+      expect(csCode.contains('ParseString(valuesById["name"])'), isTrue);
+      expect(csCode.contains('ParseEnum<GameElementData>(valuesById["element"], context)'), isTrue);
+      expect(csCode.contains('ParseReference<GameHeroData>(valuesById["target"], objectsByIds, context)'), isTrue);
+      expect(csCode.contains('ParseList(valuesById["scores"], v => ParseInt(v, context), emptyCollectionFactory)'), isTrue);
 
       final dotnetCheck = await Process.run('which', ['dotnet']);
       if (dotnetCheck.exitCode == 0) {
@@ -155,13 +208,43 @@ void main() {
       expect(javaCode.contains('GetParentTypesIncludingCurrent'), isFalse);
       expect(javaCode.contains('HashMap<Type,'), isFalse);
 
+      // Check that logger is NOT static in Java
+      expect(javaCode.contains('ThreadLocal'), isFalse);
+      expect(javaCode.contains('static Consumer<String> _logError'), isFalse);
+
       // Check positive constructs in Java
       expect(javaCode.contains('List<Class<?>> getParentTypes();'), isTrue);
       expect(javaCode.contains('public List<Class<?>> getParentTypes() { return _parentTypes; }'), isTrue);
       expect(javaCode.contains('HashMap<Class<?>, Object> AllItemsByType;'), isTrue);
       expect(javaCode.contains('item.getParentTypes().contains(itemClass)'), isTrue);
+
+      // Check exception-free Java parser and ParserContext dependency parameter
+      expect(javaCode.contains('public static class ParserContext'), isTrue);
+      expect(javaCode.contains('public Consumer<ErrorData> onError;'), isTrue);
+      expect(javaCode.contains('public static GameRootData Parse(String jsonText, GameRootData root, Consumer<ErrorData> onError)'), isTrue);
+      expect(javaCode.contains('public static GameRootData Parse(String jsonText, GameRootData root, GameRootData.ParserContext context)'), isTrue);
+      expect(javaCode.contains('public static GameRootData Parse(String jsonText, GameRootData root, Consumer<ErrorData> onError, GameRootData.ParserContext context)'), isTrue);
+      expect(javaCode.contains('throws IOException'), isFalse);
+      expect(javaCode.contains('throws IllegalArgumentException'), isFalse);
+      expect(javaCode.contains('LOGGER.severe(message);'), isTrue);
+      expect(javaCode.contains('throw new RuntimeException(String.format("Unknown table'), isFalse);
+      expect(javaCode.contains('throw new IllegalArgumentException(String.format("Can not create a new instance of an unexpected class'), isFalse);
+      expect(javaCode.contains('ParseInt(valuesById.get("level"), context)'), isTrue);
+      expect(javaCode.contains('ParseString(valuesById.get("name"))'), isTrue);
+      expect(javaCode.contains('GceditorJsonParser.<GameElementData>ParseEnum(valuesById.get("element"), GameElementData.class, context)'), isTrue);
+      expect(javaCode.contains('GceditorJsonParser.<GameHeroData>ParseReference(valuesById.get("target"), objectsByIds, context)'), isTrue);
+      expect(javaCode.contains('ParseList(valuesById.get("scores"), Integer.class, v -> ParseInt(v, context), emptyCollectionFactory)'), isTrue);
     } finally {
       tempDir.deleteSync(recursive: true);
     }
+  });
+
+  test('Newly created generators have default name ModelRoot', () {
+    final cs = DbModelFactory.generator(GeneratorType.csharp);
+    final java = DbModelFactory.generator(GeneratorType.java);
+    final json = DbModelFactory.generator(GeneratorType.json);
+    expect(cs.fileName, 'ModelRoot');
+    expect(java.fileName, 'ModelRoot');
+    expect(json.fileName, 'ModelRoot');
   });
 }

@@ -769,7 +769,7 @@ ${_makeSummary('</summary>', indentDepth)}''';
         return 'ParseList(${value}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
 
       case ClassFieldType.listInline:
-        return 'ParseListInline(${value}, vs => ({${_paramPrefix}}${field.valueTypeInfo!.classId}{${_paramPostfix}})AssignValues(GetNewInstance("${field.valueTypeInfo!.classId}", null, instance.Id), objectsByIds, vs, emptyCollectionFactory, onError), emptyCollectionFactory)';
+        return 'ParseListInline(${value}, vs => ({${_paramPrefix}}${field.valueTypeInfo!.classId}{${_paramPostfix}})AssignValues(GetNewInstance("${field.valueTypeInfo!.classId}", null, instance.Id, context), objectsByIds, vs, emptyCollectionFactory, context), emptyCollectionFactory)';
 
       case ClassFieldType.set:
         return 'ParseHashSet(${value}, v => ${_getAssignSimpleValueFunction(model, data, field.valueTypeInfo!, 'v')}, emptyCollectionFactory)';
@@ -787,19 +787,19 @@ ${_makeSummary('</summary>', indentDepth)}''';
   ) {
     switch (type.type) {
       case ClassFieldType.bool:
-        return 'ParseBool(${value})';
+        return 'ParseBool(${value}, context)';
 
       case ClassFieldType.int:
-        return 'ParseInt(${value})';
+        return 'ParseInt(${value}, context)';
 
       case ClassFieldType.long:
-        return 'ParseLong(${value})';
+        return 'ParseLong(${value}, context)';
 
       case ClassFieldType.float:
-        return 'ParseFloat(${value})';
+        return 'ParseFloat(${value}, context)';
 
       case ClassFieldType.double:
-        return 'ParseDouble(${value})';
+        return 'ParseDouble(${value}, context)';
 
       case ClassFieldType.string:
       case ClassFieldType.text:
@@ -810,41 +810,41 @@ ${_makeSummary('</summary>', indentDepth)}''';
         final classEntity = model.cache.getEntity(type.classId!);
         final genericType = '${data.prefix}${type.classId}${data.postfix}';
         if (classEntity is ClassMetaEntityEnum) //
-          return 'ParseEnum<${genericType}>(${value})';
-        return 'ParseReference<${genericType}>(${value}, objectsByIds)';
+          return 'ParseEnum<${genericType}>(${value}, context)';
+        return 'ParseReference<${genericType}>(${value}, objectsByIds, context)';
 
       case ClassFieldType.date:
-        return 'ParseDate(${value})';
+        return 'ParseDate(${value}, context)';
 
       case ClassFieldType.duration:
-        return 'ParseDuration(${value})';
+        return 'ParseDuration(${value}, context)';
 
       case ClassFieldType.color:
-        return 'ParseColor(${value})';
+        return 'ParseColor(${value}, context)';
 
       case ClassFieldType.vector2:
-        return 'ParseVector2(${value})';
+        return 'ParseVector2(${value}, context)';
 
       case ClassFieldType.vector2Int:
-        return 'ParseVector2Int(${value})';
+        return 'ParseVector2Int(${value}, context)';
 
       case ClassFieldType.vector3:
-        return 'ParseVector3(${value})';
+        return 'ParseVector3(${value}, context)';
 
       case ClassFieldType.vector3Int:
-        return 'ParseVector3Int(${value})';
+        return 'ParseVector3Int(${value}, context)';
 
       case ClassFieldType.vector4:
-        return 'ParseVector4(${value})';
+        return 'ParseVector4(${value}, context)';
 
       case ClassFieldType.vector4Int:
-        return 'ParseVector4Int(${value})';
+        return 'ParseVector4Int(${value}, context)';
 
       case ClassFieldType.rectangle:
-        return 'ParseRectangle(${value})';
+        return 'ParseRectangle(${value}, context)';
 
       case ClassFieldType.rectangleInt:
-        return 'ParseRectangleInt(${value})';
+        return 'ParseRectangleInt(${value}, context)';
 
       case ClassFieldType.list:
       case ClassFieldType.listInline:
@@ -1131,9 +1131,9 @@ ${_makeSummary('</summary>', indentDepth)}''';
 // When used in Unity, https://www.newtonsoft.com/json is required for this parser to work
 //
 // Usage:
-// var config = {${_paramPrefix}}Root{${_paramPostfix}}Parser.Parse(JSON_TEXT_FILE_GENERATED_BY_GCEDITOR)
+// var config = {${_paramPrefix}}Root{${_paramPostfix}}.Parse(JSON_TEXT_FILE_GENERATED_BY_GCEDITOR)
 // Example:
-// var config = {${_paramPrefix}}Root{${_paramPostfix}}Parser.Parse(_config.text)
+// var config = {${_paramPrefix}}Root{${_paramPostfix}}.Parse(_config.text)
 // use 'config' as a source of config data
 
 #pragma warning disable 0414, 0168, 0219, 1998, 0109, all
@@ -1661,32 +1661,93 @@ using Rectangle = System.Drawing.RectangleF;
 
   final String _parserTemplate = //
       '''#region JSON
-    public static partial class {${_paramPrefix}}Root{${_paramPostfix}}Parser
+    public class ParserContext
     {
-        public static {${_paramPrefix}}Root{${_paramPostfix}} Parse(string jsonText, {${_paramPrefix}}Root{${_paramPostfix}} root = null, Action<ErrorData> onError = null)
+        public Action<ErrorData> OnError { get; set; }
+
+        public ParserContext(Action<ErrorData> onError = null)
         {
+            OnError = onError ?? {${_paramPrefix}}Root{${_paramPostfix}}.DefaultOnError;
+        }
+
+        public void LogError(string message, IIdentifiable entity = null, Exception exception = null)
+        {
+            OnError?.Invoke(new ErrorData(entity, exception, message));
+        }
+    }
+
+    public partial class {${_paramPrefix}}Root{${_paramPostfix}}
+    {
+        public static void DefaultOnError(ErrorData error)
+        {
+            var message = error?.Message ?? error?.Exception?.Message;
+#if UNITY_5_3_OR_NEWER
+            Debug.LogError(message);
+#elif GODOT4_0_OR_GREATER
+            GD.PrintErr(message);
+#else
+            Console.Error.WriteLine(\$"[ERROR] {message}");
+#endif
+        }
+
+        public static {${_paramPrefix}}Root{${_paramPostfix}} Parse(string jsonText, {${_paramPrefix}}Root{${_paramPostfix}} root = null, Action<ErrorData> onError = null, ParserContext context = null)
+        {
+            context ??= new ParserContext(onError);
+            if (onError != null && context.OnError == null)
+                context.OnError = onError;
+
+            if (string.IsNullOrEmpty(jsonText))
+            {
+                context.LogError("jsonText is null or empty");
+                return root;
+            }
+
             EmptyCollectionFactory emptyCollectionFactory = new EmptyCollectionFactory();
 
             var objectsByIds = new Dictionary<string, IIdentifiable>();
             var valuesByIds = new Dictionary<string, Dictionary<string, object>>();
             var tables = new Dictionary<string, List<IIdentifiable>>();
 
+            JsonRoot jsonRoot;
+            try
+            {
 #if UNITY_5_3_OR_NEWER
-            var jsonRoot = JsonConvert.DeserializeObject<JsonRoot>(jsonText);
+                jsonRoot = JsonConvert.DeserializeObject<JsonRoot>(jsonText);
 #else
-            var jsonRoot = JsonSerializer.Deserialize<JsonRoot>(jsonText, new JsonSerializerOptions { IncludeFields = true, TypeInfoResolver = JsonRootSourceGenerationContext.Default });
+                jsonRoot = JsonSerializer.Deserialize<JsonRoot>(jsonText, new JsonSerializerOptions { IncludeFields = true, TypeInfoResolver = JsonRootSourceGenerationContext.Default });
 #endif
+            }
+            catch (Exception ex)
+            {
+                context.LogError(\$"Failed to deserialize json: {ex.Message}", null, ex);
+                return root;
+            }
+
+            if (jsonRoot == null || jsonRoot.tables == null)
+            {
+                context.LogError("Deserialized json root or tables is null");
+                return root;
+            }
 
             foreach (var tableEntry in jsonRoot.tables)
             {
-                var className = GetTableClass(tableEntry.Key);
+                var className = GetTableClass(tableEntry.Key, context);
+                if (className == null)
+                    continue;
+
                 var listItems = tableEntry.Value;
+                if (listItems == null)
+                    continue;
+
                 var tableItems = new List<IIdentifiable>(listItems.Count);
                 for (var i = 0; i < listItems.Count; i++)
                 {
                     var item = listItems[i];
 
-                    var instance = GetNewInstance(className, item);
+                    var instance = GetNewInstance(className, item, null, context);
+                    if (instance == null)
+                        continue;
+
                     objectsByIds[instance.Id] = instance;
                     valuesByIds[instance.Id] = item;
                     tableItems.Add(instance);
@@ -1710,22 +1771,29 @@ using Rectangle = System.Drawing.RectangleF;
             for (var i = 0; i < maxStructDepth; i++)
             {
                 foreach (var objectId in allStructs)
-                    objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId], emptyCollectionFactory, onError);
+                    objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId], emptyCollectionFactory, context);
             }
             foreach (var objectId in allClasses)
-                objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId], emptyCollectionFactory, onError);
+                objectsByIds[objectId] = AssignValues(objectsByIds[objectId], objectsByIds, valuesByIds[objectId], emptyCollectionFactory, context);
 
-            root ??= new {${_paramPrefix}}Root{${_paramPostfix}}();
-            root.CreatedBy = jsonRoot.generationUser;
-            root.CreationTime = jsonRoot.generationDate;
-            root.Initialize(new List<IIdentifiable>(objectsByIds.Values));
-            root.Tables = new TablesList(tables);
-            root.PathByEnum = jsonRoot.pathByEnum ?? new Dictionary<string, Dictionary<string, string>>();
+            try
+            {
+                root ??= new {${_paramPrefix}}Root{${_paramPostfix}}();
+                root.CreatedBy = jsonRoot.generationUser;
+                root.CreationTime = jsonRoot.generationDate;
+                root.Initialize(new List<IIdentifiable>(objectsByIds.Values));
+                root.Tables = new TablesList(tables);
+                root.PathByEnum = jsonRoot.pathByEnum ?? new Dictionary<string, Dictionary<string, string>>();
 
-            var cache = new CacheRoot();
+                var cache = new CacheRoot();
 
-            foreach (var objectId in allClasses)
-                (objectsByIds[objectId] as Base{${_paramPrefix}}Item{${_paramPostfix}}).OnParsed(root, cache);
+                foreach (var objectId in allClasses)
+                    (objectsByIds[objectId] as Base{${_paramPrefix}}Item{${_paramPostfix}})?.OnParsed(root, cache);
+            }
+            catch (Exception ex)
+            {
+                context.LogError(\$"Error during post-parse initialization: {ex.Message}", null, ex);
+            }
 
             _inlineItemsCounter.Clear();
 
@@ -1748,7 +1816,7 @@ using Rectangle = System.Drawing.RectangleF;
             public Dictionary<string, Dictionary<string, string>> pathByEnum;
         }
 
-        private static IIdentifiable GetNewInstance(string className, Dictionary<string, object> item, string ownerId = null)
+        private static IIdentifiable GetNewInstance(string className, Dictionary<string, object> item, string ownerId = null, ParserContext context = null)
         {
 #if UNITY_5_3_OR_NEWER
             var id = item?.GetValueOrDefault("id") as string ?? GetInlineRowId(ownerId);
@@ -1760,17 +1828,22 @@ using Rectangle = System.Drawing.RectangleF;
             switch (className)
             {{${_paramListInstantiate}}
                 default:
-                    throw new Exception(\$"Can not create a new instance of an unexpected class '{className}'");
+                    context?.LogError(\$"Can not create a new instance of an unexpected class '{className}'");
+                    return null;
             }
         }
 
-        private static string GetTableClass(string tableId)
+        private static string GetTableClass(string tableId, ParserContext context)
         {
-            return tableId switch
+            var className = tableId switch
             {
-{${_paramTableClassMap}}
-                _ => throw new Exception(\$"Unknown table '{tableId}'")
+{${_paramTableClassMap}}                _ => null
             };
+            if (className == null)
+            {
+                context?.LogError(\$"Unknown table '{tableId}'");
+            }
+            return className;
         }
 
         private static Dictionary<string, int> _inlineItemsCounter = new();
@@ -1781,7 +1854,7 @@ using Rectangle = System.Drawing.RectangleF;
             return \$"{ownerId}#{i:000}";
         }
 
-        private static IIdentifiable AssignValues(IIdentifiable instance, Dictionary<string, IIdentifiable> objectsByIds, Dictionary<string, object> valuesById, EmptyCollectionFactory emptyCollectionFactory, Action<ErrorData> onError)
+        private static IIdentifiable AssignValues(IIdentifiable instance, Dictionary<string, IIdentifiable> objectsByIds, Dictionary<string, object> valuesById, EmptyCollectionFactory emptyCollectionFactory, ParserContext context)
         {
             try
             {
@@ -1793,7 +1866,7 @@ using Rectangle = System.Drawing.RectangleF;
             }
             catch (Exception e)
             {
-                onError?.Invoke(new ErrorData(instance, e, \$"Could not assign values for {instance}"));
+                context?.LogError(\$"Could not assign values for {instance}: {e.Message}", instance, e);
             }
 
             return instance;
@@ -1906,21 +1979,12 @@ using Rectangle = System.Drawing.RectangleF;
             return new HashSet<T>(ParseList<T>(values, getValue, emptyCollectionFactory));
         }
 
-        private static void LogError(string message)
+        private static bool ParseBool(object value, ParserContext context)
         {
-#if UNITY_5_3_OR_NEWER
-            UnityEngine.Debug.LogError(message);
-#else
-            Console.Error.WriteLine(\$"[ERROR] {message}");
-#endif
+            return ParseInt(value, context) == 1;
         }
 
-        private static bool ParseBool(object value)
-        {
-            return ParseInt(value) == 1;
-        }
-
-        private static int ParseInt(object value)
+        private static int ParseInt(object value, ParserContext context)
         {
             try
             {
@@ -1932,12 +1996,12 @@ using Rectangle = System.Drawing.RectangleF;
             }
             catch (Exception ex)
             {
-                LogError(\$"[ParseInt] Failed to parse int from '{value}': {ex.Message}");
+                context?.LogError(\$"[ParseInt] Failed to parse int from '{value}': {ex.Message}");
                 return default;
             }
         }
 
-        private static long ParseLong(object value)
+        private static long ParseLong(object value, ParserContext context)
         {
             try
             {
@@ -1949,12 +2013,12 @@ using Rectangle = System.Drawing.RectangleF;
             }
             catch (Exception ex)
             {
-                LogError(\$"[ParseLong] Failed to parse long from '{value}': {ex.Message}");
+                context?.LogError(\$"[ParseLong] Failed to parse long from '{value}': {ex.Message}");
                 return default;
             }
         }
 
-        private static float ParseFloat(object value)
+        private static float ParseFloat(object value, ParserContext context)
         {
             try
             {
@@ -1966,12 +2030,12 @@ using Rectangle = System.Drawing.RectangleF;
             }
             catch (Exception ex)
             {
-                LogError(\$"[ParseFloat] Failed to parse float from '{value}': {ex.Message}");
+                context?.LogError(\$"[ParseFloat] Failed to parse float from '{value}': {ex.Message}");
                 return default;
             }
         }
 
-        private static double ParseDouble(object value)
+        private static double ParseDouble(object value, ParserContext context)
         {
             try
             {
@@ -1983,7 +2047,7 @@ using Rectangle = System.Drawing.RectangleF;
             }
             catch (Exception ex)
             {
-                LogError(\$"[ParseDouble] Failed to parse double from '{value}': {ex.Message}");
+                context?.LogError(\$"[ParseDouble] Failed to parse double from '{value}': {ex.Message}");
                 return default;
             }
         }
@@ -1997,7 +2061,7 @@ using Rectangle = System.Drawing.RectangleF;
 #endif
         }
 
-        private static T ParseReference<T>(object value, Dictionary<string, IIdentifiable> objectsByIds) where T : IIdentifiable
+        private static T ParseReference<T>(object value, Dictionary<string, IIdentifiable> objectsByIds, ParserContext context) where T : IIdentifiable
         {
             var id = ParseString(value);
             if (string.IsNullOrEmpty(id))
@@ -2006,11 +2070,11 @@ using Rectangle = System.Drawing.RectangleF;
             if (objectsByIds.TryGetValue(id, out var instance))
                 return (T)instance;
 
-            LogError(\$"[ParseReference] Could not find object with id '{id}' of type {typeof(T).Name}");
+            context?.LogError(\$"[ParseReference] Could not find object with id '{id}' of type {typeof(T).Name}");
             return default;
         }
 
-        private static T ParseEnum<T>(object value)
+        private static T ParseEnum<T>(object value, ParserContext context)
         {
             var id = ParseString(value);
             if (string.IsNullOrEmpty(id))
@@ -2022,12 +2086,12 @@ using Rectangle = System.Drawing.RectangleF;
             }
             catch (Exception ex)
             {
-                LogError(\$"[ParseEnum] Failed to parse enum {typeof(T).Name} from '{id}': {ex.Message}");
+                context?.LogError(\$"[ParseEnum] Failed to parse enum {typeof(T).Name} from '{id}': {ex.Message}");
                 return default;
             }
         }
 
-        private static DateTime ParseDate(object value)
+        private static DateTime ParseDate(object value, ParserContext context)
         {
 #if UNITY_5_3_OR_NEWER
 #else
@@ -2041,11 +2105,11 @@ using Rectangle = System.Drawing.RectangleF;
             if (long.TryParse(date, out var ms))
                 return DateTimeOffset.FromUnixTimeMilliseconds(ms).UtcDateTime;
 
-            LogError(\$"[ParseDate] Failed to parse DateTime from '{date}'");
+            context?.LogError(\$"[ParseDate] Failed to parse DateTime from '{date}'");
             return default;
         }
 
-        private static TimeSpan ParseDuration(object value)
+        private static TimeSpan ParseDuration(object value, ParserContext context)
         {
 #if UNITY_5_3_OR_NEWER
 #else
@@ -2059,11 +2123,11 @@ using Rectangle = System.Drawing.RectangleF;
             if (long.TryParse(duration, out var ms))
                 return TimeSpan.FromMilliseconds(ms);
 
-            LogError(\$"[ParseDuration] Failed to parse TimeSpan from '{duration}'");
+            context?.LogError(\$"[ParseDuration] Failed to parse TimeSpan from '{duration}'");
             return default;
         }
 
-        private static Vector2 ParseVector2(object value)
+        private static Vector2 ParseVector2(object value, ParserContext context)
         {
             var vector2 = ParseString(value);
             if (string.IsNullOrEmpty(vector2))
@@ -2072,7 +2136,7 @@ using Rectangle = System.Drawing.RectangleF;
             var parts = vector2.Split(';');
             if (parts.Length < 2)
             {
-                LogError(\$"[ParseVector2] Failed to parse Vector2 from '{vector2}': expected 2 semicolon-separated components");
+                context?.LogError(\$"[ParseVector2] Failed to parse Vector2 from '{vector2}': expected 2 semicolon-separated components");
                 return default;
             }
 
@@ -2085,12 +2149,12 @@ using Rectangle = System.Drawing.RectangleF;
             }
             catch (Exception ex)
             {
-                LogError(\$"[ParseVector2] Failed to parse Vector2 from '{vector2}': {ex.Message}");
+                context?.LogError(\$"[ParseVector2] Failed to parse Vector2 from '{vector2}': {ex.Message}");
                 return default;
             }
         }
 
-        private static Vector2Int ParseVector2Int(object value)
+        private static Vector2Int ParseVector2Int(object value, ParserContext context)
         {
             var vector2Int = ParseString(value);
             if (string.IsNullOrEmpty(vector2Int))
@@ -2099,7 +2163,7 @@ using Rectangle = System.Drawing.RectangleF;
             var parts = vector2Int.Split(';');
             if (parts.Length < 2)
             {
-                LogError(\$"[ParseVector2Int] Failed to parse Vector2Int from '{vector2Int}': expected 2 semicolon-separated components");
+                context?.LogError(\$"[ParseVector2Int] Failed to parse Vector2Int from '{vector2Int}': expected 2 semicolon-separated components");
                 return default;
             }
 
@@ -2112,12 +2176,12 @@ using Rectangle = System.Drawing.RectangleF;
             }
             catch (Exception ex)
             {
-                LogError(\$"[ParseVector2Int] Failed to parse Vector2Int from '{vector2Int}': {ex.Message}");
+                context?.LogError(\$"[ParseVector2Int] Failed to parse Vector2Int from '{vector2Int}': {ex.Message}");
                 return default;
             }
         }
 
-        private static Vector3 ParseVector3(object value)
+        private static Vector3 ParseVector3(object value, ParserContext context)
         {
             var vector3 = ParseString(value);
             if (string.IsNullOrEmpty(vector3))
@@ -2126,7 +2190,7 @@ using Rectangle = System.Drawing.RectangleF;
             var parts = vector3.Split(';');
             if (parts.Length < 3)
             {
-                LogError(\$"[ParseVector3] Failed to parse Vector3 from '{vector3}': expected 3 semicolon-separated components");
+                context?.LogError(\$"[ParseVector3] Failed to parse Vector3 from '{vector3}': expected 3 semicolon-separated components");
                 return default;
             }
 
@@ -2140,12 +2204,12 @@ using Rectangle = System.Drawing.RectangleF;
             }
             catch (Exception ex)
             {
-                LogError(\$"[ParseVector3] Failed to parse Vector3 from '{vector3}': {ex.Message}");
+                context?.LogError(\$"[ParseVector3] Failed to parse Vector3 from '{vector3}': {ex.Message}");
                 return default;
             }
         }
 
-        private static Vector3Int ParseVector3Int(object value)
+        private static Vector3Int ParseVector3Int(object value, ParserContext context)
         {
             var vector3Int = ParseString(value);
             if (string.IsNullOrEmpty(vector3Int))
@@ -2154,7 +2218,7 @@ using Rectangle = System.Drawing.RectangleF;
             var parts = vector3Int.Split(';');
             if (parts.Length < 3)
             {
-                LogError(\$"[ParseVector3Int] Failed to parse Vector3Int from '{vector3Int}': expected 3 semicolon-separated components");
+                context?.LogError(\$"[ParseVector3Int] Failed to parse Vector3Int from '{vector3Int}': expected 3 semicolon-separated components");
                 return default;
             }
 
@@ -2168,12 +2232,12 @@ using Rectangle = System.Drawing.RectangleF;
             }
             catch (Exception ex)
             {
-                LogError(\$"[ParseVector3Int] Failed to parse Vector3Int from '{vector3Int}': {ex.Message}");
+                context?.LogError(\$"[ParseVector3Int] Failed to parse Vector3Int from '{vector3Int}': {ex.Message}");
                 return default;
             }
         }
 
-        private static Vector4 ParseVector4(object value)
+        private static Vector4 ParseVector4(object value, ParserContext context)
         {
             var vector4 = ParseString(value);
             if (string.IsNullOrEmpty(vector4))
@@ -2182,7 +2246,7 @@ using Rectangle = System.Drawing.RectangleF;
             var parts = vector4.Split(';');
             if (parts.Length < 4)
             {
-                LogError(\$"[ParseVector4] Failed to parse Vector4 from '{vector4}': expected 4 semicolon-separated components");
+                context?.LogError(\$"[ParseVector4] Failed to parse Vector4 from '{vector4}': expected 4 semicolon-separated components");
                 return default;
             }
 
@@ -2197,12 +2261,12 @@ using Rectangle = System.Drawing.RectangleF;
             }
             catch (Exception ex)
             {
-                LogError(\$"[ParseVector4] Failed to parse Vector4 from '{vector4}': {ex.Message}");
+                context?.LogError(\$"[ParseVector4] Failed to parse Vector4 from '{vector4}': {ex.Message}");
                 return default;
             }
         }
 
-        private static Vector4Int ParseVector4Int(object value)
+        private static Vector4Int ParseVector4Int(object value, ParserContext context)
         {
             var vector4Int = ParseString(value);
             if (string.IsNullOrEmpty(vector4Int))
@@ -2211,7 +2275,7 @@ using Rectangle = System.Drawing.RectangleF;
             var parts = vector4Int.Split(';');
             if (parts.Length < 4)
             {
-                LogError(\$"[ParseVector4Int] Failed to parse Vector4Int from '{vector4Int}': expected 4 semicolon-separated components");
+                context?.LogError(\$"[ParseVector4Int] Failed to parse Vector4Int from '{vector4Int}': expected 4 semicolon-separated components");
                 return default;
             }
 
@@ -2226,12 +2290,12 @@ using Rectangle = System.Drawing.RectangleF;
             }
             catch (Exception ex)
             {
-                LogError(\$"[ParseVector4Int] Failed to parse Vector4Int from '{vector4Int}': {ex.Message}");
+                context?.LogError(\$"[ParseVector4Int] Failed to parse Vector4Int from '{vector4Int}': {ex.Message}");
                 return default;
             }
         }
 
-        private static Rectangle ParseRectangle(object value)
+        private static Rectangle ParseRectangle(object value, ParserContext context)
         {
             var rectangle = ParseString(value);
             if (string.IsNullOrEmpty(rectangle))
@@ -2240,7 +2304,7 @@ using Rectangle = System.Drawing.RectangleF;
             var parts = rectangle.Split(';');
             if (parts.Length < 4)
             {
-                LogError(\$"[ParseRectangle] Failed to parse Rectangle from '{rectangle}': expected 4 semicolon-separated components");
+                context?.LogError(\$"[ParseRectangle] Failed to parse Rectangle from '{rectangle}': expected 4 semicolon-separated components");
                 return default;
             }
 
@@ -2255,12 +2319,12 @@ using Rectangle = System.Drawing.RectangleF;
             }
             catch (Exception ex)
             {
-                LogError(\$"[ParseRectangle] Failed to parse Rectangle from '{rectangle}': {ex.Message}");
+                context?.LogError(\$"[ParseRectangle] Failed to parse Rectangle from '{rectangle}': {ex.Message}");
                 return default;
             }
         }
 
-        private static RectangleInt ParseRectangleInt(object value)
+        private static RectangleInt ParseRectangleInt(object value, ParserContext context)
         {
             var rectangleInt = ParseString(value);
             if (string.IsNullOrEmpty(rectangleInt))
@@ -2269,7 +2333,7 @@ using Rectangle = System.Drawing.RectangleF;
             var parts = rectangleInt.Split(';');
             if (parts.Length < 4)
             {
-                LogError(\$"[ParseRectangleInt] Failed to parse RectangleInt from '{rectangleInt}': expected 4 semicolon-separated components");
+                context?.LogError(\$"[ParseRectangleInt] Failed to parse RectangleInt from '{rectangleInt}': expected 4 semicolon-separated components");
                 return default;
             }
 
@@ -2284,14 +2348,14 @@ using Rectangle = System.Drawing.RectangleF;
             }
             catch (Exception ex)
             {
-                LogError(\$"[ParseRectangleInt] Failed to parse RectangleInt from '{rectangleInt}': {ex.Message}");
+                context?.LogError(\$"[ParseRectangleInt] Failed to parse RectangleInt from '{rectangleInt}': {ex.Message}");
                 return default;
             }
         }
 
-        private static Color ParseColor(object value)
+        private static Color ParseColor(object value, ParserContext context)
         {
-            var argb = ParseLong(value);
+            var argb = ParseLong(value, context);
             var alpha = (int)((argb >> 24) & 0xFF);
             var red = (int)((argb >> 16) & 0xFF);
             var green = (int)((argb >> 8) & 0xFF);
