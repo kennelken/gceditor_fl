@@ -23,6 +23,9 @@ import 'package:gceditor/components/table/primitives/data_table_cell_view.dart';
 import 'package:gceditor/components/table/primitives/data_table_row_id_view.dart';
 import 'package:gceditor/main.dart';
 import 'package:gceditor/consts/consts.dart';
+import 'package:gceditor/components/table/data_table/data_table_head_view.dart';
+import 'package:gceditor/components/table/data_table/data_table_ids_view.dart';
+import 'package:gceditor/model/state/service/client_navigation_service.dart';
 import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/utils/utils.dart';
 
@@ -591,5 +594,92 @@ void main() {
     expect(kStyle.kAppTheme.textSelectionTheme.selectionColor, kColorTextSelection);
     expect(kStyle.kAppTheme.textSelectionTheme.selectionColor, isNot(kColorPrimaryLight));
     expect(kStyle.kInputThemeLight.textSelectionTheme.selectionColor, kColorTextSelection);
+  });
+
+  testWidgets('navigating to row 0 highlights row item and does not highlight table header (0:0 corner cell)', (tester) async {
+    final dbModel = DbModel();
+    final classEntity = ClassMetaEntity()
+      ..id = 'Item'
+      ..fields = [
+        ClassMetaFieldDescription()
+          ..id = 'title'
+          ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.string),
+      ];
+    final table = TableMetaEntity()
+      ..id = 'items'
+      ..classId = 'Item';
+    final row0 = DataTableRow()..id = 'row_0';
+    final row1 = DataTableRow()..id = 'row_1';
+    table.rows.addAll([row0, row1]);
+    dbModel.classes.add(classEntity);
+    dbModel.tables.add(table);
+    dbModel.cache.invalidate();
+    providerContainer.read(clientStateProvider).setModel(dbModel);
+
+    final scrollControllerHorizontal = ScrollController();
+    final scrollControllerVertical = ScrollController();
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: providerContainer,
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          home: Scaffold(
+            body: Column(
+              children: [
+                DataTableHeadView(
+                  table: table,
+                  scrollController: scrollControllerHorizontal,
+                ),
+                Expanded(
+                  child: DataTableIdsView(
+                    table: table,
+                    scrollController: scrollControllerVertical,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Focus on row 0 in table 'items'
+    providerContainer.read(clientNavigationServiceProvider).focusOn(
+          NavigationData.toTable(tableId: table.id, fieldId: null, rowIndex: 0),
+        );
+    await tester.pump();
+
+    final idViews = tester.widgetList<DataTableRowIdView>(find.byType(DataTableRowIdView)).toList();
+    expect(idViews.length, 3);
+    expect(idViews[0].row, isNull);
+    expect(idViews[1].row?.id, 'row_0');
+    expect(idViews[2].row?.id, 'row_1');
+
+    final headerContainer = tester.widget<AnimatedContainer>(
+      find.descendant(
+        of: find.byWidget(idViews[0]),
+        matching: find.byType(AnimatedContainer),
+      ),
+    );
+    final row0Container = tester.widget<AnimatedContainer>(
+      find.descendant(
+        of: find.byWidget(idViews[1]),
+        matching: find.byType(AnimatedContainer),
+      ),
+    );
+
+    final headerBoxDec = headerContainer.decoration as BoxDecoration;
+    final row0BoxDec = row0Container.decoration as BoxDecoration;
+
+    // Header 0:0 cell must NOT be orange
+    expect(headerBoxDec.color, isNot(kColorAccentOrange));
+
+    // Row 0 cell MUST be orange
+    expect(row0BoxDec.color, kColorAccentOrange);
+
+    // Let the 500ms highlight clear timer complete
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pumpAndSettle();
   });
 }

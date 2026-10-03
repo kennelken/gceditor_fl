@@ -61,7 +61,7 @@ class DataTableRowIdView extends ConsumerWidget {
     final width = DbModelUtils.getTableIdsColumnWidth(table);
 
     final navData = ref.watch(clientNavigationServiceProvider).state.navigationData;
-    final isNavHighlighted = navData != null && navData.tableId == table.id && navData.rowIndex == index;
+    final isNavHighlighted = row != null && navData != null && navData.tableId == table.id && navData.rowIndex == index;
 
     final defaultDecoration = DbModelUtils.getDataTableIdBoxDecoration(
       coordinates,

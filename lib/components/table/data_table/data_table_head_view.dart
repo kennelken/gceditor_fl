@@ -32,7 +32,7 @@ class DataTableHeadView extends StatelessWidget {
           DataTableRowIdView(
             table: table,
             row: null,
-            index: 0,
+            index: -1,
             isPinnedItem: false,
             coordinates: null,
           ),
