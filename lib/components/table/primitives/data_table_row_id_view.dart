@@ -75,13 +75,15 @@ class DataTableRowIdView extends ConsumerWidget {
           )
         : defaultDecoration;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOut,
-      decoration: effectiveDecoration,
+    return Container(
       width: width,
       height: height,
-      child: _getBody(ref),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+        decoration: effectiveDecoration,
+        child: _getBody(ref),
+      ),
     );
   }
 

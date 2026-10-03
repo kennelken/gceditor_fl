@@ -22,6 +22,7 @@ import 'package:gceditor/components/table/primitives/data_table_cell_text_view.d
 import 'package:gceditor/components/table/primitives/data_table_cell_view.dart';
 import 'package:gceditor/components/table/primitives/data_table_row_id_view.dart';
 import 'package:gceditor/main.dart';
+import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/utils/utils.dart';
 
 void main() {
@@ -534,5 +535,53 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(idTextField.controller!.selection, const TextSelection(baseOffset: 0, extentOffset: 6));
+  });
+
+  testWidgets('DataTableRowIdView container width is fixed and child AnimatedContainer does not animate width', (tester) async {
+    final dbModel = DbModel();
+    final classEntity = ClassMetaEntity()
+      ..id = 'Item'
+      ..fields = [];
+    final table = TableMetaEntity()
+      ..id = 'items'
+      ..classId = 'Item';
+    table.idsColumnWidth = 150;
+    final row = DataTableRow()..id = 'row_01';
+    table.rows.add(row);
+    dbModel.classes.add(classEntity);
+    dbModel.tables.add(table);
+    dbModel.cache.invalidate();
+    providerContainer.read(clientStateProvider).setModel(dbModel);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: providerContainer,
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 200,
+                height: 50,
+                child: DataTableRowIdView(
+                  table: table,
+                  row: row,
+                  index: 0,
+                  isPinnedItem: false,
+                  coordinates: DataTableValueCoordinates(table: table, field: null, rowIndex: 0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final outerContainer = tester.widget<Container>(find.descendant(of: find.byType(DataTableRowIdView), matching: find.byType(Container)).first);
+    expect(outerContainer.constraints?.minWidth, 150.0 * kScale);
+    expect(outerContainer.constraints?.maxWidth, 150.0 * kScale);
+
+    final animatedContainer = tester.widget<AnimatedContainer>(find.byType(AnimatedContainer));
+    expect(animatedContainer.constraints, isNull);
   });
 }

@@ -1,5 +1,6 @@
 import 'package:dartx/dartx.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gceditor/components/table/data_table_header.dart';
 import 'package:gceditor/components/table/primitives/data_table_cell_view.dart';
 import 'package:gceditor/components/table/primitives/data_table_row_id_view.dart';
@@ -68,33 +69,39 @@ class _DataTableIdsViewState extends State<DataTableIdsView> {
     final itemExtent = DbModelUtils.getTableRowsHeight(clientModel, table: widget.table);
     final height = widget.pinnedItems != null ? widget.pinnedItems!.length * itemExtent : null;
 
-    return SizedBox(
-      width: DbModelUtils.getTableIdsColumnWidth(widget.table),
-      child: SizedBox(
-        height: height,
-        child: ScrollConfiguration(
-            behavior: kScrollDraggable,
-            child: Theme(
-              data: kStyle.kReorderableListTheme,
-              child: ReorderableListView.builder(
-                buildDefaultDragHandles: widget.pinnedItems == null,
-                scrollDirection: Axis.vertical,
-                itemCount: _rows.length,
-                scrollController: widget.scrollController,
-                onReorder: _handleReorder,
-                itemBuilder: (context, index) {
-                  return DataTableRowIdView(
-                    key: ValueKey(index),
-                    table: widget.table,
-                    row: _rows[index],
-                    index: indexes[index],
-                    isPinnedItem: widget.pinnedItems != null,
-                    coordinates: DataTableValueCoordinates(table: widget.table, field: null, rowIndex: indexes[index]),
-                  );
-                },
-              ),
-            )),
-      ),
+    return Consumer(
+      builder: (context, ref, child) {
+        ref.watch(columnSizeChangedProvider);
+
+        return SizedBox(
+          width: DbModelUtils.getTableIdsColumnWidth(widget.table),
+          child: SizedBox(
+            height: height,
+            child: ScrollConfiguration(
+                behavior: kScrollDraggable,
+                child: Theme(
+                  data: kStyle.kReorderableListTheme,
+                  child: ReorderableListView.builder(
+                    buildDefaultDragHandles: widget.pinnedItems == null,
+                    scrollDirection: Axis.vertical,
+                    itemCount: _rows.length,
+                    scrollController: widget.scrollController,
+                    onReorder: _handleReorder,
+                    itemBuilder: (context, index) {
+                      return DataTableRowIdView(
+                        key: ValueKey(index),
+                        table: widget.table,
+                        row: _rows[index],
+                        index: indexes[index],
+                        isPinnedItem: widget.pinnedItems != null,
+                        coordinates: DataTableValueCoordinates(table: widget.table, field: null, rowIndex: indexes[index]),
+                      );
+                    },
+                  ),
+                )),
+          ),
+        );
+      },
     );
   }
 
