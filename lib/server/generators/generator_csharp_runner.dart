@@ -64,9 +64,11 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
   static const _paramTablesListDeclarations = 'tablesListDeclarations';
   static const _paramTablesListAssignment = 'tablesListAssignment';
   static const _paramFastListActivatorCases = 'fastListActivatorCases';
+  static const _paramTrimExcessCases = 'trimExcessCases';
   static const _paramTableClassMap = 'tableClassMap';
   static const _paramGetPathByEnumOverloads = 'getPathByEnumOverloads';
   static const _paramExtensionsClass = 'extensionsClass';
+  static const _paramParentTypesBody = 'parentTypesBody';
 
   @override
   Future<GeneratorResult> execute(String outputFolder, DbModel model, GeneratorCsharp data, GeneratorAdditionalInformation additionalInfo) async {
@@ -99,6 +101,7 @@ class GeneratorCsharpRunner extends BaseGeneratorRunner<GeneratorCsharp> with Ou
           _paramTablesListDeclarations: _getTablesListDeclarations(model, data),
           _paramTablesListAssignment: _getTablesListAssignment(model, data),
           _paramFastListActivatorCases: _getFastListActivatorCases(model, data),
+          _paramTrimExcessCases: _getTrimExcessCases(model, data),
           _paramGetPathByEnumOverloads: _getPathByEnumOverloads(model, data),
         },
       );
@@ -180,6 +183,7 @@ namespace ${data.namespace}
           _methodCloneBody: _getCloneProperties(model, classEntity),
           _paramListStructGetHashCode: _getListStructGetHashCode(model, classEntity),
           _paramListStructEquals: _getListStructEquals(model, classEntity),
+          _paramParentTypesBody: _getParentTypesBody(model, data, classEntity),
         },
       );
 
@@ -994,6 +998,99 @@ ${_makeSummary('</summary>', indentDepth)}''';
     return items.join();
   }
 
+  String _getTrimExcessCases(DbModel model, GeneratorCsharp data) {
+    final items = <String>[];
+
+    for (final classEntity in model.cache.allClasses) {
+      switch (classEntity.classType) {
+        case ClassType.undefined:
+        case ClassType.interface:
+          items.add(
+            _trimExcessCaseTemplate.format({
+              _paramClassName: '${data.prefixInterface}${classEntity.id}${data.postfix}',
+            }),
+          );
+          break;
+
+        case ClassType.referenceType:
+        case ClassType.valueType:
+          items.add(
+            _trimExcessCaseTemplate.format({
+              _paramClassName: '${data.prefix}${classEntity.id}${data.postfix}',
+            }),
+          );
+          break;
+      }
+    }
+
+    items.add(
+      _trimExcessCaseTemplate.format({
+        _paramClassName: 'Base${data.prefix}Item${data.postfix}',
+      }),
+    );
+
+    items.add(
+      _trimExcessCaseTemplate.format({
+        _paramClassName: 'IIdentifiable',
+      }),
+    );
+
+    return items.join();
+  }
+
+  Set<ClassMetaEntity> _getAllInterfaces(DbModel model, ClassMetaEntity classEntity) {
+    final result = <ClassMetaEntity>{};
+
+    void collectFrom(ClassMetaEntity entity) {
+      final ifaces = model.cache.getParentInterfaces(entity);
+      for (final iface in ifaces) {
+        result.add(iface);
+      }
+    }
+
+    collectFrom(classEntity);
+
+    if (classEntity.classType != ClassType.valueType) {
+      final parentClasses = model.cache.getParentClasses(classEntity);
+      for (final parent in parentClasses) {
+        collectFrom(parent);
+      }
+    }
+
+    return result;
+  }
+
+  String _getParentTypesBody(DbModel model, GeneratorCsharp data, ClassMetaEntity classEntity) {
+    final typeNames = <String>{};
+
+    // 1. Current class
+    typeNames.add('${data.prefix}${classEntity.id}${data.postfix}');
+
+    // 2. Parent classes (if reference type)
+    if (classEntity.classType != ClassType.valueType) {
+      final parentClasses = model.cache.getParentClasses(classEntity);
+      for (final parent in parentClasses) {
+        typeNames.add('${data.prefix}${parent.id}${data.postfix}');
+      }
+    }
+
+    // 3. All interfaces (direct and inherited from parent classes and parent interfaces)
+    final allInterfaces = _getAllInterfaces(model, classEntity);
+    for (final iface in allInterfaces) {
+      typeNames.add('${data.prefixInterface}${iface.id}${data.postfix}');
+    }
+
+    // 4. BaseItem (only for reference types)
+    if (classEntity.classType != ClassType.valueType) {
+      typeNames.add('Base${data.prefix}Item${data.postfix}');
+    }
+
+    // 5. IIdentifiable
+    typeNames.add('IIdentifiable');
+
+    return typeNames.map((t) => '            typeof($t),').join(_defaultNewLine);
+  }
+
   int _getMaxStructDepth(DbModel model, int maxAllowedDepth) {
     var depth = 0;
     for (var classEntry in model.cache.allClasses) {
@@ -1082,6 +1179,8 @@ using Rectangle = System.Drawing.RectangleF;
     {
         string Id { get; }
         bool IsGlobal { get; }
+        bool IsValueType { get; }
+        IReadOnlyList<Type> ParentTypes { get; }
     }
 
 #region Root
@@ -1197,20 +1296,15 @@ using Rectangle = System.Drawing.RectangleF;
             AllItems = new Dictionary<string, IIdentifiable>();
             AllItemsByType = new Dictionary<Type, object>();
 
-            var typesCache = new Dictionary<Type, List<Type>>();
             foreach (var item in items)
             {
                 AllItems[item.Id] = item;
 
-                var types = GetParentTypesIncludingCurrent(item.GetType(), typesCache);
-                foreach (var type in types)
+                foreach (var type in item.ParentTypes)
                 {
-                    if (type == typeof(object))
-                        continue;
-
                     if (!AllItemsByType.TryGetValue(type, out var listItemsByType))
                     {
-                        listItemsByType = FastListActivator.CreateInstance(type);
+                        listItemsByType = FastListFactory.CreateList(type);
                         AllItemsByType.Add(type, listItemsByType);
                     }
                     (listItemsByType as IList).Add(item);
@@ -1223,40 +1317,8 @@ using Rectangle = System.Drawing.RectangleF;
             AllItemsByType.TrimExcess();
             foreach (var list in AllItemsByType.Values)
             {
-                if (list is IList { Count: > 0 })
-                {
-                    var method = list.GetType().GetMethod("TrimExcess", Type.EmptyTypes);
-                    method?.Invoke(list, null);
-                }
+                FastListFactory.TrimExcess(list);
             }
-        }
-
-        private List<Type> GetParentTypesIncludingCurrent(Type type, Dictionary<Type, List<Type>> cache)
-        {
-            if (!cache.TryGetValue(type, out var result))
-            {
-                result = new List<Type>();
-                foreach (var interfaceType in type.GetInterfaces())
-                {
-                    if (interfaceType.IsGenericType)
-                    {
-                        var genericDef = interfaceType.GetGenericTypeDefinition();
-                        if (genericDef == typeof(ICloneable<>) || genericDef == typeof(IEquatable<>))
-                            continue;
-                    }
-                    result.Add(interfaceType);
-                }
-
-                var parent = type;
-                while (parent != null)
-                {
-                    result.Add(parent);
-                    parent = parent.BaseType;
-                }
-
-                cache[type] = result;
-            }
-            return result;
         }
 
 {${_paramGetPathByEnumOverloads}}    }
@@ -1281,6 +1343,8 @@ using Rectangle = System.Drawing.RectangleF;
     {
         public string Id { get; set; }
         public bool IsGlobal { get; set; }
+        public virtual bool IsValueType => false;
+        public abstract IReadOnlyList<Type> ParentTypes { get; }
 
         public virtual void OnParsed({${_paramPrefix}}Root{${_paramPostfix}} root, CacheRoot cache) {}
     }
@@ -1335,15 +1399,22 @@ using Rectangle = System.Drawing.RectangleF;
     }
 #endregion
 
-    internal static class FastListActivator
+    internal static class FastListFactory
     {
-        public static object CreateInstance(Type type)
+        public static object CreateList(Type type)
         {
             return type.Name switch
             {
-{${_paramFastListActivatorCases}}
-                _ => Activator.CreateInstance(typeof(List<>).MakeGenericType(type))
+{${_paramFastListActivatorCases}}                _ => throw new ArgumentException(\$"Unknown type {type.FullName}")
             };
+        }
+
+        public static void TrimExcess(object list)
+        {
+            switch (list)
+            {
+{${_paramTrimExcessCases}}                default: throw new ArgumentException(\$"Unexpected class {list?.GetType().FullName}");
+            }
         }
     }
 
@@ -1424,6 +1495,12 @@ using Rectangle = System.Drawing.RectangleF;
     public partial class {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} {${_paramParentClass}} ICloneable<{${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}>{${_paramParentInterfaces}}
     {{${_paramPropertiesBody}}
 
+        private static readonly Type[] _parentTypes = new Type[]
+        {
+{${_paramParentTypesBody}}
+        };
+        public override IReadOnlyList<Type> ParentTypes => _parentTypes;
+
         /// <summary>
         /// Clone of the item. Warning: references to the model entities are not copied!
         /// </summary>
@@ -1482,7 +1559,14 @@ using Rectangle = System.Drawing.RectangleF;
     public partial struct {${_paramPrefix}}{${_paramClass}}{${_paramPostfix}} : IIdentifiable, ICloneable<{${_paramPrefix}}{${_paramClass}}{${_paramPostfix}}>{${_paramParentInterfaces}}
     {
         public string Id { get; set; }
-        public bool IsGlobal { get; set; }{${_paramPropertiesBody}}
+        public bool IsGlobal { get; set; }
+        public readonly bool IsValueType => true;
+
+        private static readonly Type[] _parentTypes = new Type[]
+        {
+{${_paramParentTypesBody}}
+        };
+        public readonly IReadOnlyList<Type> ParentTypes => _parentTypes;{${_paramPropertiesBody}}
 
         /// <summary>
         /// Deep clone of the item
@@ -1571,6 +1655,10 @@ using Rectangle = System.Drawing.RectangleF;
                 "{${_paramClassName}}" => (object)new List<{${_paramClassName}}>(),
 ''';
 
+  final String _trimExcessCaseTemplate = '''
+                case List<{${_paramClassName}}> l: l.TrimExcess(); break;
+''';
+
   final String _parserTemplate = //
       '''#region JSON
     public static partial class {${_paramPrefix}}Root{${_paramPostfix}}Parser
@@ -1612,7 +1700,7 @@ using Rectangle = System.Drawing.RectangleF;
             var allClasses = new List<string>();
             foreach (var kvp in objectsByIds)
             {
-                if (kvp.Value.GetType().IsValueType)
+                if (kvp.Value.IsValueType)
                     allStructs.Add(kvp.Key);
                 else
                     allClasses.Add(kvp.Key);
