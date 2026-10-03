@@ -185,7 +185,7 @@ class StyleStateNotifier extends ChangeNotifier {
       fontFamily: 'JetbrainsMono',
       textSelectionTheme: const TextSelectionThemeData(
         cursorColor: Colors.white,
-        selectionColor: kColorPrimaryLight,
+        selectionColor: kColorTextSelection,
         selectionHandleColor: Colors.red,
       ),
       textTheme: TextTheme(
@@ -268,8 +268,8 @@ class StyleStateNotifier extends ChangeNotifier {
     state.kInputThemeLight = state.kAppTheme.copyWith(
       textSelectionTheme: state.kAppTheme.textSelectionTheme.copyWith(
         cursorColor: kColorPrimaryDarker,
-        selectionColor: kColorPrimaryLight,
-        selectionHandleColor: kColorPrimaryLight,
+        selectionColor: kColorTextSelection,
+        selectionHandleColor: kColorTextSelection,
       ),
       inputDecorationTheme: state.kAppTheme.inputDecorationTheme.copyWith(
         isDense: true,

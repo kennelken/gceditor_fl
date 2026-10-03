@@ -23,6 +23,7 @@ import 'package:gceditor/components/table/primitives/data_table_cell_view.dart';
 import 'package:gceditor/components/table/primitives/data_table_row_id_view.dart';
 import 'package:gceditor/main.dart';
 import 'package:gceditor/consts/consts.dart';
+import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/utils/utils.dart';
 
 void main() {
@@ -583,5 +584,12 @@ void main() {
 
     final animatedContainer = tester.widget<AnimatedContainer>(find.byType(AnimatedContainer));
     expect(animatedContainer.constraints, isNull);
+  });
+
+  test('text selection color is set to dark/less bright selection color for readability', () {
+    providerContainer.read(styleStateProvider).init();
+    expect(kStyle.kAppTheme.textSelectionTheme.selectionColor, kColorTextSelection);
+    expect(kStyle.kAppTheme.textSelectionTheme.selectionColor, isNot(kColorPrimaryLight));
+    expect(kStyle.kInputThemeLight.textSelectionTheme.selectionColor, kColorTextSelection);
   });
 }
