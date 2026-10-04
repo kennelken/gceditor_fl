@@ -6,29 +6,14 @@ env:
 on:
   push:
     branches: [master]
-    tags: [v*]
   pull_request:
     branches: [master, develop]
+  release:
+    types: [published]
 
   workflow_dispatch:
 
 jobs:
-  get-tag:
-    runs-on: ubuntu-latest
-    outputs:
-      need-release: ${{steps.get-version.outputs.is-semver}}
-      version: ${{steps.get-version.outputs.version}}
-
-    steps:
-      - name: Check version tag
-        id: get-version
-        uses: battila7/get-version-action@v2
-
-      - name: Print version tag
-        run: |
-          echo is-semver=${{steps.get-version.outputs.is-semver}}
-          echo version=${{steps.get-version.outputs.version}}
-
   build-windows:
     runs-on: windows-2022
     steps:
@@ -142,9 +127,11 @@ jobs:
           path: build/macos/Build/Products/Release/gceditor.zip
 
   release:
-    needs: [get-tag, build-windows, build-web, build-linux, build-macos]
+    needs: [build-windows, build-web, build-linux, build-macos]
     runs-on: ubuntu-latest
-    if: needs.get-tag.outputs.need-release
+    if: github.event_name == 'release'
+    permissions:
+      contents: write
     steps:
       - name: Download windows build
         uses: actions/download-artifact@v4
@@ -163,6 +150,7 @@ jobs:
         with:
           name: linux-build
           path: linux-build
+
       - name: Download macos build
         uses: actions/download-artifact@v4
         with:
@@ -173,34 +161,33 @@ jobs:
         uses: vimtor/action-zip@v1
         with:
           files: windows-build
-          dest: gceditor_windows_${{needs.get-tag.outputs.version}}.zip
+          dest: gceditor_windows_${{ github.event.release.tag_name }}.zip
 
       - name: Archive web build
         uses: vimtor/action-zip@v1
         with:
           files: web-build
-          dest: gceditor_web_${{needs.get-tag.outputs.version}}.zip
+          dest: gceditor_web_${{ github.event.release.tag_name }}.zip
 
       - name: Archive linux build
         uses: vimtor/action-zip@v1
         with:
           files: linux-build
-          dest: gceditor_linux_${{needs.get-tag.outputs.version}}.zip
+          dest: gceditor_linux_${{ github.event.release.tag_name }}.zip
 
       - name: Archive macos build
         uses: vimtor/action-zip@v1
         with:
           files: macos-build
-          dest: gceditor_macos_${{needs.get-tag.outputs.version}}.zip
+          dest: gceditor_macos_${{ github.event.release.tag_name }}.zip
 
-      - name: Create a release
-        uses: marvinpinto/action-automatic-releases@latest
+      - name: Upload artifacts to release
+        uses: softprops/action-gh-release@v2
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: ${{needs.get-tag.outputs.version}}
-          prerelease: false
+          tag_name: ${{ github.event.release.tag_name }}
           files: |
-            gceditor_windows_${{needs.get-tag.outputs.version}}.zip
-            gceditor_web_${{needs.get-tag.outputs.version}}.zip
-            gceditor_linux_${{needs.get-tag.outputs.version}}.zip
-            gceditor_macos_${{needs.get-tag.outputs.version}}.zip
+            gceditor_windows_${{ github.event.release.tag_name }}.zip
+            gceditor_web_${{ github.event.release.tag_name }}.zip
+            gceditor_linux_${{ github.event.release.tag_name }}.zip
+            gceditor_macos_${{ github.event.release.tag_name }}.zip
+
