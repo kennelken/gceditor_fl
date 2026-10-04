@@ -134,7 +134,7 @@ void main() {
       expect(code.contains('var name: String = ""'), isTrue);
       expect(code.contains('var pos: Vector2 = Vector2.ZERO'), isTrue);
       expect(code.contains('var color: Color = Color(0, 0, 0, 1)'), isTrue);
-      expect(code.contains('var target: RefCounted = null'), isTrue);
+      expect(code.contains('var target: ModelHero = null'), isTrue);
       expect(code.contains('func clone() -> ModelHero:'), isTrue);
       expect(code.contains('static func parse(json_text: String'), isTrue);
       expect(code.contains('JSON.parse_string(json_text)'), isTrue);
@@ -204,6 +204,28 @@ void main() {
       dbModel.tables.add(table);
       dbModel.cache.invalidate();
 
+      final iface = ClassMetaEntity()
+        ..id = 'Character'
+        ..classType = ClassType.interface
+        ..fields = [
+          ClassMetaFieldDescription()
+            ..id = 'title'
+            ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.string),
+        ];
+      dbModel.classes.add(iface);
+
+      final unitClass = ClassMetaEntity()
+        ..id = 'Unit'
+        ..classType = ClassType.referenceType
+        ..fields = [
+          ClassMetaFieldDescription()
+            ..id = 'hp'
+            ..typeInfo = ClassFieldDescriptionDataInfo.fromData(type: ClassFieldType.int),
+        ];
+      dbModel.classes.add(unitClass);
+      heroClass.parent = 'Unit';
+      heroClass.interfaces = ['Character'];
+
       final rustGen = GeneratorRust()
         ..prefix = 'Model'
         ..postfix = ''
@@ -228,11 +250,21 @@ void main() {
       expect(code.contains('pub target: Option<String>'), isTrue);
       expect(code.contains('pub pos: Vec2'), isTrue);
       expect(code.contains('pub fn target<\'a>(&self, root: &\'a ModelRoot) -> Option<&\'a ModelHero>'), isTrue);
+      expect(code.contains('pub trait ModelCharacter {'), isTrue);
+      expect(code.contains('fn title(&self) -> &str;'), isTrue);
+      expect(code.contains('pub trait ModelUnitTrait {'), isTrue);
+      expect(code.contains('fn hp(&self) -> i32;'), isTrue);
+      expect(code.contains('pub trait ModelHeroTrait: ModelUnitTrait + ModelCharacter {'), isTrue);
+      expect(code.contains('impl ModelCharacter for ModelHero {'), isTrue);
+      expect(code.contains('impl ModelUnitTrait for ModelHero {'), isTrue);
+      expect(code.contains('impl ModelHeroTrait for ModelHero {'), isTrue);
       expect(code.contains('pub trait ModelModelItem: Sized'), isTrue);
       expect(code.contains('impl ModelModelItem for ModelHero'), isTrue);
       expect(code.contains('pub fn get<T: ModelModelItem>(&self, id: &str) -> Option<&T>'), isTrue);
       expect(code.contains('pub fn parse(json_text: &str) -> Result<Self, String>'), isTrue);
       expect(code.contains('pub struct ParserContext'), isTrue);
+      expect(code.contains(RegExp(r'^#region', multiLine: true)), isFalse);
+      expect(code.contains(RegExp(r'^#endregion', multiLine: true)), isFalse);
     } finally {
       tempDir.deleteSync(recursive: true);
     }
@@ -310,20 +342,11 @@ void main() {
     ];
     problems = computeProblems(jsonEncode(dbModel.toJson()));
 
-    // Inheritance should be an ERROR in Rust
-    final rustInhErrors = problems.where((p) => p.type == ProblemType.unsupportedInheritance);
-    expect(rustInhErrors.isNotEmpty, isTrue);
-    expect(rustInhErrors.first.severity, ProblemSeverity.error);
-    expect(rustInhErrors.first.classId, 'Hero');
-    expect(rustInhErrors.first.details, 'Rust');
-    expect(rustInhErrors.first.getDescription(), contains('Rust'));
+    // Inheritance is supported via traits in Rust, so no error
+    expect(problems.any((p) => p.type == ProblemType.unsupportedInheritance), isFalse);
 
-    // Interface should be an ERROR
-    final rustIfaceErrors = problems.where((p) => p.type == ProblemType.unsupportedInterface);
-    expect(rustIfaceErrors.isNotEmpty, isTrue);
-    expect(rustIfaceErrors.every((p) => p.severity == ProblemSeverity.error), isTrue);
-    expect(rustIfaceErrors.every((p) => p.details == 'Rust'), isTrue);
-    expect(rustIfaceErrors.first.getDescription(), contains('Rust'));
+    // Interfaces are supported via traits in Rust, so no error
+    expect(problems.any((p) => p.type == ProblemType.unsupportedInterface), isFalse);
 
     // Reference types should be a WARNING (will be replaced with struct)
     final rustRefTypeWarnings = problems.where((p) => p.type == ProblemType.unsupportedReferenceType);
@@ -340,8 +363,11 @@ void main() {
     ];
     problems = computeProblems(jsonEncode(dbModel.toJson()));
     final allInhErrors = problems.where((p) => p.type == ProblemType.unsupportedInheritance).toList();
-    expect(allInhErrors.length, 1);
-    expect(allInhErrors.first.details, 'Rust');
+    expect(allInhErrors.isEmpty, isTrue);
+
+    final allIfaceErrors = problems.where((p) => p.type == ProblemType.unsupportedInterface).toList();
+    expect(allIfaceErrors.isNotEmpty, isTrue);
+    expect(allIfaceErrors.every((p) => p.details == 'GDScript'), isTrue);
   });
 
   testWidgets('GeneratorsItemView renders Rust generator dropdowns matching item height', (tester) async {

@@ -32,6 +32,7 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
   static const _paramModelItemImpls = 'modelItemImpls';
   static const _paramReferenceAccessors = 'referenceAccessors';
   static const _paramGetPathByEnumOverloads = 'getPathByEnumOverloads';
+  static const _paramTraits = 'traits';
 
   @override
   Future<GeneratorResult> execute(String outputFolder, DbModel model, GeneratorRust data, GeneratorAdditionalInformation additionalInfo) async {
@@ -53,6 +54,7 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
         _paramModelItemImpls: _getModelItemImpls(model, data),
         _paramReferenceAccessors: _getReferenceAccessors(model, data),
         _paramGetPathByEnumOverloads: _getPathByEnumOverloads(model, data),
+        _paramTraits: _getTraits(model, data),
       });
 
       final previousResult = await readFromFile(
@@ -89,18 +91,26 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
       sb.writeln('/// ${enumEntity.description}');
       sb.writeln('#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]');
       sb.writeln('pub enum $typeName {');
-      for (final val in enumEntity.values) {
-        sb.writeln('${_indent}${val.id},');
+      if (enumEntity.values.isEmpty) {
+        sb.writeln('${_indent}None,');
+      } else {
+        for (final val in enumEntity.values) {
+          sb.writeln('${_indent}${val.id},');
+        }
       }
       sb.writeln('}');
       sb.writeln();
       sb.writeln('impl $typeName {');
       sb.writeln('${_indent}pub fn as_str(&self) -> &\'static str {');
-      sb.writeln('${_indent}${_indent}match self {');
-      for (final val in enumEntity.values) {
-        sb.writeln('${_indent}${_indent}${_indent}Self::${val.id} => "${val.id}",');
+      if (enumEntity.values.isEmpty) {
+        sb.writeln('${_indent}${_indent}""');
+      } else {
+        sb.writeln('${_indent}${_indent}match self {');
+        for (final val in enumEntity.values) {
+          sb.writeln('${_indent}${_indent}${_indent}Self::${val.id} => "${val.id}",');
+        }
+        sb.writeln('${_indent}${_indent}}');
       }
-      sb.writeln('${_indent}${_indent}}');
       sb.writeln('${_indent}}');
       sb.writeln();
       sb.writeln('${_indent}pub fn from_str(s: &str) -> Option<Self> {');
@@ -108,8 +118,22 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
       for (final val in enumEntity.values) {
         sb.writeln('${_indent}${_indent}${_indent}"${val.id}" => Some(Self::${val.id}),');
       }
+      if (enumEntity.values.isEmpty) {
+        sb.writeln('${_indent}${_indent}${_indent}"" | "None" => Some(Self::None),');
+      }
       sb.writeln('${_indent}${_indent}${_indent}_ => None,');
       sb.writeln('${_indent}${_indent}}');
+      sb.writeln('${_indent}}');
+      sb.writeln('}');
+      sb.writeln();
+
+      sb.writeln('impl Default for $typeName {');
+      sb.writeln('${_indent}fn default() -> Self {');
+      if (enumEntity.values.isEmpty) {
+        sb.writeln('${_indent}${_indent}Self::None');
+      } else {
+        sb.writeln('${_indent}${_indent}Self::${enumEntity.values.first.id}');
+      }
       sb.writeln('${_indent}}');
       sb.writeln('}');
       sb.writeln();
@@ -130,7 +154,7 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
       if (classEntity.description.isNotEmpty) {
         sb.writeln('/// ${classEntity.description}');
       }
-      sb.writeln('#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]');
+      sb.writeln('#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]');
       sb.writeln('pub struct $typeName {');
       if (!isValueType) {
         sb.writeln('${_indent}pub id: String,');
@@ -318,7 +342,7 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
       sb.writeln('${_indent}${_indent}if let Some(list) = tables_val.get("${table.id}").and_then(|v| v.as_array()) {');
       sb.writeln('${_indent}${_indent}${_indent}for (row_idx, row_val) in list.iter().enumerate() {');
       sb.writeln('${_indent}${_indent}${_indent}${_indent}if let Some(row_map) = row_val.as_object() {');
-      sb.writeln('${_indent}${_indent}${_indent}${_indent}${_indent}let id = row_map.get("id").and_then(|v| v.as_str()).map(|s| s.to_string()).unwrap_or_else(|| format!("{table}_{row_idx}"));');
+      sb.writeln('${_indent}${_indent}${_indent}${_indent}${_indent}let id = row_map.get("id").and_then(|v| v.as_str()).map(|s| s.to_string()).unwrap_or_else(|| format!("${table.id}_{row_idx}"));');
       sb.writeln('${_indent}${_indent}${_indent}${_indent}${_indent}let is_global = row_map.contains_key("id");');
       sb.writeln('${_indent}${_indent}${_indent}${_indent}${_indent}let item = $className {');
       sb.writeln('${_indent}${_indent}${_indent}${_indent}${_indent}${_indent}id: id.clone(),');
@@ -380,8 +404,7 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
         final classEntity = model.cache.getEntity(field.typeInfo.classId!);
         if (classEntity is ClassMetaEntityEnum) {
           final enumType = '${data.prefix}${classEntity.id}${data.postfix}';
-          final firstVal = classEntity.values.isNotEmpty ? classEntity.values.first.id : '';
-          return 'parse_string($rawVal).as_str().pipe($enumType::from_str).unwrap_or($enumType::$firstVal)';
+          return 'parse_string($rawVal).as_str().pipe($enumType::from_str).unwrap_or_default()';
         }
         return '$rawVal.and_then(|v| v.as_str()).map(|s| s.to_string())';
       case ClassFieldType.list:
@@ -393,7 +416,15 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
         final inlineClassName = '${data.prefix}$inlineClassId${data.postfix}';
         final inlineEntity = model.cache.getEntity(inlineClassId) as ClassMetaEntity?;
         final inlineFields = inlineEntity != null ? model.cache.getAllFields(inlineEntity) : <ClassMetaFieldDescription>[];
-        final fieldInits = inlineFields.map((f) => '${f.id}: ${_getFieldParseExpr(model, data, f).replaceAll('row_map', 'sub_map')}').join(', ');
+        final fieldInitsList = <String>[];
+        if (inlineEntity != null && inlineEntity.classType != ClassType.valueType) {
+          fieldInitsList.add('id: sub_map.get("id").and_then(|v| v.as_str()).unwrap_or("").to_string()');
+          fieldInitsList.add('is_global: sub_map.contains_key("id")');
+        }
+        for (final f in inlineFields) {
+          fieldInitsList.add('${f.id}: ${_getFieldParseExpr(model, data, f).replaceAll('row_map', 'sub_map')}');
+        }
+        final fieldInits = fieldInitsList.join(', ');
         return 'parse_vec($rawVal, |v| v.as_object().map(|sub_map| $inlineClassName { $fieldInits }).unwrap_or_default())';
       case ClassFieldType.dictionary:
         final valParser = _getSimpleElementParser(model, data, field.valueTypeInfo!);
@@ -441,8 +472,7 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
         final classEntity = model.cache.getEntity(type.classId!);
         if (classEntity is ClassMetaEntityEnum) {
           final enumType = '${data.prefix}${classEntity.id}${data.postfix}';
-          final firstVal = classEntity.values.isNotEmpty ? classEntity.values.first.id : '';
-          return '|v| parse_string(Some(v)).as_str().pipe($enumType::from_str).unwrap_or($enumType::$firstVal)';
+          return '|v| parse_string(Some(v)).as_str().pipe($enumType::from_str).unwrap_or_default()';
         }
         return '|v| parse_string(Some(v))';
       default:
@@ -504,10 +534,13 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
         if (field.typeInfo.type == ClassFieldType.reference) {
           final targetClass = model.cache.getEntity(field.typeInfo.classId!);
           if (targetClass is ClassMetaEntity && targetClass.classType == ClassType.referenceType) {
-            final targetTypeName = '${data.prefix}${targetClass.id}${data.postfix}';
-            accessors.add('''${_indent}pub fn ${field.id}<\'a>(&self, root: &\'a ${data.prefix}Root${data.postfix}) -> Option<&\'a $targetTypeName> {
+            final targetHasTable = model.cache.allDataTables.any((t) => t.classId == targetClass.id);
+            if (targetHasTable) {
+              final targetTypeName = '${data.prefix}${targetClass.id}${data.postfix}';
+              accessors.add('''${_indent}pub fn ${field.id}<\'a>(&self, root: &\'a ${data.prefix}Root${data.postfix}) -> Option<&\'a $targetTypeName> {
 ${_indent}${_indent}self.${field.id}.as_deref().and_then(|id| root.get::<$targetTypeName>(id))
 ${_indent}}''');
+            }
           }
         }
       }
@@ -537,6 +570,290 @@ ${_indent}}''');
     return sb.toString();
   }
 
+  Set<ClassMetaEntity> _getAllInterfaces(DbModel model, ClassMetaEntity classEntity) {
+    final result = <ClassMetaEntity>{};
+
+    void collectFrom(ClassMetaEntity entity) {
+      final ifaces = model.cache.getParentInterfaces(entity);
+      for (final iface in ifaces) {
+        result.add(iface);
+      }
+    }
+
+    collectFrom(classEntity);
+
+    final parentClasses = model.cache.getParentClasses(classEntity);
+    for (final parent in parentClasses) {
+      collectFrom(parent);
+    }
+
+    return result;
+  }
+
+  String _getRustGetterReturnType(DbModel model, GeneratorRust data, ClassMetaFieldDescription field) {
+    switch (field.typeInfo.type) {
+      case ClassFieldType.bool:
+        return 'bool';
+      case ClassFieldType.int:
+        return 'i32';
+      case ClassFieldType.long:
+      case ClassFieldType.date:
+      case ClassFieldType.duration:
+        return 'i64';
+      case ClassFieldType.float:
+        return 'f32';
+      case ClassFieldType.double:
+        return 'f64';
+      case ClassFieldType.string:
+      case ClassFieldType.text:
+      case ClassFieldType.undefined:
+        return '&str';
+      case ClassFieldType.color:
+        return 'Color';
+      case ClassFieldType.vector2:
+        return 'Vec2';
+      case ClassFieldType.vector2Int:
+        return 'IVec2';
+      case ClassFieldType.vector3:
+        return 'Vec3';
+      case ClassFieldType.vector3Int:
+        return 'IVec3';
+      case ClassFieldType.vector4:
+        return 'Vec4';
+      case ClassFieldType.vector4Int:
+        return 'IVec4';
+      case ClassFieldType.rectangle:
+        return 'Rect';
+      case ClassFieldType.rectangleInt:
+        return 'IRect';
+      case ClassFieldType.reference:
+        final classEntity = model.cache.getEntity(field.typeInfo.classId!);
+        if (classEntity is ClassMetaEntityEnum) {
+          return '${data.prefix}${classEntity.id}${data.postfix}';
+        }
+        return 'Option<&str>';
+      case ClassFieldType.list:
+      case ClassFieldType.set:
+        final elemType = _getSimpleRustType(model, data, field.valueTypeInfo!);
+        return '&[$elemType]';
+      case ClassFieldType.listInline:
+        final inlineClass = '${data.prefix}${field.valueTypeInfo!.classId!}${data.postfix}';
+        return '&[$inlineClass]';
+      case ClassFieldType.dictionary:
+        final keyType = _getSimpleRustType(model, data, field.keyTypeInfo!);
+        final valType = _getSimpleRustType(model, data, field.valueTypeInfo!);
+        return '&std::collections::HashMap<$keyType, $valType>';
+    }
+  }
+
+  String _getRustGetterReturnValue(DbModel model, GeneratorRust data, ClassMetaFieldDescription field) {
+    switch (field.typeInfo.type) {
+      case ClassFieldType.bool:
+      case ClassFieldType.int:
+      case ClassFieldType.long:
+      case ClassFieldType.date:
+      case ClassFieldType.duration:
+      case ClassFieldType.float:
+      case ClassFieldType.double:
+      case ClassFieldType.color:
+      case ClassFieldType.vector2:
+      case ClassFieldType.vector2Int:
+      case ClassFieldType.vector3:
+      case ClassFieldType.vector3Int:
+      case ClassFieldType.vector4:
+      case ClassFieldType.vector4Int:
+      case ClassFieldType.rectangle:
+      case ClassFieldType.rectangleInt:
+        return 'self.${field.id}';
+      case ClassFieldType.string:
+      case ClassFieldType.text:
+      case ClassFieldType.undefined:
+        return '&self.${field.id}';
+      case ClassFieldType.reference:
+        final classEntity = model.cache.getEntity(field.typeInfo.classId!);
+        if (classEntity is ClassMetaEntityEnum) {
+          return 'self.${field.id}';
+        }
+        return 'self.${field.id}.as_deref()';
+      case ClassFieldType.list:
+      case ClassFieldType.set:
+      case ClassFieldType.listInline:
+      case ClassFieldType.dictionary:
+        return '&self.${field.id}';
+    }
+  }
+
+  String _getTraits(DbModel model, GeneratorRust data) {
+    final sb = StringBuffer();
+
+    // 1. Interface traits
+    final interfaceEntities = model.cache.allClasses
+        .where((c) => c.classType == ClassType.interface)
+        .orderBy((c) => model.cache.getParentInterfaces(c).length)
+        .toList();
+
+    for (final iface in interfaceEntities) {
+      final traitName = '${data.prefix}${iface.id}${data.postfix}';
+      final validParents = iface.interfaces.whereType<String>().where((i) => i.isNotEmpty).toList();
+      final superTraitsStr = validParents.isNotEmpty
+          ? ': ${validParents.map((i) => '${data.prefix}$i${data.postfix}').join(' + ')}'
+          : '';
+
+      if (iface.description.isNotEmpty) {
+        sb.writeln('/// ${iface.description}');
+      }
+      sb.writeln('pub trait $traitName$superTraitsStr {');
+
+      final parentFieldIds = validParents
+          .expand((i) => model.cache.getAllFieldsByClassId(i) ?? <ClassMetaFieldDescription>[])
+          .map((f) => f.id)
+          .toSet();
+
+      for (final field in iface.fields) {
+        if (!parentFieldIds.contains(field.id)) {
+          final retType = _getRustGetterReturnType(model, data, field);
+          sb.writeln('${_indent}fn ${field.id}(&self) -> $retType;');
+        }
+      }
+      sb.writeln('}');
+      sb.writeln();
+    }
+
+    // 2. Class inheritance traits
+    final classEntities = model.cache.allClasses
+        .where((c) => c.classType != ClassType.interface && c.classType != ClassType.undefined)
+        .orderBy((c) => model.cache.getParentClasses(c).length)
+        .toList();
+
+    for (final classEntity in classEntities) {
+      final traitName = '${data.prefix}${classEntity.id}Trait${data.postfix}';
+      final superTraits = <String>[];
+      if (classEntity.parent != null && classEntity.parent!.isNotEmpty) {
+        superTraits.add('${data.prefix}${classEntity.parent}${data.postfix}Trait');
+      }
+      for (final iface in classEntity.interfaces.whereType<String>().where((i) => i.isNotEmpty)) {
+        superTraits.add('${data.prefix}$iface${data.postfix}');
+      }
+      final superTraitsStr = superTraits.isNotEmpty ? ': ${superTraits.join(' + ')}' : '';
+
+      if (classEntity.description.isNotEmpty) {
+        sb.writeln('/// ${classEntity.description}');
+      }
+      sb.writeln('pub trait $traitName$superTraitsStr {');
+
+      final inheritedFieldIds = <String>{};
+      if (classEntity.parent != null && classEntity.parent!.isNotEmpty) {
+        inheritedFieldIds.addAll(model.cache.getAllFieldsByClassId(classEntity.parent!)?.map((f) => f.id) ?? []);
+      }
+      for (final iface in classEntity.interfaces.whereType<String>().where((i) => i.isNotEmpty)) {
+        inheritedFieldIds.addAll(model.cache.getAllFieldsByClassId(iface)?.map((f) => f.id) ?? []);
+      }
+
+      if (classEntity.classType == ClassType.referenceType && (classEntity.parent == null || classEntity.parent!.isEmpty)) {
+        sb.writeln('${_indent}fn id(&self) -> &str;');
+        sb.writeln('${_indent}fn is_global(&self) -> bool;');
+      }
+
+      for (final field in classEntity.fields) {
+        if (!inheritedFieldIds.contains(field.id)) {
+          final retType = _getRustGetterReturnType(model, data, field);
+          sb.writeln('${_indent}fn ${field.id}(&self) -> $retType;');
+        }
+      }
+      sb.writeln('}');
+      sb.writeln();
+    }
+
+    // 3. Trait implementations on structs
+    for (final classEntity in classEntities) {
+      final structName = '${data.prefix}${classEntity.id}${data.postfix}';
+
+      // 3a. Implement own trait
+      final ownTraitName = '${data.prefix}${classEntity.id}Trait${data.postfix}';
+      sb.writeln('impl $ownTraitName for $structName {');
+
+      final ownInheritedFieldIds = <String>{};
+      if (classEntity.parent != null && classEntity.parent!.isNotEmpty) {
+        ownInheritedFieldIds.addAll(model.cache.getAllFieldsByClassId(classEntity.parent!)?.map((f) => f.id) ?? []);
+      }
+      for (final iface in classEntity.interfaces.whereType<String>().where((i) => i.isNotEmpty)) {
+        ownInheritedFieldIds.addAll(model.cache.getAllFieldsByClassId(iface)?.map((f) => f.id) ?? []);
+      }
+
+      if (classEntity.classType == ClassType.referenceType && (classEntity.parent == null || classEntity.parent!.isEmpty)) {
+        sb.writeln('${_indent}fn id(&self) -> &str { &self.id }');
+        sb.writeln('${_indent}fn is_global(&self) -> bool { self.is_global }');
+      }
+
+      for (final field in classEntity.fields) {
+        if (!ownInheritedFieldIds.contains(field.id)) {
+          final retType = _getRustGetterReturnType(model, data, field);
+          final retVal = _getRustGetterReturnValue(model, data, field);
+          sb.writeln('${_indent}fn ${field.id}(&self) -> $retType { $retVal }');
+        }
+      }
+      sb.writeln('}');
+      sb.writeln();
+
+      // 3b. Implement all ancestor class traits
+      final parentClasses = model.cache.getParentClasses(classEntity);
+      for (final parent in parentClasses) {
+        final parentTraitName = '${data.prefix}${parent.id}Trait${data.postfix}';
+        sb.writeln('impl $parentTraitName for $structName {');
+
+        final parentInheritedFieldIds = <String>{};
+        if (parent.parent != null && parent.parent!.isNotEmpty) {
+          parentInheritedFieldIds.addAll(model.cache.getAllFieldsByClassId(parent.parent!)?.map((f) => f.id) ?? []);
+        }
+        for (final iface in parent.interfaces.whereType<String>().where((i) => i.isNotEmpty)) {
+          parentInheritedFieldIds.addAll(model.cache.getAllFieldsByClassId(iface)?.map((f) => f.id) ?? []);
+        }
+
+        if (parent.classType == ClassType.referenceType && (parent.parent == null || parent.parent!.isEmpty)) {
+          sb.writeln('${_indent}fn id(&self) -> &str { &self.id }');
+          sb.writeln('${_indent}fn is_global(&self) -> bool { self.is_global }');
+        }
+
+        for (final field in parent.fields) {
+          if (!parentInheritedFieldIds.contains(field.id)) {
+            final retType = _getRustGetterReturnType(model, data, field);
+            final retVal = _getRustGetterReturnValue(model, data, field);
+            sb.writeln('${_indent}fn ${field.id}(&self) -> $retType { $retVal }');
+          }
+        }
+        sb.writeln('}');
+        sb.writeln();
+      }
+
+      // 3c. Implement all interfaces (direct and inherited)
+      final allInterfaces = _getAllInterfaces(model, classEntity).toList()
+        ..sort((a, b) => model.cache.getParentInterfaces(a).length.compareTo(model.cache.getParentInterfaces(b).length));
+
+      for (final iface in allInterfaces) {
+        final ifaceTraitName = '${data.prefix}${iface.id}${data.postfix}';
+        sb.writeln('impl $ifaceTraitName for $structName {');
+
+        final ifaceValidParents = iface.interfaces.whereType<String>().where((i) => i.isNotEmpty).toList();
+        final ifaceParentFieldIds = ifaceValidParents
+            .expand((i) => model.cache.getAllFieldsByClassId(i) ?? <ClassMetaFieldDescription>[])
+            .map((f) => f.id)
+            .toSet();
+
+        for (final field in iface.fields) {
+          if (!ifaceParentFieldIds.contains(field.id)) {
+            final retType = _getRustGetterReturnType(model, data, field);
+            final retVal = _getRustGetterReturnValue(model, data, field);
+            sb.writeln('${_indent}fn ${field.id}(&self) -> $retType { $retVal }');
+          }
+        }
+        sb.writeln('}');
+        sb.writeln();
+      }
+    }
+
+    return sb.toString();
+  }
+
   final String _rootTemplate = '''// This file was autogenerated via gceditor https://github.com/kennelken/gceditor_fl
 // {${_paramDate}}
 // by {${_paramUser}}
@@ -552,7 +869,7 @@ use bevy_math::{IVec2, IVec3, IVec4, IRect, Rect, Vec2, Vec3, Vec4};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#region Color and Geometry Helpers
+// #region Color and Geometry Helpers
 #[derive(Clone, Copy, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Color {
     pub r: f32,
@@ -576,9 +893,9 @@ trait PipeExt: Sized {
     fn pipe<F, R>(self, f: F) -> R where F: FnOnce(Self) -> R { f(self) }
 }
 impl<T> PipeExt for T {}
-#endregion
+// #endregion
 
-#region Parser Context and Errors
+// #region Parser Context and Errors
 #[derive(Clone, Debug)]
 pub struct ErrorData {
     pub message: String,
@@ -609,39 +926,43 @@ impl ParserContext {
         (self.on_error)(ErrorData { message: message.into() });
     }
 }
-#endregion
+// #endregion
 
-#region Enums
+// #region Enums
 {${_paramEnums}}
-#endregion
+// #endregion
 
-#region Structs
+// #region Structs
 {${_paramStructs}}
-#endregion
+// #endregion
 
-#region Reference Accessors
+// #region Reference Accessors
 {${_paramReferenceAccessors}}
-#endregion
+// #endregion
 
-#region Item Kind
+// #region Item Kind
 {${_paramItemKindEnum}}
-#endregion
+// #endregion
 
-#region Containers
+// #region Containers
 {${_paramTablesStruct}}
 {${_paramListsStruct}}
-#endregion
+// #endregion
 
-#region ModelItem Trait
+// #region Traits
+{${_paramTraits}}
+// #endregion
+
+// #region ModelItem Trait
 pub trait {${_paramPrefix}}ModelItem: Sized {
     fn get_from_root<'a>(root: &'a {${_paramPrefix}}Root{${_paramPostfix}}, id: &str) -> Option<&'a Self>;
     fn get_all_from_root<'a>(root: &'a {${_paramPrefix}}Root{${_paramPostfix}}) -> &'a [Self];
 }
 
 {${_paramModelItemImpls}}
-#endregion
+// #endregion
 
-#region Root
+// #region Root
 #[derive(Clone, Debug, Default)]
 pub struct {${_paramPrefix}}Root{${_paramPostfix}} {
     pub created_by: String,
@@ -719,9 +1040,9 @@ impl {${_paramPrefix}}Root{${_paramPostfix}} {
         Some(root)
     }
 }
-#endregion
+// #endregion
 
-#region Parsing Helper Functions
+// #region Parsing Helper Functions
 fn parse_bool(val: Option<&serde_json::Value>) -> bool {
     val.and_then(|v| {
         if let Some(b) = v.as_bool() {
@@ -889,6 +1210,6 @@ fn parse_hash_map<T, F: Fn(&serde_json::Value) -> T>(val: Option<&serde_json::Va
         .map(|obj| obj.iter().map(|(k, v)| (k.clone(), parse_elem(v))).collect())
         .unwrap_or_default()
 }
-#endregion
+// #endregion
 ''';
 }

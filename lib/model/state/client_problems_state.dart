@@ -750,21 +750,6 @@ void _computeAndAppendGeneratorProblems(DbModel model, List<DbModelProblem> resu
   if (!hasGodot && !hasRust) return;
 
   for (final classEntity in model.cache.allClasses) {
-    final hasInheritance = classEntity.parent != null && classEntity.parent!.isNotEmpty;
-    if (hasInheritance) {
-      if (hasRust) {
-        result.add(
-          DbModelProblem(
-            severity: ProblemSeverity.error,
-            type: ProblemType.unsupportedInheritance,
-            details: 'Rust',
-            classId: classEntity.id,
-            value: 'Rust does not support inheritance (parent: ${classEntity.parent})',
-          ),
-        );
-      }
-    }
-
     final isInterface = classEntity.classType == ClassType.interface;
     final implementsInterfaces = classEntity.interfaces.any((i) => i != null && i.isNotEmpty);
     if (isInterface || implementsInterfaces) {
@@ -777,17 +762,6 @@ void _computeAndAppendGeneratorProblems(DbModel model, List<DbModelProblem> resu
             details: 'GDScript',
             classId: classEntity.id,
             value: 'GDScript does not support interfaces ($ifaceList)',
-          ),
-        );
-      }
-      if (hasRust) {
-        result.add(
-          DbModelProblem(
-            severity: ProblemSeverity.error,
-            type: ProblemType.unsupportedInterface,
-            details: 'Rust',
-            classId: classEntity.id,
-            value: 'Rust does not support interfaces ($ifaceList)',
           ),
         );
       }
