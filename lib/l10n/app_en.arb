@@ -188,6 +188,14 @@
 	"@generatorFileExtensionLabel": {
 		"description": ""
 	},
+	"geometryClassesLabel": "geometry classes",
+	"@geometryClassesLabel": {
+		"description": ""
+	},
+	"jsonSerializerLabel": "json serializer",
+	"@jsonSerializerLabel": {
+		"description": ""
+	},
 	"projectSettingsTimezoneTitle": "timezone",
 	"@projectSettingsTimezoneTitle": {
 		"description": ""
@@ -230,6 +238,22 @@
 	},
 	"problemInvalidReference": "Invalid reference",
 	"@problemInvalidReference": {
+		"description": ""
+	},
+	"problemUnsupportedInheritance": "Unsupported inheritance",
+	"@problemUnsupportedInheritance": {
+		"description": ""
+	},
+	"problemUnsupportedInterface": "Unsupported interface",
+	"@problemUnsupportedInterface": {
+		"description": ""
+	},
+	"problemUnsupportedValueType": "Unsupported value type",
+	"@problemUnsupportedValueType": {
+		"description": ""
+	},
+	"problemUnsupportedReferenceType": "Unsupported reference type",
+	"@problemUnsupportedReferenceType": {
 		"description": ""
 	},
 	"problemsTitle": "Problems",

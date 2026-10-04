@@ -137,6 +137,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generatorFileExtensionLabel => 'extension';
 
   @override
+  String get geometryClassesLabel => 'geometry classes';
+
+  @override
+  String get jsonSerializerLabel => 'json serializer';
+
+  @override
   String get projectSettingsTimezoneTitle => 'timezone';
 
   @override
@@ -168,6 +174,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get problemInvalidReference => 'Invalid reference';
+
+  @override
+  String get problemUnsupportedInheritance => 'Unsupported inheritance';
+
+  @override
+  String get problemUnsupportedInterface => 'Unsupported interface';
+
+  @override
+  String get problemUnsupportedValueType => 'Unsupported value type';
+
+  @override
+  String get problemUnsupportedReferenceType => 'Unsupported reference type';
 
   @override
   String get problemsTitle => 'Problems';

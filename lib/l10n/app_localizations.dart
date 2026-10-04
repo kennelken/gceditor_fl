@@ -337,6 +337,18 @@ abstract class AppLocalizations {
   ///
   ///
   /// In en, this message translates to:
+  /// **'geometry classes'**
+  String get geometryClassesLabel;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'json serializer'**
+  String get jsonSerializerLabel;
+
+  ///
+  ///
+  /// In en, this message translates to:
   /// **'timezone'**
   String get projectSettingsTimezoneTitle;
 
@@ -399,6 +411,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid reference'**
   String get problemInvalidReference;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported inheritance'**
+  String get problemUnsupportedInheritance;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported interface'**
+  String get problemUnsupportedInterface;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported value type'**
+  String get problemUnsupportedValueType;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported reference type'**
+  String get problemUnsupportedReferenceType;
 
   ///
   ///

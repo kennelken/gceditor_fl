@@ -1,22 +1,22 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'generator_csharp.dart';
+part of 'generator_rust.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-GeneratorCsharp _$GeneratorCsharpFromJson(Map<String, dynamic> json) =>
-    GeneratorCsharp()
+GeneratorRust _$GeneratorRustFromJson(Map<String, dynamic> json) =>
+    GeneratorRust()
       ..$type = $enumDecodeNullable(_$GeneratorTypeEnumMap, json[r'$type'])
       ..fileName = json['fileName'] as String
       ..fileExtension = json['fileExtension'] as String
-      ..namespace = json['namespace'] as String? ?? 'Gceditor.Model'
       ..prefix = json['prefix'] as String? ?? 'Model'
-      ..prefixInterface = json['prefixInterface'] as String? ?? 'IModel'
-      ..postfix = json['postfix'] as String? ?? '';
+      ..postfix = json['postfix'] as String? ?? ''
+      ..geometryClasses = json['geometryClasses'] as String? ?? 'bevy_math'
+      ..jsonSerializer = json['jsonSerializer'] as String? ?? 'serde';
 
-Map<String, dynamic> _$GeneratorCsharpToJson(GeneratorCsharp instance) {
+Map<String, dynamic> _$GeneratorRustToJson(GeneratorRust instance) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
@@ -28,10 +28,10 @@ Map<String, dynamic> _$GeneratorCsharpToJson(GeneratorCsharp instance) {
   writeNotNull(r'$type', _$GeneratorTypeEnumMap[instance.$type]);
   val['fileName'] = instance.fileName;
   val['fileExtension'] = instance.fileExtension;
-  val['namespace'] = instance.namespace;
   val['prefix'] = instance.prefix;
-  val['prefixInterface'] = instance.prefixInterface;
   val['postfix'] = instance.postfix;
+  val['geometryClasses'] = instance.geometryClasses;
+  val['jsonSerializer'] = instance.jsonSerializer;
   return val;
 }
 

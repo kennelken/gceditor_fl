@@ -27,6 +27,8 @@ class DropDownSelector<T extends IIdentifiable?> extends ConsumerWidget {
   final bool showTooltip;
   final ClassMeta? classEntity;
   final void Function(T? item)? onJumpToDefinition;
+  final double? height;
+  final bool showSearchBox;
 
   DropDownSelector({
     super.key,
@@ -41,17 +43,20 @@ class DropDownSelector<T extends IIdentifiable?> extends ConsumerWidget {
     this.showTooltip = true,
     this.classEntity,
     this.onJumpToDefinition,
+    this.height,
+    this.showSearchBox = true,
   }) {
     this.items = addNull ? [null, ...items] : items;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final model = clientModel;
+    final clientState = ref.read(clientStateProvider).state;
+    final model = clientState.isInitialized ? clientState.model : null;
     final navService = ref.read(clientNavigationServiceProvider);
 
     bool canJump(T? item) {
-      if (item == null) return false;
+      if (item == null || model == null) return false;
       return navService.canJumpToDefinition(model, item, classEntity: classEntity);
     }
 
@@ -59,13 +64,16 @@ class DropDownSelector<T extends IIdentifiable?> extends ConsumerWidget {
       if (item == null) return;
       if (onJumpToDefinition != null) {
         onJumpToDefinition!(item);
-      } else {
+      } else if (model != null) {
         navService.jumpToDefinition(model, item, classEntity: classEntity);
       }
     }
 
+    final suffixWidth = (height != null ? 18.0 : 24.0) * kScale;
+    final suffixHeight = height ?? kStyle.kTableTopRowHeight;
+
     return SizedBox(
-      height: kStyle.kTableTopRowHeight,
+      height: height ?? kStyle.kTableTopRowHeight,
       child: DropdownSearch<T?>(
         items: (filter, loadProps) => items,
         onBeforePopupOpening: (selectedItem) async {
@@ -143,7 +151,7 @@ class DropDownSelector<T extends IIdentifiable?> extends ConsumerWidget {
           },
           searchDelay: Duration.zero,
           showSelectedItems: true,
-          showSearchBox: true,
+          showSearchBox: showSearchBox,
           searchFieldProps: TextFieldProps(
             style: kStyle.kTextExtraSmallLightest,
             decoration: kStyle.kInputTextStylePropertiesDropDownSearch.copyWith(hintText: Loc.get.dropDownSearchHint),
@@ -165,16 +173,22 @@ class DropDownSelector<T extends IIdentifiable?> extends ConsumerWidget {
           dropdownButtonProps: DropdownButtonProps(
             color: kColorPrimaryLight,
             padding: EdgeInsets.zero,
-            iconSize: 15 * kScale,
-            constraints: BoxConstraints.tightFor(width: 35 * kScale, height: 25),
-            splashRadius: 20 * kScale,
+            iconSize: (height != null ? 10 : 12) * kScale,
+            constraints: BoxConstraints.tightFor(width: suffixWidth, height: suffixHeight),
+            style: IconButton.styleFrom(
+              minimumSize: Size.zero,
+              padding: EdgeInsets.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            splashRadius: 16 * kScale,
             iconClosed: const FaIcon(FontAwesomeIcons.caretDown),
           ),
         ),
         decoratorProps: DropDownDecoratorProps(
           decoration: (inputDecoration ?? kStyle.kInputTextStyleProperties).copyWith(
-            labelText: selectedItem == null ? null : label,
+            labelText: selectedItem == null || label.isEmpty ? null : label,
             hintText: selectedItem == null ? (nullValueLabel ?? label) : '',
+            suffixIconConstraints: inputDecoration?.suffixIconConstraints ?? BoxConstraints.tightFor(width: suffixWidth, height: suffixHeight),
           ),
         ),
         compareFn: (a, b) => a == b,
