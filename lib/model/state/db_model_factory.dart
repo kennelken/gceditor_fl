@@ -17,7 +17,9 @@ import 'package:gceditor/model/db/generator_json.dart';
 import 'package:gceditor/model/db/table_meta_entity.dart';
 import 'package:gceditor/model/db/table_meta_group.dart';
 
+import '../db/generator_gdscript.dart';
 import '../db/generator_java.dart';
+import '../db/generator_rust.dart';
 
 class DbModelFactory {
   DbModel createDefaultDbModel() {
@@ -219,6 +221,22 @@ class DbModelFactory {
           ..prefix = Config.defaultGeneratorJavaPrefix
           ..prefixInterface = Config.defaultGeneratorJavaPrefixInterface
           ..postfix = Config.defaultGeneratorJavaPostfix;
+
+      case GeneratorType.gdscript:
+        return GeneratorGdscript()
+          ..fileName = Config.defaultGeneratorName
+          ..fileExtension = Config.defaultGeneratorGdscriptFileExtension
+          ..prefix = Config.defaultGeneratorGdscriptPrefix
+          ..postfix = Config.defaultGeneratorGdscriptPostfix;
+
+      case GeneratorType.rust:
+        return GeneratorRust()
+          ..fileName = Config.defaultGeneratorName
+          ..fileExtension = Config.defaultGeneratorRustFileExtension
+          ..prefix = Config.defaultGeneratorRustPrefix
+          ..postfix = Config.defaultGeneratorRustPostfix
+          ..geometryClasses = Config.defaultGeneratorRustGeometryClasses
+          ..jsonSerializer = Config.defaultGeneratorRustJsonSerializer;
     }
   }
 }

@@ -40,4 +40,6 @@ const _$GeneratorTypeEnumMap = {
   GeneratorType.json: 'json',
   GeneratorType.csharp: 'csharp',
   GeneratorType.java: 'java',
+  GeneratorType.gdscript: 'gdscript',
+  GeneratorType.rust: 'rust',
 };

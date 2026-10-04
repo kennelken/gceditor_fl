@@ -35,7 +35,9 @@ class TableProblemsItemView extends StatelessWidget {
                   ),
                   SizedBox(width: 3 * kScale),
                   Text(
-                    '${problem.tableId}:${problem.rowIndex}:${problem.fieldIndex}',
+                    problem.tableId != null
+                        ? '${problem.tableId}:${problem.rowIndex ?? 0}:${problem.fieldIndex ?? 0}'
+                        : (problem.classId ?? ''),
                     style: kStyle.kTextExtraSmall,
                   ),
                   SizedBox(width: 5 * kScale),

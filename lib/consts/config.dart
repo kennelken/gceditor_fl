@@ -35,6 +35,16 @@ class Config {
   static const String defaultGeneratorJavaPrefix = 'Model';
   static const String defaultGeneratorJavaPrefixInterface = 'IModel';
   static const String defaultGeneratorJavaPostfix = '';
+  static const String defaultGeneratorGdscriptFileExtension = 'gd';
+  static const String defaultGeneratorGdscriptPrefix = 'Model';
+  static const String defaultGeneratorGdscriptPostfix = '';
+  static const String defaultGeneratorRustFileExtension = 'rs';
+  static const String defaultGeneratorRustPrefix = 'Model';
+  static const String defaultGeneratorRustPostfix = '';
+  static const String defaultGeneratorRustGeometryClasses = 'bevy_math';
+  static const List<String> generatorRustGeometryClassesList = ['bevy_math'];
+  static const String defaultGeneratorRustJsonSerializer = 'serde';
+  static const List<String> generatorRustJsonSerializerList = ['serde'];
   static const int generatorMinFileNameLength = 2;
   static const int generatorMinFileExtensionLength = 1;
   static const bool defaultRememberPassword = true;

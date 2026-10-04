@@ -109,41 +109,53 @@ class ClientProblemsStateNotifier extends ChangeNotifier {
       nextProblem = state.problems[state.currentProblemIndex];
     }
 
-    providerContainer.read(clientNavigationServiceProvider).focusOn(
-          NavigationData.toTable(
-            tableId: nextProblem.tableId,
-            fieldId: nextProblem.fieldId,
-            rowIndex: nextProblem.rowIndex,
-          ),
-        );
+    if (nextProblem.tableId != null && nextProblem.rowIndex != null) {
+      providerContainer.read(clientNavigationServiceProvider).focusOn(
+            NavigationData.toTable(
+              tableId: nextProblem.tableId!,
+              fieldId: nextProblem.fieldId,
+              rowIndex: nextProblem.rowIndex!,
+            ),
+          );
+    } else if (nextProblem.classId != null) {
+      providerContainer.read(clientNavigationServiceProvider).focusOn(
+            NavigationData.toClassProperties(
+              classId: nextProblem.classId!,
+            ),
+          );
+    }
 
     notifyListeners();
   }
 }
 
 class DbModelProblem {
-  String tableId;
-  int rowIndex;
-  int fieldIndex;
-  String fieldId;
+  String? tableId;
+  String? classId;
+  int? rowIndex;
+  int? fieldIndex;
+  String? fieldId;
   int? innerListRowIndex;
   int? innerListColumnIndex;
   ProblemSeverity severity;
   ProblemType type;
   String? value;
   Object? exception;
+  String? details;
 
   DbModelProblem({
     required this.severity,
     required this.type,
-    required this.tableId,
-    required this.rowIndex,
-    required this.fieldIndex,
-    required this.fieldId,
+    this.tableId,
+    this.classId,
+    this.rowIndex,
+    this.fieldIndex,
+    this.fieldId,
     this.innerListRowIndex,
     this.innerListColumnIndex,
     this.value,
     this.exception,
+    this.details,
   }) {
     if (exception != null) {
       final left = value != null && value!.isNotEmpty ? '$value ' : '';
@@ -152,18 +164,32 @@ class DbModelProblem {
   }
 
   String getDescription() {
-    switch (type) {
-      case ProblemType.invalidReference:
-        return Loc.get.problemInvalidReference;
-      case ProblemType.invalidValue:
-        return Loc.get.problemInvalidValue;
-      case ProblemType.notUniqueValue:
-        return Loc.get.problemValueIsNotUnique;
-      case ProblemType.repeatingSetValue:
-        return Loc.get.problemRepeatingSetValue;
-      case ProblemType.repeatingDictionaryKey:
-        return Loc.get.problemRepeatingDictionaryKey;
+    final baseDesc = () {
+      switch (type) {
+        case ProblemType.invalidReference:
+          return Loc.get.problemInvalidReference;
+        case ProblemType.invalidValue:
+          return Loc.get.problemInvalidValue;
+        case ProblemType.notUniqueValue:
+          return Loc.get.problemValueIsNotUnique;
+        case ProblemType.repeatingSetValue:
+          return Loc.get.problemRepeatingSetValue;
+        case ProblemType.repeatingDictionaryKey:
+          return Loc.get.problemRepeatingDictionaryKey;
+        case ProblemType.unsupportedInheritance:
+          return Loc.get.problemUnsupportedInheritance;
+        case ProblemType.unsupportedInterface:
+          return Loc.get.problemUnsupportedInterface;
+        case ProblemType.unsupportedValueType:
+          return Loc.get.problemUnsupportedValueType;
+        case ProblemType.unsupportedReferenceType:
+          return Loc.get.problemUnsupportedReferenceType;
+      }
+    }();
+    if (details != null && details!.isNotEmpty) {
+      return '$baseDesc ($details)';
     }
+    return baseDesc;
   }
 
   Color get color {
@@ -198,7 +224,13 @@ enum ProblemType {
   notUniqueValue,
   repeatingSetValue,
   repeatingDictionaryKey,
+  unsupportedInheritance,
+  unsupportedInterface,
+  unsupportedValueType,
+  unsupportedReferenceType,
 }
+
+List<DbModelProblem> computeProblems(String modelJson) => _computeProblems(modelJson);
 
 List<DbModelProblem> _computeProblems(String modelJson) {
   var result = <DbModelProblem>[];
@@ -210,6 +242,7 @@ List<DbModelProblem> _computeProblems(String modelJson) {
   _computeAndAppendDuplicateUniqueValues(model, result);
   _computeAndAppendRepeatingSetValues(model, result);
   _computeAndAppendRepeatingDictionaryKeys(model, result);
+  _computeAndAppendGeneratorProblems(model, result);
 
   result = result.orderByDescending((p) => p.severity.index).toList();
 
@@ -703,6 +736,59 @@ void _computeAndAppendRepeatingDictionaryKeys(DbModel model, List<DbModelProblem
           );
         }
       }
+    }
+  }
+}
+
+void _computeAndAppendGeneratorProblems(DbModel model, List<DbModelProblem> result) {
+  final generators = model.settings.generators;
+  if (generators == null || generators.isEmpty) return;
+
+  final hasGodot = generators.any((g) => g.$type == GeneratorType.gdscript);
+  final hasRust = generators.any((g) => g.$type == GeneratorType.rust);
+
+  if (!hasGodot && !hasRust) return;
+
+  for (final classEntity in model.cache.allClasses) {
+    final isInterface = classEntity.classType == ClassType.interface;
+    final implementsInterfaces = classEntity.interfaces.any((i) => i != null && i.isNotEmpty);
+    if (isInterface || implementsInterfaces) {
+      final ifaceList = implementsInterfaces ? classEntity.interfaces.where((i) => i != null && i.isNotEmpty).join(', ') : 'interface';
+      if (hasGodot) {
+        result.add(
+          DbModelProblem(
+            severity: ProblemSeverity.error,
+            type: ProblemType.unsupportedInterface,
+            details: 'GDScript',
+            classId: classEntity.id,
+            value: 'GDScript does not support interfaces ($ifaceList)',
+          ),
+        );
+      }
+    }
+
+    if (hasGodot && classEntity.classType == ClassType.valueType) {
+      result.add(
+        DbModelProblem(
+          severity: ProblemSeverity.warning,
+          type: ProblemType.unsupportedValueType,
+          details: 'GDScript',
+          classId: classEntity.id,
+          value: 'Value type will be replaced with reference type (RefCounted) in GDScript',
+        ),
+      );
+    }
+
+    if (hasRust && classEntity.classType == ClassType.referenceType) {
+      result.add(
+        DbModelProblem(
+          severity: ProblemSeverity.warning,
+          type: ProblemType.unsupportedReferenceType,
+          details: 'Rust',
+          classId: classEntity.id,
+          value: 'Reference type will be replaced with value type (struct) in Rust',
+        ),
+      );
     }
   }
 }

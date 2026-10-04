@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:gceditor/components/properties/primitives/delete_button.dart';
+import 'package:gceditor/components/properties/primitives/drop_down_selector.dart';
 import 'package:gceditor/components/tooltip_wrapper.dart';
 import 'package:gceditor/consts/config.dart';
 import 'package:gceditor/consts/consts.dart';
 import 'package:gceditor/consts/loc.dart';
 import 'package:gceditor/model/db/db_model_shared.dart';
 import 'package:gceditor/model/db/generator_csharp.dart';
+import 'package:gceditor/model/db/generator_gdscript.dart';
 import 'package:gceditor/model/db/generator_json.dart';
+import 'package:gceditor/model/db/generator_rust.dart';
 import 'package:gceditor/model/model_root.dart';
 import 'package:gceditor/model/state/client_state.dart';
+import 'package:gceditor/model/state/string_wrapper.dart';
 import 'package:gceditor/model/state/style_state.dart';
 import 'package:gceditor/utils/utils.dart';
 
@@ -131,6 +135,16 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
         _prefixController.text = (_generatorCopy as GeneratorCsharp).prefix;
         _prefixInterfaceController.text = (_generatorCopy as GeneratorCsharp).prefixInterface;
         _postfixController.text = (_generatorCopy as GeneratorCsharp).postfix;
+        break;
+
+      case GeneratorType.gdscript:
+        _prefixController.text = (_generatorCopy as GeneratorGdscript).prefix;
+        _postfixController.text = (_generatorCopy as GeneratorGdscript).postfix;
+        break;
+
+      case GeneratorType.rust:
+        _prefixController.text = (_generatorCopy as GeneratorRust).prefix;
+        _postfixController.text = (_generatorCopy as GeneratorRust).postfix;
         break;
     }
   }
@@ -258,11 +272,19 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
     if (_prefixFocusNode.hasFocus) //
       return;
 
-    if ((_generatorCopy as GeneratorCsharp).prefix == _prefixController.text) //
-      return;
-
-    (_generatorCopy as GeneratorCsharp).prefix = _prefixController.text;
-    widget.onChange(_generatorCopy);
+    if (_generatorCopy is GeneratorCsharp) {
+      if ((_generatorCopy as GeneratorCsharp).prefix == _prefixController.text) return;
+      (_generatorCopy as GeneratorCsharp).prefix = _prefixController.text;
+      widget.onChange(_generatorCopy);
+    } else if (_generatorCopy is GeneratorGdscript) {
+      if ((_generatorCopy as GeneratorGdscript).prefix == _prefixController.text) return;
+      (_generatorCopy as GeneratorGdscript).prefix = _prefixController.text;
+      widget.onChange(_generatorCopy);
+    } else if (_generatorCopy is GeneratorRust) {
+      if ((_generatorCopy as GeneratorRust).prefix == _prefixController.text) return;
+      (_generatorCopy as GeneratorRust).prefix = _prefixController.text;
+      widget.onChange(_generatorCopy);
+    }
   }
 
   void _handlePrefixInterfaceFocusChanged() {
@@ -280,11 +302,19 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
     if (_postfixFocusNode.hasFocus) //
       return;
 
-    if ((_generatorCopy as GeneratorCsharp).postfix == _postfixController.text) //
-      return;
-
-    (_generatorCopy as GeneratorCsharp).postfix = _postfixController.text;
-    widget.onChange(_generatorCopy);
+    if (_generatorCopy is GeneratorCsharp) {
+      if ((_generatorCopy as GeneratorCsharp).postfix == _postfixController.text) return;
+      (_generatorCopy as GeneratorCsharp).postfix = _postfixController.text;
+      widget.onChange(_generatorCopy);
+    } else if (_generatorCopy is GeneratorGdscript) {
+      if ((_generatorCopy as GeneratorGdscript).postfix == _postfixController.text) return;
+      (_generatorCopy as GeneratorGdscript).postfix = _postfixController.text;
+      widget.onChange(_generatorCopy);
+    } else if (_generatorCopy is GeneratorRust) {
+      if ((_generatorCopy as GeneratorRust).postfix == _postfixController.text) return;
+      (_generatorCopy as GeneratorRust).postfix = _postfixController.text;
+      widget.onChange(_generatorCopy);
+    }
   }
 
   List<Widget> _getOptions() {
@@ -385,6 +415,139 @@ class GeneratorsItemViewState extends State<GeneratorsItemView> {
                     color: kColorPrimaryLight,
                   ),
                 ),
+              ),
+            ),
+          ),
+          SizedBox(width: 5 * kScale),
+        ];
+
+      case GeneratorType.gdscript:
+        return [
+          TooltipWrapper(
+            message: Loc.get.prefixLabel,
+            child: SizedBox(
+              width: 100 * kScale,
+              child: TextField(
+                controller: _prefixController,
+                focusNode: _prefixFocusNode,
+                inputFormatters: Config.filterId,
+                decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                  hintText: Loc.get.prefixLabel,
+                  hintStyle: kStyle.kTextUltraSmall.copyWith(
+                    color: kColorPrimaryLight,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 5 * kScale),
+          TooltipWrapper(
+            message: Loc.get.postfixLabel,
+            child: SizedBox(
+              width: 100 * kScale,
+              child: TextField(
+                controller: _postfixController,
+                focusNode: _postfixFocusNode,
+                inputFormatters: Config.filterId,
+                decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                  hintText: Loc.get.postfixLabel,
+                  hintStyle: kStyle.kTextUltraSmall.copyWith(
+                    color: kColorPrimaryLight,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 5 * kScale),
+        ];
+
+      case GeneratorType.rust:
+        final rustGen = _generatorCopy as GeneratorRust;
+        return [
+          TooltipWrapper(
+            message: Loc.get.prefixLabel,
+            child: SizedBox(
+              width: 75 * kScale,
+              child: TextField(
+                controller: _prefixController,
+                focusNode: _prefixFocusNode,
+                inputFormatters: Config.filterId,
+                decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                  hintText: Loc.get.prefixLabel,
+                  hintStyle: kStyle.kTextUltraSmall.copyWith(
+                    color: kColorPrimaryLight,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 5 * kScale),
+          TooltipWrapper(
+            message: Loc.get.postfixLabel,
+            child: SizedBox(
+              width: 75 * kScale,
+              child: TextField(
+                controller: _postfixController,
+                focusNode: _postfixFocusNode,
+                inputFormatters: Config.filterId,
+                decoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                  hintText: Loc.get.postfixLabel,
+                  hintStyle: kStyle.kTextUltraSmall.copyWith(
+                    color: kColorPrimaryLight,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 5 * kScale),
+          TooltipWrapper(
+            message: Loc.get.geometryClassesLabel,
+            child: SizedBox(
+              width: 115 * kScale,
+              child: DropDownSelector<StringWrapper>(
+                label: '',
+                items: Config.generatorRustGeometryClassesList.map((e) => StringWrapper(e)).toList(),
+                selectedItem: StringWrapper(rustGen.geometryClasses),
+                isEnabled: (e) => true,
+                addNull: false,
+                showTooltip: false,
+                showSearchBox: false,
+                height: GeneratorsItemView.itemHeight,
+                inputDecoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                  contentPadding: EdgeInsets.only(left: 4 * kScale),
+                ),
+                onValueChanged: (val) {
+                  if (val != null && val.value != rustGen.geometryClasses) {
+                    rustGen.geometryClasses = val.value;
+                    widget.onChange(_generatorCopy);
+                  }
+                },
+              ),
+            ),
+          ),
+          SizedBox(width: 5 * kScale),
+          TooltipWrapper(
+            message: Loc.get.jsonSerializerLabel,
+            child: SizedBox(
+              width: 85 * kScale,
+              child: DropDownSelector<StringWrapper>(
+                label: '',
+                items: Config.generatorRustJsonSerializerList.map((e) => StringWrapper(e)).toList(),
+                selectedItem: StringWrapper(rustGen.jsonSerializer),
+                isEnabled: (e) => true,
+                addNull: false,
+                showTooltip: false,
+                showSearchBox: false,
+                height: GeneratorsItemView.itemHeight,
+                inputDecoration: kStyle.kInputTextStyleSettingsProperties.copyWith(
+                  contentPadding: EdgeInsets.only(left: 4 * kScale),
+                ),
+                onValueChanged: (val) {
+                  if (val != null && val.value != rustGen.jsonSerializer) {
+                    rustGen.jsonSerializer = val.value;
+                    widget.onChange(_generatorCopy);
+                  }
+                },
               ),
             ),
           ),
