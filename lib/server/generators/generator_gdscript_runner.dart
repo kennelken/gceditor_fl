@@ -14,7 +14,7 @@ import 'generators_job.dart';
 
 class GeneratorGdscriptRunner extends BaseGeneratorRunner<GeneratorGdscript> with OutputFolderSaver, FilesComparer {
   static final _newLineRegExp = RegExp(r'[\r\n]+');
-  static const _indent = '    ';
+  static const _indent = '\t';
   static const _defaultNewLine = '\n';
   static const _itemsListSuffix = 'ItemsList';
 
@@ -800,34 +800,34 @@ class_name {${_paramPrefix}}Root{${_paramPostfix}} extends RefCounted
 
 #region Error and Context Classes
 class ErrorData extends RefCounted:
-    var entity: RefCounted
-    var message: String
-    func _init(p_entity: RefCounted = null, p_message: String = ""):
-        entity = p_entity
-        message = p_message
+	var entity: RefCounted
+	var message: String
+	func _init(p_entity: RefCounted = null, p_message: String = ""):
+		entity = p_entity
+		message = p_message
 
 class ParserContext extends RefCounted:
-    var on_error: Callable
-    func _init(p_on_error: Callable = Callable()):
-        on_error = p_on_error
+	var on_error: Callable
+	func _init(p_on_error: Callable = Callable()):
+		on_error = p_on_error
 
-    func log_error(p_message: String, p_entity: RefCounted = null) -> void:
-        if on_error.is_valid():
-            on_error.call(ErrorData.new(p_entity, p_message))
-        else:
-            push_error(p_message)
+	func log_error(p_message: String, p_entity: RefCounted = null) -> void:
+		if on_error.is_valid():
+			on_error.call(ErrorData.new(p_entity, p_message))
+		else:
+			push_error(p_message)
 #endregion
 
 #region Base Item
 class Base{${_paramPrefix}}Item{${_paramPostfix}} extends RefCounted:
-    var id: String = ""
-    var is_global: bool = false
-    func is_value_type() -> bool:
-        return false
-    func get_type_names() -> Array:
-        return []
-    func _on_parsed(root: RefCounted, cache: RefCounted) -> void:
-        pass
+	var id: String = ""
+	var is_global: bool = false
+	func is_value_type() -> bool:
+		return false
+	func get_type_names() -> Array:
+		return []
+	func _on_parsed(root: RefCounted, cache: RefCounted) -> void:
+		pass
 #endregion
 
 #region Enums
@@ -845,20 +845,20 @@ class Base{${_paramPrefix}}Item{${_paramPostfix}} extends RefCounted:
 #region Containers
 class ItemsLists extends RefCounted:
 {${_paramListItemsListsDeclarations}}
-    func _init(all_items: Dictionary):
+	func _init(all_items: Dictionary):
 {${_paramListItemsListsAssignment}}
 
 class TablesList extends RefCounted:
 {${_paramTablesListDeclarations}}
-    func _init(tables: Dictionary):
+	func _init(tables: Dictionary):
 {${_paramTablesListAssignment}}
 
 class CacheRoot extends RefCounted:
-    var _caches: Dictionary = {}
-    func get_cache(key: Variant, create_func: Callable) -> Variant:
-        if not _caches.has(key):
-            _caches[key] = create_func.call()
-        return _caches[key]
+	var _caches: Dictionary = {}
+	func get_cache(key: Variant, create_func: Callable) -> Variant:
+		if not _caches.has(key):
+			_caches[key] = create_func.call()
+		return _caches[key]
 #endregion
 
 #region Root Properties
@@ -875,19 +875,19 @@ static var instance: {${_paramPrefix}}Root{${_paramPostfix}} = null
 
 #region Retrieval Methods
 func get_item(id: String) -> Base{${_paramPrefix}}Item{${_paramPostfix}}:
-    if all_items.has(id):
-        return all_items[id]
-    return null
+	if all_items.has(id):
+		return all_items[id]
+	return null
 
 func get_item_or_default(id: String, default_value: Base{${_paramPrefix}}Item{${_paramPostfix}} = null) -> Base{${_paramPrefix}}Item{${_paramPostfix}}:
-    if all_items.has(id):
-        return all_items[id]
-    return default_value
+	if all_items.has(id):
+		return all_items[id]
+	return default_value
 
 func get_all(type_name: String) -> Array:
-    if all_items_by_type.has(type_name):
-        return all_items_by_type[type_name]
-    return []
+	if all_items_by_type.has(type_name):
+		return all_items_by_type[type_name]
+	return []
 
 {${_paramTypedGetters}}
 {${_paramGetPathByEnumOverloads}}
@@ -895,280 +895,280 @@ func get_all(type_name: String) -> Array:
 
 #region Initialization
 func initialize(items: Array) -> void:
-    {${_paramPrefix}}Root{${_paramPostfix}}.instance = self
-    all_items.clear()
-    all_items_by_type.clear()
+	{${_paramPrefix}}Root{${_paramPostfix}}.instance = self
+	all_items.clear()
+	all_items_by_type.clear()
 
-    for item in items:
-        if item == null:
-            continue
-        all_items[item.id] = item
-        if item.has_method("get_type_names"):
-            for type_name in item.get_type_names():
-                if not all_items_by_type.has(type_name):
-                    all_items_by_type[type_name] = []
-                all_items_by_type[type_name].append(item)
+	for item in items:
+		if item == null:
+			continue
+		all_items[item.id] = item
+		if item.has_method("get_type_names"):
+			for type_name in item.get_type_names():
+				if not all_items_by_type.has(type_name):
+					all_items_by_type[type_name] = []
+				all_items_by_type[type_name].append(item)
 
-    lists = ItemsLists.new(all_items)
+	lists = ItemsLists.new(all_items)
 #endregion
 
 #region Parser
 static var _inline_items_counter: Dictionary = {}
 
 static func _get_inline_row_id(owner_id: String) -> String:
-    var count = _inline_items_counter.get(owner_id, 0)
-    _inline_items_counter[owner_id] = count + 1
-    return "%s#%03d" % [owner_id, count]
+	var count = _inline_items_counter.get(owner_id, 0)
+	_inline_items_counter[owner_id] = count + 1
+	return "%s#%03d" % [owner_id, count]
 
 static func parse(json_text: String, root: {${_paramPrefix}}Root{${_paramPostfix}} = null, on_error: Callable = Callable(), context: ParserContext = null) -> {${_paramPrefix}}Root{${_paramPostfix}}:
-    if context == null:
-        context = ParserContext.new(on_error)
-    elif on_error.is_valid() and not context.on_error.is_valid():
-        context.on_error = on_error
+	if context == null:
+		context = ParserContext.new(on_error)
+	elif on_error.is_valid() and not context.on_error.is_valid():
+		context.on_error = on_error
 
-    if json_text.is_empty():
-        context.log_error("json_text is empty")
-        return root
+	if json_text.is_empty():
+		context.log_error("json_text is empty")
+		return root
 
-    var parsed_json = JSON.parse_string(json_text)
-    if parsed_json == null or not (parsed_json is Dictionary):
-        context.log_error("Failed to parse JSON string or root is not an object")
-        return root
+	var parsed_json = JSON.parse_string(json_text)
+	if parsed_json == null or not (parsed_json is Dictionary):
+		context.log_error("Failed to parse JSON string or root is not an object")
+		return root
 
-    var json_root: Dictionary = parsed_json
-    var json_tables = json_root.get("tables", {})
-    if not (json_tables is Dictionary):
-        context.log_error("tables in JSON root is missing or invalid")
-        return root
+	var json_root: Dictionary = parsed_json
+	var json_tables = json_root.get("tables", {})
+	if not (json_tables is Dictionary):
+		context.log_error("tables in JSON root is missing or invalid")
+		return root
 
-    var objects_by_ids: Dictionary = {}
-    var values_by_ids: Dictionary = {}
-    var tables_dict: Dictionary = {}
+	var objects_by_ids: Dictionary = {}
+	var values_by_ids: Dictionary = {}
+	var tables_dict: Dictionary = {}
 
-    for table_name in json_tables.keys():
-        var class_name_str = _get_table_class(table_name, context)
-        if class_name_str.is_empty():
-            continue
+	for table_name in json_tables.keys():
+		var class_name_str = _get_table_class(table_name, context)
+		if class_name_str.is_empty():
+			continue
 
-        var list_items = json_tables[table_name]
-        if not (list_items is Array):
-            continue
+		var list_items = json_tables[table_name]
+		if not (list_items is Array):
+			continue
 
-        var table_items: Array = []
-        for item in list_items:
-            if not (item is Dictionary):
-                continue
-            var inst = _get_new_instance(class_name_str, item, "", context)
-            if inst == null:
-                continue
-            objects_by_ids[inst.id] = inst
-            values_by_ids[inst.id] = item
-            table_items.append(inst)
+		var table_items: Array = []
+		for item in list_items:
+			if not (item is Dictionary):
+				continue
+			var inst = _get_new_instance(class_name_str, item, "", context)
+			if inst == null:
+				continue
+			objects_by_ids[inst.id] = inst
+			values_by_ids[inst.id] = item
+			table_items.append(inst)
 
-        tables_dict[table_name] = table_items
+		tables_dict[table_name] = table_items
 
-    var all_structs: Array[String] = []
-    var all_classes: Array[String] = []
-    for obj_id in objects_by_ids.keys():
-        var item = objects_by_ids[obj_id]
-        if item.is_value_type():
-            all_structs.append(obj_id)
-        else:
-            all_classes.append(obj_id)
+	var all_structs: Array[String] = []
+	var all_classes: Array[String] = []
+	for obj_id in objects_by_ids.keys():
+		var item = objects_by_ids[obj_id]
+		if item.is_value_type():
+			all_structs.append(obj_id)
+		else:
+			all_classes.append(obj_id)
 
-    var max_depth = {${_paramMaxStructDepth}}
-    for d in range(max_depth):
-        for obj_id in all_structs:
-            objects_by_ids[obj_id] = _assign_values(objects_by_ids[obj_id], objects_by_ids, values_by_ids.get(obj_id, {}), context)
+	var max_depth = {${_paramMaxStructDepth}}
+	for d in range(max_depth):
+		for obj_id in all_structs:
+			objects_by_ids[obj_id] = _assign_values(objects_by_ids[obj_id], objects_by_ids, values_by_ids.get(obj_id, {}), context)
 
-    for obj_id in all_classes:
-        objects_by_ids[obj_id] = _assign_values(objects_by_ids[obj_id], objects_by_ids, values_by_ids.get(obj_id, {}), context)
+	for obj_id in all_classes:
+		objects_by_ids[obj_id] = _assign_values(objects_by_ids[obj_id], objects_by_ids, values_by_ids.get(obj_id, {}), context)
 
-    if root == null:
-        root = {${_paramPrefix}}Root{${_paramPostfix}}.new()
+	if root == null:
+		root = {${_paramPrefix}}Root{${_paramPostfix}}.new()
 
-    root.created_by = str(json_root.get("generationUser", ""))
-    root.creation_time = str(json_root.get("generationDate", ""))
-    root.initialize(objects_by_ids.values())
-    root.tables = TablesList.new(tables_dict)
-    root.path_by_enum = json_root.get("pathByEnum", {})
+	root.created_by = str(json_root.get("generationUser", ""))
+	root.creation_time = str(json_root.get("generationDate", ""))
+	root.initialize(objects_by_ids.values())
+	root.tables = TablesList.new(tables_dict)
+	root.path_by_enum = json_root.get("pathByEnum", {})
 
-    var cache = CacheRoot.new()
-    for obj_id in all_classes:
-        var inst = objects_by_ids[obj_id]
-        if inst != null and inst.has_method("_on_parsed"):
-            inst._on_parsed(root, cache)
+	var cache = CacheRoot.new()
+	for obj_id in all_classes:
+		var inst = objects_by_ids[obj_id]
+		if inst != null and inst.has_method("_on_parsed"):
+			inst._on_parsed(root, cache)
 
-    _inline_items_counter.clear()
-    return root
+	_inline_items_counter.clear()
+	return root
 
 static func _get_new_instance(class_name_str: String, item: Dictionary, owner_id: String, context: ParserContext) -> RefCounted:
-    var id: String = ""
-    var is_global: bool = false
-    if item != null and item.has("id"):
-        id = str(item["id"])
-        is_global = true
-    else:
-        id = _get_inline_row_id(owner_id)
+	var id: String = ""
+	var is_global: bool = false
+	if item != null and item.has("id"):
+		id = str(item["id"])
+		is_global = true
+	else:
+		id = _get_inline_row_id(owner_id)
 
-    match class_name_str:
+	match class_name_str:
 {${_paramListInstantiate}}
-        _:
-            context.log_error("Cannot create instance of unknown class '%s'" % class_name_str)
-            return null
+		_:
+			context.log_error("Cannot create instance of unknown class '%s'" % class_name_str)
+			return null
 
 static func _get_table_class(table_id: String, context: ParserContext) -> String:
-    match table_id:
+	match table_id:
 {${_paramTableClassMap}}
-        _:
-            context.log_error("Unknown table '%s'" % table_id)
-            return ""
+		_:
+			context.log_error("Unknown table '%s'" % table_id)
+			return ""
 
 static func _assign_values(instance: RefCounted, objects_by_ids: Dictionary, values_by_id: Dictionary, context: ParserContext) -> RefCounted:
-    if instance == null:
-        return null
+	if instance == null:
+		return null
 {${_paramAssignValueCases}}
-    return instance
+	return instance
 
 static func _parse_bool(val: Variant, context: ParserContext) -> bool:
-    return _parse_int(val, context) == 1
+	return _parse_int(val, context) == 1
 
 static func _parse_int(val: Variant, context: ParserContext) -> int:
-    if val == null:
-        return 0
-    return int(val)
+	if val == null:
+		return 0
+	return int(val)
 
 static func _parse_float(val: Variant, context: ParserContext) -> float:
-    if val == null:
-        return 0.0
-    return float(val)
+	if val == null:
+		return 0.0
+	return float(val)
 
 static func _parse_string(val: Variant) -> String:
-    if val == null:
-        return ""
-    return str(val)
+	if val == null:
+		return ""
+	return str(val)
 
 static func _parse_reference(val: Variant, objects_by_ids: Dictionary, context: ParserContext) -> RefCounted:
-    var id_str = _parse_string(val)
-    if id_str.is_empty():
-        return null
-    if objects_by_ids.has(id_str):
-        return objects_by_ids[id_str]
-    context.log_error("Could not find object with id '%s'" % id_str)
-    return null
+	var id_str = _parse_string(val)
+	if id_str.is_empty():
+		return null
+	if objects_by_ids.has(id_str):
+		return objects_by_ids[id_str]
+	context.log_error("Could not find object with id '%s'" % id_str)
+	return null
 
 static func _parse_color(val: Variant, context: ParserContext) -> Color:
-    var argb = _parse_int(val, context)
-    var a = ((argb >> 24) & 0xFF) / 255.0
-    var r = ((argb >> 16) & 0xFF) / 255.0
-    var g = ((argb >> 8) & 0xFF) / 255.0
-    var b = (argb & 0xFF) / 255.0
-    return Color(r, g, b, a)
+	var argb = _parse_int(val, context)
+	var a = ((argb >> 24) & 0xFF) / 255.0
+	var r = ((argb >> 16) & 0xFF) / 255.0
+	var g = ((argb >> 8) & 0xFF) / 255.0
+	var b = (argb & 0xFF) / 255.0
+	return Color(r, g, b, a)
 
 static func _parse_vector2(val: Variant, context: ParserContext) -> Vector2:
-    var str_val = _parse_string(val)
-    if str_val.is_empty():
-        return Vector2.ZERO
-    var parts = str_val.split(";")
-    if parts.size() < 2:
-        context.log_error("Failed to parse Vector2 from '%s'" % str_val)
-        return Vector2.ZERO
-    return Vector2(float(parts[0]), float(parts[1]))
+	var str_val = _parse_string(val)
+	if str_val.is_empty():
+		return Vector2.ZERO
+	var parts = str_val.split(";")
+	if parts.size() < 2:
+		context.log_error("Failed to parse Vector2 from '%s'" % str_val)
+		return Vector2.ZERO
+	return Vector2(float(parts[0]), float(parts[1]))
 
 static func _parse_vector2i(val: Variant, context: ParserContext) -> Vector2i:
-    var str_val = _parse_string(val)
-    if str_val.is_empty():
-        return Vector2i.ZERO
-    var parts = str_val.split(";")
-    if parts.size() < 2:
-        context.log_error("Failed to parse Vector2i from '%s'" % str_val)
-        return Vector2i.ZERO
-    return Vector2i(int(parts[0]), int(parts[1]))
+	var str_val = _parse_string(val)
+	if str_val.is_empty():
+		return Vector2i.ZERO
+	var parts = str_val.split(";")
+	if parts.size() < 2:
+		context.log_error("Failed to parse Vector2i from '%s'" % str_val)
+		return Vector2i.ZERO
+	return Vector2i(int(parts[0]), int(parts[1]))
 
 static func _parse_vector3(val: Variant, context: ParserContext) -> Vector3:
-    var str_val = _parse_string(val)
-    if str_val.is_empty():
-        return Vector3.ZERO
-    var parts = str_val.split(";")
-    if parts.size() < 3:
-        context.log_error("Failed to parse Vector3 from '%s'" % str_val)
-        return Vector3.ZERO
-    return Vector3(float(parts[0]), float(parts[1]), float(parts[2]))
+	var str_val = _parse_string(val)
+	if str_val.is_empty():
+		return Vector3.ZERO
+	var parts = str_val.split(";")
+	if parts.size() < 3:
+		context.log_error("Failed to parse Vector3 from '%s'" % str_val)
+		return Vector3.ZERO
+	return Vector3(float(parts[0]), float(parts[1]), float(parts[2]))
 
 static func _parse_vector3i(val: Variant, context: ParserContext) -> Vector3i:
-    var str_val = _parse_string(val)
-    if str_val.is_empty():
-        return Vector3i.ZERO
-    var parts = str_val.split(";")
-    if parts.size() < 3:
-        context.log_error("Failed to parse Vector3i from '%s'" % str_val)
-        return Vector3i.ZERO
-    return Vector3i(int(parts[0]), int(parts[1]), int(parts[2]))
+	var str_val = _parse_string(val)
+	if str_val.is_empty():
+		return Vector3i.ZERO
+	var parts = str_val.split(";")
+	if parts.size() < 3:
+		context.log_error("Failed to parse Vector3i from '%s'" % str_val)
+		return Vector3i.ZERO
+	return Vector3i(int(parts[0]), int(parts[1]), int(parts[2]))
 
 static func _parse_vector4(val: Variant, context: ParserContext) -> Vector4:
-    var str_val = _parse_string(val)
-    if str_val.is_empty():
-        return Vector4.ZERO
-    var parts = str_val.split(";")
-    if parts.size() < 4:
-        context.log_error("Failed to parse Vector4 from '%s'" % str_val)
-        return Vector4.ZERO
-    return Vector4(float(parts[0]), float(parts[1]), float(parts[2]), float(parts[3]))
+	var str_val = _parse_string(val)
+	if str_val.is_empty():
+		return Vector4.ZERO
+	var parts = str_val.split(";")
+	if parts.size() < 4:
+		context.log_error("Failed to parse Vector4 from '%s'" % str_val)
+		return Vector4.ZERO
+	return Vector4(float(parts[0]), float(parts[1]), float(parts[2]), float(parts[3]))
 
 static func _parse_vector4i(val: Variant, context: ParserContext) -> Vector4i:
-    var str_val = _parse_string(val)
-    if str_val.is_empty():
-        return Vector4i.ZERO
-    var parts = str_val.split(";")
-    if parts.size() < 4:
-        context.log_error("Failed to parse Vector4i from '%s'" % str_val)
-        return Vector4i.ZERO
-    return Vector4i(int(parts[0]), int(parts[1]), int(parts[2]), int(parts[3]))
+	var str_val = _parse_string(val)
+	if str_val.is_empty():
+		return Vector4i.ZERO
+	var parts = str_val.split(";")
+	if parts.size() < 4:
+		context.log_error("Failed to parse Vector4i from '%s'" % str_val)
+		return Vector4i.ZERO
+	return Vector4i(int(parts[0]), int(parts[1]), int(parts[2]), int(parts[3]))
 
 static func _parse_rect2(val: Variant, context: ParserContext) -> Rect2:
-    var str_val = _parse_string(val)
-    if str_val.is_empty():
-        return Rect2()
-    var parts = str_val.split(";")
-    if parts.size() < 4:
-        context.log_error("Failed to parse Rect2 from '%s'" % str_val)
-        return Rect2()
-    return Rect2(float(parts[0]), float(parts[1]), float(parts[2]), float(parts[3]))
+	var str_val = _parse_string(val)
+	if str_val.is_empty():
+		return Rect2()
+	var parts = str_val.split(";")
+	if parts.size() < 4:
+		context.log_error("Failed to parse Rect2 from '%s'" % str_val)
+		return Rect2()
+	return Rect2(float(parts[0]), float(parts[1]), float(parts[2]), float(parts[3]))
 
 static func _parse_rect2i(val: Variant, context: ParserContext) -> Rect2i:
-    var str_val = _parse_string(val)
-    if str_val.is_empty():
-        return Rect2i()
-    var parts = str_val.split(";")
-    if parts.size() < 4:
-        context.log_error("Failed to parse Rect2i from '%s'" % str_val)
-        return Rect2i()
-    return Rect2i(int(parts[0]), int(parts[1]), int(parts[2]), int(parts[3]))
+	var str_val = _parse_string(val)
+	if str_val.is_empty():
+		return Rect2i()
+	var parts = str_val.split(";")
+	if parts.size() < 4:
+		context.log_error("Failed to parse Rect2i from '%s'" % str_val)
+		return Rect2i()
+	return Rect2i(int(parts[0]), int(parts[1]), int(parts[2]), int(parts[3]))
 
 static func _parse_list(val: Variant, parse_element: Callable, context: ParserContext) -> Array:
-    if val == null or not (val is Array):
-        return []
-    var result: Array = []
-    for item in val:
-        result.append(parse_element.call(item))
-    return result
+	if val == null or not (val is Array):
+		return []
+	var result: Array = []
+	for item in val:
+		result.append(parse_element.call(item))
+	return result
 
 static func _parse_list_inline(val: Variant, parse_inline: Callable) -> Array:
-    if val == null or not (val is Array):
-        return []
-    var result: Array = []
-    for item in val:
-        if item is Dictionary:
-            result.append(parse_inline.call(item))
-    return result
+	if val == null or not (val is Array):
+		return []
+	var result: Array = []
+	for item in val:
+		if item is Dictionary:
+			result.append(parse_inline.call(item))
+	return result
 
 static func _parse_dictionary(val: Variant, parse_key: Callable, parse_val: Callable, context: ParserContext) -> Dictionary:
-    if val == null or not (val is Dictionary):
-        return {}
-    var result: Dictionary = {}
-    for k in val.keys():
-        result[parse_key.call(k)] = parse_val.call(val[k])
-    return result
+	if val == null or not (val is Dictionary):
+		return {}
+	var result: Dictionary = {}
+	for k in val.keys():
+		result[parse_key.call(k)] = parse_val.call(val[k])
+	return result
 #endregion
 ''';
 }
