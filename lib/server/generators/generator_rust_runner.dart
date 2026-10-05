@@ -88,13 +88,20 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
     final sb = StringBuffer();
     for (final enumEntity in model.cache.allEnums) {
       final typeName = '${data.prefix}${enumEntity.id}${data.postfix}';
-      sb.writeln('/// ${enumEntity.description}');
-      sb.writeln('#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]');
+      if (enumEntity.description.trim().isNotEmpty) {
+        sb.writeln('/// ${enumEntity.description.trim()}');
+      }
+      sb.writeln('#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]');
       sb.writeln('pub enum $typeName {');
       if (enumEntity.values.isEmpty) {
+        sb.writeln('${_indent}#[default]');
         sb.writeln('${_indent}None,');
       } else {
-        for (final val in enumEntity.values) {
+        for (var i = 0; i < enumEntity.values.length; i++) {
+          final val = enumEntity.values[i];
+          if (i == 0) {
+            sb.writeln('${_indent}#[default]');
+          }
           sb.writeln('${_indent}${val.id},');
         }
       }
@@ -113,6 +120,7 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
       }
       sb.writeln('${_indent}}');
       sb.writeln();
+      sb.writeln('${_indent}#[allow(clippy::should_implement_trait)]');
       sb.writeln('${_indent}pub fn from_str(s: &str) -> Option<Self> {');
       sb.writeln('${_indent}${_indent}match s {');
       for (final val in enumEntity.values) {
@@ -126,14 +134,10 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
       sb.writeln('${_indent}}');
       sb.writeln('}');
       sb.writeln();
-
-      sb.writeln('impl Default for $typeName {');
-      sb.writeln('${_indent}fn default() -> Self {');
-      if (enumEntity.values.isEmpty) {
-        sb.writeln('${_indent}${_indent}Self::None');
-      } else {
-        sb.writeln('${_indent}${_indent}Self::${enumEntity.values.first.id}');
-      }
+      sb.writeln('impl std::str::FromStr for $typeName {');
+      sb.writeln('${_indent}type Err = ();');
+      sb.writeln('${_indent}fn from_str(s: &str) -> Result<Self, Self::Err> {');
+      sb.writeln('${_indent}${_indent}Self::from_str(s).ok_or(())');
       sb.writeln('${_indent}}');
       sb.writeln('}');
       sb.writeln();
@@ -151,8 +155,8 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
       final isValueType = classEntity.classType == ClassType.valueType;
 
       final sb = StringBuffer();
-      if (classEntity.description.isNotEmpty) {
-        sb.writeln('/// ${classEntity.description}');
+      if (classEntity.description.trim().isNotEmpty) {
+        sb.writeln('/// ${classEntity.description.trim()}');
       }
       sb.writeln('#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]');
       sb.writeln('pub struct $typeName {');
@@ -787,7 +791,7 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
       sb.writeln('${_indent}fn get_from_root<\'a>(root: &\'a ${data.prefix}Root${data.postfix}, id: &str) -> Option<&\'a Self> {');
       sb.writeln('${_indent}${_indent}root.${lowerName}_by_id.get(id).map(|&idx| &root.tables.${table.id}[idx])');
       sb.writeln('${_indent}}');
-      sb.writeln('${_indent}fn get_all_from_root<\'a>(root: &\'a ${data.prefix}Root${data.postfix}) -> &\'a [Self] {');
+      sb.writeln('${_indent}fn get_all_from_root(root: &${data.prefix}Root${data.postfix}) -> &[Self] {');
       sb.writeln('${_indent}${_indent}&root.tables.${table.id}');
       sb.writeln('${_indent}}');
       sb.writeln('}');
@@ -996,8 +1000,8 @@ ${_indent}}''');
           ? ': ${validParents.map((i) => '${data.prefix}$i${data.postfix}').join(' + ')}'
           : '';
 
-      if (iface.description.isNotEmpty) {
-        sb.writeln('/// ${iface.description}');
+      if (iface.description.trim().isNotEmpty) {
+        sb.writeln('/// ${iface.description.trim()}');
       }
       sb.writeln('pub trait $traitName$superTraitsStr {');
 
@@ -1033,8 +1037,8 @@ ${_indent}}''');
       }
       final superTraitsStr = superTraits.isNotEmpty ? ': ${superTraits.join(' + ')}' : '';
 
-      if (classEntity.description.isNotEmpty) {
-        sb.writeln('/// ${classEntity.description}');
+      if (classEntity.description.trim().isNotEmpty) {
+        sb.writeln('/// ${classEntity.description.trim()}');
       }
       sb.writeln('pub trait $traitName$superTraitsStr {');
 
@@ -1160,7 +1164,7 @@ ${_indent}}''');
 // serde_json = "1.0"
 // bevy_math = "0.14"
 
-#![allow(unused_imports, dead_code, unused_variables, non_snake_case)]
+#![allow(unused_imports, dead_code, unused_variables, non_snake_case, clippy::all)]
 
 use bevy_math::{IVec2, IVec3, IVec4, IRect, Rect, Vec2, Vec3, Vec4};
 use serde::{Deserialize, Serialize};
@@ -1263,7 +1267,7 @@ pub trait {${_paramPrefix}}ItemLookup<'a> {
 
 pub trait {${_paramPrefix}}ModelItem: Sized {
     fn get_from_root<'a>(root: &'a {${_paramPrefix}}Root{${_paramPostfix}}, id: &str) -> Option<&'a Self>;
-    fn get_all_from_root<'a>(root: &'a {${_paramPrefix}}Root{${_paramPostfix}}) -> &'a [Self];
+    fn get_all_from_root(root: &{${_paramPrefix}}Root{${_paramPostfix}}) -> &[Self];
 }
 
 {${_paramModelItemImpls}}
@@ -1313,9 +1317,11 @@ impl {${_paramPrefix}}Root{${_paramPostfix}} {
             }
         };
 
-        let mut root = Self::default();
-        root.created_by = json_root.get("generationUser").and_then(|v| v.as_str()).unwrap_or("").to_string();
-        root.creation_time = json_root.get("generationDate").and_then(|v| v.as_str()).unwrap_or("").to_string();
+        let mut root = Self {
+            created_by: json_root.get("generationUser").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+            creation_time: json_root.get("generationDate").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+            ..Default::default()
+        };
 
         if let Some(path_by_enum_val) = json_root.get("pathByEnum").and_then(|v| v.as_object()) {
             for (k, v) in path_by_enum_val {
@@ -1352,13 +1358,7 @@ impl {${_paramPrefix}}Root{${_paramPostfix}} {
 // #region Parsing Helper Functions
 fn parse_bool(val: Option<&serde_json::Value>) -> bool {
     val.and_then(|v| {
-        if let Some(b) = v.as_bool() {
-            Some(b)
-        } else if let Some(i) = v.as_i64() {
-            Some(i == 1)
-        } else {
-            None
-        }
+        v.as_bool().or_else(|| v.as_i64().map(|i| i == 1))
     }).unwrap_or(false)
 }
 
