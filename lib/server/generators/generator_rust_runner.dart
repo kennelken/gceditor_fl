@@ -276,17 +276,286 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
     }
   }
 
-  String _getItemKindEnum(DbModel model, GeneratorRust data) {
-    final sb = StringBuffer();
-    sb.writeln('#[derive(Clone, Debug, PartialEq)]');
-    sb.writeln('pub enum ${data.prefix}ItemRef<\'a> {');
-    for (final classEntity in model.cache.allClasses) {
-      if (classEntity.classType == ClassType.referenceType) {
-        final typeName = '${data.prefix}${classEntity.id}${data.postfix}';
-        sb.writeln('${_indent}${classEntity.id}(&\'a $typeName),');
+  List<ClassMetaEntity> _getImplementingTableClasses(DbModel model, ClassMetaEntity entity) {
+    final tableClassIds = model.cache.allDataTables.map((t) => t.classId).toSet();
+    final implementing = model.cache.getImplementingClasses(entity);
+    final allCandidates = [entity, ...implementing];
+    final result = <ClassMetaEntity>[];
+    final seen = <String>{};
+    for (final c in allCandidates) {
+      if (c.classType != ClassType.valueType &&
+          c.classType != ClassType.undefined &&
+          tableClassIds.contains(c.id) &&
+          !seen.contains(c.id)) {
+        seen.add(c.id);
+        result.add(c);
       }
     }
-    sb.writeln('}');
+    result.sort((a, b) => a.id.compareTo(b.id));
+    return result;
+  }
+
+  List<ClassMetaEntity> _getAllTableClasses(DbModel model) {
+    final tableClassIds = model.cache.allDataTables.map((t) => t.classId).toSet();
+    final result = <ClassMetaEntity>[];
+    final seen = <String>{};
+    for (final c in model.cache.allClasses) {
+      if (c.classType != ClassType.valueType &&
+          c.classType != ClassType.undefined &&
+          tableClassIds.contains(c.id) &&
+          !seen.contains(c.id)) {
+        seen.add(c.id);
+        result.add(c);
+      }
+    }
+    result.sort((a, b) => a.id.compareTo(b.id));
+    return result;
+  }
+
+  String _getItemKindEnum(DbModel model, GeneratorRust data) {
+    final sb = StringBuffer();
+    final generatedRefNames = <String>{};
+
+    for (final classEntity in model.cache.allClasses) {
+      if (classEntity.classType == ClassType.undefined || classEntity.classType == ClassType.valueType) {
+        continue;
+      }
+      final implementingTables = _getImplementingTableClasses(model, classEntity);
+      if (implementingTables.isEmpty) {
+        continue;
+      }
+
+      final refName = '${data.prefix}${classEntity.id}Ref';
+      generatedRefNames.add(refName);
+
+      sb.writeln('#[derive(Clone, Copy, Debug, PartialEq)]');
+      sb.writeln('pub enum $refName<\'a> {');
+      for (final tc in implementingTables) {
+        final tcTypeName = '${data.prefix}${tc.id}${data.postfix}';
+        sb.writeln('${_indent}${tc.id}(&\'a $tcTypeName),');
+      }
+      sb.writeln('}');
+      sb.writeln();
+
+      sb.writeln('impl<\'a> $refName<\'a> {');
+      sb.writeln('${_indent}pub fn id(&self) -> &str {');
+      sb.writeln('${_indent}${_indent}match self {');
+      for (final tc in implementingTables) {
+        sb.writeln('${_indent}${_indent}${_indent}Self::${tc.id}(item) => &item.id,');
+      }
+      sb.writeln('${_indent}${_indent}}');
+      sb.writeln('${_indent}}');
+      sb.writeln();
+      sb.writeln('${_indent}pub fn is_global(&self) -> bool {');
+      sb.writeln('${_indent}${_indent}match self {');
+      for (final tc in implementingTables) {
+        sb.writeln('${_indent}${_indent}${_indent}Self::${tc.id}(item) => item.is_global,');
+      }
+      sb.writeln('${_indent}${_indent}}');
+      sb.writeln('${_indent}}');
+      sb.writeln('}');
+      sb.writeln();
+
+      // Trait implementations for ref enum
+      if (classEntity.classType == ClassType.interface) {
+        final ifaces = <ClassMetaEntity>[classEntity, ...model.cache.getParentInterfaces(classEntity)].toSet();
+        for (final iface in ifaces) {
+          final ifaceTraitName = '${data.prefix}${iface.id}${data.postfix}';
+          sb.writeln('impl<\'a> $ifaceTraitName for $refName<\'a> {');
+          final validParents = iface.interfaces.whereType<String>().where((i) => i.isNotEmpty).toList();
+          final ifaceParentFieldIds = validParents
+              .expand((i) => model.cache.getAllFieldsByClassId(i) ?? <ClassMetaFieldDescription>[])
+              .map((f) => f.id)
+              .toSet();
+          for (final field in iface.fields) {
+            if (!ifaceParentFieldIds.contains(field.id)) {
+              final retType = _getRustGetterReturnType(model, data, field);
+              sb.writeln('${_indent}fn ${field.id}(&self) -> $retType {');
+              sb.writeln('${_indent}${_indent}match self {');
+              for (final tc in implementingTables) {
+                sb.writeln('${_indent}${_indent}${_indent}Self::${tc.id}(item) => $ifaceTraitName::${field.id}(*item),');
+              }
+              sb.writeln('${_indent}${_indent}}');
+              sb.writeln('${_indent}}');
+            }
+          }
+          sb.writeln('}');
+          sb.writeln();
+        }
+      } else {
+        final classTraits = <ClassMetaEntity>[classEntity, ...model.cache.getParentClasses(classEntity)].toSet();
+        for (final c in classTraits) {
+          final traitName = '${data.prefix}${c.id}Trait${data.postfix}';
+          sb.writeln('impl<\'a> $traitName for $refName<\'a> {');
+          final inheritedFieldIds = <String>{};
+          if (c.parent != null && c.parent!.isNotEmpty) {
+            inheritedFieldIds.addAll(model.cache.getAllFieldsByClassId(c.parent!)?.map((f) => f.id) ?? []);
+          }
+          for (final iface in c.interfaces.whereType<String>().where((i) => i.isNotEmpty)) {
+            inheritedFieldIds.addAll(model.cache.getAllFieldsByClassId(iface)?.map((f) => f.id) ?? []);
+          }
+          if (c.parent == null || c.parent!.isEmpty) {
+            sb.writeln('${_indent}fn id(&self) -> &str {');
+            sb.writeln('${_indent}${_indent}match self {');
+            for (final tc in implementingTables) {
+              sb.writeln('${_indent}${_indent}${_indent}Self::${tc.id}(item) => $traitName::id(*item),');
+            }
+            sb.writeln('${_indent}${_indent}}');
+            sb.writeln('${_indent}}');
+            sb.writeln('${_indent}fn is_global(&self) -> bool {');
+            sb.writeln('${_indent}${_indent}match self {');
+            for (final tc in implementingTables) {
+              sb.writeln('${_indent}${_indent}${_indent}Self::${tc.id}(item) => $traitName::is_global(*item),');
+            }
+            sb.writeln('${_indent}${_indent}}');
+            sb.writeln('${_indent}}');
+          }
+          for (final field in c.fields) {
+            if (!inheritedFieldIds.contains(field.id)) {
+              final retType = _getRustGetterReturnType(model, data, field);
+              sb.writeln('${_indent}fn ${field.id}(&self) -> $retType {');
+              sb.writeln('${_indent}${_indent}match self {');
+              for (final tc in implementingTables) {
+                sb.writeln('${_indent}${_indent}${_indent}Self::${tc.id}(item) => $traitName::${field.id}(*item),');
+              }
+              sb.writeln('${_indent}${_indent}}');
+              sb.writeln('${_indent}}');
+            }
+          }
+          sb.writeln('}');
+          sb.writeln();
+        }
+
+        final allInterfaces = _getAllInterfaces(model, classEntity);
+        for (final iface in allInterfaces) {
+          final ifaceTraitName = '${data.prefix}${iface.id}${data.postfix}';
+          sb.writeln('impl<\'a> $ifaceTraitName for $refName<\'a> {');
+          final ifaceValidParents = iface.interfaces.whereType<String>().where((i) => i.isNotEmpty).toList();
+          final ifaceParentFieldIds = ifaceValidParents
+              .expand((i) => model.cache.getAllFieldsByClassId(i) ?? <ClassMetaFieldDescription>[])
+              .map((f) => f.id)
+              .toSet();
+          for (final field in iface.fields) {
+            if (!ifaceParentFieldIds.contains(field.id)) {
+              final retType = _getRustGetterReturnType(model, data, field);
+              sb.writeln('${_indent}fn ${field.id}(&self) -> $retType {');
+              sb.writeln('${_indent}${_indent}match self {');
+              for (final tc in implementingTables) {
+                sb.writeln('${_indent}${_indent}${_indent}Self::${tc.id}(item) => $ifaceTraitName::${field.id}(*item),');
+              }
+              sb.writeln('${_indent}${_indent}}');
+              sb.writeln('${_indent}}');
+            }
+          }
+          sb.writeln('}');
+          sb.writeln();
+        }
+      }
+
+      // ModelCollection & ModelItemLookup
+      sb.writeln('impl<\'a> ${data.prefix}Collection<\'a> for $refName<\'a> {');
+      sb.writeln('${_indent}type Output = Vec<Self>;');
+      sb.writeln('${_indent}fn get_all_from_root(root: &\'a ${data.prefix}Root${data.postfix}) -> Self::Output {');
+      sb.writeln('${_indent}${_indent}let mut result = Vec::new();');
+      for (final tc in implementingTables) {
+        final tables = model.cache.allDataTables.where((t) => t.classId == tc.id);
+        for (final t in tables) {
+          sb.writeln('${_indent}${_indent}for item in &root.tables.${t.id} {');
+          sb.writeln('${_indent}${_indent}${_indent}result.push(Self::${tc.id}(item));');
+          sb.writeln('${_indent}${_indent}}');
+        }
+      }
+      sb.writeln('${_indent}${_indent}result');
+      sb.writeln('${_indent}}');
+      sb.writeln('}');
+      sb.writeln();
+
+      sb.writeln('impl<\'a> ${data.prefix}ItemLookup<\'a> for $refName<\'a> {');
+      sb.writeln('${_indent}type Output = Self;');
+      sb.writeln('${_indent}fn get_from_root(root: &\'a ${data.prefix}Root${data.postfix}, id: &str) -> Option<Self::Output> {');
+      for (final tc in implementingTables) {
+        final tables = model.cache.allDataTables.where((t) => t.classId == tc.id);
+        final lowerName = tc.id.toLowerCase();
+        for (final t in tables) {
+          sb.writeln('${_indent}${_indent}if let Some(&idx) = root.${lowerName}_by_id.get(id) {');
+          sb.writeln('${_indent}${_indent}${_indent}return Some(Self::${tc.id}(&root.tables.${t.id}[idx]));');
+          sb.writeln('${_indent}${_indent}}');
+        }
+      }
+      sb.writeln('${_indent}${_indent}None');
+      sb.writeln('${_indent}}');
+      sb.writeln('}');
+      sb.writeln();
+    }
+
+    final rootItemRefName = '${data.prefix}ItemRef';
+    if (!generatedRefNames.contains(rootItemRefName)) {
+      final allTableClasses = _getAllTableClasses(model);
+      if (allTableClasses.isNotEmpty) {
+        sb.writeln('#[derive(Clone, Copy, Debug, PartialEq)]');
+        sb.writeln('pub enum $rootItemRefName<\'a> {');
+        for (final tc in allTableClasses) {
+          final tcTypeName = '${data.prefix}${tc.id}${data.postfix}';
+          sb.writeln('${_indent}${tc.id}(&\'a $tcTypeName),');
+        }
+        sb.writeln('}');
+        sb.writeln();
+
+        sb.writeln('impl<\'a> $rootItemRefName<\'a> {');
+        sb.writeln('${_indent}pub fn id(&self) -> &str {');
+        sb.writeln('${_indent}${_indent}match self {');
+        for (final tc in allTableClasses) {
+          sb.writeln('${_indent}${_indent}${_indent}Self::${tc.id}(item) => &item.id,');
+        }
+        sb.writeln('${_indent}${_indent}}');
+        sb.writeln('${_indent}}');
+        sb.writeln();
+        sb.writeln('${_indent}pub fn is_global(&self) -> bool {');
+        sb.writeln('${_indent}${_indent}match self {');
+        for (final tc in allTableClasses) {
+          sb.writeln('${_indent}${_indent}${_indent}Self::${tc.id}(item) => item.is_global,');
+        }
+        sb.writeln('${_indent}${_indent}}');
+        sb.writeln('${_indent}}');
+        sb.writeln('}');
+        sb.writeln();
+
+        sb.writeln('impl<\'a> ${data.prefix}Collection<\'a> for $rootItemRefName<\'a> {');
+        sb.writeln('${_indent}type Output = Vec<Self>;');
+        sb.writeln('${_indent}fn get_all_from_root(root: &\'a ${data.prefix}Root${data.postfix}) -> Self::Output {');
+        sb.writeln('${_indent}${_indent}let mut result = Vec::new();');
+        for (final tc in allTableClasses) {
+          final tables = model.cache.allDataTables.where((t) => t.classId == tc.id);
+          for (final t in tables) {
+            sb.writeln('${_indent}${_indent}for item in &root.tables.${t.id} {');
+            sb.writeln('${_indent}${_indent}${_indent}result.push(Self::${tc.id}(item));');
+            sb.writeln('${_indent}${_indent}}');
+          }
+        }
+        sb.writeln('${_indent}${_indent}result');
+        sb.writeln('${_indent}}');
+        sb.writeln('}');
+        sb.writeln();
+
+        sb.writeln('impl<\'a> ${data.prefix}ItemLookup<\'a> for $rootItemRefName<\'a> {');
+        sb.writeln('${_indent}type Output = Self;');
+        sb.writeln('${_indent}fn get_from_root(root: &\'a ${data.prefix}Root${data.postfix}, id: &str) -> Option<Self::Output> {');
+        for (final tc in allTableClasses) {
+          final tables = model.cache.allDataTables.where((t) => t.classId == tc.id);
+          final lowerName = tc.id.toLowerCase();
+          for (final t in tables) {
+            sb.writeln('${_indent}${_indent}if let Some(&idx) = root.${lowerName}_by_id.get(id) {');
+            sb.writeln('${_indent}${_indent}${_indent}return Some(Self::${tc.id}(&root.tables.${t.id}[idx]));');
+            sb.writeln('${_indent}${_indent}}');
+          }
+        }
+        sb.writeln('${_indent}${_indent}None');
+        sb.writeln('${_indent}}');
+        sb.writeln('}');
+        sb.writeln();
+      }
+    }
+
     return sb.toString();
   }
 
@@ -504,7 +773,11 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
 
   String _getModelItemImpls(DbModel model, GeneratorRust data) {
     final sb = StringBuffer();
+    final seenClassIds = <String>{};
     for (final table in model.cache.allDataTables) {
+      if (seenClassIds.contains(table.classId)) continue;
+      seenClassIds.add(table.classId);
+
       final classEntity = model.cache.getEntity(table.classId) as ClassMetaEntity?;
       if (classEntity == null || classEntity.classType != ClassType.referenceType) continue;
       final className = '${data.prefix}${classEntity.id}${data.postfix}';
@@ -516,6 +789,22 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
       sb.writeln('${_indent}}');
       sb.writeln('${_indent}fn get_all_from_root<\'a>(root: &\'a ${data.prefix}Root${data.postfix}) -> &\'a [Self] {');
       sb.writeln('${_indent}${_indent}&root.tables.${table.id}');
+      sb.writeln('${_indent}}');
+      sb.writeln('}');
+      sb.writeln();
+
+      sb.writeln('impl<\'a> ${data.prefix}Collection<\'a> for $className {');
+      sb.writeln('${_indent}type Output = &\'a [Self];');
+      sb.writeln('${_indent}fn get_all_from_root(root: &\'a ${data.prefix}Root${data.postfix}) -> Self::Output {');
+      sb.writeln('${_indent}${_indent}&root.tables.${table.id}');
+      sb.writeln('${_indent}}');
+      sb.writeln('}');
+      sb.writeln();
+
+      sb.writeln('impl<\'a> ${data.prefix}ItemLookup<\'a> for $className {');
+      sb.writeln('${_indent}type Output = &\'a Self;');
+      sb.writeln('${_indent}fn get_from_root(root: &\'a ${data.prefix}Root${data.postfix}, id: &str) -> Option<Self::Output> {');
+      sb.writeln('${_indent}${_indent}root.${lowerName}_by_id.get(id).map(|&idx| &root.tables.${table.id}[idx])');
       sb.writeln('${_indent}}');
       sb.writeln('}');
       sb.writeln();
@@ -533,13 +822,21 @@ class GeneratorRustRunner extends BaseGeneratorRunner<GeneratorRust> with Output
       for (final field in model.cache.getAllFields(classEntity)) {
         if (field.typeInfo.type == ClassFieldType.reference) {
           final targetClass = model.cache.getEntity(field.typeInfo.classId!);
-          if (targetClass is ClassMetaEntity && targetClass.classType == ClassType.referenceType) {
+          if (targetClass is ClassMetaEntity) {
             final targetHasTable = model.cache.allDataTables.any((t) => t.classId == targetClass.id);
             if (targetHasTable) {
               final targetTypeName = '${data.prefix}${targetClass.id}${data.postfix}';
               accessors.add('''${_indent}pub fn ${field.id}<\'a>(&self, root: &\'a ${data.prefix}Root${data.postfix}) -> Option<&\'a $targetTypeName> {
 ${_indent}${_indent}self.${field.id}.as_deref().and_then(|id| root.get::<$targetTypeName>(id))
 ${_indent}}''');
+            } else {
+              final implementingTables = _getImplementingTableClasses(model, targetClass);
+              if (implementingTables.isNotEmpty) {
+                final targetRefName = '${data.prefix}${targetClass.id}Ref';
+                accessors.add('''${_indent}pub fn ${field.id}<\'a>(&self, root: &\'a ${data.prefix}Root${data.postfix}) -> Option<$targetRefName<\'a>> {
+${_indent}${_indent}self.${field.id}.as_deref().and_then(|id| root.get::<$targetRefName<\'a>>(id))
+${_indent}}''');
+              }
             }
           }
         }
@@ -953,7 +1250,17 @@ impl ParserContext {
 {${_paramTraits}}
 // #endregion
 
-// #region ModelItem Trait
+// #region Model Collection and Lookup Traits
+pub trait {${_paramPrefix}}Collection<'a> {
+    type Output;
+    fn get_all_from_root(root: &'a {${_paramPrefix}}Root{${_paramPostfix}}) -> Self::Output;
+}
+
+pub trait {${_paramPrefix}}ItemLookup<'a> {
+    type Output;
+    fn get_from_root(root: &'a {${_paramPrefix}}Root{${_paramPostfix}}, id: &str) -> Option<Self::Output>;
+}
+
 pub trait {${_paramPrefix}}ModelItem: Sized {
     fn get_from_root<'a>(root: &'a {${_paramPrefix}}Root{${_paramPostfix}}, id: &str) -> Option<&'a Self>;
     fn get_all_from_root<'a>(root: &'a {${_paramPrefix}}Root{${_paramPostfix}}) -> &'a [Self];
@@ -974,15 +1281,15 @@ pub struct {${_paramPrefix}}Root{${_paramPostfix}} {
 }
 
 impl {${_paramPrefix}}Root{${_paramPostfix}} {
-    pub fn get<T: {${_paramPrefix}}ModelItem>(&self, id: &str) -> Option<&T> {
+    pub fn get<'a, T: {${_paramPrefix}}ItemLookup<'a>>(&'a self, id: &str) -> Option<T::Output> {
         T::get_from_root(self, id)
     }
 
-    pub fn get_or_default<'a, T: {${_paramPrefix}}ModelItem>(&'a self, id: &str, default: &'a T) -> &'a T {
+    pub fn get_or_default<'a, T: {${_paramPrefix}}ItemLookup<'a>>(&'a self, id: &str, default: T::Output) -> T::Output {
         self.get::<T>(id).unwrap_or(default)
     }
 
-    pub fn get_all<T: {${_paramPrefix}}ModelItem>(&self) -> &[T] {
+    pub fn get_all<'a, T: {${_paramPrefix}}Collection<'a>>(&'a self) -> T::Output {
         T::get_all_from_root(self)
     }
 

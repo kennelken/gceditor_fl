@@ -774,6 +774,15 @@ class GeneratorGdscriptRunner extends BaseGeneratorRunner<GeneratorGdscript> wit
       sb.writeln('${_indent}return null');
       sb.writeln();
     }
+    for (final classEntity in model.cache.allClasses) {
+      if (classEntity.classType == ClassType.undefined) {
+        continue;
+      }
+      final lowerName = classEntity.id.toLowerCase();
+      sb.writeln('func get_all_$lowerName() -> Array:');
+      sb.writeln('${_indent}return get_all("${classEntity.id}")');
+      sb.writeln();
+    }
     return sb.toString();
   }
 

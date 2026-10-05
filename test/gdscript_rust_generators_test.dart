@@ -139,6 +139,8 @@ void main() {
       expect(code.contains('static func parse(json_text: String'), isTrue);
       expect(code.contains('JSON.parse_string(json_text)'), isTrue);
       expect(code.contains('func get_hero(id: String) -> ModelHero:'), isTrue);
+      expect(code.contains('func get_all_hero() -> Array:'), isTrue);
+      expect(code.contains('func get_all_statmod() -> Array:'), isTrue);
       expect(code.contains('class ParserContext extends RefCounted:'), isTrue);
     } finally {
       tempDir.deleteSync(recursive: true);
@@ -260,7 +262,20 @@ void main() {
       expect(code.contains('impl ModelHeroTrait for ModelHero {'), isTrue);
       expect(code.contains('pub trait ModelModelItem: Sized'), isTrue);
       expect(code.contains('impl ModelModelItem for ModelHero'), isTrue);
-      expect(code.contains('pub fn get<T: ModelModelItem>(&self, id: &str) -> Option<&T>'), isTrue);
+      expect(code.contains('pub trait ModelCollection<\'a> {'), isTrue);
+      expect(code.contains('pub trait ModelItemLookup<\'a> {'), isTrue);
+      expect(code.contains('impl<\'a> ModelCollection<\'a> for ModelHero'), isTrue);
+      expect(code.contains('impl<\'a> ModelItemLookup<\'a> for ModelHero'), isTrue);
+      expect(code.contains('pub enum ModelCharacterRef<\'a> {'), isTrue);
+      expect(code.contains('pub enum ModelUnitRef<\'a> {'), isTrue);
+      expect(code.contains('pub enum ModelHeroRef<\'a> {'), isTrue);
+      expect(code.contains('pub enum ModelItemRef<\'a> {'), isTrue);
+      expect(code.contains('impl<\'a> ModelCharacter for ModelCharacterRef<\'a>'), isTrue);
+      expect(code.contains('impl<\'a> ModelUnitTrait for ModelUnitRef<\'a>'), isTrue);
+      expect(code.contains('impl<\'a> ModelCollection<\'a> for ModelCharacterRef<\'a>'), isTrue);
+      expect(code.contains('impl<\'a> ModelItemLookup<\'a> for ModelCharacterRef<\'a>'), isTrue);
+      expect(code.contains('pub fn get<\'a, T: ModelItemLookup<\'a>>(&\'a self, id: &str) -> Option<T::Output>'), isTrue);
+      expect(code.contains('pub fn get_all<\'a, T: ModelCollection<\'a>>(&\'a self) -> T::Output'), isTrue);
       expect(code.contains('pub fn parse(json_text: &str) -> Result<Self, String>'), isTrue);
       expect(code.contains('pub struct ParserContext'), isTrue);
       expect(code.contains(RegExp(r'^#region', multiLine: true)), isFalse);
@@ -420,4 +435,38 @@ void main() {
       expect(size.width, lessThanOrEqualTo(20.0 * 0.85 + 0.1));
     }
   });
+
+  test('Rust generator output compiles in testing_gceditor/bevy project if available', () async {
+    final projectFile = File('/run/media/kennel32/c/projects/testing_gceditor/config/project.json');
+    if (!projectFile.existsSync()) return;
+
+    final jsonText = projectFile.readAsStringSync();
+    final model = DbModel.fromJson(jsonDecode(jsonText));
+
+    final rustGen = model.settings.generators?.firstWhere(
+      (g) => g.$type == GeneratorType.rust,
+      orElse: () => GeneratorRust(),
+    ) as GeneratorRust?;
+    if (rustGen == null) return;
+
+    final additionalInfo = GeneratorAdditionalInformation(
+      date: '2026-10-05',
+      user: 'TestUser',
+    );
+    final runner = GeneratorRustRunner();
+    final result = await runner.execute(
+      '/run/media/kennel32/c/projects/testing_gceditor/config/output',
+      model,
+      rustGen,
+      additionalInfo,
+    );
+    expect(result.success, isTrue, reason: result.error);
+
+    final cargoToml = File('/run/media/kennel32/c/projects/testing_gceditor/bevy/Cargo.toml');
+    if (cargoToml.existsSync()) {
+      final res = Process.runSync('cargo', ['check', '--manifest-path', cargoToml.path]);
+      expect(res.exitCode, 0, reason: '${res.stdout}\n${res.stderr}');
+    }
+  });
 }
+
