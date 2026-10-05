@@ -805,6 +805,12 @@ class GeneratorGdscriptRunner extends BaseGeneratorRunner<GeneratorGdscript> wit
 # var config = {${_paramPrefix}}Root{${_paramPostfix}}.parse(json_text)
 # use 'config' as a source of config data
 
+@warning_ignore_start("unused_parameter")
+@warning_ignore_start("int_as_enum_without_cast")
+@warning_ignore_start("int_as_enum_without_match")
+@warning_ignore_start("shadowed_variable")
+@warning_ignore_start("shadowed_variable_base_class")
+
 class_name {${_paramPrefix}}Root{${_paramPostfix}} extends RefCounted
 
 #region Error and Context Classes

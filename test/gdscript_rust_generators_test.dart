@@ -126,6 +126,10 @@ void main() {
       expect(file.existsSync(), isTrue);
       final code = file.readAsStringSync();
 
+      expect(code.contains('@warning_ignore_start("unused_parameter")'), isTrue);
+      expect(code.contains('@warning_ignore_start("int_as_enum_without_cast")'), isTrue);
+      expect(code.contains('@warning_ignore_start("int_as_enum_without_match")'), isTrue);
+      expect(code.contains('@warning_ignore_start("shadowed_variable")'), isTrue);
       expect(code.contains('class_name ModelRoot extends RefCounted'), isTrue);
       expect(code.contains('class ModelHero extends BaseModelItem:'), isTrue);
       expect(code.contains('class ModelStatMod extends BaseModelItem:'), isTrue);
@@ -466,6 +470,21 @@ void main() {
     if (cargoToml.existsSync()) {
       final res = Process.runSync('cargo', ['check', '--manifest-path', cargoToml.path]);
       expect(res.exitCode, 0, reason: '${res.stdout}\n${res.stderr}');
+    }
+
+    final gdGen = model.settings.generators?.firstWhere(
+      (g) => g.$type == GeneratorType.gdscript,
+      orElse: () => GeneratorGdscript(),
+    ) as GeneratorGdscript?;
+    if (gdGen != null) {
+      final gdRunner = GeneratorGdscriptRunner();
+      final gdResult = await gdRunner.execute(
+        '/run/media/kennel32/c/projects/testing_gceditor/config/output',
+        model,
+        gdGen,
+        additionalInfo,
+      );
+      expect(gdResult.success, isTrue, reason: gdResult.error);
     }
   });
 }
